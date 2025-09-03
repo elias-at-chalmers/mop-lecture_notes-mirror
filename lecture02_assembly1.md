@@ -7,13 +7,14 @@
 Links:
 [Unpriveleged ISA](https://drive.google.com/file/d/1uviu1nH-tScFfgrovvFCrj7Omv8tFtkp/view)
 
+In this course, you will learn to program a microcontroller based on a RISC-V processor. Today, almost every phone, computer, or smart device runs on a processor from one of a handful of companies (e.g. ARM, Intel). RISC-V changes that: it’s an open alternative that anyone can use, extend, and build on, and it is becoming increasingly important in both industry and research. In this course, you’ll learn to program real hardware built on RISC-V. So what does it mean to be a "RISC-V" processor? 
 
 RISC-V is an *Instruction Set Architecture* (ISA). That is, it specifies a processor's behaviour in terms of the *instruction set*, the *registers*, and the *memory model*, and how all of these components interact. Anyone is allowed to use this specification to *implement* their own processor, without paying anyone. For example, in this course we will use the MD307 lab kit, which contains a CH32V307 microcontroller (a chip developed by the company WCH), which in turn contains (as part of the chip) a QingKe V4 *processor core*, which is an implementation of the RISC-V ISA.
 
 Other companies have implemented their own processor cores, in their own microcontrollers, that are also based on the RISC-V ISA. Raspberry Pi, for instance, has implemented a RISC-V core called Hazard3 in their RP2350 microcontroller, which is the heart of the Raspberry Pico 2. Since both machines use the same ISA, they can use the same compiler toolchains to produce executable code, and can in some cases even run the *same* binary code, even though the actual hardware is completely different.
 
 ## Variants and Extensions
-RISC-V is intended to be used in a huge range of devices, from small microcontrollers in your car key or fridge, to CPUs in the nodes of a machine-learning data center. Therefore, the specification is divided into a *base integer instruction set*, which only describes around 50 separate instructions, and a large number of *extensions* that describe instructions for additional functionality.
+RISC-V is intended to be used in a huge range of devices, from small microcontrollers in your car key or fridge, to CPUs in the nodes of a machine-learning data center. Therefore, the specification is divided into what is called the *base integer instruction set*, which only describes 47 separate instructions, and a large number of *extensions* that describe instructions for additional functionality. Anyone that decides to build a RISC-V processor will have to decide which of these extensions they want to support. Implementing more extensions naturally means more work, and probably means that the chip will be more expensive and draw more power. Similarly, anyone who *buys* a processor for use in their product will have to choose which extensions it should support. 
 
 Let's consider a few examples:
 
@@ -28,7 +29,7 @@ The microcontroller used in this course (CH32F307) is a 32-bit processor (RV32I)
 ## The Application Binary Interface (ABI)
 Before we go any further in describing how a RISC-V processor works, it's important to understand the **ABI**. While the ISA defines the rules that a hardware design must follow to qualify as a RISC-V processor, the ABI (Application Binary Interface) defines how compiled programs interact at the binary level. In other words, it provides rules for how machine code should be written so that independently compiled programs and libraries can work together.
 
-For example, the ISA specifies that the processor must have 32 general-purpose 32-bit registers, but it doesn’t define what each register is used for. The ABI, on the other hand, specifies that when a function returns an integer, it should place the result in register x10 (also known as a0). If your assembly program—or your C compiler—follows that rule, it can seamlessly interoperate with other code that follows the same ABI.
+For example, the ISA specifies that the processor must have 32 general-purpose 32-bit registers, but it doesn’t define what each register is used for. The ABI, on the other hand, specifies that when a function returns an integer, it should place the result in register x10 (also known as a0). If your assembly program - or your C compiler - follows that rule, it can seamlessly interoperate with other code that follows the same ABI.
 
 In this course, all compilers and assembly code will adhere to the ABI. This not only ensures compatibility between different pieces of code, but also makes assembly programs much easier to understand and maintain.
 
@@ -60,7 +61,7 @@ We will return to all of these different uses later on, and for now it is suffic
 
 Apart from the general purpose registers, the only other register is the program counter, ``pc``. This register always contains the address to the next instruction to be executed, and exists in almost all processor designs.
 
-💡 **Note:** *If you have previous experience with assembly programming on other processors you might be surprised that there is no specific stack pointer, link register, or even a flag register. There are good reasons for this, and we will address why RISC-V does not need them in upcoming chapters.*
+💡 **Note:** *If you have previous experience with assembly programming on other processors you might be surprised that all registers are general-purpose and that the is no specific stack pointer, link register, or even a flag register described in the ISA. There are good reasons for this, and we will address why RISC-V does not need them in upcoming chapters.*
 
 
 ### Instruction Set and Assembly Code
@@ -78,7 +79,8 @@ However, the RV32I instruction set does not include a specific instruction for c
 ```
 add x1, x2, x0        // Add 0 to x2 and store the result in x1
 ```
-This has the same effect: the contents of x2 are copied to x1. But the processor does not have to implement a specific "move" instruction; it simply reuses the `add` instruction. We will see many more examples of how pseudo-instructions are compiled into machine code later.
+
+This might look strange (to someone reading the machine code), but has exactly the same effect: the contents of x2 are copied to x1. Since we can implement `mv` with `add`, the processor simply reuses the `add` instruction. We will see many more examples of how pseudo-instructions are compiled into machine code later.
 
 
 ### Load/Store architecture.
@@ -94,11 +96,11 @@ add r0, [r1]           // Take the value in memory at the address pointed to by 
 In RISC-V, this is expressed in two instructions:
 
 ``` asm
-lw x3, 0(x2)           // Load the value in memory at the address pointed to by x2
+lw x3, 0(x2)         // Load the value in memory at the address pointed to by x2
 add x1, x3           // Add that value to x1
 ```
 
-This might seem unnecessary, but there are several reasons behind this choice. Firstly, it greatly simplifies the hardware design and simpler hardware usually means faster and less error-prone hardware. Secondly, it makes pipelining simpler [^2] and allows the compiler to make optimizations that make the code run faster.
+This might seem unnecessary, but there are several reasons behind this choice. Firstly, it greatly simplifies the hardware design (simpler hardware usually means faster and less error-prone hardware). Secondly, it makes pipelining simpler [^2] and allows the compiler to make optimizations that make the code run faster.
 
 [^2]: Pipelining is when the processor executes several instructions at once, and will not be covered in this course. It is explained in detail in the Computer Architecture course.
 
@@ -148,24 +150,23 @@ loop:
 Now let's see what happens if we compile this assembly program to machine code [^4]. If we take the machine code created by the assembler and ask the `objdump` tool to tell us what instructions it represents, the answer is:
 
 ```
-00000000 <loop-0x4>:
-   0:   00a00293                addi    t0,zero,10
-00000004 <loop>:
-   4:   ffe28293                addi    t0,t0,-2
-   8:   fe504ee3                blt     zero,t0,4 <loop>
+   addi    t0,zero,10
+   loop:
+   addi    t0,t0,-2
+   blt     zero,t0,4 loop
 ```
 
 This is slightly different from the code we wrote! Let's see what changed and why:
 * `li t0, 10` ➔ `addi t0, zero, 10`: The "Load Immediate" instruction that we used is a pseudo instruction. The processor does not have to implement this instruction, because it already has the "Add Immediate" instruction. By adding the constant 10 to the "zero" register (which is always 0), and store the result in `t0`, we achieve the same thing.
 * `bgtz t0, loop` ➔ `blt zero,t0,4`: In our assembly code, we used the "Branch if Greater Than Zero" instruction, but the assembler has translated this into the "Branch if Less Than" instruction. It compares if 0 is less than `t0`, and jumps if that is true. This is equivalent because (x > y) ➔ (y < x).
 
-In this course, you will learn how to write assembly code, and we will not worry too much about what machine code that turns into most of the time. It is important to understand, however, that even when writing assembly, the code you write is not always exactly the code that is executed. So far we have seen that the assembler will sometimes replace your pseudo instruction with an equivalent instruction and next we will see that some pseudo instructions will turn into *several* machine code instructions.
+In this course, you will learn how to write *assembly code*, and we will not worry too much about what *machine code* it turns into, most of the time. It is important to understand, however, that even when writing assembly, the code you write is not always exactly the code that is executed. So far we have seen that the assembler will sometimes replace your pseudo instruction with an equivalent instruction and next we will see that some pseudo instructions will turn into *several* machine code instructions.
 
 ### Loading a large constant
 
 We will now change the very first line of our program to:
 ```
-li t0, 1000000
+   li t0, 1000000
 ```
 The only difference is that we load the register with one million, rather than 10. If we examine the machine code now, we will see that this turns into:
 ```
@@ -184,14 +185,53 @@ Instead, it will translate your assembly instruction into *two* machine instruct
 
 Since 1000000, in decimal, is `0xf4240` in hexadecimal, `t0` will be loaded with the value `0x000F4000` after the `lui` instruction. The next instruction has to fill in the lower 12 bits, which can be achieved with an `add` instruction (where we have 12 bits for the value).
 
+### Arithmetic and Logical instructions
+
+The table below lists all the ALU instructions in RV32I (the instructions that perform some operation on the input and stores the result in a register). These can be divided into "register to register" instructions where the input consists only of registers, and "immediate" instructions, where part of the input is a (small) constant that is embedded in the instruction's machine code. All "immediate" instructions end with the letter `i` (for immediate) or `u` for unsigned immediate. 
+
+| Instruction | Explanation |
+|-------------|-------------|
+| **Arithmetic Instructions** ||
+| `add rd, rs1, rs2` | rd = rs1 + rs2 |
+| `sub rd, rs1, rs2` | rd = rs1 - rs2 |
+| `addi rd, rs1, imm` | rd = rs1 + imm (sign-extended 12-bit immediate) |
+| **Shift Instructions** ||
+| `sll rd, rs1, rs2` | rd = rs1 << rs2 (logical shift left) |
+| `srl rd, rs1, rs2` | rd = rs1 >> rs2 (logical shift right, fill with 0) |
+| `sra rd, rs1, rs2` | rd = rs1 >> rs2 (arithmetic shift right, sign-extended) |
+| `slli rd, rs1, imm` | rd = rs1 << imm (logical shift left by immediate) |
+| `srli rd, rs1, imm` | rd = rs1 >> imm (logical shift right by immediate, fill 0) |
+| `srai rd, rs1, imm` | rd = rs1 >> imm (arithmetic shift right by immediate, sign-extended) |
+| **Bitwise Logical Instructions** ||
+| `xor rd, rs1, rs2` | rd = rs1 ⊕ rs2 (bitwise XOR) |
+| `or rd, rs1, rs2` | rd = rs1 ∨ rs2 (bitwise OR) |
+| `and rd, rs1, rs2` | rd = rs1 ∧ rs2 (bitwise AND) |
+| `xori rd, rs1, imm` | rd = rs1 ⊕ imm |
+| `ori rd, rs1, imm` | rd = rs1 ∨ imm |
+| `andi rd, rs1, imm` | rd = rs1 ∧ imm |
+| **Compare Instructions** ||
+| `slt rd, rs1, rs2` | rd = (rs1 < rs2) ? 1 : 0 (signed compare) |
+| `sltu rd, rs1, rs2` | rd = (rs1 < rs2) ? 1 : 0 (unsigned compare) |
+| `slti rd, rs1, imm` | rd = (rs1 < imm) ? 1 : 0 (signed compare with imm) |
+| `sltiu rd, rs1, imm` | rd = (rs1 < imm) ? 1 : 0 (unsigned compare with imm) |
+
+The last category of instructions (the "compare" instructions) will be discussed further in a later lesson when we talk about branching. In addition to these instructions, there are a number of pseudo instructions that are convenient to use in your assembly code, but will be compiled into one or two "real" instructions by the assembler: 
+
+| Pseudo Instruction | Expands to | Meaning |
+|--------|-----------|---------|
+| `nop` | `addi x0, x0, 0` | No operation |
+| `li rd, imm` | `addi` / `lui` + `ori` (depending on imm size) | Load immediate |
+| `mv rd, rs` | `addi rd, rs, 0` | Copy register |
+| `not rd, rs` | `xori rd, rs, -1` | Bitwise NOT |
+| `neg rd, rs` | `sub rd, x0, rs` | Two’s complement negate |
+| `seqz rd, rs` | `sltiu rd, rs, 1` | Set if equal to zero |
+| `snez rd, rs` | `sltu rd, x0, rs` | Set if not equal to zero |
+| `sltz rd, rs` | `slt rd, rs, x0` | Set if less than zero |
+| `sgtz rd, rs` | `slt rd, x0, rs` | Set if greater than zero |
+
 
 [^4]: For information on how to compile, run, and disassemble programs, please see LINK.
 [^5]: This is not the exact ordering of the bits used in reality.
-
-
-**ALL BELOW IS TBD**
-
-
 
 # Loading and Storing from memory
 
@@ -209,3 +249,4 @@ Since 1000000, in decimal, is `0xf4240` in hexadecimal, `t0` will be loaded with
 
 ## Assignments we can give them to test their knowledge of this lecture
 * Ask them to check how different assembly instructions turn into which machine instructions
+* Some sort of concept-map where we ask them to connect the different concepts introduced (ISA/ABI/Processor/Processor Core, etc...).

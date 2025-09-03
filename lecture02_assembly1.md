@@ -7,14 +7,14 @@
 Links:
 [Unpriveleged ISA](https://drive.google.com/file/d/1uviu1nH-tScFfgrovvFCrj7Omv8tFtkp/view)
 
-In this course, you will learn to program a microcontroller based on a RISC-V processor. Today, almost every phone, computer, or smart device runs on a processor from one of a handful of companies (e.g. ARM, Intel). RISC-V changes that: it’s an open alternative that anyone can use, extend, and build on, and it is becoming increasingly important in both industry and research. In this course, you’ll learn to program real hardware built on RISC-V. So what does it mean to be a "RISC-V" processor? 
+In this course, you will learn to program a microcontroller based on a RISC-V processor. Today, almost every phone, computer, or smart device runs on a processor from one of a handful of companies (e.g. ARM, Intel). RISC-V changes that: it’s an open alternative that anyone can use, extend, and build on, and it is becoming increasingly important in both industry and research. In this course, you’ll learn to program real hardware built on RISC-V. So what does it mean to be a "RISC-V" processor?
 
 RISC-V is an *Instruction Set Architecture* (ISA). That is, it specifies a processor's behaviour in terms of the *instruction set*, the *registers*, and the *memory model*, and how all of these components interact. Anyone is allowed to use this specification to *implement* their own processor, without paying anyone. For example, in this course we will use the MD307 lab kit, which contains a CH32V307 microcontroller (a chip developed by the company WCH), which in turn contains (as part of the chip) a QingKe V4 *processor core*, which is an implementation of the RISC-V ISA.
 
 Other companies have implemented their own processor cores, in their own microcontrollers, that are also based on the RISC-V ISA. Raspberry Pi, for instance, has implemented a RISC-V core called Hazard3 in their RP2350 microcontroller, which is the heart of the Raspberry Pico 2. Since both machines use the same ISA, they can use the same compiler toolchains to produce executable code, and can in some cases even run the *same* binary code, even though the actual hardware is completely different.
 
 ## Variants and Extensions
-RISC-V is intended to be used in a huge range of devices, from small microcontrollers in your car key or fridge, to CPUs in the nodes of a machine-learning data center. Therefore, the specification is divided into what is called the *base integer instruction set*, which only describes 47 separate instructions, and a large number of *extensions* that describe instructions for additional functionality. Anyone that decides to build a RISC-V processor will have to decide which of these extensions they want to support. Implementing more extensions naturally means more work, and probably means that the chip will be more expensive and draw more power. Similarly, anyone who *buys* a processor for use in their product will have to choose which extensions it should support. 
+RISC-V is intended to be used in a huge range of devices, from small microcontrollers in your car key or fridge, to CPUs in the nodes of a machine-learning data center. Therefore, the specification is divided into what is called the *base integer instruction set*, which only describes 47 separate instructions, and a large number of *extensions* that describe instructions for additional functionality. Anyone that decides to build a RISC-V processor will have to decide which of these extensions they want to support. Implementing more extensions naturally means more work, and probably means that the chip will be more expensive and draw more power. Similarly, anyone who *buys* a processor for use in their product will have to choose which extensions it should support.
 
 Let's consider a few examples:
 
@@ -122,7 +122,7 @@ When the "store" phase is complete, the cycle starts again from the beginning.
 💡 **Note:** *If all of this were strictly true, the processor would only execute an instruction once every four clock-cycles when, in fact, it will execute approximately one instruction every clock-cycle. This is due to pipelining and instruction pre-fetching, which is out of scope for this course.*
 
 
-# RISC-V Assembly Programming
+# Introduction to RISC-V Assembly Programming
 We will now look at how to write assembly code for a very simple program, and examine what machine code the assembler produces. Let's say we want our program to do the following:
 
 ```
@@ -187,7 +187,7 @@ Since 1000000, in decimal, is `0xf4240` in hexadecimal, `t0` will be loaded with
 
 ### Arithmetic and Logical instructions
 
-The table below lists all the ALU instructions in RV32I (the instructions that perform some operation on the input and stores the result in a register). These can be divided into "register to register" instructions where the input consists only of registers, and "immediate" instructions, where part of the input is a (small) constant that is embedded in the instruction's machine code. All "immediate" instructions end with the letter `i` (for immediate) or `u` for unsigned immediate. 
+The table below lists all the ALU instructions in RV32I (the instructions that perform some operation on the input and stores the result in a register). These can be divided into "register-register" instructions where the input consists only of registers, and "register-immediate" instructions, where part of the input is a (small) constant that is embedded in the instruction's machine code. All immediate instructions end with i (for immediate), except for a few that use u to indicate unsigned interpretation of the immediate value.
 
 | Instruction | Explanation |
 |-------------|-------------|
@@ -215,7 +215,9 @@ The table below lists all the ALU instructions in RV32I (the instructions that p
 | `slti rd, rs1, imm` | rd = (rs1 < imm) ? 1 : 0 (signed compare with imm) |
 | `sltiu rd, rs1, imm` | rd = (rs1 < imm) ? 1 : 0 (unsigned compare with imm) |
 
-The last category of instructions (the "compare" instructions) will be discussed further in a later lesson when we talk about branching. In addition to these instructions, there are a number of pseudo instructions that are convenient to use in your assembly code, but will be compiled into one or two "real" instructions by the assembler: 
+The last category of instructions (the "compare" instructions) will be discussed further in a later lesson when we talk about branching.
+
+In addition to these instructions, there are a number of pseudo instructions that are convenient to use in your assembly code, but will be compiled into one or two "real" instructions by the assembler:
 
 | Pseudo Instruction | Expands to | Meaning |
 |--------|-----------|---------|
@@ -233,7 +235,11 @@ The last category of instructions (the "compare" instructions) will be discussed
 [^4]: For information on how to compile, run, and disassemble programs, please see LINK.
 [^5]: This is not the exact ordering of the bits used in reality.
 
-# Loading and Storing from memory
+# Load and Store Operations
+
+So far, we have seen the basic instructions that let us perform calculations on constants and values in registers. But there is very little point in doing that if we cannot somehow communicate the results to a user, or store them in memory. This is all done by the Load and Store instructions, which we will discuss next.
+
+
 
 * Briefly explain the memory bus and introduce them to the idea that all of the address space is not memory.
 * Explain alignment

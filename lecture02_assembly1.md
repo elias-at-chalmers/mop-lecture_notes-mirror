@@ -349,12 +349,75 @@ In all of these instructions, `offset` is a small number (12 bits) and `base` is
 
 So far, we have carefully and skillfully avoided one thorny issue that most novice assembler programmers find a bit challenging: Memory Alignment. Hopefully, this section will help you realize that it is not very difficult at all.
 
+
+## Why we need it
 Whatever type of memory module you encounter, the data will be stored as *bits* that are either 0 or 1. To read or write data you will supply the memory with an address that is expressed in *bytes*. In the simplest, old, 8-bit, memories the address would be sent to the memory chip (one line per bit) and the memory chip would output the eight bits of data on that address onto the data bus. 
 
-On more modern hardware, and specifically on our CH32F307, the registers are 32 bits wide, and it is much more common that we want to load or store 32 bits at once. Therefore, the data bus is 32 bits wide so that we can send an address to the memory "chip" [^9]
+On more modern hardware, and specifically on our CH32F307, the registers are 32 bits wide, and it is much more common that we want to load or store 32 bits at once. Therefore, the data bus is 32 bits wide so that we can send an address to the memory "chip" [^9] and read a whole 32-bit word in one cycle. The figure below illustrates such a read operation, where the processor reads a 4-byte word, starting at the address `0x20000008`. 
+
+![](images/valid_word_access.png)
+
+This works fine. The processor will put the *byte* address `0x20000008` on the address bus, and the address logic can divide this by 4 to find which *word* it should put on the data bus. Now consider what happens if the processor wants to read a 4-byte word starting at address `0x20000006` instead: 
+
+![](images/invalid_word_access.png)
+
+Now we have a problem. A 4-byte word starting at `0x20000006` would span over *two* rows in the memory. The memory module cannot simply pick one of the words and put it on the data bus. The solution would be to first put the word starting on `0x20000004` in a register, then shift that two bytes to the right, then read the word starting at `0x20000008` in another register and shift that two bytes to the left, and finally ORing these two registers onto the data bus. 
+
+While that is by no means impossible, it would mean much more complicated logic in the memory module, and it would mean that reading out the word would take at least two cycles, instead of one. Instead, most architectures simply do not allow these kinds of accesses [^10]: 
+
+> **Rule:** 4-byte words must be 4-byte aligned (address divisible by 4)
+
+Another way to say this is that a 4-byte word must be 4-byte *aligned* in memory. If we do not follow this rule, the program will simply crash (actually, it will cause an "exception", but more on that later).
+
+What if we try to read or write a 2-byte word? This is illustrated in the two figures below: 
+
+| ![Image 1](images/valid_halfword_access.png) | ![Image 2](images/invalid_halfword_access.png) |
+|------------------------|------------------------|
+
+When trying to access a halfword (2 bytes) at address `0x20000006` the address logic can simply divide the address by four to find the row in memory containing the halfword. It can then use the remainder as input to a MUX that chooses the upper or lower part of the word to put on the data bus. This logic is simple enough to include in the memory chip, and completes in a single cycle, so this access is allowed. 
+
+Consider the case on the right, however, where we want to read a halfword from address `0x20000005`. Now, even though the halfword *is* "inside" one row of memory, the simple MUX logic doesn't quite work. If we tried to read a halfword from, e.g., address `0x20000007` instead, the situation would be the same is above; the halfword resides in two different rows of the memory. For halfwords, the alignment rule simply boils down to: 
+
+> **Rule:** 2-byte words must be 2-byte aligned (address divisible by 2)
+
+Finally, if we read a single byte (with `lb`) there are no alignment rules. A byte will always reside in exactly one of the 32-bit rows, so the logic to extract it onto the databus is very simple. 
+
+## How to do it
+In this course, you will encounter many scenarios where you accidentally break one of these rules and crash your program, since we will do a lot of programming with absolute addresses. When working with variables, however, there is a simple syntax that makes sure that your data is correctly aligned. 
+
+Let's revisit the example code with variables above, but this time, `var_b` is a four byte word: 
+
+```
+   // Load the value of var_a into x2
+   la x1, var_a
+   lb x2, 0(x1)
+   // Load the value of var_b into x3
+   la x1, var_b
+   lw x3, 0(x1)
+   // Put the sum in x1
+   add x1, x2, x3
+   // x1 should now contain 30
+   var_a: .byte 10
+   var_b: .word 20
+```
+Since the first machine code instruction starts at 0x20000000, and all machine code is 32 bits on our platform, we know that `var_a` will be at an address that is divisible by 4. At that address, we make room for *one byte* so `var_b` will *not* be on an address that is dividible by 4! That means that if we compiled and ran this program, the `lw` instruction on line 6 would crash. 
+
+To avoid this, we simply tell the compiler that we want `var_b` to be word aligned: 
+
+```
+   var_a: .byte 10
+   .align 2
+   var_b: .word 20
+```
+
+The syntax here is a bit confusing. The `.align x` directive means that the compiler should insert a number of empty bytes here, so that the next address is divisible by `2^x`. So, if we want a word-aligned address, we say `.align 2` and if we want a halfword-aligned address, we say `.align 1`. 
+
 
 
 [^9]: The SRAM we are accessing is actually not its own chip, but is built into the same chip that holds the processor. 
+
+[^10]: To be perfectly honest, modern architectures, including CH32V307, actually *do* implement this logic and you can enable unaligned accesses. It is, however, good practise not to as it will affect performance, sometimes severely. 
+
 
 <!--
 ## Stuff they should know after this lecture

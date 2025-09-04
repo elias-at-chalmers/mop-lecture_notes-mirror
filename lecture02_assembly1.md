@@ -147,6 +147,8 @@ loop:
 
 * Finally, on the fourth line: `bgtz t0, loop`, `bgtz` stands for "Branch if Greater Than Zero". The first argument is the register we want to check, and the second argument is the label (address) we want to jump to if the value of that register is greater than zero.
 
+## Pseudo Instructions and Machine Code
+
 Now let's see what happens if we compile this assembly program to machine code [^4]. If we take the machine code created by the assembler and ask the `objdump` tool to tell us what instructions it represents, the answer is:
 
 ```
@@ -185,7 +187,7 @@ Instead, it will translate your assembly instruction into *two* machine instruct
 
 Since 1000000, in decimal, is `0xf4240` in hexadecimal, `t0` will be loaded with the value `0x000F4000` after the `lui` instruction. The next instruction has to fill in the lower 12 bits, which can be achieved with an `add` instruction (where we have 12 bits for the value).
 
-### Arithmetic and Logical instructions
+## Arithmetic and Logical instructions
 
 The table below lists all the ALU instructions in RV32I (the instructions that perform some operation on the input and stores the result in a register). These can be divided into "register-register" instructions where the input consists only of registers, and "register-immediate" instructions, where part of the input is a (small) constant that is embedded in the instruction's machine code. All immediate instructions end with i (for immediate), except for a few that use u to indicate unsigned interpretation of the immediate value.
 
@@ -235,19 +237,126 @@ In addition to these instructions, there are a number of pseudo instructions tha
 [^4]: For information on how to compile, run, and disassemble programs, please see LINK.
 [^5]: This is not the exact ordering of the bits used in reality.
 
-# Load and Store Operations
+## Load and Store Operations
 
 So far, we have seen the basic instructions that let us perform calculations on constants and values in registers. But there is very little point in doing that if we cannot somehow communicate the results to a user, or store them in memory. This is all done by the Load and Store instructions, which we will discuss next.
 
+It is important to understand that *all* communication with things outside the processor core happens via load/store operations. Our processor has an SRAM (a 64KB read/write memory module) mapped to the address range `0x20000000-0x2000FFFF`, so any reads or writes to addresses within that range will go to memory. Other memory areas are the "System Control Space" and the "Peripheral Registers" area. You can see an overview of the memory mapping in the figure below. We will talk about how these other areas are used later on in the course, but for now we will stick to the SRAM. 
+
+![](images/address_space.png)
+
+### Loading data from memory
+
+Let's say we want to read the third byte in SRAM into a register. You could write: 
+```
+   la x1, 0x20000002
+   lb x1, 0(x1)
+```
+The first instruction `la` (Load Address) takes two parameters: a destination register (`x1`) and an address (`0x20000002`, the third byte in SRAM). Since we prepended the address with `0x`, the address will be expected to be in hexadecimal form. The result of this pseudoinstruction is that the address will end up in register `x1` and the instruction will be expanded into one `lui` and one `addi` instruction, just as for the `li` pseudoinstruction that we discussed in the previous section. 
+
+The second assembler instruction, `lb` (Load Byte), takes three parameters. The first parameter (`x1`) is the destination register (as usual). The second parameter (`0`) is the *offset* from the *base address*, which is the third parameter (`x1`). 
+
+When the address is put on the address bus, there is logic on the chip that will first note that this address is in the SRAM memory area (`0x20000000-0x2000FFFF`). It will subtract `0x20000000` from the address, and pass the resulting address (`2`) on to the SRAM module. Let's say the third byte contains the value `9`. The SRAM will read out this byte and put it on the 32-bit data bus by first sign-extending it to 32 bits [^6]. Whatever `x1` contained before, it will now contain the 32-bit value `0x00000009`.
+
+There are a few important things to note about this simple read operation: 
+* The processor core and compiler have no idea whether you are trying to read from SRAM, FLASH, or anything else. It will put an address on the bus and let the memory system figure out the routing. 
+* The *name of the instruction* decides how many bytes you want to read, starting at the address. You can read 8 bits, 16 bits, or 32 bits with `lb` (Load Byte), `lh` (Load Halfword), or `lw` (Load Word) respectively. 
+* You will *always* read the result into the lowest part of a 32-bit register and overwrite the rest of the register (regardless of how many bytes you read).
+
+[^6]: We will discuss negative numbers and sign extensions in the next lecture. 
+
+### Storing data to memory
+
+Storing data works in very much the same way. We first load a base address into a register using `la` and then write a register's value to that address using the `sb` (Store Byte, 8 bits), `sh` (Store Halfword, 16 bits), or `sw` (Store Word, 32 bits) instruction.
+
+As an example, let's say we want to store the values 1, 2, and 3 into the first three *half-words* of the SRAM [^7]. We could write: 
+
+```
+   la x1, 0x20000000    // Put the base address 0x20000000 (start of SRAM) in x1
+   li x2, 1             // Put the value 1 into x2
+   sh x2, 0(x1)         // Store the lower two bytes of x2 into memory at address 0x20000000
+   li x2, 2             // Put the value 2 into x2
+   sh x2, 2(x1)         // Store the lower two bytes of x2 into memory at address 0x20000002
+   li x2, 3             // Put the value 3 into x2
+   sh x2, 4(x1)         // Store the lower two bytes of x2 into memory at address 0x20000004
+```
+[^7]: Don't try this at home! The beginning of SRAM is usually where your code resides.
+
+On the first line, we load the base address `0x20000000` into `x1`. We will then use this as the base address for *all three* store operations. On the second line, we just load the value 1 into another register (`x2`). On the third line we do the actual store operation. The value in `x2` gets stored into memory at address `0x20000000`. The address is calculated by taking the value in `x1` (`0x20000000`) and adding the offset from the instruction (`0`). Note that the offset is always given in *bytes*, not words or halfwords. 
+
+This is then repeated for the second and third values, where the offsets are 2 and 4, respectively. 
+
+Things to note about the store instruction: 
+* Again, the name of the instruction tells the processor how many bytes you are writing. If you write a byte, or a halfword, only the lowest bytes in the register will be written to memory. There is no sign extension needed here.
+* The store instructions are the only instructions (that you will come across in this course) where the first parameter is *not* the destination register. Instead, the first parameter is the source register and the following parameters define the destination.
+
+## Variables
+
+So far, we have read and written data to memory at *absolute addresses*. Sometimes that is exactly what we want to do, but often we just want to store data in a variable without caring where in memory it resides.
+
+Let's look at a final example where we have two variables, `var_a` and `var_b`, each one byte in size, and we want to add them together and store the result in `x1`:
+
+```
+   // Load the value of var_a into x2
+   la x1, var_a
+   lb x2, 0(x1)
+   // Load the value of var_b into x3
+   la x1, var_b
+   lb x3, 0(x1)
+   // Put the sum in x1
+   add x1, x2, x3
+   // x1 should now contain 30
+   
+   var_a: .byte 10
+   var_b: .byte 20
+```
+
+When the assembler [^8] sees the first line: `la x1, var_a`, it replaces the variable name with the address of the label var_a. We *could* calculate that address ourselves (by counting the instructions that precede the label) but that would be terribly annoying and rather pointless.
+
+At the end of the code, we "allocate" space for the variables: 
+```
+   var_a: .byte 10
+```
+Here, `var_a:` is a label that marks a memory location, and `.byte 10` reserves one byte at that location and initializes it to 10. The same applies to var_b.
+
+[^8]: To be precise, the final address is actually calculated by the *linker*, but we will cover that in a later lecture. 
+
+## Load/Store Instructions
+To summarize, every load or store operation requires calculating the address where we want to read or write the value. Often, this is done with the pseudoinstruction `la` (Load Address): 
+
+```
+la rd, address       // Put the address into the destination register rd
+```
+
+The `address` can either be an absolute address (e.g., 0x20000002) or a *variable name*. 
+The load and store operations themselves are given in the following table. Some of these you have seen and some will be discussed further in the next lecture.
+
+| Instruction | Meaning |
+|--------|-----------|
+| `lb rd, offset(base)` | Load a byte. Sign extend. 
+| `lbu rd, offset(base)` | Load a byte. Zero extend. 
+| `lh rd, offset(base)` | Load a halfword. Sign extend. 
+| `lhu rd, offset(base)` | Load a halfword. Zero extend. 
+| `lw rd, offset(base)` | Load a word. No extension necessary.
+| `sb rs, offset(base)` | Store a byte.
+| `sh rs, offset(base)` | Store a halfword.
+| `sw rs, offset(base)` | Store a word.
+
+In all of these instructions, `offset` is a small number (12 bits) and `base` is a register containing the base address. 
 
 
-* Briefly explain the memory bus and introduce them to the idea that all of the address space is not memory.
-* Explain alignment
-* Show some simple assembly that reads/writes directly from absolute adresses.
-* Show how variables are used in assembly.
+# Memory alignment
+
+So far, we have carefully and skillfully avoided one thorny issue that most novice assembler programmers find a bit challenging: Memory Alignment. Hopefully, this section will help you realize that it is not very difficult at all.
+
+Whatever type of memory module you encounter, the data will be stored as *bits* that are either 0 or 1. To read or write data you will supply the memory with an address that is expressed in *bytes*. In the simplest, old, 8-bit, memories the address would be sent to the memory chip (one line per bit) and the memory chip would output the eight bits of data on that address onto the data bus. 
+
+On more modern hardware, and specifically on our CH32F307, the registers are 32 bits wide, and it is much more common that we want to load or store 32 bits at once. Therefore, the data bus is 32 bits wide so that we can send an address to the memory "chip" [^9]
 
 
+[^9]: The SRAM we are accessing is actually not its own chip, but is built into the same chip that holds the processor. 
 
+<!--
 ## Stuff they should know after this lecture
 
 * Difference between assembly and machine code, and why it needs to be different
@@ -256,3 +365,5 @@ So far, we have seen the basic instructions that let us perform calculations on 
 ## Assignments we can give them to test their knowledge of this lecture
 * Ask them to check how different assembly instructions turn into which machine instructions
 * Some sort of concept-map where we ask them to connect the different concepts introduced (ISA/ABI/Processor/Processor Core, etc...).
+
+-->

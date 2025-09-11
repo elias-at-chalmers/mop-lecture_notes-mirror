@@ -4,8 +4,17 @@
 <!-- markdownlint-disable MD022 -->
 
 
-Links:
+**Links:**
 [Unpriveleged ISA](https://drive.google.com/file/d/1uviu1nH-tScFfgrovvFCrj7Omv8tFtkp/view)
+[RISC-V Assembly Programmer’sManual](https://github.com/riscv-non-isa/riscv-asm-manual/releases/download/v0.0.1/riscv-asm.pdf)
+
+**Text and excercises in the Workbook (Arbetsboken)**
+Chapter 1, Pages 7-16
+Chapter 1, Pages 24-33
+
+**Things that are in the Workbook that should possibly be in this lecture**
+MUL/DIV, (Arrays)
+
 
 In this course, you will learn to program a microcontroller based on a RISC-V processor. Today, almost every phone, computer, or smart device runs on a processor from one of a handful of companies (e.g. ARM, Intel). RISC-V changes that: it’s an open alternative that anyone can use, extend, and build on, and it is becoming increasingly important in both industry and research. In this course, you’ll learn to program real hardware built on RISC-V. So what does it mean to be a "RISC-V" processor?
 
@@ -38,12 +47,14 @@ In this course, all compilers and assembly code will adhere to the ABI. This not
 Initially, we will only talk about the very basics of the RISC-V specification, RV32I. This part of the specification must be implemented by *any* 32-bit RISC-V processor. The specification tells us what *registers* shall be available, what the basic set of *machine instructions* are, and how they are encoded.
 
 ### Registers
-A processor that implements RV32I must implement 33 registers. There are 32 *general purpose* registers, ``x0-x31``. These registers can contain any 32 bit word and any instruction can use either of these registers interchangeably. The first register, ``x0``, is special however; it is hardwired to always be zero, and writes to it are ignored. We will soon see why this is a good idea.
+A processor that implements RV32I must implement 33 registers. There are 32 *general purpose* registers, ``x0-x31``. These registers can contain any 32 bit word and any instruction can use either of these registers interchangeably. The only other register is `pc`, the program counter. 
+
+The first register, ``x0``, is special; it is hardwired to always be zero, and writes to it are ignored. This simplifies the hardware and instructions by always having a `0` to feed the ALU. We will see examples of this later on in the text. 
 
 
 While the **ISA** puts no restrictions on how these registers are used, the **ABI** suggests which registers are to be used for what, and gives them special names.
 
-|Register     |ABI Name   |Usage
+|Register     |ABI Name   |Recommended Usage (ABI)
 |---------    |---------- |----------
 |x0           |zero       |Hard-wired to zero
 |x1           |ra         |Return Address
@@ -57,11 +68,11 @@ While the **ISA** puts no restrictions on how these registers are used, the **AB
 |x18-x27      |s2-s11     |Saved Register
 |x28-x31  	  |t3-t6	  |Temporary
 
-We will return to all of these different uses later on, and for now it is sufficient that you are aware that, in assembly code, you can refer to either the register name or the ABI name, and it really makes no difference other than for compatibility and readability.
+We will return to all of these different uses later on, and for now it is sufficient that you are aware that, in assembly code, you can refer to either the register name (e.g., `x5`) or the ABI name (`t0`), and it really makes no difference other than for compatibility and readability.
 
 Apart from the general purpose registers, the only other register is the program counter, ``pc``. This register always contains the address to the next instruction to be executed, and exists in almost all processor designs.
 
-💡 **Note:** *If you have previous experience with assembly programming on other processors you might be surprised that all registers are general-purpose and that the is no specific stack pointer, link register, or even a flag register described in the ISA. There are good reasons for this, and we will address why RISC-V does not need them in upcoming chapters.*
+💡 **Note:** *If you have previous experience with assembly programming on other processors you might be surprised that all registers are general-purpose and that there is no specific stack pointer, link register, or even a flag register described in the ISA. There are good reasons for this, and we will address why RISC-V does not need them in upcoming chapters.*
 
 
 ### Instruction Set and Assembly Code
@@ -239,7 +250,7 @@ In addition to these instructions, there are a number of pseudo instructions tha
 
 ## Load and Store Operations
 
-So far, we have seen the basic instructions that let us perform calculations on constants and values in registers. But there is very little point in doing that if we cannot somehow communicate the results to a user, or store them in memory. This is all done by the Load and Store instructions, which we will discuss next.
+We have seen the basic instructions that let us perform calculations on constants and values in registers. But there is very little point in doing that if we cannot somehow communicate the results to a user, or store them in memory. This is all done by the Load and Store instructions, which we will discuss next.
 
 It is important to understand that *all* communication with things outside the processor core happens via load/store operations. Our processor has an SRAM (a 64KB read/write memory module) mapped to the address range `0x20000000-0x2000FFFF`, so any reads or writes to addresses within that range will go to memory. Other memory areas are the "System Control Space" and the "Peripheral Registers" area. You can see an overview of the memory mapping in the figure below. We will talk about how these other areas are used later on in the course, but for now we will stick to the SRAM. 
 
@@ -317,7 +328,24 @@ At the end of the code, we "allocate" space for the variables:
 ```
    var_a: .byte 10
 ```
-Here, `var_a:` is a label that marks a memory location, and `.byte 10` reserves one byte at that location and initializes it to 10. The same applies to var_b.
+Here, `var_a:` is a label that marks a memory location, and `.byte 10` reserves one byte at that location and initializes it to 10. The same applies to `var_b`.
+
+### Load and Store Global
+Since loading variables to registers from memory and storing variables from register to memory are very common operations, there are very useful pseudo instructions available that simplify this in the assembly language. 
+
+To load a variable, `var_a` from memory, into register `x1`, with a single (pseudo) instruction, you can write: 
+```
+lb x1, var_a
+```
+To store the contents of register `x1`, into a variable `var b`, with a single (pseudo) instruction, you can write: 
+```
+sb x1, var, x2
+```
+Now, where did that `x2` come from? Think about the _actual_ instructions that this pseudo instruction has to create; In order to store the contents of x1 into the variable, it first has to calculate the address to the variable and put that into a register. The assembler cannot choose a register on its own, since it does not know what registers you (the programmer) want to save. Therefore, in the `sb` instruction, you supply a _temporary_ register that it can use for the address calculation. 
+
+In the former example, with the `lb` instruction, we do not have to supply a temporary register, since the assembler knows that it is going to overwrite the contents of `x1` and can use the same register for address calculations. 
+
+💡 **Note:** *If you look at the machine instructions created when using these pseudo instructions, you will probably see that they turn into two instructions, one `auipc` instruction and one `lb`/`sb` instruction, rather than the three instructions you would get from `la` and then `lb`. This is just the most efficient way of implementing it.*
 
 [^8]: To be precise, the final address is actually calculated by the *linker*, but we will cover that in a later lecture. 
 

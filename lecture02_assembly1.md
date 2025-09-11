@@ -47,7 +47,7 @@ In this course, all compilers and assembly code will adhere to the ABI. This not
 Initially, we will only talk about the very basics of the RISC-V specification, RV32I. This part of the specification must be implemented by *any* 32-bit RISC-V processor. The specification tells us what *registers* shall be available, what the basic set of *machine instructions* are, and how they are encoded.
 
 ### Registers
-A processor that implements RV32I must implement 33 registers. There are 32 *general purpose* registers, ``x0-x31``. These registers can contain any 32 bit word and any instruction can use either of these registers interchangeably. The only other register is `pc`, the program counter. 
+A processor that implements RV32I must implement 33 registers. There are 32 *general purpose* registers, ``x0-x31`` and one program counter, `pc`. The general purpose registers can contain any 32 bit word and any instruction can use either of these registers interchangeably.
 
 The first register, ``x0``, is special; it is hardwired to always be zero, and writes to it are ignored. This simplifies the hardware and instructions by always having a `0` to feed the ALU. We will see examples of this later on in the text. 
 
@@ -121,12 +121,12 @@ Before we go on to write a first little program, let's recap how a processor exe
 
 When the machine turns on, it will enter a `RESET` phase, which initializes registers and puts the processor into a known state. After that, the following "state machine" starts running (one step every clock cycle):
 
-1. **Fetch Instruction -** In this state, whatever address is in the `PC` register will be used to fetch the next instruction. In a basic RV32I architecture *every* instruction (including all arguments) is exactly 32 bits[^3]. The 32 bits are used to pack the "op-code" (which instruction this is, e.g., `add`) and the arguments (e.g., source register x1 and destination register x2). When the instruction has been fetched from memory, the address in PC is increased by 4 bytes (32 bits) so that it points to the next instruction.
-2. **Decode Instruction -** The processor will now look at all the bits in the instruction and decide on the operation to execute. For example, if the instruction is `add x1, x2, x0`, it will make registers `x2` and `x0` available as the inputs to the ALU and will configure the ALU to do an addition and store it in `x1`.
+1. **Fetch Instruction -** In this state, whatever address is in the `PC` register will be used to fetch the next instruction. In a basic RV32I architecture *every* instruction (including all operands) is exactly 32 bits[^3]. When the instruction has been fetched from memory, the address in PC is increased by 4 bytes (32 bits) so that it points to the next instruction.
+2. **Decode Instruction -** The 32 bits in the machine code instruction are used to pack the "op-code" (which instruction this is, e.g., `add`) and the operands (e.g., source register x1 and destination register x2). The processor will now look at these bits and decide on the operation to execute. For example, if the instruction is `add x1, x2, x0`, it will make registers `x2` and `x0` available as the inputs to the ALU and will configure the ALU to do an addition.
 3. **Execute Instruction -** In this state, the operation, whatever it was, is executed. This might mean performing the addition for an `add` instruction, or calculating the address of a `load` instruction.
-4. **Store -** For instructions that do memory operations, this final phase stores a register's value into memory (for a `store` instruction), or reads the value from memory and stores it in a register (for a `load` instruction).
+4. **Store/Writeback -** The final phase writes the result un the bus into memory or into a destination register. 
 
-[^3]: On other architectures, instructions may be followed by arguments, and a RISC-V with the `C` extension allows for "compressed" instructions that are 16 bit wide, but in this course we will only use purely 32-bit instructions.
+[^3]: On other architectures, instructions may be followed by operands, and a RISC-V with the `C` extension allows for "compressed" instructions that are 16 bit wide, but in this course we will only use purely 32-bit instructions.
 
 When the "store" phase is complete, the cycle starts again from the beginning.
 
@@ -150,13 +150,13 @@ loop:
     bgtz t0, loop     # 3. If t0 > 0, go back to 'loop'
 ```
 
-* In the first line: `li t0, 10`, `li` stands for "Load Immediate", that is, we load a register with a value given immediately in the code (not a value from memory). The first argument, `t0`, is the *destination register*, and the second value is the value we want to put there.
+* In the first line: `li t0, 10`, `li` stands for "Load Immediate", that is, we load a register with a value given immediately in the code (not a value from memory). The first operand, `t0`, is the *destination register*, and the second value is the value we want to put there.
 
-* The second line is just a "label". When compiled, every instruction will be at a specific address in memory and the label, "loop" in this case, will be translated to that address.
+* The second line is just a "label". When compiled, every instruction will be at a specific address in memory and the label, "loop" in this case, will be translated to that the address that the next instruction starts at. 
 
-* On the third line, `addi t0, t0, -2`, `addi` stands for "Add Immediate". Again, "immediate" means that the value that we want to add to the source register is given directly in the instruction. The first argument is, again, the *destination register*. The second argument is the *source register*, and the third argument is the value we want to add to the source register and put in the destination register. Note that there is no "Subtract Immediate" instruction, because adding `-x` to a register is the same as subtracting `x`.
+* On the third line, `addi t0, t0, -2`, `addi` stands for "Add Immediate". Again, "immediate" means that the value that we want to add to the source register is given directly in the instruction. The first operand is, again, the *destination register*. The second operand is the *source register*, and the third operand is the value we want to add to the source register and put in the destination register. Note that there is no "Subtract Immediate" instruction, because adding `-x` to a register is the same as subtracting `x`.
 
-* Finally, on the fourth line: `bgtz t0, loop`, `bgtz` stands for "Branch if Greater Than Zero". The first argument is the register we want to check, and the second argument is the label (address) we want to jump to if the value of that register is greater than zero.
+* Finally, on the fourth line: `bgtz t0, loop`, `bgtz` stands for "Branch if Greater Than Zero". The first operand is the register we want to check, and the second operand is the label (address) we want to jump to if the value of that register is greater than zero.
 
 ## Pseudo Instructions and Machine Code
 
@@ -187,20 +187,20 @@ The only difference is that we load the register with one million, rather than 1
    add     t0,t0,0x240
 ```
 Feel free to raise an eybrow and shake your head a little at this point. When you are done, let's see what happened.
-When we asked the assembler to put the value 10 into `t0`, this could be achieved with a single "addi" instruction. In machine code, any instruction is coded into a 32-bit value, and the processor knows how to decode this value. The value will consist of an "opcode" that identifies the type of instruction, and some arguments to the instruction. In the case of the `addi` instruction, this looks like[^5]
+When we asked the assembler to put the value 10 into `t0`, this could be achieved with a single "addi" instruction. In machine code, any instruction is coded into a 32-bit value, and the processor knows how to decode this value. The value will consist of an "opcode" that identifies the type of instruction, and some operands to the instruction. In the case of the `addi` instruction, this looks like[^5]
 :
 ```
 [Opcode(7 bits) | Function(3 bits) | Source Register(5 bits) | Destination Register(5 bits) | Value (12 bits)]
 ```
 So there are 7 bits for the opcode (which allows for 128 different opcodes), 3 bits for the "function" (different variants of the same instruction), 5 bits for the registers (which let's us point out any of the 32 general-purpose registers) and 12 bits for the value that we want to add. When the assembler is asked to load a value that does *not* fit into 12 bits, it simply cannot express that in a single, 32-bit, instruction.
 
-Instead, it will translate your assembly instruction into *two* machine instructions. The first instruction, `lui`, stands for "Load Upper Immediate". It takes a destination register and a 20-bit value as arguments, and it loads the 20-bit value into the 20 upper bits of the destination register.
+Instead, it will translate your assembly instruction into *two* machine instructions. The first instruction, `lui`, stands for "Load Upper Immediate". It takes a destination register and a 20-bit value as operands, and it loads the 20-bit value into the 20 upper bits of the destination register.
 
 Since 1000000, in decimal, is `0xf4240` in hexadecimal, `t0` will be loaded with the value `0x000F4000` after the `lui` instruction. The next instruction has to fill in the lower 12 bits, which can be achieved with an `add` instruction (where we have 12 bits for the value).
 
 ## Arithmetic and Logical instructions
 
-The table below lists all the ALU instructions in RV32I (the instructions that perform some operation on the input and stores the result in a register). These can be divided into "register-register" instructions where the input consists only of registers, and "register-immediate" instructions, where part of the input is a (small) constant that is embedded in the instruction's machine code. All immediate instructions end with i (for immediate), except for a few that use u to indicate unsigned interpretation of the immediate value.
+The table below lists all the ALU instructions in RV32I (the instructions that perform some operation on the operands and stores the result in a register). These can be divided into "register-register" instructions where the operands consists only of registers, and "register-immediate" instructions, where one of the operands is a (small) constant that is embedded in the instruction's machine code. All immediate instructions end with i (for immediate), except for a few that use u to indicate unsigned interpretation of the immediate value.
 
 | Instruction | Explanation |
 |-------------|-------------|
@@ -263,16 +263,16 @@ Let's say we want to read the third byte in SRAM into a register. You could writ
    la x1, 0x20000002
    lb x1, 0(x1)
 ```
-The first instruction `la` (Load Address) takes two parameters: a destination register (`x1`) and an address (`0x20000002`, the third byte in SRAM). Since we prepended the address with `0x`, the address will be expected to be in hexadecimal form. The result of this pseudoinstruction is that the address will end up in register `x1` and the instruction will be expanded into one `lui` and one `addi` instruction, just as for the `li` pseudoinstruction that we discussed in the previous section. 
+The first instruction `la` (Load Address) takes two operands: a destination register (`x1`) and an address (`0x20000002`, the third byte in SRAM). Since we prepended the address with `0x`, the address will be expected to be in hexadecimal form. The result of this pseudoinstruction is that the address will end up in register `x1` and the instruction will be expanded into one `lui` and one `addi` instruction, just as for the `li` pseudoinstruction that we discussed in the previous section. 
 
-The second assembler instruction, `lb` (Load Byte), takes three parameters. The first parameter (`x1`) is the destination register (as usual). The second parameter (`0`) is the *offset* from the *base address*, which is the third parameter (`x1`). 
+The second assembler instruction, `lb` (Load Byte), takes three operands. The first operand (`x1`) is the destination register (as usual). The second operand (`0`) is the *offset* from the *base address*, which is the third operand (`x1`). 
 
 When the address is put on the address bus, there is logic on the chip that will first note that this address is in the SRAM memory area (`0x20000000-0x2000FFFF`). It will subtract `0x20000000` from the address, and pass the resulting address (`2`) on to the SRAM module. Let's say the third byte contains the value `9`. The SRAM will read out this byte and put it on the 32-bit data bus by first sign-extending it to 32 bits [^6]. Whatever `x1` contained before, it will now contain the 32-bit value `0x00000009`.
 
 There are a few important things to note about this simple read operation: 
 * The processor core and compiler have no idea whether you are trying to read from SRAM, FLASH, or anything else. It will put an address on the bus and let the memory system figure out the routing. 
 * The *name of the instruction* decides how many bytes you want to read, starting at the address. You can read 8 bits, 16 bits, or 32 bits with `lb` (Load Byte), `lh` (Load Halfword), or `lw` (Load Word) respectively. 
-* You will *always* read the result into the lowest part of a 32-bit register and overwrite the rest of the register (regardless of how many bytes you read).
+* If you read less than 32 bits (8 or 16) from memory, they will be placed in the lower part of the 32-bit register rest of the register will be overwritten. 
 
 [^6]: We will discuss negative numbers and sign extensions in the next lecture. 
 
@@ -285,7 +285,8 @@ As an example, let's say we want to store the values 1, 2, and 3 into the first 
 ```
    la x1, 0x20000000    // Put the base address 0x20000000 (start of SRAM) in x1
    li x2, 1             // Put the value 1 into x2
-   sh x2, 0(x1)         // Store the lower two bytes of x2 into memory at address 0x20000000
+   sh x2, 0(x1)         // Store the lower two bytes of x2 into memory at address
+                        // base register (x1) + offset (0) =  0x20000000
    li x2, 2             // Put the value 2 into x2
    sh x2, 2(x1)         // Store the lower two bytes of x2 into memory at address 0x20000002
    li x2, 3             // Put the value 3 into x2
@@ -293,13 +294,13 @@ As an example, let's say we want to store the values 1, 2, and 3 into the first 
 ```
 [^7]: Don't try this at home! The beginning of SRAM is usually where your code resides.
 
-On the first line, we load the base address `0x20000000` into `x1`. We will then use this as the base address for *all three* store operations. On the second line, we just load the value 1 into another register (`x2`). On the third line we do the actual store operation. The value in `x2` gets stored into memory at address `0x20000000`. The address is calculated by taking the value in `x1` (`0x20000000`) and adding the offset from the instruction (`0`). Note that the offset is always given in *bytes*, not words or halfwords. 
+On the first line, we load the base address `0x20000000` into `x1`. We will then use this as the base address for *all three* store operations. On the second line, we just load the value 1 into another register (`x2`). On the third line we do the first actual store operation. The value in `x2` gets stored into memory at address `0x20000000`. The address is calculated by taking the value in `x1` (`0x20000000`) and adding the offset from the instruction (`0`). Note that the offset is always given in *bytes*, not words or halfwords. 
 
 This is then repeated for the second and third values, where the offsets are 2 and 4, respectively. 
 
 Things to note about the store instruction: 
 * Again, the name of the instruction tells the processor how many bytes you are writing. If you write a byte, or a halfword, only the lowest bytes in the register will be written to memory. There is no sign extension needed here.
-* The store instructions are the only instructions (that you will come across in this course) where the first parameter is *not* the destination register. Instead, the first parameter is the source register and the following parameters define the destination.
+* The store instructions are the only instructions (that you will come across in this course) where the first operand is *not* the destination register. Instead, the first operand is the source register and the following operands define the destination.
 
 ## Variables
 
@@ -341,7 +342,7 @@ To store the contents of register `x1`, into a variable `var b`, with a single (
 ```
 sb x1, var, x2
 ```
-Now, where did that `x2` come from? Think about the _actual_ instructions that this pseudo instruction has to create; In order to store the contents of x1 into the variable, it first has to calculate the address to the variable and put that into a register. The assembler cannot choose a register on its own, since it does not know what registers you (the programmer) want to save. Therefore, in the `sb` instruction, you supply a _temporary_ register that it can use for the address calculation. 
+Now, where did that `x2` come from? Think about the _actual_ instructions that this pseudo instruction has to create; In order to store the contents of x1 into the variable, it first has to calculate the address to the variable and put that into a register. The assembler cannot choose a register on its own, since it does not know what registers you (the programmer) want to preserve. Therefore, in the `sb` instruction, you supply a _temporary_ register that it can use for the address calculation. 
 
 In the former example, with the `lb` instruction, we do not have to supply a temporary register, since the assembler knows that it is going to overwrite the contents of `x1` and can use the same register for address calculations. 
 

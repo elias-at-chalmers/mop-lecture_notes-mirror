@@ -11,65 +11,85 @@ Sign Extension
 
 > *"I came to get down, I came to get down
 > So get out your seat and jump around"*
-> 
+>
 >  -- House of Pain, 1992
 
-This lecture will focus on *Program Control Flow*, i.e., how to make jumps in our code, call subroutines, and how to make function calls. This will include using the ABI conventions for function parameters and return parameters, understanding how the *stack* works, and how to deal with *register spilling* (i.e., what to do when we do not have enough registers).
+This lecture will focus on *Program Control Flow*, i.e., how to make jumps in our code, call subroutines, and make function calls. This will include using the ABI conventions for function parameters and return values, understanding how the *stack* works, and how to deal with *register spilling* (i.e., what to do when we do not have enough registers).
 
 
 ## Jump and Link
-There are only two instructions in RISC-V that perform unconditional jumps (`jal` and `jalr`). These are used for a number of pseudoinstructions that make the code much easier to read. The table below describes these two instructions. 
+There are only two instructions in RISC-V that perform unconditional jumps (`jal` and `jalr`). These are used for a number of pseudoinstructions that make the code easier to read. The table below describes these two instructions.
 
 | Instruction | Mnemonic            | Meaning                                      |
 |------------------|----------------|----------------------------------------------|
-| `jal ra, offset` | Jump And Link  | Store return address in `ra`.                | 
+| `jal ra, offset` | Jump And Link  | Store return address in `ra`.                |
 |                  |                | Jump to `pc + offset`.                       |
 |                  |                | `offset` must fit in 20 bits                 |
-| `jalr ra, offset(rs)` | Jump And Link Register | Store return address in `ra`    | 
-|                       |                        | Jump to `rs + offset`           | 
+| `jalr ra, offset(rs)` | Jump And Link Register | Store return address in `ra`    |
+|                       |                        | Jump to `rs + offset`           |
 
-There are two versions of the jump and link instruction because the simpler one, `jal`, only allows us to jump a certain offset (which is limited to +/- 500KB) from the current value of `pc`. Since our SRAM (where the code normally resides) is only 64KB large, that is not normally a problem, but if we needed to jump to code in FLASH memory, the distance would be too far for `jal` and we would have to put our address into a separate register and then use `jalr`, instead. There are other reasons for using `jalr` which we will encounter shortly. 
+The word "Link" in these mnemonics means that we store the return address, so that we can return from the jump later.
+
+There are two versions of the jump and link instruction because the simpler one, `jal`, only allows us to jump a certain offset (which is limited to +/- 500KB) from the current value of `pc`. Since our SRAM (where the code normally resides) is only 64KB in size, that is not normally a problem for us. However, if we need to jump to code in FLASH memory, the distance would be too far for `jal` so we must put our address into a separate register, and then use `jalr`, instead. There are other reasons for using `jalr` which we will encounter shortly.
 
 ### Jump
-Sometimes, all we want to do is jump to some other part of the code. Let's say you want to make an LED lamp blink continously as soon as you started your machine.  Consider the example below: 
+Sometimes, all we want to do is jump to some other part of the code. Let's say you want to make an LED lamp blink continuously as soon as you start your machine.  Consider the example below:
 
 ```
   <initialization code>
-blink: 
-  <code that turns on a led lamp, waits 1 second, turns it off, waits 1 sec>
+blink:
+  <code that turns on an LED lamp, waits 1 second, turns it off, waits 1 sec>
   j blink    // Jump to the "blink" label
 ```
 
-Here, when making our jump, we have no interest in what the return address but the assembler will still turn this pseudo instruction (`j`) into a real instruction (`jal`): 
+Here, when making our jump, we have no interest in what the return address is (so we do not need "Link") but the assembler will still translate this pseudo instruction (`j`) into the real instruction (`jal`):
 
-| Instruction      | Mnemonic | Implementation     | 
+| Instruction      | Mnemonic | Implementation     |
 |------------------|----------|--------------------|
-| `j offset`       | Jump     | `jal zero, offset` | 
+| `j offset`       | Jump     | `jal zero, offset` |
 
-Since we do not need the return address for this pseudo instruction, we simply tell `jal` to store it into the `zero` register (`x0`, which is always 0).
+Since we do not need the return address for this pseudo instruction, `jal` simply stores it into the `zero` register (writes to `zero`, or `x0`, are always ignored).
 
-The `offset` can be either a label (like in the example), or an absolute address: 
+The `offset` can be either a label (like in the example), or an absolute address:
 `j 0x20000000    // Jump to to the start of our program`
 
-In either case, the compiler (or linker) will complain if the address we want to jump to is too far away from the current address (the offset from `pc` would require > 20 bits). In such cases, we have to use the `jr` (Jump Register) instruction instead.
+In either case, the compiler (or linker) will complain if the address we want to jump to is too far away from the current address (i.e., if the offset from `pc` would require > 20 bits). In such cases, we have to use the `jr` (Jump Register) instruction instead.
 
-| Instruction      | Mnemonic | Implementation     | 
+| Instruction      | Mnemonic | Implementation     |
 |------------------|----------|--------------------|
-| `jr rs`       | Jump     | `jalr zero, 0(rs)`    | 
+| `jr rs`       | Jump     | `jalr zero, 0(rs)`    |
 
-If we, for example, knew that we had some useful code att address 0x00000100 (in FLASH memory), we could write: 
+If we, for example, knew that we had some useful code at address 0x00000100 (in FLASH memory), we could write:
 
-```
+```riscv
 li t0, 0x00000100       // Load the address into t0
 jr t0                   // Jump to that address
 ```
 
-
-
-
-
-
 ## Branching
+Conditionally jumping based on some condition is called "branching" and we wouldn't be able to do much with our computers without it. Let's consider a simple for-loop:
+```c
+int y = 0;
+for(int i=0; i<10; i++) {
+  y = y + i;
+}
+```
+
+We can write this loop in RISC-V assembly language as (read and make sure you follow):
+
+```riscv
+li t0, 0              # Use register t0 for `y`, and set it to zero
+li t1, 0              # Use register t1 for `i`, and set it to zero
+forloop:
+  bge t1, 10, end         # Check if `i` is more than or equal to 10 and jump to `end` if it is
+  add t0, t0, t1          # y + i -> y
+  addi t1, t1, 1          # i++
+  j foorloop
+end:
+```
+
+
+
 Show an example of a simple for-loop, for example, BEQ, BGE, etc.
 Show the pseudo instructions.
 BLT vs BLTU, etc

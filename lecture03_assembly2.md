@@ -131,22 +131,74 @@ end:
 
 Note that there are no *immediate* versions of the branch instructions. We cannot write `bgt t1, 5, end`, for example, but have to put the value you want to compare against into a register first. 
 
-### Branchless
+💡 **Note:** *If you’ve worked with other CPU architectures (perhaps in a previous course), you may notice that branch handling is different on RISC-V. In many older architectures, a branch instruction is preceded by a compare instruction, which compares two values using the ALU and sets condition flags (e.g., Negative, Zero, etc.) in a flag register. In contrast, RISC-V performs these comparisons directly as part of the branch instruction. This design avoids the need for a global condition-code register, simplifying the hardware and reducing potential pipeline dependencies.*
+
+### Branchless (Advanced)
 Explain why branchless can be very good. (branch prediction...)
 Show a = min(b, c) branchless
 Connect to a = (b<c)?b:c
 (there should also be an example where the comparison is reused several times... perhaps not important)
 
 ## The Stack
-Alignment?
-No push pop (important first year, at least)
-Show what push/pop really does. Why not do that with existing instructions? RISC.
-Why not push pull as pseudo instructions?
-More efficient to think of a stack frame.
+Before we move on to discuss how function calls are implemented, let's quickly recap the *Stack* and learn how it is used on a RISC-V architecture. The stack is a memory area where computer programs can store temporary data. The number of registers on any CPU are limited, so sometimes we need to *push* data to memory, temporarily, and then *pop* it back into registers when we need it. 
+
+On many architectures, the process might look like this: 
+
+```
+  <code that does stuff>
+  <we need to perform a calculation, but we have no free registers>
+  PUSH {t0, t1, t2}       # Copy the contents or registers x1, x2, and x3 to the stack
+  <do calculations that might overwrite x1, x2 and x3>
+  POP {t0, t1, t2}        # Copy the values from the stack, back into x1, x2, and x3
+```
+
+A stack has one associated register called the *stack pointer* (the ABI convention is to use register `x2`/`sp`). This register always holds the address to the *top of the stack*, i.e., where the last value was pushed. The stack pointer needs to be initialized to point at *the end of* some memory area that is known to be free (called the *bottom of the stack*). Then, when we need to store a value (let's say a 4 byte integer) on the stack, we can store it in memory, at the address held by `sp`, and then reduce the address stored in `sp` by 4 bytes. 
+
+On many architectures, *push* and *pop* are actual instructions, implemented by the hardware, but in RISC-V it is done explicitly with existing instructions. To push register `t0` to the stack, you would write: 
+
+```
+  add sp, sp, -4       # Reduce the stack pointer so it points to where we will store t0
+  sw  t0, 0(sp)        # Store t0 at the address held by sp
+```
+
+As you will see soon, we often want to push several registers to the stack at the same time. If we needed to push `t0`, `t1`, and `t2` to the stack, we could write: 
+
+```
+0:  add sp, sp, -12      # Reduce the stack pointer so it points to where we will store
+1:                       # the LAST value we push (t2)
+2:  sw t0, 8(sp)         # Store the three registers
+3:  sw t1, 4(sp)
+4:  sw t2, 0(sp)
+```
+
+
+<figure>
+  <img src="images/pushing_on_stack.png">
+  <centre>
+  <figcaption style="text-align: center;"><em> Left: Initial state, stackpointer is at end-of-stack. Middle: At Line 2, stack pointer moved. Right: Line 5: All registers copied to stack.</em></figcaption></centre>
+</figure>
+
+The process is also illustrated in the Figure above. 
+
+To pop the values, we just do the same thing in reverse. We first use the current address in the stack-pointer to read out the last three values that were pushed, and then we increase the stack pointer. We do not *remove* the values from the stack, but any subsequent push operation will overwrite that memory: 
+
+```
+  lw t2, 0(sp)    # Read the values back into registers
+  lw t1, 4(sp)
+  lw t0, 8(sp)
+  add sp, sp, 12  # Restore the stack pointer to where it was before we pushed
+```
+
+## Function Calls
+passing arguments
+
+return values
+
+Stack frame. 
 Frame pointer.
 Return address.
 
-## Function Calls
+
 ## Register Spilling
 ##I Arrays
 (slightly out of place in this lecture, but probably won't fit in the previous)

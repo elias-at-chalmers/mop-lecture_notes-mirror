@@ -1,5 +1,7 @@
 # Jumping around
 
+**Links:**
+https://projectf.io/posts/riscv-cheat-sheet/
 
 **Text and excercises in the Workbook (Arbetsboken)**
 Chapter 1, Pages 34-
@@ -30,7 +32,9 @@ There are only two instructions in RISC-V that perform unconditional jumps (`jal
 
 The word "Link" in these mnemonics means that we store the return address, so that we can return from the jump later.
 
-There are two versions of the jump and link instruction because the simpler one, `jal`, only allows us to jump a certain offset (which is limited to +/- 500KB) from the current value of `pc`. Since our SRAM (where the code normally resides) is only 64KB in size, that is not normally a problem for us. However, if we need to jump to code in FLASH memory, the distance would be too far for `jal` so we must put our address into a separate register, and then use `jalr`, instead. There are other reasons for using `jalr` which we will encounter shortly.
+There are two versions of the jump and link instruction because the simpler one, `jal`, only allows us to jump a certain offset (which is limited to +/- 1MB) [^1] from the current value of `pc`. Since our SRAM (where the code normally resides) is only 64KB in size, that is not normally a problem for us. However, if we need to jump to code in FLASH memory, the distance would be too far for `jal` so we must put our address into a separate register, and then use `jalr`, instead. There are other reasons for using `jalr` which we will encounter shortly.
+
+[^1]: 💡 **Note:** *If you are very awake, you might have noticed that a 20-bit offset should only allow us to jump +/- 0.5MB. However, since all instructions are guaranteed to be 2-byte aligned, the offset in the machine instruction is multiplied by 2 before being added to `pc`.*
 
 ### Jump
 Sometimes, all we want to do is jump to some other part of the code. Let's say you want to make an LED lamp blink continuously as soon as you start your machine.  Consider the example below:
@@ -51,7 +55,7 @@ Here, when making our jump, we have no interest in what the return address is (s
 Since we do not need the return address for this pseudo instruction, `jal` simply stores it into the `zero` register (writes to `zero`, or `x0`, are always ignored).
 
 The `offset` can be either a label (like in the example), or an absolute address:
-`j 0x20000000    // Jump to to the start of our program`
+`j 0x20000000    // Jump to the start of our program`
 
 In either case, the compiler (or linker) will complain if the address we want to jump to is too far away from the current address (i.e., if the offset from `pc` would require > 20 bits). In such cases, we have to use the `jr` (Jump Register) instruction instead.
 
@@ -67,32 +71,65 @@ jr t0                   // Jump to that address
 ```
 
 ## Branching
-Conditionally jumping based on some condition is called "branching" and we wouldn't be able to do much with our computers without it. Let's consider a simple for-loop:
+Conditionally jumping based on some condition is called "branching" and we wouldn't be able to do much with our computers without it. The real instruction that we use for branching are listed in the table below: 
+
+| Instr   | Description                | Use                  | Result                        | 
+|---------|----------------------------|----------------------|-------------------------------|
+| beq     | Branch Equal               | beq rs1, rs2, imm    | if(rs1 == rs2) pc += imm      |
+| bne     | Branch Not Equal           | bne rs1, rs2, imm    | if(rs1 ≠ rs2) pc += imm       |
+| blt     | Branch Less Than           | blt rs1, rs2, imm    | if(rs1 < rs2) pc += imm       |
+| bge     | Branch Greater or Equal    | bge rs1, rs2, imm    | if(rs1 ≥ rs2) pc += imm       |
+| bltu    | Branch Less Than Unsigned  | bltu rs1, rs2, imm   | if(rs1 < rs2) pc += imm       |
+| bgeu    | Branch Greater or Equal Unsigned | bgeu rs1, rs2, imm | if(rs1 ≥ rs2) pc += imm   |
+
+You might think that this looks limited. Why is there no "Branch Greater Than" or "Branch Less or Equal"? The answer, as usual, is that this functionality can be implemented with existing instructions. Since a < b => b > a, `bgt rs1, rs2, label` (Branch Greater Than) can be written as `blt rs2, rs1, label`. There are pseudoinstructions that cover all of the missing operations: 
+
+| Instr   | Description                | Use                  | Result                        | 
+|---------|----------------------------|----------------------|-------------------------------|
+| bgt     | *Branch Greater Than (p)*  | bgt rs1, rs2, imm    | if(rs1 > rs2) pc += imm       
+| ble     | *Branch Less or Equal (p)* | ble rs1, rs2, imm    | if(rs1 ≤ rs2) pc += imm       
+| bgtu    | *Branch Greater Than Unsigned (p)* | bgtu rs1, rs2, imm | if(rs1 > rs2) pc += imm      
+| bleu    | *Branch Less or Equal Unsigned (p)* | bleu rs1, rs2, imm | if(rs1 ≤ rs2) pc += imm      
+
+Many of these instructions exist in a signed and an unsigned version (e.g., `blt` and `bltu`). This is necessary since the processor does not know if you consider the value in a register to be a signed or an unsigned number. Consider the instruction `blt x1, zero`. If `x1` contains `0xFFFFFFFB`, it is less than zero if we consider it a signed integer (-5), but *much* more than zero if we consider it unsigned (4294967291).
+
+In addition, there are a number of pseudoinstructions that compare a register's value to zero. These are just for convenience and are easily implemented using the correspoding instructions and using `zero` as one of the operands: 
+
+| Instr   | Description                | Use                  | Result                        | 
+|---------|----------------------------|----------------------|-------------------------------|
+| beqz    | *Branch Equal Zero (p)*    | beqz rs1, imm        | if(rs1 == 0) pc += imm        | 
+| bnez    | *Branch Not Equal Zero (p)*| bnez rs1, rs2, imm   | if(rs1 ≠ 0) pc += imm         |
+| bltz    | *Branch Less Than Zero (p)*| bltz rs1, imm        | if(rs1 < 0) pc += imm         | 
+| bgtz    | *Branch Greater Than Zero (p)* | bgtz rs1, imm       | if(rs1 > 0) pc += imm         | 
+| blez    | *Branch Less or Equal Zero (p)* | blez rs1, imm       | if(rs1 ≤ 0) pc += imm         | 
+| bgez    | *Branch Greater or Equal Zero (p)* | bgez rs1, imm      | if(rs1 ≥ 0) pc += imm         | 
+
+
+Let's put this to use. We want to calculate the factorial of 5 (5! = 5 * 4 * 3 * 2 * 1). In C, or any C-like high-level language, this could look like: 
 ```c
-int y = 0;
-for(int i=0; i<10; i++) {
-  y = y + i;
+int y = 1;
+for(int i=1; i<=5; i++) {
+  y = y * i;
 }
 ```
 
-We can write this loop in RISC-V assembly language as (read and make sure you follow):
+We can write this same program in RISC-V assembly language as (read and make sure you follow):
 
 ```riscv
-li t0, 0              # Use register t0 for `y`, and set it to zero
-li t1, 0              # Use register t1 for `i`, and set it to zero
+li t0, 1              # Use register t0 for `y`, and set it to 1
+li t1, 1              # Use register t1 for `i`, and set it to 1
 forloop:
-  bge t1, 10, end         # Check if `i` is more than or equal to 10 and jump to `end` if it is
-  add t0, t0, t1          # y + i -> y
-  addi t1, t1, 1          # i++
-  j foorloop
+  li t2, 5               # Put the value 5 in a temporary register
+  bgt t1, t2, end        # Check if `i` is more than 5 
+                         # and jump to `end` if it is
+  mul t0, t0, t1         # y * i -> y
+  addi t1, t1, 1         # i++
+  j forloop             # Repeat
 end:
+  # t0 now contains the answer.
 ```
 
-
-
-Show an example of a simple for-loop, for example, BEQ, BGE, etc.
-Show the pseudo instructions.
-BLT vs BLTU, etc
+Note that there are no *immediate* versions of the branch instructions. We cannot write `bgt t1, 5, end`, for example, but have to put the value you want to compare against into a register first. 
 
 ### Branchless
 Explain why branchless can be very good. (branch prediction...)

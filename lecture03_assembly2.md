@@ -250,22 +250,42 @@ Let's say you have written the function `int max(int a, int b)` in C and that yo
 mv a0, t0        # Use t0 as the first parameter
 mv a1, t1        # and t1 as the second parameter
 call max         # After this line, the maximum of t0 and t1 is in a0
-                 # Since a0 is already max(t0, t1) we do not have to do anything for the first paramter
+                 # Since a0 is already max(t0, t1) we do not have to do anything for the first parameter
 mv a1, t2        # Use t2 as the second parameter
 call max         # After this line a0 should contain max(max(t0, t1), t2)...
                  # Or should it...
 ```
- There is a potential bug in this program. Can you spot it? That's right: 
- **We do not know what happens in `max`. It might have overwritten our `t2` register!**
- This is a general problem. When writing code, we can not feasibly read through every function we call, just to find out if it might overwrite any register we want to preserve.  
+ There is a potential bug in this program. Can you spot it? That's right:
+ *We do not know what happens in `max`. It might have overwritten our `t2` register!*
+ This is a general problem. When writing code, we can not feasibly read through every function we call, just to find out if it might overwrite any register we want to preserve.
 
-We *could* save *all* registers, before calling any function, but that would almost always be a waste. In the `min` function that we wrote earlier, we only overwrite `a0`, so saving every single register everytime we need to call `min` would be very silly. 
+We *could* save *all* registers, before calling any function, but that would almost always be a waste. In the `min` function that we wrote earlier, we only overwrite `a0`, so saving every single register everytime we need to call `min` would be very silly.
 
-An alternative would be let the *callee* (the function being called) save the registers. When writing the `min` function, we know that we only need to save the `a0` register, so we would only save that. But then, another function that uses many registers would have to save all of them, regardless of whether they are important to the calling function or not. 
+An alternative would be to let the *callee* (the function being called) save the registers. When *writing* the `min` function, we know that we only need to save the `a0` register, so we would only save that. But then, another function that uses many registers would have to save all of them, regardless of whether they are important to the calling function or not.
 
-The solution to this problem is a compromise. The ABI conventions say that the *calling* function is responsible for saving `t0-t6` and `a0-a7`, if it needs them to be preserved. The *callee* is responsible for saving any other register, if it might modify them. 
+The solution to this problem is a compromise. The ABI conventions say that the *calling* function is responsible for saving `t0-t6` and `a0-a7`, if it needs them to be preserved. The *callee* is responsible for saving any other register, if it might modify them.
 
-Put differently, whenever calling a function, you have to think about which of `t0-t6` and `a0-a7` you might need later, and save them. Whenever you are writing a function, and use any of the *other* registers, you have to make sure that you save them first, and restore them before returning. 
+Put differently, whenever calling a function, you have to think about which of `t0-t6` and `a0-a7` you might need later, and save them. Whenever you are writing a function, and use any of the *other* registers, you have to make sure that you save them first, and restore them before returning.
+
+So for our example to be guaranteed to work, we need to save `t2` to the stack before calling `max` the first time. Note that `max` might also overwrite `a0`, `a1`, `a2`, and `t1` but since we do not need those values any more we do not need to save them:
+
+```
+mv a0, t0        # Use t0 as the first parameter
+mv a1, t1        # and t1 as the second parameter
+
+addi sp, -8      # Decrease the stack pointer
+sw   t2, 4(sp)   # Save t2 for later
+
+call max         # After this line, the maximum of t0 and t1 is in a0
+                 # Since a0 is already max(t0, t1) we do not have to do anything for the first parameter
+
+lw   t2, 4(sp)    # Restore t2 from the stack
+addi sp, 8        # And increase the stack pointer
+
+mv a1, t2        # Use t2 as the second parameter
+call max         # After this line a0 contains max(max(t0, t1), t2)...
+```
+
 
 💡 **Note:** *These rules might seem arbitrary, but have proven to work well for minimizing redundant register saving in most cases. When writing performance-critical code, an optimizer can often find remaining redundant register saving and remove it.*
 

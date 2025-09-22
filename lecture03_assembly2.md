@@ -1,4 +1,4 @@
-# Jumping around
+# Control Flow
 
 **Links:**
 https://projectf.io/posts/riscv-cheat-sheet/
@@ -243,7 +243,7 @@ min_end:
 ### Register Saving
 There is one more important thing to consider when writing, or calling, functions in assembly. We will illustrate this by an example.
 
-Let's say you have written the function `int max(int a, int b)` in C and that you are linking the compiled code with your assembly program [^2]. You are now given the task to write an assembly program that finds the smallest of the values stored in registers `t0`, `t1`, and `t2`. You might write the following code:
+Let's say you have written the function `int max(int a, int b)` in C and that you are linking the compiled code with your assembly program [^2]. You are now given the task to write an assembly program that finds the largest of the *three* values stored in registers `t0`, `t1`, and `t2`. You might write the following code:
 [^2]: You don't know how to do that just yet, but you will in a few lessons time.
 
 ```
@@ -263,41 +263,125 @@ We *could* save *all* registers, before calling any function, but that would alm
 
 An alternative would be to let the *callee* (the function being called) save the registers. When *writing* the `min` function, we know that we only need to save the `a0` register, so we would only save that. But then, another function that uses many registers would have to save all of them, regardless of whether they are important to the calling function or not.
 
-The solution to this problem is a compromise. The ABI conventions say that the *calling* function is responsible for saving `t0-t6` and `a0-a7`, if it needs them to be preserved. The *callee* is responsible for saving any other register, if it might modify them.
+The solution to this problem is a compromise. The ABI conventions say that the *calling* function (the *caller*) is responsible for saving `t0-t6`, `a0-a7`, and `ra`, if it needs them to be preserved. The *callee* is responsible for saving any other register, if it might modify them.
 
 Put differently, whenever calling a function, you have to think about which of `t0-t6` and `a0-a7` you might need later, and save them. Whenever you are writing a function, and use any of the *other* registers, you have to make sure that you save them first, and restore them before returning.
 
-So for our example to be guaranteed to work, we need to save `t2` to the stack before calling `max` the first time. Note that `max` might also overwrite `a0`, `a1`, `a2`, and `t1` but since we do not need those values any more we do not need to save them:
+💡 **Note:** *These rules might seem arbitrary, but have proven to work well for minimizing redundant register saving in most cases. When writing performance-critical code, an optimizer can often find remaining redundant register saving and remove it.*
+
+So, for our example to be guaranteed to work, we need to save `t2` to the stack before calling `max` the first time. Note that `max` might also overwrite `a0`, `a1`, `a2`, and `t1` but since we do not need those values any more we do not need to save them:
 
 ```
 mv a0, t0        # Use t0 as the first parameter
 mv a1, t1        # and t1 as the second parameter
 
-addi sp, -8      # Decrease the stack pointer
-sw   t2, 4(sp)   # Save t2 for later
+addi sp, -4      # Decrease the stack pointer
+sw   t2, 0(sp)   # Save t2 for later
 
 call max         # After this line, the maximum of t0 and t1 is in a0
                  # Since a0 is already max(t0, t1) we do not have to do anything for the first parameter
 
-lw   t2, 4(sp)    # Restore t2 from the stack
-addi sp, 8        # And increase the stack pointer
+lw   t2, 0(sp)    # Restore t2 from the stack
+addi sp, 4        # And increase the stack pointer
 
 mv a1, t2        # Use t2 as the second parameter
 call max         # After this line a0 contains max(max(t0, t1), t2)...
 ```
 
+### Nested Function Calls
+In real programs, any code you write will usually be part of a function which means that you are always writing code for a *callee*, but sometimes that function calls another function, making it the *caller*. 
 
-💡 **Note:** *These rules might seem arbitrary, but have proven to work well for minimizing redundant register saving in most cases. When writing performance-critical code, an optimizer can often find remaining redundant register saving and remove it.*
+To keep things manageable, an assembly programmer will usually follow a simple procedure when writing a function `f`: 
+* Do most calculations in the `t` (temporary) registers. You can use them freely without pushing to the stack, as the function that called `f` will have saved them if it needed to. 
+* If you need any value to be preserved over a function call, use an `s` register instead. The function you call will make sure that it is not overwritten. 
+* If you use an `s` register, you have to make sure to save it the first thing you do in the function, and restore it before you return.
 
+Let us revisit the problem above. We now want to write a function `int max_of_three(int a, int b, int c)`, using the `int max(a, b)` function: 
+
+```
+# int max_of_three(int a, int b, int c)
+# =================================================================================
+# a0: a
+# a1: b
+# a2: c
+max_of_three: 
+  # ===== PROLOGUE ================================================================
+  # Save any callee saved register that might be overwritten by this function
+  addi sp, sp, -8                        # Allocate room for two words on stack
+  sw s0, 4(sp)                           # Save s0 in one slot
+  sw ra, 0(sp)                           # Save ra, since it will be overwritten by 
+                                         # `call`
+  # ===============================================================================
+
+  mv s0, a2           # s0 <- c
+  call max            # a0 <- max(a, b)
+  mv a1, s0           # a1 <- c
+  call max            # a0 <- max(max(a,b),c)
+
+  # ===== EPILOGUE ================================================================
+  # Restore all values we pushed in the beginning and return
+  lw s0, 4(sp)
+  lw ra, 0(sp)
+  addi sp, sp, 8
+  #================================================================================
+  ret
+```
+In this version, we save the temporary register to one of the saved registers, instead of putting it directly on the stack. Since we use an `s` register, we have to save *that* on the stack, however, so we do not reduce the stack traffic. Both ways are allowed, but writing your code in this way makes it much easier to keep track of what is on the stack (it only changes as you enter a function), and makes the code easier to read. 
+
+
+
+
+<!---
+```
+factorial(1) = 1
+factorial(n) = n * factorial(n-1)
+```
+
+This can be implemented in assembly as: 
+
+```
+# factorial(n)
+# ===========================================================
+# a0: The parameter n
+factorial:
+  addi sp, sp, -8             # Make room on the stack for everything we (might) want to push
+  sw   ra, 4(sp)              # Since this function will overwrite ra (if we get to the
+                              # call instruction below), we have to push ra onto the stack
+                              # (ra is "Callee saved")
+
+  li t0, 1                    # We can freely use t0 here, since the caller
+                              # will have saved it, if needed
+  beq a0, t0, factorial_one   # If n == 1, return 1
+
+  mv t0, a0                   # Otherwise, store n in a temporary register
+  addi a0, a0, -1             # a0 = n-1
+
+  sw t0, 0(sp)                # Since we are about to call another function, and we need
+                              # to remember t0 for later, we store it in the slot we reserved 
+                              # earlier (t0 is "Caller saved").
+
+  call factorial              # a0 <- factorial(n-1)
+
+  lw t0, 0(sp)                # Restore t0 from stack
+
+  mul a0, a0, t0              # a0 <- factorial(n-1) * n
+
+factorial_end:
+  lw   ra, 4(sp)              # Restore ra for the calling function
+  addi sp, sp, 8
+  ret
+```
+--->
 
 
 
 
 
 ## Arrays
-(slightly out of place in this lecture, but probably won't fit in the previous)
+(TBD, slightly out of place in this lecture, but probably won't fit in the previous)
 
 
+<!---
 ### RISC-V Jumping and Branching Instructions
 
 | Pseudoinstruction | Real Instruction(s) | Description |
@@ -317,4 +401,4 @@ call max         # After this line a0 contains max(max(t0, t1), t2)...
 | `jal label`      | `jal ra, label`  | Jump and link; used for function calls. |
 | `nop`            | `addi x0, x0, 0` | No operation (used in delay slots or padding, sometimes with branches). |
 | `li rd, imm`     | `addi rd, x0, imm` or `lui+addi` | Load immediate (can be used to set up jump addresses in some pseudo branches). |
-
+--->

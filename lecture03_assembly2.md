@@ -1,16 +1,19 @@
-# Control Flow
+# Control Flow and Arrays
 
 **Links:**
 https://projectf.io/posts/riscv-cheat-sheet/
 https://d3s.mff.cuni.cz/files/teaching/nswi200/202324/doc/riscv-abi.pdf
 
 **Text and excercises in the Workbook (Arbetsboken)**
-Chapter 1, Pages 34-
+Chapter 1, Pages 17-24
+Chapter 1, Pages 34-56
 
 **Things that are in the Workbook that should possibly be in this lecture**
-Sign Extension
+Sign Extension (not as important in RISCV, but still needs to be handled somewhere)
+Stack frames? (I think överkurs)
+Arrays with multiple dimensions (definitely  överkurs)
 
-This lecture will focus on *Program Control Flow*, i.e., how to make jumps in our code, call subroutines, and make function calls. This will include using the ABI conventions for function parameters and return values, understanding how the *stack* works, and how to deal with *register spilling* (i.e., what to do when we do not have enough registers).
+This lecture will focus on *Program Control Flow*, i.e., how to make jumps in our code, call subroutines, and make function calls. This will include using the ABI conventions for function parameters and return values, understanding how the *stack* works, and how to deal with *register spilling* (i.e., what to do when we do not have enough registers). We will round of the lecture with a discussion about *arrays* and how they are implemented in assembly.
 
 
 ## Jump and Link
@@ -23,6 +26,7 @@ There are only two instructions in RISC-V that perform unconditional jumps (`jal
 |                  |                | `offset` must fit in 20 bits                 |
 | `jalr ra, offset(rs)` | Jump And Link Register | Store return address in `ra`    |
 |                       |                        | Jump to `rs + offset`           |
+|                       |                        | `offset` must fit in 12 bits           |
 
 The word "Link" in these mnemonics means that we store the return address, so that we can return from the jump later.
 
@@ -44,7 +48,8 @@ Here, when making our jump, we have no interest in what the return address is (s
 
 | Pseudo Instruction      | Mnemonic | Translation     |
 |------------------|----------|--------------------|
-| `j offset`       | Jump     | `jal zero, offset` |
+| `j <address or label>`       | Jump     | `jal zero, offset` |
+|                              |          | (offset is calculated from current pc by assembler) |
 
 Since we do not need the return address for this pseudo instruction, `jal` simply stores it into the `zero` register (writes to `zero`, or `x0`, are always ignored).
 
@@ -67,36 +72,36 @@ jr t0                   // Jump to that address
 ## Branching
 Conditionally jumping based on some condition is called "branching" and we wouldn't be able to do much with our computers without it. The real instruction that we use for branching are listed in the table below:
 
-| Instr   | Description                | Use                  | Result                        |
+| Instr   | Mnemonic                   | Use                  | Condition (jump if)                        |
 |---------|----------------------------|----------------------|-------------------------------|
-| beq     | Branch Equal               | beq rs1, rs2, imm    | if(rs1 == rs2) pc += imm      |
-| bne     | Branch Not Equal           | bne rs1, rs2, imm    | if(rs1 ≠ rs2) pc += imm       |
-| blt     | Branch Less Than           | blt rs1, rs2, imm    | if(rs1 < rs2) pc += imm       |
-| bge     | Branch Greater or Equal    | bge rs1, rs2, imm    | if(rs1 ≥ rs2) pc += imm       |
-| bltu    | Branch Less Than Unsigned  | bltu rs1, rs2, imm   | if(rs1 < rs2) pc += imm       |
-| bgeu    | Branch Greater or Equal Unsigned | bgeu rs1, rs2, imm | if(rs1 ≥ rs2) pc += imm   |
+| beq     | Branch Equal               | beq rs1, rs2, label    | rs1 == rs2)      |
+| bne     | Branch Not Equal           | bne rs1, rs2, label    | rs1 ≠ rs2)       |
+| blt     | Branch Less Than           | blt rs1, rs2, label    | rs1 < rs2)       |
+| bge     | Branch Greater or Equal    | bge rs1, rs2, label    | rs1 ≥ rs2)       |
+| bltu    | Branch Less Than Unsigned  | bltu rs1, rs2, label   | rs1 < rs2)       |
+| bgeu    | Branch Greater or Equal Unsigned | bgeu rs1, rs2, label | rs1 ≥ rs2)   |
 
 You might think that this looks limited. Why is there no "Branch Greater Than" or "Branch Less or Equal"? The answer, as usual, is that this functionality can be implemented with existing instructions. Since a < b => b > a, `bgt rs1, rs2, label` (Branch Greater Than) can be written as `blt rs2, rs1, label`. There are pseudoinstructions that cover all of the missing operations:
 
-| Instr   | Description                | Use                  | Result                        |
+| Pseudo Instr   | Mnemonic                | Use                  |  Condition (jump if)                         |
 |---------|----------------------------|----------------------|-------------------------------|
-| bgt     | *Branch Greater Than (p)*  | bgt rs1, rs2, imm    | if(rs1 > rs2) pc += imm
-| ble     | *Branch Less or Equal (p)* | ble rs1, rs2, imm    | if(rs1 ≤ rs2) pc += imm
-| bgtu    | *Branch Greater Than Unsigned (p)* | bgtu rs1, rs2, imm | if(rs1 > rs2) pc += imm
-| bleu    | *Branch Less or Equal Unsigned (p)* | bleu rs1, rs2, imm | if(rs1 ≤ rs2) pc += imm
+| bgt     | *Branch Greater Than*  | bgt rs1, rs2, label    | rs1 > rs2
+| ble     | *Branch Less or Equal* | ble rs1, rs2, label    | rs1 ≤ rs2
+| bgtu    | *Branch Greater Than Unsigned* | bgtu rs1, rs2, label | rs1 > rs
+| bleu    | *Branch Less or Equal Unsigned* | bleu rs1, rs2, label | rs1 ≤ rs2
 
 Many of these instructions exist in a signed and an unsigned version (e.g., `blt` and `bltu`). This is necessary since the processor does not know if you consider the value in a register to be a signed or an unsigned number. Consider the instruction `blt x1, zero`. If `x1` contains `0xFFFFFFFB`, it is less than zero if we consider it a signed integer (-5), but *much* more than zero if we consider it unsigned (4294967291).
 
 In addition, there are a number of pseudoinstructions that compare a register's value to zero. These are just for convenience and are easily implemented using the correspoding instructions and using `zero` as one of the operands:
 
-| Instr   | Description                | Use                  | Result                        |
+| Instr   | Mnemonic                | Use                  | Condition (jump if)                         |
 |---------|----------------------------|----------------------|-------------------------------|
-| beqz    | *Branch Equal Zero (p)*    | beqz rs1, imm        | if(rs1 == 0) pc += imm        |
-| bnez    | *Branch Not Equal Zero (p)*| bnez rs1, rs2, imm   | if(rs1 ≠ 0) pc += imm         |
-| bltz    | *Branch Less Than Zero (p)*| bltz rs1, imm        | if(rs1 < 0) pc += imm         |
-| bgtz    | *Branch Greater Than Zero (p)* | bgtz rs1, imm       | if(rs1 > 0) pc += imm         |
-| blez    | *Branch Less or Equal Zero (p)* | blez rs1, imm       | if(rs1 ≤ 0) pc += imm         |
-| bgez    | *Branch Greater or Equal Zero (p)* | bgez rs1, imm      | if(rs1 ≥ 0) pc += imm         |
+| beqz    | *Branch Equal Zero*    | beqz rs1, label        | rs1 == 0        |
+| bnez    | *Branch Not Equal Zero*| bnez rs1, rs2, label   | rs1 ≠ 0         |
+| bltz    | *Branch Less Than Zero*| bltz rs1, label        | rs1 < 0         |
+| bgtz    | *Branch Greater Than Zero* | bgtz rs1, label       | rs1 > 0         |
+| blez    | *Branch Less or Equal Zero* | blez rs1, label       | rs1 ≤ 0         |
+| bgez    | *Branch Greater or Equal Zero* | bgez rs1, label      | rs1 ≥ 0        |
 
 
 Let's put this to use. We want to calculate the factorial of 5 (5! = 5 * 4 * 3 * 2 * 1). In C, or any C-like high-level language, this could look like:
@@ -184,7 +189,7 @@ To pop the values, we just do the same thing in reverse. We first use the curren
 ```
 
 ## Function Calls
-Most high-level languages have the concept of *function calls*. A function takes a number of parameters and returns a value. The assembly language does *not* have function calls built into the language, but even when writing pure assembly, we still want to divide code into functions. Additionally, we want to be able to mix languages. Sometimes we want to write a function in assembly, and call it from our C code, or vice versa. For that to work, it is important that we, as assembly programmers, follow exactly the same rules as the C compiler does.
+Most high-level languages have the concept of *functions* (sometimes called *subroutines*). A function takes a number of parameters and returns a value. The assembly language does *not* have function calls built into the language but even when writing pure assembly we often want to divide code into functions. Additionally, we want to be able to mix languages. Sometimes we want to write a function in assembly, and call it from our C code, or vice versa. For that to work, it is important that we, as assembly programmers, follow exactly the same rules as the C compiler does.
 
 Therefore, there are several *conventions* (described by the ABI) that define how function calls should be done. Let us consider a simple function that takes two parameters and returns the smallest:
 
@@ -198,7 +203,7 @@ int min(int a, int b) {
 How can we write this function in RISC-V assembly? How are the arguments `a` and `b` passed to the function? How do we return a value? All of this is described in detail in the ABI specification, and we will go through the basics here.
 
 ### Calling and returning from a function
-When calling a function we need to be able to return from that function, and the convention is that the caller saves the return address in register `ra` (The ABI name for register `x1`). Assume that there is a label `min` (somewhere in the code) that corresponds to the address where the function code begins. If the distance from the calling instruction to the function fits in the 20-bit offset of the `jal ra, min` instruction, we could use that directly. Otherwise, we have to first calculate the full target address into a register, and then use the `jalr` instruction.
+When calling a function we need to be able to return from that function, and the convention is that the *caller* (the function that makes the function call) saves the return address in register `ra` (The ABI name for register `x1`). Assume that there is a label `min` (somewhere in the code) that corresponds to the address where the function code begins. If the distance from the calling instruction to the function fits in the 20-bit offset of the `jal ra, min` instruction, we could use that directly. Otherwise, we have to first calculate the full target address into a register, and then use the `jalr` instruction.
 
 Whether or not the function is close enough could be hard to know in some cases. Fortunately, the assembler will accept a simple pseudoinstruction, `call`, which puts the return address into `ra` and generates the proper instructions (`jal`, or `auipc`+`jalr`) as needed.
 
@@ -241,7 +246,9 @@ min_end:
 ### Register Saving
 There is one more important thing to consider when writing, or calling, functions in assembly. We will illustrate this by an example.
 
-Let's say you have written the function `int max(int a, int b)` in C and that you are linking the compiled code with your assembly program [^2]. You are now given the task to write an assembly program that finds the largest of the *three* values stored in registers `t0`, `t1`, and `t2`. You might write the following code:
+Let's say you have written the function `int max(int a, int b)` in C and that you are linking the compiled code with your assembly program [^2]. You are now given the task to write an assembly program that finds the largest of the *three* values stored in registers `t0`, `t1`, and `t2`. I.e., we want to calculate `max(max(t0, t1), t2)`
+
+You might write the following code:
 [^2]: You don't know how to do that just yet, but you will in a few lessons time.
 
 ```
@@ -257,9 +264,9 @@ call max         # After this line a0 should contain max(max(t0, t1), t2)...
  *We do not know what happens in `max`. It might have overwritten our `t2` register!*
  This is a general problem. When writing code, we can not feasibly read through every function we call, just to find out if it might overwrite any register we want to preserve.
 
-We *could* save *all* registers, before calling any function, but that would almost always be a waste. In the `min` function that we wrote earlier, we only overwrite `a0`, so saving every single register everytime we need to call `min` would be very silly.
+We *could* save *all* registers, before calling any function, but that would almost always be a waste. In the `min` function that we wrote earlier, we only overwrite `a0`, so saving every single register every time we need to call `min` would be very silly.
 
-An alternative would be to let the *callee* (the function being called) save the registers. When *writing* the `min` function, we know that we only need to save the `a0` register, so we would only save that. But then, another function that uses many registers would have to save all of them, regardless of whether they are important to the calling function or not.
+An alternative would be to let the *callee* (the function being called) save the registers. When *writing* the `min` function, we know that we only need to overwrite the `a0` register, so we would only save that. But then, another function that uses many registers would have to save all of them, regardless of whether they are important to the calling function or not.
 
 The solution to this problem is a compromise. The ABI conventions say that the *calling* function (the *caller*) is responsible for saving `t0-t6`, `a0-a7`, and `ra`, if it needs them to be preserved. The *callee* is responsible for saving any other register, if it might modify them.
 

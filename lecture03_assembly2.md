@@ -10,8 +10,6 @@ Chapter 1, Pages 34-
 **Things that are in the Workbook that should possibly be in this lecture**
 Sign Extension
 
-**Notes:** Try to make it the goal of this lecture to call a C function.
-
 This lecture will focus on *Program Control Flow*, i.e., how to make jumps in our code, call subroutines, and make function calls. This will include using the ABI conventions for function parameters and return values, understanding how the *stack* works, and how to deal with *register spilling* (i.e., what to do when we do not have enough registers).
 
 
@@ -44,7 +42,7 @@ blink:
 
 Here, when making our jump, we have no interest in what the return address is (so we do not need "Link") but the assembler will still translate this pseudo instruction (`j`) into the real instruction (`jal`):
 
-| Instruction      | Mnemonic | Implementation     |
+| Pseudo Instruction      | Mnemonic | Translation     |
 |------------------|----------|--------------------|
 | `j offset`       | Jump     | `jal zero, offset` |
 
@@ -55,7 +53,7 @@ The `offset` can be either a label (like in the example), or an absolute address
 
 In either case, the compiler (or linker) will complain if the address we want to jump to is too far away from the current address (i.e., if the offset from `pc` would require > 20 bits). In such cases, we have to use the `jr` (Jump Register) instruction instead.
 
-| Instruction      | Mnemonic | Implementation     |
+| Pseudo Instruction      | Mnemonic | Translation     |
 |------------------|----------|--------------------|
 | `jr rs`       | Jump     | `jalr zero, 0(rs)`    |
 
@@ -289,14 +287,154 @@ call max         # After this line a0 contains max(max(t0, t1), t2)...
 
 💡 **Note:** *These rules might seem arbitrary, but have proven to work well for minimizing redundant register saving in most cases. When writing performance-critical code, an optimizer can often find remaining redundant register saving and remove it.*
 
-
-
-
-
-
 ## Arrays
-(slightly out of place in this lecture, but probably won't fit in the previous)
 
+We have seen how we can have variables in memory and load them into registers already, but we often need a *list* of variables. A list of variables of the same type are often called *arrays*, as you have probably seen in previous programming courses. In C (and similarly in C++ and Java), some example code that uses an array could be:
+
+``` C
+char numbers[10];          // Allocate memory space for 10 chars (bytes)
+numbers[0] = 10;           // Write a value into the first element of the array
+numbers[1] = 20;           //          ...           second         ....
+...
+numbers[9] = 100;          //          ...           last           ...
+char v = numbers[9];       // Read the last element of the array into another variable
+```
+
+We will return to arrays in C later in the course, but for now we shall see how arrays are implemented in assembly.
+
+## Globally allocated arrays
+If we want to allocate an array of chars *globally* (i.e., that exists throughout the programs lifetime and is available to any function), this is very similar to allocating a single-byte variable:
+
+```
+numbers: .byte 10, 20, 30, 40, 50
+```
+
+This line will allocate space for 5 bytes (starting at the current address, which depends on preceding instructions in the code) and initialize them to the given values.
+
+If we want to allocate an empty (i.e., uninitialized) array, we can write:
+```
+numbers: .space 5          # Allocate 5 bytes for the array
+```
+
+Loading or storing an element from/to the array is done in the same way that we accessed a single variable in the previous lecture. Let's say we want to copy the value of `numbers[4]` into `numbers[0]`
+```
+la t0, numbers             # Load the address to where the array starts into t0
+lb t1, 4(t0)               # Load numbers[4] (the fifth element) into t1
+sb t1, 0(t0)               # And store it into numbers[0]
+
+numbers: .space 5          # Allocate 5 bytes for the array
+```
+
+In other words, we put the *starting address* of the array into a register, and then access individual elements with an *offset* from that address. When our array consists of `char` (bytes) the offset is the same as the element. Let's do the same thing for an array of `short` (halfwords, 2 bytes):
+
+```
+la t0, numbers             # Load the address to where the array starts into t0
+lh t1, 8(t0)               # Load numbers[4] (the fifth element) into t1
+sh t1, 0(t0)               # And store it into numbers[0]
+
+.align 1                    # Make sure address of numbers is divisible by 2 (since halfwords)
+numbers: .space 10          # Allocate 10 bytes for the array
+```
+
+```
+<<< An image would be good here >>>
+```
+
+Firstly, we have to allocate twice as much space (10 bytes for 5 elements, since each `short` is two bytes). Secondly, we now use the offset 8 to access element number 4, again, this is because each element takes up 2 bytes, so the fifth element lies 2*4 bytes from the arrays starting address [^3].
+
+Also, remember that we now need to use `lh` (Load Halfword) instead of `lb` (Load Byte), and that we need to use `.align` to make sure that the array starts at an address that is divisible by 2 (see previous Lecture).
+
+[^3]: If you are confused about `numbers[4]` being the fifth element, this is a good time to get used to it :). Since C uses *zero-based indexing*, `numbers[0]` is the first element, `numbers[1]` is the second, and so on.
+
+### Iterating over an array
+We have seen how to access individual elements in an array, but how do we loop over all (or some) elements? Usually, we will put the starting address to the array in one register and then `add` the offset to that. In the following example, we have a list of 10 numbers and we want to calculate their sum:
+
+``` C
+int sum = 0;
+for(int i=0; i<10; i++) {
+  sum = sum + numbers[i];
+}
+```
+In assembly, we could write this as:
+```
+ 1: li t0, 0                                            # We use t0 for i
+ 2: li t1, 0                                            # We use t1 for the sum
+ 3: la t2, numbers                                      # t2 <- address of first element in array
+ 4: loop:
+ 5:   li t3, 4                                          # t3 <- 4, the number of bytes per element
+ 6:   mul t3, t0, t3                                    # t3 <- i * 4
+ 7:   add t3, t2, t3                                    # t3 <- address of array + i * (4 bytes)
+ 8:   lw t3, 0(t3)                                      # t3 <- numbers[i]
+ 9:   add t1, t1, t3                                    # add element to sum
+10:   addi t0, t0, 1                                    # i++
+11:   li t3, 10                                         # t3 <- 10
+12:   blt t0, t3, loop                                  # iterate while i < 10
+13:
+14: done: # t1 now contains the sum
+15:
+16: .align 2                                            # Make sure our numbers are aligned to 4 bytes
+17: numbers: .word 2, 4, 6, 8, 0, 1, 2, 3, 4, 5         # Allocate 10*4 bytes for the array
+```
+
+Note that we have to manually multiply the offset by the size of the element type, to get the correct address. In the example above, we did this with the `mul` instruction (on lines 5-6), but we can do it slightly more efficiently with:
+
+```
+ 5: slli t3, t0, 2                                      # Shifting left by two steps is the same as multiplying by 4
+```
+
+## Locally allocated arrays
+Sometimes we need an array *locally* in a function. Perhaps the function should read 10 words from disk, calculate the sum, and return the sum. Since the memory for the array is only needed until the function returns, that array will be put on the *stack* instead. Consider the example in C:
+```
+void f() {
+  int array[10];
+  <read data into array>
+  <calculate sum of array>
+  return sum;
+}
+```
+In assembly, this could look like:
+
+```
+function:
+  addi sp, sp, -40            # Make room on the stack for 10 integers
+  mv t0, sp                   # t0 now holds the address to the start of the array
+  <read data into array>
+  <calculate sum of array>
+  addi sp, sp, 40             # restore the stack
+  ret
+```
+We will se later in the course how the stack is used for *all* local variables (unless they only exist in registers) when compiling C code.
+
+## Arrays as function parameters
+It is very common that we want to send an array as a parameter to a function. We might, for instance, want to write a function that calculates the sum of an arbitrary array of integers. Since an array might consist of hundreds or thousands of elements, it does not make sense to try to pack them into the `a` registers. It usually also does not make sense to copy the array into the stack (we would have to copy thousands of bytes just to call a function). Instead, the usual approach to "sending" an array to a function is to simply send the starting address and the size of the array as parameters to the function:
+
+```
+main:
+  la a0, numbers        # Load address of array as first parameter
+  li a1, 10             # Size of array as second parameter
+  call sum
+  # a0 now contains sum of numbers
+
+# int sum(int array[], int size)
+# a0: starting address of array
+# a1: size (number of elements) of array
+sum:
+  li t0, 0              # Calculating sum in t0
+sum_loop:
+  lw t1, 0(a0)          # Read element
+  add t0, t0, t1        # Add to sum
+  addi a0, a0, 4        # Move a0 so it points at next element
+  addi a1, a1, -1       # Reduce size of (remaining) array
+  bnez a1, sum_loop     # If we have elements left, loop
+  mv a0, t0             # Return the sum
+  ret
+
+.align 2                                            # Make sure our numbers are aligned to 4 bytes
+numbers: .word 2, 4, 6, 8, 0, 1, 2, 3, 4, 5         # Allocate 10*4 bytes for the array
+```
+
+
+<!--
 
 ### RISC-V Jumping and Branching Instructions
 
@@ -317,4 +455,4 @@ call max         # After this line a0 contains max(max(t0, t1), t2)...
 | `jal label`      | `jal ra, label`  | Jump and link; used for function calls. |
 | `nop`            | `addi x0, x0, 0` | No operation (used in delay slots or padding, sometimes with branches). |
 | `li rd, imm`     | `addi rd, x0, imm` or `lui+addi` | Load immediate (can be used to set up jump addresses in some pseudo branches). |
-
+--->

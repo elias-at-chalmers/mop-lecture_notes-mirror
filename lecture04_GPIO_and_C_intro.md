@@ -225,7 +225,7 @@ The file `math.c` begins with the statement `#define PI 3.14`. This tells the pr
 The define statement can also be used to construct slightly more complex *macros*, but we will not come across them in this course.
 
 #### Compiler
-The next step is to take the preprocessed `.i` files and generate assembly code [^6]. This is the job of the \textit{Compiler}. We can run the compiler to produce assembly files with: 
+The next step is to take the preprocessed `.i` files and generate assembly code [^6]. This is the job of the *Compiler*. We can run the compiler to produce assembly files with: 
 
 ```bash
 gcc -S main.i

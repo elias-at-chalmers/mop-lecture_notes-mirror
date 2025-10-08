@@ -68,7 +68,7 @@ We want to set pin 6 as an *output* pin. From the table we can see that we then 
 
 Since `MODE` is an *output* mode, the `CNF` value lets us choose between `Push-Pull`, `Open Drain`, `Alternative Function Push-Pull`, and `Alternative Function Open Drain`. We will go through the meaning of this in the next lecture. For now, we set it to `Push-Pull` (`00`), which means that it will output 0V if the corresponding bit in `OUTDR` is set to 0 and 3.3V if set to 1. 
 
-So, we want to set `MODE` for pin 6 (bits 25:24 in `CFGLR`) to 10, and `CNF` for pin 6 (bits 27:26 in `CFGLR`) to 00. We do not care about the other pins, and will just set them to 0, so we should write the binary value 0000 **1000** 0000 0000 0000 0000 0000 0000, or, in hexadecimal `0x08000000` to `CFGLR` to configure our pin. 
+So, we want to set `MODE` for pin 6 (bits 25:24 in `CFGLR`) to `10`, and `CNF` for pin 6 (bits 27:26 in `CFGLR`) to `00`. We do not care about the other pins, and will just set them to `0`, so we should write the binary value <code>0000 <b>1000</b> 0000 0000 0000 0000 0000 0000</code>, or, in hexadecimal `0x08000000` to `CFGLR` to configure our pin. 
 
 In assembly, that looks like: 
 ```

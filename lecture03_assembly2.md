@@ -21,10 +21,10 @@ There are only two instructions in RISC-V that perform unconditional jumps (`jal
 
 | Instruction | Mnemonic            | Meaning                                      |
 |------------------|----------------|----------------------------------------------|
-| `jal ra, offset` | Jump And Link  | Store return address in `ra`.                |
+| `jal r, offset` | Jump And Link  | Store return address in `r`.                |
 |                  |                | Jump to `pc + offset`.                       |
 |                  |                | `offset` must fit in 20 bits                 |
-| `jalr ra, offset(rs)` | Jump And Link Register | Store return address in `ra`    |
+| `jalr r, offset(rs)` | Jump And Link Register | Store return address in `r`    |
 |                       |                        | Jump to `rs + offset`           |
 |                       |                        | `offset` must fit in 12 bits           |
 

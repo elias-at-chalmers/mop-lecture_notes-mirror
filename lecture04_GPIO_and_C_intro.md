@@ -9,7 +9,7 @@ Reference Manual: https://www.wch-ic.com/downloads/CH32FV2x_V3xRM_PDF.html
 
 So far, we have focused on the *core* of our processor, the *Qingke V4F*, and how to move data between memory and registers. This would be quite pointless unless the processor was connected to the outside world somehow. Today we will start introducing how to communicate with off-chip devices using the GPIO ports.
 
-We will also start looking at the programming language C, which we will start using to program our machine. You know the basics of the RISC-V assembly language now, and you have probably noticed that this quickly becomes impractical for larger programs. Throughout the rest of the course, we will switch over to the (relatively) high-level language C, but we will keep showing you how C is *compiled* into assembly language. Understanding how a high-level language gets translated to assembly, and then machine code, is very important for writing performant and secure code, on any machine.
+We will also start looking at the programming language C, which we will start using to program our machine. You know the basics of the RISC-V assembly language now, and you have probably noticed that it quickly becomes impractical for larger programs. Throughout the rest of the course, we will switch over to the (relatively) high-level language C, but we will keep showing you how C is *compiled* into assembly language. Understanding how a high-level language gets translated to assembly, and then machine code, is very important for writing performant and secure code, on any machine.
 
 ## GPIO (General Purpose Input/Output)
 A processor chip talks to the outside world through its tiny metal legs, called *pins*. In desktop and laptop computers, most of these pins are already spoken for - they connect directly to memory (so you can plug in RAM) or to standard buses like PCI Express (so you can add devices like graphics cards). Microcontrollers, however, are much simpler. They often don’t have separate memory chips or standard expansion slots, so most of their pins can be used more flexibly as General Purpose Input/Output (GPIO) [^1].
@@ -20,18 +20,18 @@ By allowing the processor to directly read or control the logical status of thes
 
 ![](images/md307_ch32v307_zoom.png)
 
-The picture above illustrates how the processor chip is connected to the GPIO pins on the MD307. If you look close enough (and turn the board over at times) you can follow a very thin wire from most of the CH32V307's tiny pins to one of the more accessible pins on the top of the board. On this MCU, the pins are divided into 16-bit *ports*, labeled A-E. On the bottom of the board, you can see that the pins that make up the ports labeled E and D are also available in a nice little connector layout, that allows us to connect peripheral devices with a standard ribbon cable.
+The picture above illustrates how the processor chip is connected to the GPIO pins on the MD307. If you look close enough (and turn the board over at times) you can follow a very thin wire from most of the CH32V307's tiny pins to one of the more accessible pins on the top of the board. On this microcontroller, the pins are divided into 16-bit *ports*, labeled A-E. On the bottom of the board, you can see that the pins that make up the ports labeled E and D are also available in a nice little connector layout, that allows us to connect peripheral devices with a standard ribbon cable. The pins on the top of the board, in the image, provide access to the remaining GPIO ports (A-C). 
 
 To read or set a pin's value, we read or write to a specific memory location (the GPIO Port's *In or Out Data Register*, which we will discuss soon). When the memory subsystem sees that the address we are trying to write to from the CPU is, e.g., `0x4001400C` it knows (this is implemented at the hardware level) that that write operation should be sent on to the *GPIO Module*. The GPIO Module, in turn, knows that this address means "the Out Data Register for Port D". If the value we write is `0b00001111` it will set the first four GPIOD pins (some of the little spider legs in the image of the chip, above) to 1 (3.3V) and the others to 0 (0V). These pins are connected with wires to the pins in the connector. 
 
 ### Blink
-When learning programming in almost any language, the starting example is "Hello World.". Similarly, when starting MCU programming, the first thing to try is "Blink", so let's start there. We want to plug in an LED to our MCU and make it blink. This will serve as a first introduction to GPIO programming, and then we will go through the details in the next lecture.
+When learning programming in almost any language, the starting example is "Hello World.". Similarly, when starting MCU programming, the first thing to try is "Blink", so let's start there. We want to plug in an LED to our MCU and make it blink. This will serve as a first introduction to GPIO programming, and then we will continue with more challenging tasks in the next lecture.
 
 <p align="center">
   <img src="images/IDC_layout.png" alt="My image" width="80%"/>
 </p>
 
-The image above illustrates the physical connector corresponding to the lower byte (pin 0-7) of Port D. Eight of the pins carry a voltage (0 or 3.3V) depending on whether the corresponding bit is high or low. There are two additional pins: one is always 0V (GND) and one is always 3.3V.
+The image above illustrates the physical connector corresponding to the lower byte (pin 0-7) of Port D. Eight of the pins (labeled bit0-bit7 in the image) carry a voltage (0 or 3.3V) depending on whether the corresponding bit in the data register is high or low. There are two additional pins: one is always 0V (GND) and one is always 3.3V.
 
 If we want to connect an LED we can do that as in the figure above. We connect the cathode of the LED (through a resistor) to the GND pin, and the anode to one of the data-carrying pins (the one corresponding to bit 6, in this case). The resistor is required to stay within the maximum current allowed by the LED.
 
@@ -40,7 +40,7 @@ Now, if we *set* bit 6 in Port D, the pin will be at 3.3V, and a current will ru
 ### Configuring a pin for output
 Each pin in the port can *either* be an input pin *or* an output pin, at any given time. If the pin is configured as an input pin, we can read the corresponding bit to find out if the pin is at 3.3V (bit is 1) or 0V (bit is 0). Right now, we want pin 6 to act as an output bit, so we have to configure Port D accordingly.
 
-As previously mentioned, any communication between the processor core and the outside is achieved by reading from or writing to the memory subsystem. We have, for instance, seen that we can access the SRAM module by writing to the `0x20000000` - `0x2000FFFF` region. In the same way, to communicate with the GPIO module, we read and write to the `0x4001800`-`0x40011BFF` region. In that region, there are a number of registers for each GPIO Port. To find out which registers there are, and how to configure our GPIO Module, we consult the [QuickGuide](TODO_nolinkyet). The section about the GPIO Module looks like: 
+As previously mentioned, any communication between the processor core and the outside is achieved by reading from or writing to the memory subsystem. We have, for instance, seen that we can access the SRAM module by writing to the `0x20000000` - `0x2000FFFF` region. In the same way, to communicate with the GPIO module, we read and write to the `0x4001800`-`0x40011BFF` region. In that region, there are a number of registers for each GPIO Port. To find out which registers there are, and how to configure our GPIO Module, we would normally refer to the microcontrollers reference manual, but in this course we have prepared an easier-to-read [QuickGuide](TODO_nolinkyet). The section about the GPIO Module looks like: 
 
 <p align="center">
   <img src="images/Quickguide_GPIO.png" alt="My image" width="95%" style="border: 2px solid black; border-radius: 8px;"/>
@@ -241,7 +241,7 @@ The resulting assembly files are:
 
 You are not expected to understand this assembly code, but we will note a few important things about them. First, we can compile, for instance, the `main.i` file into assembly code *indepenently* of the other files. To create the assembly code for `main.i`, the compiler needs to know that *there exists* a function called `function`, that it returns a `float`, and that it takes a `float` as parameter, but it does not need to know what that function *does*. 
 
-Secondly, this assembler code can be created without any knowledge of where this code will reside in memory. Connecting the symbols between the assembly files and placing them at specific places in memory is the job of the *Linker*, which we will discuss soon.
+Secondly, this assembler code can be created without any knowledge of where this code will reside in memory. Connecting the symbols (function and variable names) between the assembly files and placing them at specific places in memory is the job of the *Linker*, which we will discuss soon.
 
 In larger projects, it is very important that we can recompile a single `.c` file and that we do not have to recompile *all* files, whenever one of them changes. 
 

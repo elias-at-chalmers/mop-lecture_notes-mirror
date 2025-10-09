@@ -35,7 +35,7 @@ The image above illustrates the physical connector corresponding to the lower by
 
 If we want to connect an LED we can do that as in the figure above. We connect the cathode of the LED (through a resistor) to the GND pin, and the anode to one of the data-carrying pins (the one corresponding to bit 6, in this case). The resistor is required to stay within the maximum current allowed by the LED.
 
-Now, if we *set* bit 6 in Port D, the pin will be at 3.3V, and a current will run through the LED, making it glow. If we *clear* bit 6, the pin will be at 0V (same as the GND pin) and there will be no current, and no light.
+Now, if we *set* bit 6 in Port D, the pin will be at 3.3V, and current will run through the LED, making it glow. If we *clear* bit 6, the pin will be at 0V (same as the GND pin) and there will be no current, and no light.
 
 ### Configuring a pin for output
 Each pin in the port can *either* be an input pin *or* an output pin, at any given time. If the pin is configured as an input pin, we can read the corresponding bit to find out if the pin is at 3.3V (bit is 1) or 0V (bit is 0). Right now, we want pin 6 to act as an output bit, so we have to configure Port D accordingly.
@@ -68,7 +68,7 @@ We want to set pin 6 as an *output* pin. From the table we can see that we then 
 
 Since `MODE` is an *output* mode, the `CNF` value lets us choose between `Push-Pull`, `Open Drain`, `Alternative Function Push-Pull`, and `Alternative Function Open Drain`. We will go through the meaning of this in the next lecture. For now, we set it to `Push-Pull` (`00`), which means that it will output 0V if the corresponding bit in `OUTDR` is set to 0 and 3.3V if set to 1. 
 
-So, we want to set `MODE` for pin 6 (bits 25:24 in `CFGLR`) to 10, and `CNF` for pin 6 (bits 27:26 in `CFGLR`) to 00. We do not care about the other pins, and will just set them to 0, so we should write the binary value 0000 **1000** 0000 0000 0000 0000 0000 0000, or, in hexadecimal `0x08000000` to `CFGLR` to configure our pin. 
+So, we want to set `MODE` for pin 6 (bits 25:24 in `CFGLR`) to `10`, and `CNF` for pin 6 (bits 27:26 in `CFGLR`) to `00`. We do not care about the other pins, and will just set them to `0`, so we should write the binary value <code>0000 <b>1000</b> 0000 0000 0000 0000 0000 0000</code>, or, in hexadecimal `0x08000000` to `CFGLR` to configure our pin. 
 
 In assembly, that looks like: 
 ```
@@ -225,7 +225,7 @@ The file `math.c` begins with the statement `#define PI 3.14`. This tells the pr
 The define statement can also be used to construct slightly more complex *macros*, but we will not come across them in this course.
 
 #### Compiler
-The next step is to take the preprocessed `.i` files and generate assembly code [^6]. This is the job of the \textit{Compiler}. We can run the compiler to produce assembly files with: 
+The next step is to take the preprocessed `.i` files and generate assembly code [^6]. This is the job of the *Compiler*. We can run the compiler to produce assembly files with: 
 
 ```bash
 gcc -S main.i

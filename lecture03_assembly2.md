@@ -92,7 +92,7 @@ You might think that this looks limited. Why is there no "Branch Greater Than" o
 
 Many of these instructions exist in a signed and an unsigned version (e.g., `blt` and `bltu`). This is necessary since the processor does not know if you consider the value in a register to be a signed or an unsigned number. Consider the instruction `blt x1, zero`. If `x1` contains `0xFFFFFFFB`, it is less than zero if we consider it a signed integer (-5), but *much* more than zero if we consider it unsigned (4294967291).
 
-In addition, there are a number of pseudoinstructions that compare a register's value to zero. These are just for convenience and are easily implemented using the correspoding instructions and using `zero` as one of the operands:
+Additionally, there are a number of pseudoinstructions that compare a register's value to zero. These are just for convenience and are easily implemented using the correspoding instructions and using `zero` as one of the operands:
 
 | Instr   | Mnemonic                | Use                  | Condition (jump if)                         |
 |---------|----------------------------|----------------------|-------------------------------|
@@ -139,7 +139,7 @@ Connect to a = (b<c)?b:c
 (there should also be an example where the comparison is reused several times... perhaps not important)
 
 ## The Stack
-Before we move on to discuss how function calls are implemented, let's quickly recap the *Stack* and learn how it is used on a RISC-V architecture. The stack is a memory area where computer programs can store temporary data. The number of registers on any CPU are limited, so sometimes we need to *push* data to memory, temporarily, and then *pop* it back into registers when we need it.
+Before we move on to discuss how function calls are implemented, let's quickly recap the *Stack* and learn how it is used on a RISC-V architecture. The stack is a memory area where computer programs can store temporary data. The number of registers on any CPU are limited, so sometimes we need to *push* data to memory, temporarily, and then *pop* (or *pull*) it back into registers when we need it.
 
 On many architectures, the process might look like this:
 

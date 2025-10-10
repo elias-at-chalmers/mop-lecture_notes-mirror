@@ -9,7 +9,7 @@ peripherals = root.find('peripherals')
 
 html = ""
 
-table_css = "style = 'border-collapse: collapse; table-layout: fixed; width: 100%';"
+table_css = "style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'"
 shrink_css = "style = 'width: 5%;'"
 middle_css = "style = 'width: 1%;'"
 unused_css = "style = 'background-color: lightgray;'"
@@ -76,9 +76,9 @@ def PrintPeripheralOverviewTable(p):
         for f in fields:
             # Check if we have empty space
             if (f["offset"] + f["width"]) != bit:
-                html += "<td colspan=" + str(bit - (f["offset"] + f["width"])) + " " + td_gray_css + "> </td>"
+                html += "<td colspan=" + str(bit - (f["offset"] + f["width"])) + " " + td_gray_css + "> </td>\n"
             # Draw field
-            html += "<td colspan=" + str(f["width"]) + " " + td_css + ">" + " " + "</td>"            
+            html += "<td colspan=" + str(f["width"]) + " " + td_css + ">" + " " + "</td>\n"            
             bit = f["offset"]
 
         #html += "<td>"+ r.find('name').text + "</td>"
@@ -102,27 +102,32 @@ def PrintRegisterDetails(r):
     html += "</p>\n";
 
 
-    html += '<table>\n'
+    html += '<table ' + table_css + '>\n'
     html += '<tr>'
+
+    html += "<colgroup>"
+    for i in range(0, 32): html += "<col " + middle_css + ">"
+    html += "</colgroup>"
 
     if(r.find('fields') is not None):
         fields = ParseBitFields(r.find('fields'))
         fields.sort(key=lambda item: item["offset"], reverse=True)
 
-
         html += "<tr>"
-        for i in range(0, 32): html += "<th>" + str(31 - i) + "</th>"
+        for i in range(0, 32): html += th(str(31 - i))
         html += "</tr>"
 
         bit = 32
         for f in fields: 
             # Check if we have empty space
             if (f["offset"] + f["width"]) != bit:
-                html += "<td class='unused-bit' colspan=" + str(bit - (f["offset"] + f["width"])) + ">"
+                html += "<td colspan=" + str(bit - (f["offset"] + f["width"])) + " " + td_gray_css + "> </td>\n"
+#                html += "<td class='unused-bit' colspan=" + str(bit - (f["offset"] + f["width"])) + ">"
                 html += "</td>"
             # Draw field
-            html += "<td colspan=" + str(f["width"]) + ">" 
-            html += "<small>" + f["name"] + "</small></td>"
+            #html += "<td colspan=" + str(f["width"]) + ">" 
+            html += "<td colspan=" + str(f["width"]) + " " + td_css + ">" 
+            html += "<small>" + f["name"] + "</small></td>\n"
             bit = f["offset"]        
 
         html += '</tr>'

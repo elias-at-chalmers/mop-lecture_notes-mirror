@@ -2,4 +2,7 @@
 
 ## Next heading
 
-test stuff
+Testing including a table
+
+{{include output.html}}
+

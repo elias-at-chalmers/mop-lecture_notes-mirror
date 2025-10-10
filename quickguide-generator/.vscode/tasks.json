@@ -9,10 +9,12 @@
                 "${file}",               // current file
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}.html",
+                "--lua-filter=include-html.lua",
                 "--standalone",
                 "--embed-resources",
                 "--css",
-                "style.css"
+                "style.css",
+                "--ascii"
             ],
             "group": {
                 "kind": "build",

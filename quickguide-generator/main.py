@@ -164,7 +164,7 @@ for p in peripherals:
 
  
 
-with open("quickguide.html", "w", encoding="utf-8") as file:
+with open("output.html", "w", encoding="utf-8") as file:
     file.write(html)
 
     print(html)

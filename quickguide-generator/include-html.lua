@@ -8,14 +8,34 @@ local function read_file(path)
   return content
 end
 
+local function strip_outer_html(html)
+  -- remove <!DOCTYPE html>
+  html = html:gsub("<!DOCTYPE html>", "")
+  -- remove <html> and </html>
+  html = html:gsub("<html[^>]*>", ""):gsub("</html>", "")
+  -- remove <head>...</head> but keep styles/scripts for inline use
+  html = html:gsub("<head[^>]*>.-</head>", "")
+  -- remove <body> and </body>
+  html = html:gsub("<body[^>]*>", ""):gsub("</body>", "")
+  return html
+end
+
 local function handle_placeholder(text)
   -- {{include filename.md}}
   local inc = text:match("^{{include%s+([^}]+)}}$")
   if inc then
     local content = read_file(inc)
     if content then
-      local doc = pandoc.read(content, "markdown")
-      return doc.blocks  -- return a table of blocks
+      local ext = inc:match("^.+(%..+)$")
+      if ext == ".html" then
+        -- strip outer HTML tags
+        content = strip_outer_html(content)
+        return pandoc.RawBlock("html", content)
+      else
+        -- parse markdown normally
+        local doc = pandoc.read(content, "markdown")
+        return doc.blocks
+      end
     end
   end
 

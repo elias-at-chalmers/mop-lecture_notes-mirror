@@ -3,14 +3,14 @@
 <p>
 <b> Base addresses: </b>
 
-{{python main.py baseaddress GPIO*}}
+{{python quickguide-generator/main.py baseaddress GPIO*}}
 
 </p>
 
 <p>
 <b> Register Block Overview </b>
 
-{{python main.py overview-table GPIOA}}
+{{python quickguide-generator/main.py overview-table GPIOA}}
 
 </p>
 
@@ -68,7 +68,7 @@ For each pin, there are two bits to set the MODE (Input or Output, and speed of 
 <p>
 <hr>
 
-{{python main.py register-details GPIOA .*}}
+{{python quickguide-generator/main.py register-details GPIOA .*}}
 
 </p>
 

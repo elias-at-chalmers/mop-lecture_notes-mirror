@@ -4,7 +4,7 @@ from collections import defaultdict
 import sys
 
 
-with open("ch32v30x.svd", "r", encoding="utf-8") as f:
+with open("quickguide-generator/ch32v30x.svd", "r", encoding="utf-8") as f:
     xml = f.read()
 
 root = ET.fromstring(xml)

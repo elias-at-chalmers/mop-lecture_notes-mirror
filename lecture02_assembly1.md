@@ -386,6 +386,8 @@ On more modern hardware, and specifically on our CH32F307, the registers are 32 
 
 ![](images/valid_word_access.png)
 
+> TODO: Make memory grow upwards. 
+
 This works fine. The processor will put the *byte* address `0x20000008` on the address bus, and the address logic can divide this by 4 to find which *word* it should put on the data bus. Now consider what happens if the processor wants to read a 4-byte word starting at address `0x20000006` instead: 
 
 ![](images/invalid_word_access.png)

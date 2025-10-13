@@ -9,7 +9,7 @@
 <details open>
 <summary class="h3"> GPIO </summary>
 
-{{include gpio.html}}
+{{include quickguide/gpio.html}}
 
 </details>
 

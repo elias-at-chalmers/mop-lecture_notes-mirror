@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ET
 import re
 from collections import defaultdict
+import sys
 
 
 with open("ch32v30x.svd", "r", encoding="utf-8") as f:
@@ -124,17 +125,19 @@ def summarize_fields(fields):
 
 
 def PrintRegisterDetails(r):
-    html = "<h3>" + r.find('name').text + "</h3>\n"
+    html = "<b>" + r.find('name').text + "</b>\n"
     html += "<p>\n";
     if r.find('description') is not None:
         html += r.find('description').text + "<br>\n"
+    html += "<small>"
     if r.find('access') is not None:
-        html += "Access: " + r.find('access').text + "<br>\n"
+        html += "Access: " + r.find('access').text + "  "
     if r.find('resetValue') is not None:
-        html += "Reset Value: " + r.find('resetValue').text + "<br>\n"
+        html += "Reset Value: " + r.find('resetValue').text + "  "
     if r.find('resetMask') is not None:
-        html += "Reset Mask: " + r.find('resetMask').text + "<br>\n"
-    html += "</p>\n";
+        html += "Reset Mask: " + r.find('resetMask').text + "  "
+    html += "</small>\n"
+    html += "</p>\n"
 
 
     html += '<table ' + table_css + '>\n'
@@ -174,49 +177,78 @@ def PrintRegisterDetails(r):
         for line in summarize_fields(fields):
             html += line + "<br>\n"
         
+    html += "<hr>\n"
 
     return html
 
 
 # Things I want it to do: 
 # * Print the overview table for a peripheral
+# Ex: ./quickguide-generator.py overview-table GPIOA
 # * Print the details for each register in the peripheral
+# Ex: ./quickguide-generator.py register-details GPIOA CFG*
 # * Print the base adresses for a peripheral regexp
+# Ex: ./quickguide-generator.py baseaddress GPIO*
 
-# Usage <overview/details/baseaddress> <peripheralname/regexp>
-# Example: overview GPIOA
-#          baseaddress GPIO*
+if(sys.argv[1] == "overview-table"): 
+    if(len(sys.argv) != 3):     
+        print("Usage: " + sys.argv[0]  + "overview-table <peripheral>")
+        exit(1)
+    
+    found = False
+    for p in peripherals:
 
-
-for p in peripherals:
-    p_name = p.find('name').text
-
-    if isolate != "" and p_name != isolate: continue
-
-    ###########################################################################
-    # Create the overview table for the peripheral
-    ###########################################################################
-    print(p_name)
-    if "derivedFrom" in p.attrib:
-        html += "<h1>" + p_name + " (same as " + p.attrib["derivedFrom"] + ")</h1>"
-    else:
-#        html += "<h1>" + p_name + "</h1>\n"
-#        p_description = p.find('description')
-#        if p_description is not None:
-#            html += "<p>" + p_description.text + "</p>"
-#        else:
-#            html += "<p> no description </p>"
-#        html += "<p>Base Address:" + p.find("baseAddress").text + "</p>"
-
-
+        if p.find('name').text != sys.argv[2]: continue
+        found = True
+        p_name = p.find('name').text
+        if "derivedFrom" in p.attrib: 
+            html += "<b>WARNING: Peripheral is derived from " + p.attrib["derivedFrom"] + ", and will not parse correctly yet</b><br>\n"
+            continue
         html += PrintPeripheralOverviewTable(p)
+    if not found:
+        print("Peripheral " + sys.argv[2] + " not found")
+        exit(1)
+
+if(sys.argv[1] == "baseaddress"):
+    if(len(sys.argv) != 3):     
+        print("Usage: " + sys.argv[0]  + "baseaddress <peripheral-regexp>")
+        exit(1)
+    
+    pattern = re.compile(sys.argv[2])
+
+    found = False
+    for p in peripherals:
+
+        if not pattern.match(p.find('name').text): continue
+        found = True
+        p_name = p.find('name').text
+        html += p_name + ": <code>" + p.find("baseAddress").text + "</code><br>\n"
+    if not found:
+        print("Peripheral matching " + sys.argv[2] + " not found")
+        exit(1)
+
+if(sys.argv[1] == "register-details"):
+    if(len(sys.argv) != 4):     
+        print("Usage: " + sys.argv[0]  + "register-details <peripheral> <register-regexp>")
+        exit(1)
+    
+    pattern = re.compile(sys.argv[3])
+
+    found = False
+    for p in peripherals:
+
+        if p.find('name').text != sys.argv[2]: continue
+        found = True
+        p_name = p.find('name').text
+        if "derivedFrom" in p.attrib: 
+            html += "<b>WARNING: Peripheral is derived from " + p.attrib["derivedFrom"] + ", and will not parse correctly yet</b><br>\n"
+            continue
 
         for r in p.find('registers'):        
+            if not pattern.match(r.find('name').text): continue
             html += PrintRegisterDetails(r)
+    if not found:
+        print("Peripheral " + sys.argv[2] + " not found")
+        exit(1)
 
-print(html) 
-
-with open("output.html", "w", encoding="utf-8") as file:
-    file.write(html)
-
-    print(html)
+print(html)

@@ -1,4 +1,7 @@
 import xml.etree.ElementTree as ET
+import re
+from collections import defaultdict
+
 
 with open("ch32v30x.svd", "r", encoding="utf-8") as f:
     xml = f.read()
@@ -34,12 +37,12 @@ def ParseBitFields(fields):
     fieldsdict = []
     for f in fields:
         if f.find('bitOffset') is not None:
-            fieldsdict.append({"offset":int(f.find('bitOffset').text), "width":int(f.find('bitWidth').text), "name":f.find('name').text})
+            fieldsdict.append({"offset":int(f.find('bitOffset').text), "width":int(f.find('bitWidth').text), "name":f.find('name').text, "description":f.find('description').text if f.find('description') is not None else "" })
         elif  f.find('bitRange') is not None:
             s = f.find('bitRange').text
             a_str, b_str = s.strip("[]").split(":")
             a, b = int(a_str), int(b_str)
-            fieldsdict.append({"offset":b, "width":b - a, "name":f.find('name').text})
+            fieldsdict.append({"offset":b, "width":b - a, "name":f.find('name').text, "description":f.find('description').text if f.find('description') is not None else "" })
     return fieldsdict
 
 
@@ -88,6 +91,38 @@ def PrintPeripheralOverviewTable(p):
     html += "</table>"
     return html
 
+def clean_whitespace(text: str) -> str:
+    # Replace line breaks with spaces
+    text = text.replace("\n", " ").replace("\r", " ")
+    # Collapse multiple spaces into one
+    text = re.sub(r"\s+", " ", text)
+    # Strip leading/trailing spaces
+    return text.strip()
+
+def summarize_fields(fields):
+    groups = defaultdict(list)
+
+    for entry in fields:
+        name = entry.get("name", "")
+        match = re.match(r"([A-Za-z_]+)(\d+)$", name)
+        if match:
+            prefix, number = match.groups()
+            groups[prefix].append((int(number), clean_whitespace(entry.get("description", ""))))
+
+    overview = []
+    for prefix, items in groups.items():
+        numbers = [n for n, _ in items]
+        desc = ""
+        # try to grab the description from the lowest-numbered entry
+        for n, d in sorted(items):
+            if d:
+                desc = d
+                break
+        overview.append(f"<b>{prefix}</b>n (n = {min(numbers)}..{max(numbers)}): {desc}")
+
+    return overview
+
+
 def PrintRegisterDetails(r):
     html = "<h3>" + r.find('name').text + "</h3>\n"
     html += "<p>\n";
@@ -133,8 +168,25 @@ def PrintRegisterDetails(r):
         html += '</tr>'
     html += '</table>'
 
+    # Information about each field, but if there are n , e.g., CNFn fields then only one description
+
+    if(r.find('fields') is not None):
+        for line in summarize_fields(fields):
+            html += line + "<br>\n"
+        
 
     return html
+
+
+# Things I want it to do: 
+# * Print the overview table for a peripheral
+# * Print the details for each register in the peripheral
+# * Print the base adresses for a peripheral regexp
+
+# Usage <overview/details/baseaddress> <peripheralname/regexp>
+# Example: overview GPIOA
+#          baseaddress GPIO*
+
 
 for p in peripherals:
     p_name = p.find('name').text
@@ -162,7 +214,7 @@ for p in peripherals:
         for r in p.find('registers'):        
             html += PrintRegisterDetails(r)
 
- 
+print(html) 
 
 with open("output.html", "w", encoding="utf-8") as file:
     file.write(html)

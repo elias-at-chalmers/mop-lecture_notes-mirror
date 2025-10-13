@@ -20034,8 +20034,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
         <register>
           <name>CFGLR</name>
           <displayName>CFGLR</displayName>
-          <description>Port configuration register low
-          (GPIOn_CFGLR)</description>
+          <description>Configure port for the lower 8 pins</description>
           <addressOffset>0x0</addressOffset>
           <size>0x20</size>
           <access>read-write</access>
@@ -20043,14 +20042,13 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
           <fields>
             <field>
               <name>MODE0</name>
-              <description>Port n.0 mode bits</description>
+              <description>Set pin mode</description>
               <bitOffset>0</bitOffset>
               <bitWidth>2</bitWidth>
             </field>
             <field>
               <name>CNF0</name>
-              <description>Port n.0 configuration
-              bits</description>
+              <description>Set pin configuration</description>
               <bitOffset>2</bitOffset>
               <bitWidth>2</bitWidth>
             </field>

@@ -58,15 +58,20 @@ Whether we need this pull down resistor or not depends entirely on what we have 
 
 A push button is a *Passive Component*. In the right image above, we have connected an *Active Component* (Perhaps and OR gate, or a DAC). This chip will put *either* 0 or 3.3V on its output pin (it is never floating), and then we don't need any pull-up or pull-down resistors. 
 
-Since it is so common to connect passive components of various kinds to the GPIO pins, most MCUs have pull-up and -down resistors built into the chip. There is one of each, for each pin on the GPIO ports. These can be activated or de-activated by writing to the configuration registers (as we will see soon). By activating only the internal pull-down resistor, we can connect a push button with only two cables and still be certain to read either `0` or `1`, depending on the buttons state. 
+Since it is so common to connect passive components of various kinds to the GPIO pins, most MCUs have pull-up and -down resistors built into the chip. On the CH32V307, this is implemented as in the image below. When the pin is configured as an input pin, we can activate a pull-up/down resistor. This resistor is connected to the corresponding *output* bit, of the `OUTDR` register. 
+
+This might seem confusing at first. We have seen that the `OUTDR` register is used when the pin is configured as an *output* pin, and that the value of the bit sets the voltage of the pin. This is cleverly reused here. When the pin is configured as an input pin, the `OUTDR` register is instead used as a selector, that decides whether the resistor should pull up or down. This is equivalent to physically connecting a resistor to either GND or V<sub>dd</sub>, as we did before. 
+
+So, if we need a pull-down resistor for the button connected to pin2 (as in the image) we activate pull up/down, and we set bit 2 of the `OUTDR` register to 0 (GND). This will, exactly as before, ensure that a floating input is "pulled down" to 0V. 
 
 <p align="center">
   <img src="images/built-in-pull.png" alt="My image" width="75%" />
 </p>
 
+And now we end with a little assembly program that reads a button. 
 
 
 ## Digital Output
 
 Push-Pull: 
-Open Drain: Simple example is connect
+Open Drain: Simple example is connecting several pins to one led. 

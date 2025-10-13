@@ -42,9 +42,17 @@ Each pin in the port can *either* be an input pin *or* an output pin, at any giv
 
 As previously mentioned, any communication between the processor core and the outside is achieved by reading from or writing to the memory subsystem. We have, for instance, seen that we can access the SRAM module by writing to the `0x20000000` - `0x2000FFFF` region. In the same way, to communicate with the GPIO module, we read and write to the `0x4001800`-`0x40011BFF` region. In that region, there are a number of registers for each GPIO Port. To find out which registers there are, and how to configure our GPIO Module, we would normally refer to the microcontrollers reference manual, but in this course we have prepared an easier-to-read [QuickGuide](TODO_nolinkyet). The section about the GPIO Module looks like: 
 
+<!--
 <p align="center">
   <img src="images/Quickguide_GPIO.png" alt="My image" width="95%" style="border: 2px solid black; border-radius: 8px;"/>
 </p>
+--->
+
+<div class="boxed">
+
+{{include quickguide/gpio-short.html}}
+
+</div>
 
 This text is pretty dense, but in a few weeks' time you will find it an invaluable resource when programming.
 

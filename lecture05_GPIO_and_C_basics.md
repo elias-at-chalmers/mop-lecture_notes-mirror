@@ -41,6 +41,7 @@ We have connected one of these cables to the V<sub>dd</sub> (3.3V) pin, and the 
 We would like be certain that if we read the bit when the button is released, the answer should be `0`. But actually, the pin is not connected to *anything* now, so the actual potential at the pin is unknown. The pin is said to be *floating*, and if we read it we might get a 0, or a 1. 
 
 The standard way to solve this problem is to add a small "Pull-Down Resistor", as in the image below: 
+
 <p align="center">
   <img src="images/simple_pull_down.png" alt="My image" width="75%" />
 </p>
@@ -69,7 +70,6 @@ So, if we need a pull-down resistor for the button connected to pin2 (as in the 
 </p>
 
 And now we end with a little assembly program that reads a button. 
-
 
 ## Digital Output
 

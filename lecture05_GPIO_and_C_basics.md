@@ -101,17 +101,23 @@ The name “push-pull” originally comes from amplifier design, where two activ
 
 The interesting question is why we would ever do something else? You will see later that there are many cases where this configuration could cause problems, but let us start with a simple example that illustrates the main problem:
 
-**Example:** *We have a system where pins 3 and 5 will be set high if some error has occurred. We want to connect a red LED that warns us if either of these error-pins are active:*
+**Example:** *We have a system where pins 3 and 5 will be set to zero if some error has occurred. We want to connect a red LED that warns us if either of these error-pins are zero:*
 <p align="center">
-  <img src="images/two_pin_led_push_pull.png" alt="My image" width="75%" />
+  <img src="images/two_pins_one_led.PNG" alt="My image" width="75%" />
 </p>
 
 Now, consider what happens if we connect the LED as in the image above and configure pins 3 and 5 as push-pull outputs:
 
-* If both pins output 0, no current flows through the LED, and it stays off.
-* If both pins output 1, current flows from the pins through the LED to ground, and it lights up.
+* If both bits are set to 1, no current flows through the LED (the anode and cathode are both at 3.3V), and it stays off.
+* If both bits are set to 0, current flows from V<sub>DD</sub> through the LED to the pins, and the LED lights up.
 
 *But if one pin outputs 1 and the other outputs 0*, we create a direct short: one pin is actively driving 3.3 V while the other is actively pulling to ground. This causes a large current to flow directly between the two pins instead of through the LED. This is very bad and might damage the transistors inside the microcontroller.
+
+The solution to this problem is to configure the pins as "Open Drain" instead of "Push Pull". In an Open Drain configuration, writing `0` to the corresponding bit drives the pin to 0V, but writing `1` sets it in *floating* mode (it is as if it wasn't connected at all). Now: 
+
+* If both bits are set to 1, it is as if we had removed the two green lines in the image. No current can flow, and the LED is off. 
+* If both bits are set to 0, the pins are both set to 0V, and current flows from V<sub>DD</sub> through the LED to the pins, and the LED lights up.
+* If one bit is set to 0 (pin is 0V) and the other is set to 1 (pin is floating) current still flows from V<sub>DD</sub> to the pin at 0V, and the LED lights up. 
 
 
 

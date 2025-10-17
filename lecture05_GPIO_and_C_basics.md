@@ -4,7 +4,11 @@
 
 **Text and excercises in the Workbook (Arbetsboken)**
 
+Chapter 2, up untill 2.2
+
 **Things that are in the Workbook that should possibly be in this lecture**
+
+Schmidt Trigger
 
 In the previous lecture, we learned how to control the voltage on a GPIO pin to switch an LED on or off. We also saw how to configure a pin as either an output or an input, but we glossed over a few important details.
 
@@ -38,7 +42,7 @@ On the right side, we illustrate a simple push button, of the kind you can buy f
 
 We have connected one of these cables to the V<sub>dd</sub> (3.3V) pin, and the other to pin 5 (which is configured as an input pin). Thus, when the button is pushed down, we have 3.3V at the pin, and we can read `1` in the corresponding bit in the `INDR` register. But what happens when the button is released (and we are back to the situation in the image)?
 
-We would like be certain that if we read the bit when the button is released, the answer should be `0`. But actually, the pin is not connected to *anything* now, so the actual potential at the pin is unknown. The pin is said to be *floating*, and if we read it we might get a 0, or a 1.
+We would like be certain that if we read the bit when the button is released, the answer should be `0`. But the pin is not connected to *anything* now, so the actual potential at the pin is unknown. The pin is said to be *floating*, and if we read it we might get a 0, or a 1.
 
 The standard way to solve this problem is to add a small "Pull-Down Resistor", as in the image below:
 
@@ -48,7 +52,7 @@ The standard way to solve this problem is to add a small "Pull-Down Resistor", a
 
 Now, if the button is released (as in the image), pin 5 is still connected to ground (through the resistor), so the potential is 0V. If we read the bit it will be `0`. We say that this new connection "*pulls* the floating signal *down* to ground". If the button is pushed down, pin 5 is directly connected to 3.3V, as before, so if we read the bit it will be `1`.
 
-Because the resistor connects 3.3V to ground when the button is pressed, a small *leakage current* will run through this connection, and some energy will be lost. If we use a resistor with a high resistance, the current will be very small, and the energy loss will be negligible.
+Because the resistor connects 3.3V to ground when the button is pressed, a small *leakage current* will run through this connection, and some energy will be lost. If we use a resistor with a high resistance, the current will be very small, however, and the energy loss will be negligible.
 
 Whether we need this pull down resistor or not depends entirely on what we have connected. We could, for instance, connect the same button but connect one of the terminals (the blue cable) to `GND` instead of V<sub>dd</sub>. In that case, we know that we will get a 0 when the button is pressed, but to avoid a floating value when the button is released, we need to connect a "Pull-Up Resistor", to 3.3V. This is illustrated in the left image below. We say that "the floating signal is *pulled* *up* to 3.3V".
 
@@ -57,13 +61,13 @@ Whether we need this pull down resistor or not depends entirely on what we have 
   <img src="images/no-pull.png" alt="My image" width="45%" />
 </p>
 
-A push button is a *Passive Component*. In the right image above, we have connected an *Active Component* (Perhaps and OR gate, or a DAC). This chip will put *either* 0 or 3.3V on its output pin (it is never floating), and then we don't need any pull-up or pull-down resistors.
+A push button is a *Passive Component*. In the right image above, we have connected an *Active Component* (Perhaps an OR gate, or a DAC). This chip will put *either* 0 or 3.3V on its output pin (it is never floating), and then we don't need any pull-up or pull-down resistors.
 
 Since it is so common to connect passive components of various kinds to the GPIO pins, most MCUs have pull-up and -down resistors built into the chip. On the CH32V307, this is implemented as in the image below. When the pin is configured as an input pin, we can activate a pull-up/down resistor. This resistor is connected to the corresponding *output* bit, of the `OUTDR` register.
 
-This might seem confusing at first. We have seen that the `OUTDR` register is used when the pin is configured as an *output* pin, and that the value of the bit sets the voltage of the pin. This is cleverly reused here. When the pin is configured as an input pin, the `OUTDR` register is instead used as a selector, that decides whether the resistor should pull up or down. This is equivalent to physically connecting a resistor to either GND or V<sub>dd</sub>, as we did before.
+This might seem confusing at first. We have seen that the `OUTDR` register is used when the pin is configured as an *output* pin, and that the value of the bit sets the voltage of the pin. This is cleverly reused here. When the pin is configured as an input pin, the `OUTDR` register is instead used as a selector that decides whether the resistor should pull up or down. This is equivalent to physically connecting a resistor to either GND or V<sub>dd</sub>, as we did before.
 
-So, if we need a pull-down resistor for the button connected to pin2 (as in the image) we activate pull up/down, and we set bit 2 of the `OUTDR` register to 0 (GND). This will, exactly as before, ensure that a floating input is "pulled down" to 0V.
+So, if we need a pull-down resistor for the button connected to pin 2 (as in the image) we activate pull up/down, and we set bit 2 of the `OUTDR` register to 0 (GND). This will, exactly as before, ensure that a floating input is "pulled down" to 0V.
 
 <p align="center">
   <img src="images/built-in-pull.png" alt="My image" width="75%" />
@@ -75,13 +79,21 @@ Now, let's revisit relevant parts from the [Quickguide](LINK) to see how we conf
 
 {{include quickguide/gpio-cfg.html}}
 
+> TODO: Put CNF on left side, since it is first in the bit order
+
 {{include quickguide/gpio-cfg-regs.html}}
+
 
 </div>
 
 We want to plug in a button as in the image above, so we want to configure pin2 as an input pin and activate a *pull-down* resistor on this pin. To configure the pin as input, we only need to set `MODE` to `00`.
 
-To activate the pull up/down resistor, we set `CNF` to `10`. The alternative configurations for an input pin are: *Analog* (00) -- Used when the input voltage varies anywhere between 0 and 3.3V and we want to read its value. You might want to try this out towards the end of the course, but we leave it for now, *Floating* (10) -- this is when we don't want any pull up/down resistor connected, *Pull-up/Pull-down* (10) -- Activates the resistor, and *Reserved* (11) -- Not used.
+To activate the pull up/down resistor, we set `CNF` to `10`. The possible configurations for an input pin are: 
+
+* *Analog* (00) -- Used when the input voltage varies anywhere between 0 and 3.3V and we want to read its value. You might want to try this out towards the end of the course, but we leave it for now, 
+* *Floating* (10) -- this is when we don't want any pull up/down resistor connected, 
+* *Pull-up/Pull-down* (10) -- Activates the resistor, and 
+* *Reserved* (11) -- Not used.
 
 
 To choose pull *down*, rather than pull up, resistor, we set bit 2 in `OUTDR` to 0.
@@ -132,9 +144,9 @@ The solution to this problem is to configure the pins as "Open Drain" instead of
 
 
 ### Read-Modify-Write and BSHR/BCR
-Especially when programming "close to the metal", as in this course, you will often find yourself wanting to change just a few bits in a word, and leave the rest as they are. If, for instance, your task is to turn a single led-light, connected to GPIO_D, pin2, on and off we have previously configured the pin as output but writing a value to the *whole* `CFGLR` register. But other pins on that port might be used for something else, and might already have been configured, and you do not want to overwrite that configuration. 
+Especially when programming "close to the metal", as in this course, you will often find yourself wanting to change just a few bits in a word, and leave the rest as they are. Say, for instance, that your task is to turn a single led-light -- connected to pin 2 of GPIO_D -- on and off. We have previously configured the pin as output by writing a value to the *whole* `CFGLR` register. But other pins on that port might be used for something else, and might already have been configured, and you do not want to overwrite that configuration. 
 
-The standard way of handling this is to break the operation into two operations, where you first *clear* the only the bits you want to want to change with an AND operation, and then set the bits you want to be set with an OR operation: 
+The standard way of handling this is to break the operation into two operations, where you first *clear* all the bits you want to want to change with an AND operation, and then *set* the desired bits with an OR operation: 
 
 ```
 la t0, 0x40011400    # GPIO_D_CFGLR
@@ -155,7 +167,7 @@ This works fine, but is a bit cumbersome and not very fast. Therefore, some peri
 
 The `BSHR` register allows you to set some bits and clear some bits in a single 32-bit write operation, which can be useful in some cases. Normally, though, we will use the lower 16 bits in the `BSHR` register to set bits, and the lower 16 bits in the `BCR` register to clear bits. 
 
-So, if we wanted to just blink an LED connected to pin 2 on and off as fast as we could, without changing the values of the other bits, we could write: 
+So, if we wanted to just blink an LED connected to pin 2 on and off as fast as we could, without changing the values of the other bits, write: 
 
 ```
 la t0, 0x40011410    # GPIO_D_BSHR
@@ -171,9 +183,9 @@ blink:
 
 > **Quiz:**  If you actually run this program on hardware, you would find that the LED just shines dimly and doesn't blink at all. Why?
 
-## Keyboard
+## Keypad
 
-Now that you know everything worth knowing about the GPIO ports let us take a look at a more interesting device. In the simulator and on the lab equipment, there is a *keyboard* with 16 keys. An image of the keypad, along with an illustration of how it is connected is given in the image below:
+Now that you know everything worth knowing about the GPIO ports let us take a look at a more interesting device. In the simulator and on the lab equipment, there is a *keypad* with 16 keys. An image of the keypad, along with an illustration of how it is connected is given in the image below:
 
 <p align="center">
   <img src="images/keypad.png" alt="My image" width="75%" />
@@ -187,14 +199,14 @@ The idea is that each pin is connected to one *row* or one *column* of keys. By 
 * If button number 10 is pressed, pin 6 and pin 2 are connected, and we will read `0` on pin 2. 
 * If button number 6 is pressed... well then it will depend on whether pin *5* outputs 0 or 1.
 
-In the workbook, you will construct an algorithm that activates one row at a time and reads all four columns for that row. By sweeping over all four rows you can find out exactly which buttons are pressed. 
+By following the assignments in the workbook, you will construct an algorithm that activates one row at a time and reads all four columns for that row. By sweeping over all four rows you can find out exactly which buttons are pressed. 
 
-One important thing to note is that you have to use `Open Drain` (not `Push-Pull`) on the output pins. Otherwise, if you press both, e.g., key 0 and key 12 at *the same time* there is a direct connection between output pins 7 and 4 and, as we saw earlier, this can lead to a shorted circuit and broken transistors. 
+One important thing to note is that you have to use `Open Drain` (not `Push-Pull`) on the output pins. Otherwise, if you press both key 0 and key 12 (for instance) at *the same time* there is a direct connection between output pins 7 and 4 and, as we saw earlier, this can lead to a shorted circuit and broken transistors. 
 
 
 ## C Programming Basics
 
-We will now go through some more basic C programming
+We will now switch topic for a bit and go through some more basic C programming
 
 ### Calling, Declaring and Defining a function
 All code in a C program resides in a *function*. To call a function, it must have been *declared* earlier in the C file being compiled. A function declaration looks like:

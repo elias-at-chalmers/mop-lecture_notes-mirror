@@ -131,9 +131,66 @@ The solution to this problem is to configure the pins as "Open Drain" instead of
 * If one bit is set to 0 (pin is 0V) and the other is set to 1 (pin is floating) current still flows from V<sub>DD</sub> to the pin at 0V, and the LED lights up.
 
 
-### BSHR BCR
+### Read-Modify-Write and BSHR/BCR
+Especially when programming "close to the metal", as in this course, you will often find yourself wanting to change just a few bits in a word, and leave the rest as they are. If, for instance, your task is to turn a single led-light, connected to GPIO_D, pin2, on and off we have previously configured the pin as output but writing a value to the *whole* `CFGLR` register. But other pins on that port might be used for something else, and might already have been configured, and you do not want to overwrite that configuration. 
+
+The standard way of handling this is to break the operation into two operations, where you first *clear* the only the bits you want to want to change with an AND operation, and then set the bits you want to be set with an OR operation: 
+
+```
+la t0, 0x40011400    # GPIO_D_CFGLR
+lh t1, 0(t0)         # Load the current value of CFGLR into t1
+li t2, 0xFFFFF0FF    # Load a mask into t2
+and t1, t1, t2       # Clear the four bits you want to change
+li t2, 0x00000200    # Set the bits you want to set in t2
+or t1, t1, t2        # And set these bits in t1 
+                     # (without changing what was there before)
+sw t1, 0(t0)         # Write back to CFGLR
+```
+
+This works fine, but is a bit cumbersome and not very fast. Therefore, some peripherals have specific registers for setting or clearing bits in a single operation: 
+
+<div class="boxed">
+{{include quickguide/gpio-bshr-bcr.html}}
+</div>
+
+The `BSHR` register allows you to set some bits and clear some bits in a single 32-bit write operation, which can be useful in some cases. Normally, though, we will use the lower 16 bits in the `BSHR` register to set bits, and the lower 16 bits in the `BCR` register to clear bits. 
+
+So, if we wanted to just blink an LED connected to pin 2 on and off as fast as we could, without changing the values of the other bits, we could write: 
+
+```
+la t0, 0x40011410    # GPIO_D_BSHR
+la t1, 0x40011414    # GPIO_D_BCR
+li t2, 0b100         # Only bit 2 
+blink: 
+  sh t2, 0(t0)       # Set only bit 2 (leave the others as they are)
+  sh t2, 0(t1)       # Clear only bit 2 (leave the others as they are)
+  j blink
+```
+
+ Note that you *set* the bit in `BCR` to *clear* the value in `OUTDR`.
+
+> **Quiz:**  If you actually run this program on hardware, you would find that the LED just shines dimly and doesn't blink at all. Why?
 
 ## Keyboard
+
+Now that you know everything worth knowing about the GPIO ports let us take a look at a more interesting device. In the simulator and on the lab equipment, there is a *keyboard* with 16 keys. An image of the keypad, along with an illustration of how it is connected is given in the image below:
+
+<p align="center">
+  <img src="images/keypad.png" alt="My image" width="75%" />
+</p>
+
+It would, of course, be possible to build a simple keyboard where each key was connected to its own GPIO pin, but that would require very many pins (and thick cables) for large keyboards. Instead, the keys in your computer keyboard, or your digital piano, for that matter, are usually connected similarly to this one. 
+
+The idea is that each pin is connected to one *row* or one *column* of keys. By pressing a button, you will connect one row pin with one column pin. So, if you wanted to know if, e.g., the button labeled `10` in the image was pressed, you could configure pin 2 (the pink column in the image) to be an input pin, with pull-up enabled, and you could output `0` on pin 6. 
+
+* If no button is pressed, there is no connection, and you will read `1` from pin 2 (because of the pull-up)
+* If button number 10 is pressed, pin 6 and pin 2 are connected, and we will read `0` on pin 2. 
+* If button number 6 is pressed... well then it will depend on whether pin *5* outputs 0 or 1.
+
+In the workbook, you will construct an algorithm that activates one row at a time and reads all four columns for that row. By sweeping over all four rows you can find out exactly which buttons are pressed. 
+
+One important thing to note is that you have to use `Open Drain` (not `Push-Pull`) on the output pins. Otherwise, if you press both, e.g., key 0 and key 12 at *the same time* there is a direct connection between output pins 7 and 4 and, as we saw earlier, this can lead to a shorted circuit and broken transistors. 
+
 
 ## C Programming Basics
 

@@ -218,7 +218,47 @@ To make our blinky program optimizer safe, we change the first two lines to:
 #define GPIOD_OUTDR *((volatile unsigned int *)0x4001140C)
 ```
 
+## Synchronization
 
+So far, we have talked about plugging in an LED, a push-button, and simple keyboard to our microcontroller. These components are *passive* and instantaneously respond to the current state of the connected GPIO pins. When we plug in something more complicated, like a display, or a motor, or an old-school text terminal, we often have to follow a *communication protocol*. Many devices (such as the TFT display we will be using later in the course) use standardized protocals (RS-232, CAN, SPI, ...), which are supported by the microcontrollers hardware. These will be discussed later, but first we will look at a simpler, *active*, device: the 1602 ASCII LCD display: 
+
+<p align="center">
+  <img src="images/ascii-display.png" alt="My image" width="50%" />
+</p>
+
+A standard LCD display that you would buy [of-the-shelf](https://www.electrokit.com/lcd-2x16-tecken-rgb-seriell-qwiic) actually consists of an LCD *panel* and a *controller chip* (often confusingly called a *driver*). This controller chip is *itself* a little microcontroller that runs code to put characters on the display. So, when you want your LCD display to show a string of text, the code you write on the MD307 has to communicate with the microcontroller in the display, according to a specific communication protocol. The protocol is usually described in the display's *data-sheet*. 
+
+To communicate with our ASCII display, we can write *commands* (such as "clear the display" or "move the cursor") or *data* (the text we want to show) to it. To do this, we must follow a *timing-diagram* that we can find in the data sheet: 
+
+<p align="center">
+  <img src="images/ascii_timing_write.png" alt="My image" width="90%" />
+</p>
+
+This figure shows us that there are 11 signals (GPIO pins on our MD307, connected to pins on the display, via wires) that we use to communicate with the display: 
+
+* **Register Select (RS)**: This signal is used to tell the display whether we are sending/recieving a command or data. 
+* **Read/Write (R/W)**: This signal is used to tell the display whether we want to send data to it, or recieve data from it. 
+* **Enable (E)**: This signal is used to initiate communication with the display
+* **Data Lines (DB0-DB7)**: These lines contain the command or data that we want to send (one byte).
+
+Let's say we want to tell the display to clear the screen, and go through what happens on the device and why we need to be careful about timing. 
+
+* The first thing we have to do is to set the **RS** signal high?, to tell the device that we are about to send a *command*. We do that by writing `1` to the corresponding bit in the `GPIO ODATA` register, as we have done before. 
+    - The device is not continously reading (*polling*) the incoming signals. Instead, when a signal *changes* from 0 to 1, or 1 to 0, the device will be *interrupted*.
+    - If the device was already in "command mode", nothing happens (no change in signal, so it doesn't notice that we wrote anything).
+    - Otherwise, it needs to switch over to "command mode". This takes a short time (x nanoseconds). *During this time, the device will not react to any other signals* so our code has to *wait* for x nano seconds before doing anything else. 
+
+
+
+
+
+
+
+
+
+### The ASCII display
+
+### SysTick and other timers
 
 ### More about pointers
 
@@ -233,11 +273,3 @@ To make our blinky program optimizer safe, we change the first two lines to:
 #### Pointers to Pointers
 
 #### Function Pointers
-
-## Synchronization
-
-### The ASCII display
-
-### SysTick and other timers
-
-

@@ -6,7 +6,7 @@
             "type": "shell",
             "command": "pandoc",
             "args": [
-                "${file}",               // current file
+                "${file}",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}.html",
                 "--lua-filter=quickguide-generator/include-html.lua",

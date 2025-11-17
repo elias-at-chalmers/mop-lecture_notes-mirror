@@ -19,6 +19,8 @@ middle_css = "style = 'width: 1%;'"
 unused_css = "style = 'background-color: lightgray;'"
 th_css = "style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: \"Arial Narrow\", sans-serif;'"
 td_css = "style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: \"Arial Narrow\", sans-serif;'"
+td_rotated_css = "style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: \"Arial Narrow\", sans-serif;'"
+
 td_gray_css = "style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: \"Arial Narrow\", sans-serif;'"
 
 def th(text): 
@@ -109,17 +111,24 @@ def summarize_fields(fields):
         if match:
             prefix, number = match.groups()
             groups[prefix].append((int(number), clean_whitespace(entry.get("description", ""))))
+        else: 
+            prefix = name
+            number = 1
+            groups[prefix].append((int(number), clean_whitespace(entry.get("description", ""))))
 
     overview = []
     for prefix, items in groups.items():
-        numbers = [n for n, _ in items]
-        desc = ""
-        # try to grab the description from the lowest-numbered entry
-        for n, d in sorted(items):
-            if d:
-                desc = d
-                break
-        overview.append(f"<b>{prefix}</b>n (n = {min(numbers)}..{max(numbers)}): {desc}")
+        if(len(groups[prefix]) == 1):
+            overview.append(f"<b>{prefix}</b>: {groups[prefix][0][1]}")
+        else: 
+            numbers = [n for n, _ in items]
+            desc = ""
+            # try to grab the description from the lowest-numbered entry
+            for n, d in sorted(items):
+                if d:
+                    desc = d
+                    break
+            overview.append(f"<b>{prefix}</b>n (n = {min(numbers)}..{max(numbers)}): {desc}")
 
     return overview
 
@@ -164,7 +173,12 @@ def PrintRegisterDetails(r):
                 html += "</td>"
             # Draw field
             #html += "<td colspan=" + str(f["width"]) + ">" 
-            html += "<td colspan=" + str(f["width"]) + " " + td_css + ">" 
+
+            # Check if we need to rotate
+            if(f["width"] == 1 and len(f["name"]) > 2):
+                html += "<td colspan=" + str(f["width"]) + " " + td_rotated_css + ">" 
+            else: 
+                html += "<td colspan=" + str(f["width"]) + " " + td_css + ">" 
             html += "<small>" + f["name"] + "</small></td>\n"
             bit = f["offset"]        
 

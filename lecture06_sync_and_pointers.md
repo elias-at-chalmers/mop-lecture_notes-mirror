@@ -251,14 +251,28 @@ The important numbers are:
 * **t<sub>h</sub>** - After starting the command (by setting E=0), all signals must be available for another *t<sub>su1</sub> = 10ns*. 
 * **t<sub>c</sub>** - Finally, the cycle time (the time between two commands) must be at least 500ns.
 
-In the workbook, you will also find the timing diagrams for reading data from the device, what commands are available, and a suggestion of how to write code that follows this timing protocol. Before you start writing anything there is a much more fundamental question that we have to answer: *How do we tell our microcontroller to wait a specific length of time?*. 
-
-
-
-
-### The ASCII display
+In the workbook, you will also find the timing diagrams for reading data from the device, what commands are available, and a suggestion of how to write code that follows this timing protocol. Before you start writing anything there is a much more fundamental question that we have to answer, however: *How do we tell our microcontroller to wait a specific length of time?*. 
 
 ### SysTick and other timers
+The only way we can measure the passage of time on a processor is by the *clock signal*. As you have learned in a previous course, the CPU is pushed through its state-machine, every few nanoseconds, by a clock signal that goes up and down periodically. On the MD307, the clock *frequency* is 144MHz, so the time between each clock pulse is (1[sec]/144000000[Hz] ≈) **7ns**.
+
+Since we know that our microcontroller will execute *approximately* one instruction per clock, we can get an approximate delay with just a little for loop. If we want to wait for 1 ms, and we know that amounts to approximately (1000ns/7ns ≈) **143** clock cycles, and the loop is two instructions, we could write:  
+
+```
+li t0, 143
+loop: 
+  addi t0, -2   # Two more instructions have been executed
+  bnz loop      # If not zero, go again.
+```
+
+This is not very exact, however. Firstly, due to pipelining (see Lecture ??), and instruction caches, and other clever tricks that our processor might do, we do not *know* exactly how many clock cycles each instruction takes. Secondly, as you will learn in a future lecture, the processor is frequently *interrupted* by other processes, and when the CPU starts running our code again, we have no idea how many cycles have passed. 
+
+Instead, all processors come with one or more *timer peripherals*. These are separate modules, on the same chip, that listen to the same clock signal as the CPU does, but whose only job is to count how many cycles have passed, and provide that information to the program running on the CPU. 
+
+
+
+
+
 
 ### More about pointers
 

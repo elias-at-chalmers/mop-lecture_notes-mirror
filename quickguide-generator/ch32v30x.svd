@@ -39963,6 +39963,16 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
             </field>
           </fields>
         </register>
+        </registers>
+		</peripheral>
+
+
+
+    <peripheral>
+      <name>SysTick</name>
+      <description>System Tick Timer</description>
+      <baseAddress>0xE000F000</baseAddress>
+      <registers>
 		<register>
           <name>STK_CTLR</name>
           <displayName>STK_CTLR</displayName>
@@ -40103,90 +40113,6 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
           </fields>
         </register>        
 		</registers>
-		</peripheral>
-
-
-
-    <peripheral>
-      <name>SysTick</name>
-      <description>System Tick Timer</description>
-      <baseAddress>0xE000F000</baseAddress>
-      <registers>
-        <register>
-          <name>CTLR</name>
-          <description>Control and Status Register</description>
-          <addressOffset>0x000</addressOffset>
-          <size>32</size>
-          <resetValue>0x00000000</resetValue>
-          <fields>
-            <field>
-              <name>ENABLE</name>
-              <description>Enable SysTick Timer</description>
-              <bitOffset>0</bitOffset>
-              <bitWidth>1</bitWidth>
-              <access>read-write</access>
-            </field>
-            <field>
-              <name>TICKINT</name>
-              <description>Enable SysTick Interrupt</description>
-              <bitOffset>1</bitOffset>
-              <bitWidth>1</bitWidth>
-              <access>read-write</access>
-            </field>
-            <field>
-              <name>CLKSOURCE</name>
-              <description>Clock Source</description>
-              <bitOffset>2</bitOffset>
-              <bitWidth>1</bitWidth>
-              <access>read-write</access>
-            </field>
-            <field>
-              <name>COUNTFLAG</name>
-              <description>Indicates counter reached zero</description>
-              <bitOffset>16</bitOffset>
-              <bitWidth>1</bitWidth>
-              <access>read-only</access>
-            </field>
-          </fields>
-        </register>
-        <register>
-          <name>LOAD</name>
-          <description>SysTick Reload Value Register</description>
-          <addressOffset>0x004</addressOffset>
-          <size>32</size>
-          <resetValue>0x00000000</resetValue>
-        </register>
-        <register>
-          <name>VAL</name>
-          <description>SysTick Current Value Register</description>
-          <addressOffset>0x008</addressOffset>
-          <size>32</size>
-          <resetValue>0x00000000</resetValue>
-        </register>
-        <register>
-          <name>CALIB</name>
-          <description>SysTick Calibration Value Register</description>
-          <addressOffset>0x00C</addressOffset>
-          <size>32</size>
-          <resetValue>0x00000000</resetValue>
-          <fields>
-            <field>
-              <name>TICK</name>
-              <description>Number of ticks per second</description>
-              <bitOffset>0</bitOffset>
-              <bitWidth>24</bitWidth>
-              <access>read-only</access>
-            </field>
-            <field>
-              <name>RESERVED</name>
-              <description>Reserved bits</description>
-              <bitOffset>24</bitOffset>
-              <bitWidth>8</bitWidth>
-              <access>read-only</access>
-            </field>
-          </fields>
-        </register>
-      </registers>
     </peripheral>
 
 

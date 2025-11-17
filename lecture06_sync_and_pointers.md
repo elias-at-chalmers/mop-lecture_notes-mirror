@@ -220,15 +220,15 @@ To make our blinky program optimizer safe, we change the first two lines to:
 
 ## Synchronization
 
-So far, we have talked about plugging in an LED, a push-button, and simple keyboard to our microcontroller. These components are *passive* and instantaneously respond to the current state of the connected GPIO pins. When we plug in something more complicated, like a display, or a motor, or an old-school text terminal, we often have to follow a *communication protocol*. Many devices (such as the TFT display we will be using later in the course) use standardized protocals (RS-232, CAN, SPI, ...), which are supported by the microcontrollers hardware. These will be discussed later, but first we will look at a simpler, *active*, device: the 1602 ASCII LCD display: 
+So far, we have talked about plugging in an LED, a push-button, and simple keyboard to our microcontroller. These components are *passive* and instantaneously respond to the current state of the connected GPIO pins. When we plug in something more complicated, like a display, or a motor, or an old-school text terminal, we often have to follow a *communication protocol*. Many devices (such as the TFT display we will be using later in the course) use standardized protocols (RS-232, CAN, SPI, ...), which are supported by the microcontrollers hardware. These will be discussed later, but first we will look at a simpler, *active*, device: the 1602 ASCII LCD display: 
 
 <p align="center">
   <img src="images/ascii-display.png" alt="My image" width="50%" />
 </p>
 
-A standard LCD display that you would buy [of-the-shelf](https://www.electrokit.com/lcd-2x16-tecken-rgb-seriell-qwiic) actually consists of an LCD *panel* and a *controller chip* (often confusingly called a *driver*). This controller chip is *itself* a little microcontroller that runs code to put characters on the display. So, when you want your LCD display to show a string of text, the code you write on the MD307 has to communicate with the microcontroller in the display, according to a specific communication protocol. The protocol is usually described in the display's *data-sheet*. 
+A standard LCD display that you would buy [off-the-shelf](https://www.electrokit.com/lcd-2x16-tecken-rgb-seriell-qwiic) actually consists of an LCD *panel* and a *controller chip* (often confusingly called a *driver*). This controller chip is *itself* a little microcontroller that runs code to put characters on the display. So, when you want your LCD display to show a string of text, the code you write on the MD307 has to communicate with the microcontroller in the display, according to a specific communication protocol. The protocol is usually described in the display's *datasheet*. 
 
-To communicate with our ASCII display, we can write *commands* (such as "clear the display" or "move the cursor") or *data* (the text we want to show) to it. To do this, we must follow a *timing-diagram* that we can find in the data sheet: 
+To communicate with our ASCII display, we can write *commands* (such as "clear the display" or "move the cursor") or *data* (the text we want to show) to it. To do this, we must follow a *timing diagram* that we can find in the datasheet: 
 
 <p align="center">
   <img src="images/ascii_timing_write.png" alt="My image" width="90%" />
@@ -236,22 +236,22 @@ To communicate with our ASCII display, we can write *commands* (such as "clear t
 
 This figure shows us that there are 11 signals (GPIO pins on our MD307, connected to pins on the display, via wires) that we use to communicate with the display: 
 
-* **Register Select (RS)**: This signal is used to tell the display whether we are sending/recieving a command or data. 
-* **Read/Write (R/W)**: This signal is used to tell the display whether we want to send data to it, or recieve data from it. 
+* **Register Select (RS)**: This signal is used to tell the display whether we are sending/receiving a command or data. 
+* **Read/Write (R/W)**: This signal is used to tell the display whether we want to send data to it, or receive data from it. 
 * **Enable (E)**: This signal is used to initiate communication with the display
 * **Data Lines (DB0-DB7)**: These lines contain the command or data that we want to send (one byte).
 
-Let's say we want to tell the display to clear the screen, and go through what happens on the device and why we need to be careful about timing. 
+To run a command, or read/write data from/to the display we have to follow the timing constraints given by this diagram. We *prepare* the device for a command by setting the **E**(enable) signal high, and then we *execute* the command by setting **E** low again. 
 
-* The first thing we have to do is to set the **RS** signal high?, to tell the device that we are about to send a *command*. We do that by writing `1` to the corresponding bit in the `GPIO ODATA` register, as we have done before. 
-    - The device is not continously reading (*polling*) the incoming signals. Instead, when a signal *changes* from 0 to 1, or 1 to 0, the device will be *interrupted*.
-    - If the device was already in "command mode", nothing happens (no change in signal, so it doesn't notice that we wrote anything).
-    - Otherwise, it needs to switch over to "command mode". This takes a short time (x nanoseconds). *During this time, the device will not react to any other signals* so our code has to *wait* for x nano seconds before doing anything else. 
+The important numbers are: 
 
+* **t<sub>su1</sub>** - Before setting E high, we have to tell the display whether it should perform a *command* or a *data-transfer* and whether we want to write to the display or read from it. This is done by setting the **RS** and **R/W** signals. Since these signals are connected to GPIO pins on our MD307, we simply set the corresponding bits in the GPIO `ODATA` register, as we have done before. This will (almost) immediately set the corresponding *pins* to 0V, but it will take some time (*t<sub>su1</sub> = 40ns*) for the electrical signal to propagate through the display. 
+* **t<sub>su2</sub>** - When we have told the display to prepare for a command, by setting E=1, it needs the data to be available on the GPIO pins for *at least* *t<sub>su1</sub> = 80ns* before we can tell it to actually execute the command. Again, this is to be certain that the signals have propagated.  
+* **t<sub>w</sub>** - We *also* have to make certain that the E signal is high for at least *t<sub>w</sub> = 230ns* before E is set to 0 again.
+* **t<sub>h</sub>** - After starting the command (by setting E=0), all signals must be available for another *t<sub>su1</sub> = 10ns*. 
+* **t<sub>c</sub>** - Finally, the cycle time (the time between two commands) must be at least 500ns.
 
-
-
-
+In the workbook, you will also find the timing diagrams for reading data from the device, what commands are available, and a suggestion of how to write code that follows this timing protocol. Before you start writing anything there is a much more fundamental question that we have to answer: *How do we tell our microcontroller to wait a specific length of time?*. 
 
 
 

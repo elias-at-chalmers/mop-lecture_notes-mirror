@@ -39983,49 +39983,49 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
           <fields>
             <field>
               <name>STE</name>
-              <description>System counter  enable</description>
+              <description>Turns the SysTick timer on when set; clearing it stops the counter.</description>
 			  <access>read-write</access>
               <bitOffset>0</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
 			<field>
               <name>STIE</name>
-              <description>System counter interrupt enable</description>
+              <description>Enables SysTick interrupt generation when the counter reaches zero; if cleared, no interrupt is triggered.</description>
 			  <access>read-write</access>
               <bitOffset>1</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
 			 <field>
               <name>STCLK</name>
-              <description>System selects the clock source</description>
+              <description>Selects the clock source: the processor clock (HCLK) when set, or HCLK/8 if not set.</description>
 			  <access>read-write</access>
               <bitOffset>2</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
 			<field>
               <name>STRE</name>
-              <description>System reload register</description>
+              <description>If set, restarts from 0 when Compare Value reached (upcounting) or from the Compare Value when zero is reached (downcounting). Otherwise it keeps counting beyond the ccompare value (or zero).</description>
 			  <access>read-write</access>
               <bitOffset>3</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
 			<field>
               <name>MODE</name>
-              <description>System Mode</description>
+              <description>If set, count up, otherwise count down.</description>
 			  <access>read-write</access>
               <bitOffset>4</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
 			<field>
               <name>INIT</name>
-              <description>System Initialization update</description>
+              <description>If set, loads CNT with 0 (upcounting) or Compare Value (downcounting) when timer is enabled. Otherwise does not modify CNT.</description>
 			  <access>read-write</access>
               <bitOffset>5</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
 			<field>
               <name>SWIE</name>
-              <description>System software triggered interrupts enable</description>
+              <description>If set, immediately triggers a SysTick Interrupt.</description>
 			  <access>read-write</access>
               <bitOffset>31</bitOffset>
               <bitWidth>1</bitWidth>

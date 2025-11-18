@@ -211,7 +211,6 @@ if(sys.argv[1] == "overview-table"):
     
     found = False
     for p in peripherals:
-
         if p.find('name').text != sys.argv[2]: continue
         found = True
         p_name = p.find('name').text
@@ -223,23 +222,36 @@ if(sys.argv[1] == "overview-table"):
         print("Peripheral " + sys.argv[2] + " not found")
         exit(1)
 
-if(sys.argv[1] == "baseaddress"):
-    if(len(sys.argv) != 3):     
-        print("Usage: " + sys.argv[0]  + "baseaddress <peripheral-regexp>")
+if sys.argv[1] == "baseaddress":
+    if len(sys.argv) != 3:
+        print("Usage: " + sys.argv[0] + " baseaddress <peripheral-regexp>")
         exit(1)
-    
+
     pattern = re.compile(sys.argv[2])
 
-    found = False
+    matches = []
     for p in peripherals:
+        name = p.find('name').text
+        if pattern.match(name):
+            matches.append(p)
 
-        if not pattern.match(p.find('name').text): continue
-        found = True
-        p_name = p.find('name').text
-        html += p_name + ": <code>" + p.find("baseAddress").text + "</code><br>\n"
-    if not found:
+    if not matches:
         print("Peripheral matching " + sys.argv[2] + " not found")
         exit(1)
+
+    # Exactly one match: Don't print name
+    if len(matches) == 1:
+        p = matches[0]
+        p_name = p.find("name").text
+        base = p.find("baseAddress").text
+        html += f"<code>{base}</code><br>\n"
+
+    # Multiple matches → normal output
+    else:
+        for p in matches:
+            p_name = p.find("name").text
+            base = p.find("baseAddress").text
+            html += p_name + ": <code>" + base + "</code><br>\n"
 
 if(sys.argv[1] == "register-details"):
     if(len(sys.argv) != 4):     

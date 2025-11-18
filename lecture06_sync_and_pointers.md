@@ -1,8 +1,5 @@
 # Pointers and Synchronization
 
-** Things in the compendium not yet used **: Volatile Pointers
-
-
 In this lesson, we will combine all the things we have learned about GPIO and C so far, and finally do some machine oriented programming and get an LED to light up, all in C. To do that, we will first have to go through the concept of *pointers*.
 
 In the second part of the lecture, we will start looking at an *ASCII Display* which is controlled by following a specific protocol. This protocol requires precise *timing*, and so we will look into how the basic system timer (SysTick) works. 
@@ -253,7 +250,7 @@ The important numbers are:
 
 In the workbook, you will also find the timing diagrams for reading data from the device, what commands are available, and a suggestion of how to write code that follows this timing protocol. Before you start writing anything there is a much more fundamental question that we have to answer, however: *How do we tell our microcontroller to wait a specific length of time?*. 
 
-### SysTick and other timers
+### SysTick
 The only way we can measure the passage of time on a processor is by the *clock signal*. As you have learned in a previous course, the CPU is pushed through its state-machine, every few nanoseconds, by a clock signal that goes up and down periodically. On the MD307, the clock *frequency* is 144MHz, so the time between each clock pulse is (1[sec]/144000000[Hz] ≈) **7ns**.
 
 Since we know that our microcontroller will execute *approximately* one instruction per clock, we can get an approximate delay with just a little for loop. If we want to wait for 1 ms, and we know that amounts to approximately (1000ns/7ns ≈) **143** clock cycles, and the loop is two instructions, we could write:  
@@ -267,11 +264,86 @@ loop:
 
 This is not very exact, however. Firstly, due to pipelining (see Lecture ??), and instruction caches, and other clever tricks that our processor might do, we do not *know* exactly how many clock cycles each instruction takes. Secondly, as you will learn in a future lecture, the processor is frequently *interrupted* by other processes, and when the CPU starts running our code again, we have no idea how many cycles have passed. 
 
-Instead, all processors come with one or more *timer peripherals*. These are separate modules, on the same chip, that listen to the same clock signal as the CPU does, but whose only job is to count how many cycles have passed, and provide that information to the program running on the CPU. 
+Instead, all processors come with one or more *timer peripherals*. These are separate modules (on the same chip) that listen to the same clock signal as the CPU does, but whose only job is to count how many cycles have passed, and provide that information to the program running on the CPU. 
 
+On the MD307, the simplest, and most commonly used, timer peripheral is called *SysTick* and it has the following register block: 
+<hr>
 
+<large><b>SysTick</b></large>
 
+Base address: 
 
+{{python quickguide-generator/main.py baseaddress SysTick}}
+
+<p>
+<b> Register Block Overview </b>
+
+{{python quickguide-generator/main.py overview-table SysTick}}
+
+</p>
+<hr>
+
+{{python quickguide-generator/main.py register-details SysTick .*CTLR}}
+
+As you can see, this peripheral can be used in quite a number of ways, but for this lecture we will only focus on the most basic use. The registers `STK_CNTL` and `STK_CNTH` make up a 64 bit counter value. That means that the counter can count up to eighteen *quantillion* clock cycles, before it has to restart from zero. (That would take about 4 thousand years, at 144MHz). Usually, we need to count much shorter intervals than that and a long as we are looking at periods shorter than ~30sek (2^32 clocks), we can ignore the `STK_CNTH` register. 
+
+So, if all we want to do is wait for a specific time interval, *t*, we would usually: 
+* Calculate the number of clockcycles, `c` that t corresponds to: 
+  - c = t [sec] * 144000000 [clocks/sec]
+* Set `STK_CNTL` and `STK_CNTH` to zero. 
+* Enable the timer, by setting the first bit (`STE: Enable`) in `STK_CTLR`.
+* Wait until `STK_CNTL` has reached `c`
+
+In C, this would look like: 
+
+```C
+#define SYSTICK_CTLR ((volatile uint32_t *)0xE000F000)
+#define SYSTICK_CNTL ((volatile uint32_t *)0xE000F008)
+
+void main()
+{
+  *SYSTICK_CNTL = 0;                // Clear counter
+  *SYSTICK_CTLR |= 0b101;           // Start the clock and use the system clock (STCLK=1)
+  while(*SYSTICK_CNTL < 144000000); // Wait for one second. 
+  // ...
+}
+```
+
+Alternatively, we can set the *compare value* (`STK_CMPLR` and `STK_CMPHR`) to the number of clock cycles we want to wait, and then check the lowest bit of the *status register*, `STK_SR`. This bit will flip over to 1 when `STK_CNT` reaches `STK_CMP`: 
+
+```C
+#define SYSTICK_CTLR ((volatile uint32_t *)0xE000F000)
+#define SYSTICK_SR   ((volatile uint32_t *)0xE000F004)
+#define SYSTICK_CNTL ((volatile uint32_t *)0xE000F008)
+#define SYSTICK_CNTH ((volatile uint32_t *)0xE000F00C)
+#define SYSTICK_CMPL ((volatile uint32_t *)0xE000F010)
+#define SYSTICK_CMPH ((volatile uint32_t *)0xE000F014)
+void main()
+{
+  *SYSTICK_CNTL = 0;                // Clear counter
+  *SYSTICK_CNTH = 0; 
+  *SYSTICK_CMPL = 144000000;        // Set Compare value
+  *SYSTICK_CMPH = 0;  
+  *SYSTICK_CTLR |= 0b101;           // Start the clock and use the system clock (STCLK=1)
+  while(*SYSTICK_SR == 0); // Wait for one second. 
+  // ...
+}
+```
+
+Besides being a fairly exact way of measuring time, the SysTick timer also runs *independently* of the processor, so we are free to do other things while we are waiting.
+
+In the next lecture, we will start looking at *interrupts*. We can ask SysTick to interrupt the processor when it has reached a specific value, and in that way we can make periodic things run completely independently from the main code. 
+
+#### Waiting Very Short Intervals
+When you start writing code for the ASCII display, you will find that some of the time intervals in that timing diagram are very short indeed. **t<sub>su</sub>**, the time we need to wait after setting the RS/RW signals before setting the E signal is, for example, only 40ns. That is less than six clock cycles on our machine, and setting up SysTick might take longer than that (!). 
+
+For such small intervals, it is better to just run a few `NOP` instructions, that are guaranteed to take *at least* the interval we need. We can do that with *inline assembly* in C, in the following way:  
+
+```C
+__asm__("nop"); // Wait at least 3 cycles
+__asm__("nop");
+__asm__("nop");
+```
 
 
 ### More about pointers

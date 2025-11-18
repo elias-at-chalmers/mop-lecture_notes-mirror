@@ -1,0 +1,696 @@
+{
+    "Arithmetic Instructions": [
+        {
+            "instruction": "LUI",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Load upper immediate into rd",
+            "operands": [
+                "rd",
+                "imm"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                "12-bit signed immediate (-2048 to 2047)"
+            ]
+        },
+        {
+            "instruction": "AUIPC",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Add upper immediate to PC",
+            "operands": [
+                "rd",
+                "imm"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                "12-bit signed immediate (-2048 to 2047)"
+            ]
+        },
+        {
+            "instruction": "ADDI",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Add immediate",
+            "operands": [
+                "rd",
+                "rs1",
+                "imm"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null,
+                "12-bit signed immediate (-2048 to 2047)"
+            ]
+        },
+        {
+            "instruction": "XORI",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "XOR immediate",
+            "operands": [
+                "rd",
+                "rs1",
+                "imm"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null,
+                "12-bit signed immediate (-2048 to 2047)"
+            ]
+        },
+        {
+            "instruction": "ORI",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "OR immediate",
+            "operands": [
+                "rd",
+                "rs1",
+                "imm"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null,
+                "12-bit signed immediate (-2048 to 2047)"
+            ]
+        },
+        {
+            "instruction": "ANDI",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "AND immediate",
+            "operands": [
+                "rd",
+                "rs1",
+                "imm"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null,
+                "12-bit signed immediate (-2048 to 2047)"
+            ]
+        },
+        {
+            "instruction": "SLLI",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Shift left logical immediate",
+            "operands": [
+                "rd",
+                "rs1",
+                "shamt"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null,
+                "5-bit shift amount (0-31)"
+            ]
+        },
+        {
+            "instruction": "SRLI",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Shift right logical immediate",
+            "operands": [
+                "rd",
+                "rs1",
+                "shamt"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null,
+                "5-bit shift amount (0-31)"
+            ]
+        },
+        {
+            "instruction": "SRAI",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Shift right arithmetic immediate",
+            "operands": [
+                "rd",
+                "rs1",
+                "shamt"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null,
+                "5-bit shift amount (0-31)"
+            ]
+        },
+        {
+            "instruction": "ADD",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Add",
+            "operands": [
+                "rd",
+                "rs1",
+                "rs2"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null,
+                null
+            ]
+        },
+        {
+            "instruction": "SUB",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Subtract",
+            "operands": [
+                "rd",
+                "rs1",
+                "rs2"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null,
+                null
+            ]
+        },
+        {
+            "instruction": "XOR",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "XOR",
+            "operands": [
+                "rd",
+                "rs1",
+                "rs2"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null,
+                null
+            ]
+        },
+        {
+            "instruction": "OR",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "OR",
+            "operands": [
+                "rd",
+                "rs1",
+                "rs2"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null,
+                null
+            ]
+        },
+        {
+            "instruction": "AND",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "AND",
+            "operands": [
+                "rd",
+                "rs1",
+                "rs2"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null,
+                null
+            ]
+        },
+        {
+            "instruction": "li",
+            "is_pseudo": true,
+            "implementation": "LUI + ADDI",
+            "description": "Load immediate",
+            "operands": [
+                "rd",
+                "imm"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                "12-bit signed immediate (-2048 to 2047)"
+            ]
+        },
+        {
+            "instruction": "mv",
+            "is_pseudo": true,
+            "implementation": "ADDI rd, rs, 0",
+            "description": "Move register",
+            "operands": [
+                "rd",
+                "rs"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null
+            ]
+        },
+        {
+            "instruction": "neg",
+            "is_pseudo": true,
+            "implementation": "SUB rd, x0, rs",
+            "description": "Negate",
+            "operands": [
+                "rd",
+                "rs"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null
+            ]
+        },
+        {
+            "instruction": "not",
+            "is_pseudo": true,
+            "implementation": "XORI rd, rs, -1",
+            "description": "Bitwise NOT",
+            "operands": [
+                "rd",
+                "rs"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null
+            ]
+        }
+    ],
+    "Control Flow Instructions": [
+        {
+            "instruction": "JAL",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Jump and link",
+            "operands": [
+                "rd",
+                "offset"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                "12-bit signed offset (-2048 to 2047)"
+            ]
+        },
+        {
+            "instruction": "JALR",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Jump and link register",
+            "operands": [
+                "rd",
+                "rs1",
+                "offset"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null,
+                "12-bit signed offset (-2048 to 2047)"
+            ]
+        },
+        {
+            "instruction": "BEQ",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Branch if equal",
+            "operands": [
+                "rs1",
+                "rs2",
+                "offset"
+            ],
+            "restrictions": [
+                null,
+                null,
+                "12-bit signed offset (-2048 to 2047)"
+            ]
+        },
+        {
+            "instruction": "BNE",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Branch if not equal",
+            "operands": [
+                "rs1",
+                "rs2",
+                "offset"
+            ],
+            "restrictions": [
+                null,
+                null,
+                "12-bit signed offset (-2048 to 2047)"
+            ]
+        },
+        {
+            "instruction": "BLT",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Branch if less than",
+            "operands": [
+                "rs1",
+                "rs2",
+                "offset"
+            ],
+            "restrictions": [
+                null,
+                null,
+                "12-bit signed offset (-2048 to 2047)"
+            ]
+        },
+        {
+            "instruction": "BGE",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Branch if greater or equal",
+            "operands": [
+                "rs1",
+                "rs2",
+                "offset"
+            ],
+            "restrictions": [
+                null,
+                null,
+                "12-bit signed offset (-2048 to 2047)"
+            ]
+        },
+        {
+            "instruction": "j",
+            "is_pseudo": true,
+            "implementation": "JAL x0, label",
+            "description": "Jump",
+            "operands": [
+                "label"
+            ],
+            "restrictions": [
+                null
+            ]
+        },
+        {
+            "instruction": "jr",
+            "is_pseudo": true,
+            "implementation": "JALR x0, 0(rs)",
+            "description": "Jump register",
+            "operands": [
+                "rs"
+            ],
+            "restrictions": [
+                null
+            ]
+        },
+        {
+            "instruction": "ret",
+            "is_pseudo": true,
+            "implementation": "JALR x0, 0(x1)",
+            "description": "Return from function",
+            "operands": [],
+            "restrictions": []
+        },
+        {
+            "instruction": "call",
+            "is_pseudo": true,
+            "implementation": "JAL x1, symbol",
+            "description": "Call function",
+            "operands": [
+                "symbol"
+            ],
+            "restrictions": [
+                null
+            ]
+        },
+        {
+            "instruction": "beqz",
+            "is_pseudo": true,
+            "implementation": "BEQ rs, x0, label",
+            "description": "Branch if equal to zero",
+            "operands": [
+                "rs",
+                "label"
+            ],
+            "restrictions": [
+                null,
+                null
+            ]
+        },
+        {
+            "instruction": "bnez",
+            "is_pseudo": true,
+            "implementation": "BNE rs, x0, label",
+            "description": "Branch if not equal to zero",
+            "operands": [
+                "rs",
+                "label"
+            ],
+            "restrictions": [
+                null,
+                null
+            ]
+        }
+    ],
+    "Load and Store Instructions": [
+        {
+            "instruction": "LB",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Load byte",
+            "operands": [
+                "rd",
+                "offset(rs1)"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null
+            ]
+        },
+        {
+            "instruction": "LH",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Load halfword",
+            "operands": [
+                "rd",
+                "offset(rs1)"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null
+            ]
+        },
+        {
+            "instruction": "LW",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Load word",
+            "operands": [
+                "rd",
+                "offset(rs1)"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null
+            ]
+        },
+        {
+            "instruction": "SB",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Store byte",
+            "operands": [
+                "rs2",
+                "offset(rs1)"
+            ],
+            "restrictions": [
+                null,
+                null
+            ]
+        },
+        {
+            "instruction": "SH",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Store halfword",
+            "operands": [
+                "rs2",
+                "offset(rs1)"
+            ],
+            "restrictions": [
+                null,
+                null
+            ]
+        },
+        {
+            "instruction": "SW",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Store word",
+            "operands": [
+                "rs2",
+                "offset(rs1)"
+            ],
+            "restrictions": [
+                null,
+                null
+            ]
+        },
+        {
+            "instruction": "la",
+            "is_pseudo": true,
+            "implementation": "AUIPC + ADDI",
+            "description": "Load address",
+            "operands": [
+                "rd",
+                "symbol"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null
+            ]
+        }
+    ],
+    "Compare and Set Instructions": [
+        {
+            "instruction": "SLTI",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Set less than immediate",
+            "operands": [
+                "rd",
+                "rs1",
+                "imm"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null,
+                "12-bit signed immediate (-2048 to 2047)"
+            ]
+        },
+        {
+            "instruction": "SLTIU",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Set less than immediate unsigned",
+            "operands": [
+                "rd",
+                "rs1",
+                "imm"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null,
+                "12-bit signed immediate (-2048 to 2047)"
+            ]
+        },
+        {
+            "instruction": "SLT",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Set less than",
+            "operands": [
+                "rd",
+                "rs1",
+                "rs2"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null,
+                null
+            ]
+        },
+        {
+            "instruction": "SLTU",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Set less than unsigned",
+            "operands": [
+                "rd",
+                "rs1",
+                "rs2"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null,
+                null
+            ]
+        },
+        {
+            "instruction": "seqz",
+            "is_pseudo": true,
+            "implementation": "SLTIU rd, rs, 1",
+            "description": "Set if equal to zero",
+            "operands": [
+                "rd",
+                "rs"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null
+            ]
+        },
+        {
+            "instruction": "snez",
+            "is_pseudo": true,
+            "implementation": "SLTU rd, x0, rs",
+            "description": "Set if not equal to zero",
+            "operands": [
+                "rd",
+                "rs"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null
+            ]
+        },
+        {
+            "instruction": "sgtz",
+            "is_pseudo": true,
+            "implementation": "SLT rd, x0, rs",
+            "description": "Set if greater than zero",
+            "operands": [
+                "rd",
+                "rs"
+            ],
+            "restrictions": [
+                "Destination register cannot be x0 (writes ignored if rd=x0)",
+                null
+            ]
+        }
+    ],
+    "System Instructions": [
+        {
+            "instruction": "FENCE",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Memory fence",
+            "operands": [
+                "pred",
+                "succ"
+            ],
+            "restrictions": [
+                null,
+                null
+            ]
+        },
+        {
+            "instruction": "FENCE.I",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Instruction fence",
+            "operands": [],
+            "restrictions": []
+        },
+        {
+            "instruction": "ECALL",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Environment call",
+            "operands": [],
+            "restrictions": []
+        },
+        {
+            "instruction": "EBREAK",
+            "is_pseudo": false,
+            "implementation": null,
+            "description": "Breakpoint",
+            "operands": [],
+            "restrictions": []
+        }
+    ]
+}

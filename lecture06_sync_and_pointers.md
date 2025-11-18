@@ -345,17 +345,269 @@ __asm__("nop");
 __asm__("nop");
 ```
 
-
 ### More about pointers
+> TODO: This lecture is getting very long. I should probably move the things below to a later lecture. 
 
 #### Pointer Arithmetic
+There are some peculiarities about what happens when we perform mathematical operations on pointers. We will illustrate why with a little example: Let's pretend that we know that there is a big chunk of free memory at address `0x30000000` and we want to read a second of music samples from somewhere (maybe from an ADC connected to our MD307) and put them there: 
+
+```C
+float ReadValue(); // We expect this function to exist in some other file.
+int main()
+{
+    unsigned int FREE_MEM_ADDRESS = 0x30000000;
+    float * output_pointer = (float *) FREE_MEM_ADDRESS;
+    for(int i=0; i<44100; i++) {
+        *output_pointer = ReadValue(); 
+        output_pointer = output_pointer + 1;
+    }
+}
+```
+
+This code would work just fine, which might surprise you, considering line 8. Since we are now reading and storing floating point values (four bytes), the address that `output_pointer` points to must be increased by 4, in every iteration of the loop. When adding **x** to a pointer that points to a value of type **y**, we are telling the compiler to add `x * sizeof(y)` to the address. So, for example: 
+
+```C
+int main() {
+    char * char_pointer = (char *) 0x20000000;
+    short * short_pointer = (short *) 0x2000000; 
+    int * int_pointer = (int *) 0x20000000; 
+    char_pointer += 1;  // Now points to address 0x20000001
+    short_pointer += 1; // Now points to address 0x20000002
+    int_pointer += 1;   // Now points to address 0x20000004
+}
+```
+
+This might seem strange, but actually leads to much cleaner code in many cases. You will probably end up in situations where you get this wrong, however, and one of them might be when you write something like this: 
+
+```C
+#define SYSTICK_BASE_ADDRESS 0xE000F000
+#define SYSTICK_CTLR ((volatile uint32_t *)BASE_ADDRESS + 0x0)
+#define SYSTICK_SR   ((volatile uint32_t *)BASE_ADDRESS + 0x4)
+#define SYSTICK_CNTL ((volatile uint32_t *)BASE_ADDRESS + 0x8)
+#define SYSTICK_CNTH ((volatile uint32_t *)BASE_ADDRESS + 0xC)
+```
+
+Here, when the compiler calculates the address for `SYSTICK_SR`, for instance, it will *first* cast `BASE_ADDRESS` to a `uint32_t *`, and *then* add 4. Since it adds to a pointer to a four byte value, the actual address will become `BASE_ADDRESS + 4 * 4`, which is completely wrong. In this case, the fix is to add a parenthesis: 
+```C
+#define SYSTICK_SR   ((volatile uint32_t *)(BASE_ADDRESS + 0x4))
+```
+
+
+
+
+#### Indexed Access
+
+Since pointers are often used to point out the *starting address* of a list of elements in memory, and we add an offset from that address to access a specific element, there is an alternative way of writing this: 
+```C
+float ReadValue(); // We expect this function to exist in some other file.
+int main()
+{
+    float * free_mem_pointer = (float *) 0x30000000;
+    for(int i=0; i<44100; i++) {
+        big_sram_pointer[i] = ReadValue(); 
+    }
+}
+```
+The syntax `ptr[i]` is *equivalent* to `*(ptr + i)`; It means "Take the address that `ptr` points to, increase it by the size of `i` *elements*, and dereference that pointer".
+
 
 #### Arrays
+In the previous sections, we have seen examples of iterating through a list of variables (an array) when we know the absolute starting address of the list. Obviously, C supports allocating arrays of elements without hard-coded addresses as well:
+```C
+short value_array[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+int main()
+{
+    int square_array[10];
+    for(int i=0; i<10; i++) {
+        square_array[i] = value_array[i] * value_array[i];
+    }
+}
+```
+
+Hopefully, the syntax is fairly intuitive from your knowledge of other imperative languages (e.g., Java). On the first line, we declare that we want an array of `short` (2 byte) elements. The square brackets can be empty, because we immediately define the values of the array on the same line (comma-separated within the curly brackets). Since this array is declared outside of any function, the memory for the array will be allocated in the *initialized data area*. The compiler will count the number of elements and knows the size of each element and allocates memory for the array before the program starts. The variable `value_array` is a `const` pointer (a pointer that cannot be changed) to the first element of the allocated array.
+
+On line 4, another array is declared. This time, no initial values are given and so the size of the array must be given within the square brackets. Since this array is local, it will be allocated on the stack and will only "exist" while the function is running. Note that, unlike higher level languages, an array in C is always of constant size, since the compiler needs to know the size when producing the code [^2].
+
+[^2]: Allocating memory dynamically is possible, and common practice, when writing programs for machines with operating systems. How this works is discussed in detail in the Course Book, Chapter 6. 
+
+The program then enters a loop and, at each iteration, the i:th element in the first array is squared and the result is stored in the second array. This is done, just as in the previous sections, using the pointers to the start of the arrays in memory (`value_array` and `square_array`). 
 
 #### Pointers as Function Parameters
+Let's say we want to isolate the code that squares the values of an array in a function. This is done by passing the pointers to the start of the arrays as arguments to the function: 
+```C
+void SquareArray(short * src_array, int * dst_array, int num_elements) {
+    for(int i=0; i<num_elements; i++) {
+        dst_array[i] = src_array[i] * src_array[i];
+    }
+}
+
+int main()
+{
+    short value_array[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    int square_array[10];
+    SquareArray(value_array, square_array, 10); 
+}
+```
+
+After the call to `SquareArray` on line 11, the array `square_array` will contain the squares, just as before. It is worth remembering here that we have claimed previously that *all* function parameters in C are sent *by value*. Yet, the contents of `square_array` are changed after the function call. This is because the array itself is *not* a function parameter. The parameter is a single *pointer* to the start of the array, and that pointer is copied as a function parameter.
+
+In the same way, we can use pointers to variables when we want to change the value of "a parameter" (where we would have used pass by reference in other languages): 
+```C
+void swap(int * x, int * y) {
+    int temp = *y; 
+    *y = *x;
+    *x = temp; 
+}
+
+int main()
+{
+    int a = 1, b = 2;
+    swap(&a, &b);
+    // a now equals 2 and b equals 1
+}
+```
+This example was discussed in the introduction, but bears repeating now that you have a better grasp of what pointers are. The function `swap` takes as input *pointers* to two integers, which allows it to modify the values that they point at. 
 
 #### Strings
+In C, there is no built-in or otherwise special datatype to represent strings. Instead, a string is simply a certain number of characters (bytes) stored contiguously in memory, i.e., an array of `char`. Each character is represented by a single byte (which can have a value between 0 and 255) and each character is assigned a certain value. The mapping between byte values and characters is defined in the ASCII standard[^3]. This standard also contains some non-characters. For instance, the byte value 10 means "end of line" and the byte value 0 means "end of string". When we want to do operations on strings, for example compare two strings and see if they are equal, we do this by passing around the \textit{pointer} to the beginning of the strings:
+
+[^3]: More info on the ASCII standard at [https://en.wikipedia.org/wiki/ASCII](https://en.wikipedia.org/wiki/ASCII)
+
+```C
+int compare_string(char * str0, char * str1)
+{
+    while(1) {
+        char character0 = *str0;
+        char character1 = *str1;
+        if(character0 != character1) return 0;
+        if(character0 == 0) return 1;
+        str0 += 1;
+        str1 += 1;
+    }
+}
+```
+
+This function will take the pointer to the starting characters of two strings, then look at the subsequent chars until they either differ (so the strings are not the same and we return 0), or one of them is zero (then we have reached the end of the strings and we return 1). 
+
+A string can be declared in several ways: 
+```C
+char * string1 = "Hello";
+char string2[] = "Hello";
+char string3[] = {'H', 'e', 'l', 'l', 'o', 0};
+char string4[] = {72, 101, 108, 108, 111, 0};
+```
+
+All of these declarations represent exactly the same string.
+
 
 #### Pointers to Pointers
+We have seen how pointers can be used to point to basic datatypes such as `int` or `char`. In this section we will see that we often need pointers that point to other pointers. 
+
+```C
+int main()
+{	
+    int a = 0x1234; 
+    int * ptr_to_a = &a; 
+    int ** ptr_to_ptr_to_a = &ptr_to_a; 
+}
+```
+
+<p align="center">
+  <img src="images/doublepointer.png" alt="My image" width="75%" />
+</p>
+
+
+
+The code and figure above show an example of declaring a pointer to another pointer. As you can see, it works exactly the same as creating a pointer for any other type: 
+```C
+    int ** ptr_to_ptr_to_a = &ptr_to_a; 
+```
+The type of a "pointer to a pointer to an integer" is `int **`, and to get the address of a pointer, we use the `&` character just as before. 
+
+Let's revisit the example of a `swap` function one more time, but this time we want to swap two *pointers*: 
+```C
+void swap(char ** x, char ** y) {
+    char * temp = *y;
+    *y = *x;
+    *x = temp;
+}
+
+int main()
+{	
+    char * name0 = "Chimpanzee";
+    char * name1 = "Bonobo";
+    swap(name0, name1); 
+    // name0 now points to "Bonobo" and name1 to "Chimpanzee"
+}
+```
+
+The variables `name0` and `name1` are both *pointers* to the places in memory where two text strings start. We want to swap these two pointers, so that `name0` points to the start of the string "Bonobo" and `name1` points to the start of the string "Chimpanze" (without actually changing any of the strings).
+
+Just as in the previous `swap` example, we cannot send `name0` and `name1` as parameters to the swap function, since they will be copied to the stack and any changes will be local to the swap function. Instead, we send pointers to `name0` and `name1`, which are dereferenced in the swap function to change their respective contents. 
+
+Thus, the the parameters to the swap function are: 
+```C
+void swap(char ** x, char ** y)
+```
+That is, `x` is a "pointer to a pointer to a char". When dereferenced we have that `*x` is a "pointer to a char". 
 
 #### Function Pointers
+
+We will conclude this lecture by talking about *function pointers*. Just as a pointer can point to the beginning of a string of characters in memory, it can point to the beginning of a piece of code in memory (a function). This can be extremely useful as it, for instance, allows us to send a function as a parameter to another function. Let's consider a very simple toy example: 
+
+```C
+int function(int a) {
+    return a + 1; 
+}
+int main() {
+    int (*function_ptr)(int) = &function; 
+    int a = (*function_ptr)(1);
+}
+```
+
+On line 5, we declare a new function pointer and assign it the address of an existing function. On line 6, we then dereference that function pointer (which gives us a function) and call that function with the parameter 1. There is really nothing new about this, a function is just another thing that we can point to, but the *syntax* is often quite confusing to beginners[^4].
+
+[^4]: Okay, the syntax can be confusing to experienced programmers too.
+
+A function pointer is declared as: 
+```
+<return type of function> (*<name of function pointer>)(<parameters of function>)
+```
+
+The pointer (address) to a specific function is obtained with the `&` operator just as for any other data type, and that pointer can be dereferenced to call the actual function with the `*` operator, as we saw in the previous example. However, somewhat surprisingly, it is *also* allowed to use the function name itself to mean "the address of this function" and to call the function pointer without dereferencing it. Thus, the example above *can* look like: 
+
+```C
+int main() {
+    int (*function_ptr)(int) = function; 
+    int a = function_ptr(1);
+}
+```
+
+This code is equivalent and arguably "prettier", but it is less consistent with how pointers to ordinary data types work. 
+
+Let us look at a slightly more useful example of using function pointers: 
+```C
+int Double(int value) {
+    return 2 * value;
+}
+int Square(int value) {
+    return value * value;
+}
+void map(int (*an_operation)(int), int * items, int num_items)
+{
+    for(int i=0; i<num_items; i++) {
+        items[i] = (*an_operation)(items[i]); 
+    }
+}
+int main()
+{
+    int values[] = {1, 2, 3, 4};
+    map(Double, values, 4); // Double every item in values
+    map(Square, values, 4); // Square every item in values
+    // values is now {4, 16, 36, 64}
+}
+```
+
+Here, we create a general function called `map` that takes as input a list of items, and an operation that shall be performed on each item. There is nothing new in this example, so go through the code and make sure you understand how it works. 
+
+

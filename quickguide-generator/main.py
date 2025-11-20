@@ -19,6 +19,8 @@ middle_css = "style = 'width: 1%;'"
 unused_css = "style = 'background-color: lightgray;'"
 th_css = "style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: \"Arial Narrow\", sans-serif;'"
 td_css = "style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: \"Arial Narrow\", sans-serif;'"
+td_rotated_css = "style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: \"Arial Narrow\", sans-serif;'"
+
 td_gray_css = "style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: \"Arial Narrow\", sans-serif;'"
 
 def th(text): 
@@ -109,17 +111,24 @@ def summarize_fields(fields):
         if match:
             prefix, number = match.groups()
             groups[prefix].append((int(number), clean_whitespace(entry.get("description", ""))))
+        else: 
+            prefix = name
+            number = 1
+            groups[prefix].append((int(number), clean_whitespace(entry.get("description", ""))))
 
     overview = []
     for prefix, items in groups.items():
-        numbers = [n for n, _ in items]
-        desc = ""
-        # try to grab the description from the lowest-numbered entry
-        for n, d in sorted(items):
-            if d:
-                desc = d
-                break
-        overview.append(f"<b>{prefix}</b>n (n = {min(numbers)}..{max(numbers)}): {desc}")
+        if(len(groups[prefix]) == 1):
+            overview.append(f"<b>{prefix}</b>: {groups[prefix][0][1]}")
+        else: 
+            numbers = [n for n, _ in items]
+            desc = ""
+            # try to grab the description from the lowest-numbered entry
+            for n, d in sorted(items):
+                if d:
+                    desc = d
+                    break
+            overview.append(f"<b>{prefix}</b>n (n = {min(numbers)}..{max(numbers)}): {desc}")
 
     return overview
 
@@ -164,7 +173,12 @@ def PrintRegisterDetails(r):
                 html += "</td>"
             # Draw field
             #html += "<td colspan=" + str(f["width"]) + ">" 
-            html += "<td colspan=" + str(f["width"]) + " " + td_css + ">" 
+
+            # Check if we need to rotate
+            if(f["width"] == 1 and len(f["name"]) > 2):
+                html += "<td colspan=" + str(f["width"]) + " " + td_rotated_css + ">" 
+            else: 
+                html += "<td colspan=" + str(f["width"]) + " " + td_css + ">" 
             html += "<small>" + f["name"] + "</small></td>\n"
             bit = f["offset"]        
 
@@ -197,7 +211,6 @@ if(sys.argv[1] == "overview-table"):
     
     found = False
     for p in peripherals:
-
         if p.find('name').text != sys.argv[2]: continue
         found = True
         p_name = p.find('name').text
@@ -209,23 +222,36 @@ if(sys.argv[1] == "overview-table"):
         print("Peripheral " + sys.argv[2] + " not found")
         exit(1)
 
-if(sys.argv[1] == "baseaddress"):
-    if(len(sys.argv) != 3):     
-        print("Usage: " + sys.argv[0]  + "baseaddress <peripheral-regexp>")
+if sys.argv[1] == "baseaddress":
+    if len(sys.argv) != 3:
+        print("Usage: " + sys.argv[0] + " baseaddress <peripheral-regexp>")
         exit(1)
-    
+
     pattern = re.compile(sys.argv[2])
 
-    found = False
+    matches = []
     for p in peripherals:
+        name = p.find('name').text
+        if pattern.match(name):
+            matches.append(p)
 
-        if not pattern.match(p.find('name').text): continue
-        found = True
-        p_name = p.find('name').text
-        html += p_name + ": <code>" + p.find("baseAddress").text + "</code><br>\n"
-    if not found:
+    if not matches:
         print("Peripheral matching " + sys.argv[2] + " not found")
         exit(1)
+
+    # Exactly one match: Don't print name
+    if len(matches) == 1:
+        p = matches[0]
+        p_name = p.find("name").text
+        base = p.find("baseAddress").text
+        html += f"<code>{base}</code><br>\n"
+
+    # Multiple matches → normal output
+    else:
+        for p in matches:
+            p_name = p.find("name").text
+            base = p.find("baseAddress").text
+            html += p_name + ": <code>" + base + "</code><br>\n"
 
 if(sys.argv[1] == "register-details"):
     if(len(sys.argv) != 4):     

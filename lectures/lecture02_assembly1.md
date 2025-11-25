@@ -1,8 +1,7 @@
 ---
-title: Lecture 02 - Assembly on RISCV
+title: Lecture 02 - Assembly on RISC-V
 ---
 
-# The RISC-V Instruction Set Architecture (ISA)
 
 <!-- markdownlint-disable MD012 -->
 <!-- markdownlint-disable MD022 -->
@@ -12,13 +11,21 @@ title: Lecture 02 - Assembly on RISCV
 [Unpriveleged ISA](https://drive.google.com/file/d/1uviu1nH-tScFfgrovvFCrj7Omv8tFtkp/view)
 [RISC-V Assembly Programmer’sManual](https://github.com/riscv-non-isa/riscv-asm-manual/releases/download/v0.0.1/riscv-asm.pdf)
 
+---
+
 **Text and excercises in the Workbook (Arbetsboken)**
 Chapter 1, Pages 7-16
 Chapter 1, Pages 24-33
 
+---
+
 **Things that are in the Workbook that should possibly be in this lecture**
 MUL/DIV, (Arrays)
 
+---
+In this lecture you will learn about the basics of assembly programming on a small RISC-V processor. 
+
+# The RISC-V Instruction Set Architecture (ISA)
 
 In this course, you will learn to program a microcontroller based on a RISC-V processor. Today, almost every phone, computer, or smart device runs on a processor from one of a handful of companies (e.g. ARM, Intel). RISC-V changes that: it’s an open alternative that anyone can use, extend, and build on, and it is becoming increasingly important in both industry and research. In this course, you’ll learn to program real hardware built on RISC-V. So what does it mean to be a "RISC-V" processor?
 
@@ -258,7 +265,7 @@ We have seen the basic instructions that let us perform calculations on constant
 
 It is important to understand that *all* communication with things outside the processor core happens via load/store operations. Our processor has an SRAM (a 64KB read/write memory module) mapped to the address range `0x20000000-0x2000FFFF`, so any reads or writes to addresses within that range will go to memory. Other memory areas are the "System Control Space" and the "Peripheral Registers" area. You can see an overview of the memory mapping in the figure below. We will talk about how these other areas are used later on in the course, but for now we will stick to the SRAM. 
 
-![](images/address_space.png)
+![](../images/address_space.png)
 
 ### Loading data from memory
 
@@ -388,13 +395,13 @@ Whatever type of memory module you encounter, the data will be stored as *bits* 
 
 On more modern hardware, and specifically on our CH32F307, the registers are 32 bits wide, and it is much more common that we want to load or store 32 bits at once. Therefore, the data bus is 32 bits wide so that we can send an address to the memory "chip" [^9] and read a whole 32-bit word in one cycle. The figure below illustrates such a read operation, where the processor reads a 4-byte word, starting at the address `0x20000008`. 
 
-![](images/valid_word_access.png)
+![](../images/valid_word_access.png)
 
 > TODO: Make memory grow upwards. 
 
 This works fine. The processor will put the *byte* address `0x20000008` on the address bus, and the address logic can divide this by 4 to find which *word* it should put on the data bus. Now consider what happens if the processor wants to read a 4-byte word starting at address `0x20000006` instead: 
 
-![](images/invalid_word_access.png)
+![](../images/invalid_word_access.png)
 
 Now we have a problem. A 4-byte word starting at `0x20000006` would span over *two* rows in the memory. The memory module cannot simply pick one of the words and put it on the data bus. The solution would be to first put the word starting on `0x20000004` in a register, then shift that two bytes to the right, then read the word starting at `0x20000008` in another register and shift that two bytes to the left, and finally ORing these two registers onto the data bus. 
 
@@ -406,7 +413,7 @@ Another way to say this is that a 4-byte word must be 4-byte *aligned* in memory
 
 What if we try to read or write a 2-byte word? This is illustrated in the two figures below: 
 
-| ![Image 1](images/valid_halfword_access.png) | ![Image 2](images/invalid_halfword_access.png) |
+| ![Image 1](../images/valid_halfword_access.png) | ![Image 2](../images/invalid_halfword_access.png) |
 |------------------------|------------------------|
 
 When trying to access a halfword (2 bytes) at address `0x20000006` the address logic can simply divide the address by four to find the row in memory containing the halfword. It can then use the remainder as input to a MUX that chooses the upper or lower part of the word to put on the data bus. This logic is simple enough to include in the memory chip, and completes in a single cycle, so this access is allowed. 

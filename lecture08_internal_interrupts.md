@@ -1,4 +1,8 @@
-# Internal Interrupts
+---
+title: Lecture 08 - Internal Interrupts
+---
+
+
 
 ## What are interrupts and exceptions? 
 Go through exceptions traps faults and so on

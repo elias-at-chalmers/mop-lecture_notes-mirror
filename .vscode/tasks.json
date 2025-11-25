@@ -8,10 +8,9 @@
             "args": [
                 "${file}",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}.html",
+                "${fileDirname}/html/${fileBasenameNoExtension}.html",
                 "--lua-filter=quickguide-generator/include-html.lua",
                 "--standalone",
-                "--embed-resources",
                 "--css",
                 "style.css",
                 "--ascii"

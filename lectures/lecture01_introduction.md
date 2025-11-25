@@ -1,4 +1,6 @@
-Lecture 1 - Introduction
+---
+title: Lecture 01 - Introduction
+---
 
 What is Machine Oriented Programming?
 ===============================================================================

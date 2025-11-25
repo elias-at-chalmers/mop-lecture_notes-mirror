@@ -24,7 +24,7 @@ We saw in the previous lecture that the physical pins on the connector are conne
 [^1]: Of course, in reality, both registers are physically connected to the pin all the time, but the connection can be switched by a transistor.
 
 <p align="center">
-  <img src="images/in_out_switch.png" alt="My image" width="75%" />
+  <img src="../images/in_out_switch.png" alt="My image" width="75%" />
 </p>
 
 
@@ -35,7 +35,7 @@ We saw in the previous lecture that the physical pins on the connector are conne
 The simplest input device we could connect is arguably a single button, so let's start there. How does a button work? How can we connect it to our computer? This image suggests a pretty good start:
 
 <p align="center">
-  <img src="images/simple_button.png" alt="My image" width="75%" />
+  <img src="../images/simple_button.png" alt="My image" width="75%" />
 </p>
 
 On the right side, we illustrate a simple push button, of the kind you can buy from any [electronics outlet](https://www.electrokit.com/tryckknapp-12.2mm-1-pol-off-onrod). The button has cables connected to two terminals and when you push the button down, these come into contact and a current can run through the circuit.
@@ -47,7 +47,7 @@ We would like be certain that if we read the bit when the button is released, th
 The standard way to solve this problem is to add a small "Pull-Down Resistor", as in the image below:
 
 <p align="center">
-  <img src="images/simple_pull_down.png" alt="My image" width="75%" />
+  <img src="../images/simple_pull_down.png" alt="My image" width="75%" />
 </p>
 
 Now, if the button is released (as in the image), pin 5 is still connected to ground (through the resistor), so the potential is 0V. If we read the bit it will be `0`. We say that this new connection "*pulls* the floating signal *down* to ground". If the button is pushed down, pin 5 is directly connected to 3.3V, as before, so if we read the bit it will be `1`.
@@ -57,8 +57,8 @@ Because the resistor connects 3.3V to ground when the button is pressed, a small
 Whether we need this pull down resistor or not depends entirely on what we have connected. We could, for instance, connect the same button but connect one of the terminals (the blue cable) to `GND` instead of V<sub>dd</sub>. In that case, we know that we will get a 0 when the button is pressed, but to avoid a floating value when the button is released, we need to connect a "Pull-Up Resistor", to 3.3V. This is illustrated in the left image below. We say that "the floating signal is *pulled* *up* to 3.3V".
 
 <p align="center">
-  <img src="images/pull-up.png" alt="My image" width="45%" />
-  <img src="images/no-pull.png" alt="My image" width="45%" />
+  <img src="../images/pull-up.png" alt="My image" width="45%" />
+  <img src="../images/no-pull.png" alt="My image" width="45%" />
 </p>
 
 A push button is a *Passive Component*. In the right image above, we have connected an *Active Component* (Perhaps an OR gate, or a DAC). This chip will put *either* 0 or 3.3V on its output pin (it is never floating), and then we don't need any pull-up or pull-down resistors.
@@ -70,7 +70,7 @@ This might seem confusing at first. We have seen that the `OUTDR` register is us
 So, if we need a pull-down resistor for the button connected to pin 2 (as in the image) we activate pull up/down, and we set bit 2 of the `OUTDR` register to 0 (GND). This will, exactly as before, ensure that a floating input is "pulled down" to 0V.
 
 <p align="center">
-  <img src="images/built-in-pull.png" alt="My image" width="75%" />
+  <img src="../images/built-in-pull.png" alt="My image" width="75%" />
 </p>
 
 Now, let's revisit relevant parts from the [Quickguide](LINK) to see how we configure our pin:
@@ -126,7 +126,7 @@ The interesting question is why we would ever do something else? You will see la
 
 **Example:** *We have a system where pins 3 and 5 will be set to zero if some error has occurred. We want to connect a red LED that warns us if either of these error-pins are zero:*
 <p align="center">
-  <img src="images/two_pins_one_led.PNG" alt="My image" width="75%" />
+  <img src="../images/two_pins_one_led.PNG" alt="My image" width="75%" />
 </p>
 
 Now, consider what happens if we connect the LED as in the image above and configure pins 3 and 5 as push-pull outputs:
@@ -188,7 +188,7 @@ blink:
 Now that you know everything worth knowing about the GPIO ports let us take a look at a more interesting device. In the simulator and on the lab equipment, there is a *keypad* with 16 keys. An image of the keypad, along with an illustration of how it is connected is given in the image below:
 
 <p align="center">
-  <img src="images/keypad.png" alt="My image" width="75%" />
+  <img src="../images/keypad.png" alt="My image" width="75%" />
 </p>
 
 It would, of course, be possible to build a simple keyboard where each key was connected to its own GPIO pin, but that would require very many pins (and thick cables) for large keyboards. Instead, the keys in your computer keyboard, or your digital piano, for that matter, are usually connected similarly to this one. 

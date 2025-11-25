@@ -1,3 +1,7 @@
+---
+title: Lecture 02 - Assembly on RISCV
+---
+
 # The RISC-V Instruction Set Architecture (ISA)
 
 <!-- markdownlint-disable MD012 -->

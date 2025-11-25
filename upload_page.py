@@ -32,6 +32,44 @@ def extract_title(html_text):
         raise ValueError("HTML file has no <title> tag.")
     return match.group(1).strip()
 
+# ------------------------------------------------------
+# Inject local style.css into HTML <head>
+# ------------------------------------------------------
+def inject_css_into_html(html_text, html_dir):
+    css_path = os.path.join(html_dir, "style.css")
+    if not os.path.exists(css_path):
+        print("No style.css found; skipping CSS embedding.")
+        return html_text
+
+    with open(css_path, "r", encoding="utf-8") as f:
+        css = f.read()
+
+    css_comment = "\n/* --- Injected from style.css --- */\n"
+    injected_css = css_comment + css + "\n"
+
+    # CASE 1: There is an existing <style> ... </style>
+    style_match = re.search(r"<style[^>]*>(.*?)</style>", html_text, flags=re.IGNORECASE | re.DOTALL)
+    if style_match:
+        original_style_block = style_match.group(0)
+        original_style_content = style_match.group(1)
+
+        # Merge into existing style block
+        new_style_content = original_style_content + injected_css
+        new_style_block = re.sub(
+            r"<style[^>]*>.*?</style>",
+            f"<style>{new_style_content}</style>",
+            original_style_block,
+            flags=re.DOTALL
+        )
+
+        html_text = html_text.replace(original_style_block, new_style_block)
+        return html_text
+
+    # CASE 2: No <style> block → inject at top of <head>
+    return html_text.replace(
+        "</head>",
+        f"<style>{injected_css}</style></head>"
+    )
 
 # ------------------------------------------------------
 # Slugify title for Canvas page URL
@@ -115,6 +153,15 @@ def upload_canvas_page(html_path):
     # Read HTML
     with open(html_path, "r", encoding="utf-8") as f:
         html_content = f.read()
+
+    # Inject CSS before processing images
+    html_dir = os.path.dirname(html_path)
+    html_content = inject_css_into_html(html_content, html_dir)
+
+    # DEBUG: write modified HTML to a temp file for inspection
+    with open("temp.html", "w", encoding="utf-8") as debug_out:
+        debug_out.write(html_content)
+    print("Wrote debug output to temp.html")
 
     # Get page title
     page_title = extract_title(html_content)

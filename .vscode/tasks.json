@@ -8,11 +8,11 @@
             "args": [
                 "${file}",
                 "-o",
-                "${fileDirname}/html/${fileBasenameNoExtension}.html",
+                "${fileDirname}/../html/${fileBasenameNoExtension}.html",
                 "--lua-filter=quickguide-generator/include-html.lua",
                 "--standalone",
                 "--css",
-                "style.css",
+                "../style.css",
                 "--ascii"
             ],
             "group": {

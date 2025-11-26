@@ -42,6 +42,7 @@ On the right side, we illustrate a simple push button, of the kind you can buy f
 
 We have connected one of these cables to the V<sub>dd</sub> (3.3V) pin, and the other to pin 5 (which is configured as an input pin). Thus, when the button is pushed down, we have 3.3V at the pin, and we can read `1` in the corresponding bit in the `INDR` register. But what happens when the button is released (and we are back to the situation in the image)?
 
+<!-- Here "potential" is used instead of "voltage", do we trust the students to know that they're synonyms?  -->
 We would like be certain that if we read the bit when the button is released, the answer should be `0`. But the pin is not connected to *anything* now, so the actual potential at the pin is unknown. The pin is said to be *floating*, and if we read it we might get a 0, or a 1.
 
 The standard way to solve this problem is to add a small "Pull-Down Resistor", as in the image below:
@@ -50,6 +51,7 @@ The standard way to solve this problem is to add a small "Pull-Down Resistor", a
   <img src="../images/simple_pull_down.png" alt="My image" width="75%" />
 </p>
 
+<!-- since you talk about current before and after this parapgraph, I think it would be helpful to explain this "pull-down action" in terms of current. For example: "If the button is released, the resistor (connected to ground) will quickly drain the tiny amount of charge stored in the pin, until the pin's voltage has reached 0V. -->
 Now, if the button is released (as in the image), pin 5 is still connected to ground (through the resistor), so the potential is 0V. If we read the bit it will be `0`. We say that this new connection "*pulls* the floating signal *down* to ground". If the button is pushed down, pin 5 is directly connected to 3.3V, as before, so if we read the bit it will be `1`.
 
 Because the resistor connects 3.3V to ground when the button is pressed, a small *leakage current* will run through this connection, and some energy will be lost. If we use a resistor with a high resistance, the current will be very small, however, and the energy loss will be negligible.
@@ -63,10 +65,12 @@ Whether we need this pull down resistor or not depends entirely on what we have 
 
 A push button is a *Passive Component*. In the right image above, we have connected an *Active Component* (Perhaps an OR gate, or a DAC). This chip will put *either* 0 or 3.3V on its output pin (it is never floating), and then we don't need any pull-up or pull-down resistors.
 
+<!-- nitpicking: maybe emphasize "built in" since it's a big deal for the rest of the section -->
 Since it is so common to connect passive components of various kinds to the GPIO pins, most MCUs have pull-up and -down resistors built into the chip. On the CH32V307, this is implemented as in the image below. When the pin is configured as an input pin, we can activate a pull-up/down resistor. This resistor is connected to the corresponding *output* bit, of the `OUTDR` register.
 
 This might seem confusing at first. We have seen that the `OUTDR` register is used when the pin is configured as an *output* pin, and that the value of the bit sets the voltage of the pin. This is cleverly reused here. When the pin is configured as an input pin, the `OUTDR` register is instead used as a selector that decides whether the resistor should pull up or down. This is equivalent to physically connecting a resistor to either GND or V<sub>dd</sub>, as we did before.
 
+<!-- for clarity, you could add an explanation that if we were to have set the bit 2 in OUTDR to '1' we would have gotten a pull-up configuration --->
 So, if we need a pull-down resistor for the button connected to pin 2 (as in the image) we activate pull up/down, and we set bit 2 of the `OUTDR` register to 0 (GND). This will, exactly as before, ensure that a floating input is "pulled down" to 0V.
 
 <p align="center">
@@ -100,7 +104,7 @@ To choose pull *down*, rather than pull up, resistor, we set bit 2 in `OUTDR` to
 Once the GPIO port is configured, we can read the current status of the input pin by reading the corresponding bit (bit 2 in this case) of the `INDR` register.
 
 In assembly, a program that loops until the button has been pushed could look like:
-
+<!-- maybe add a comment with the binary representation of the hex values to be super clear? -->
 ```
 la t0, GPIO_D_CFGLR      # Configure pin 2 as input with pull up/down active
 li t1, 0x00000200
@@ -135,6 +139,8 @@ Now, consider what happens if we connect the LED as in the image above and confi
 * If both bits are set to 0, current flows from V<sub>DD</sub> through the LED to the pins, and the LED lights up.
 
 *But if one pin outputs 1 and the other outputs 0*, we create a direct short: one pin is actively driving 3.3 V while the other is actively pulling to ground. This causes a large current to flow directly between the two pins instead of through the LED. This is very bad and might damage the transistors inside the microcontroller.
+
+<!-- From grudat, the students are familiar with three state logic and the the high impedance state (when they worked with a bus.) So you could remind them of this, and say that a '1' sets the pin to a high-impedance state  -->
 
 The solution to this problem is to configure the pins as "Open Drain" instead of "Push Pull". In an Open Drain configuration, writing `0` to the corresponding bit drives the pin to 0V, but writing `1` sets it in *floating* mode (it is as if it wasn't connected at all). Now:
 
@@ -194,7 +200,7 @@ Now that you know everything worth knowing about the GPIO ports let us take a lo
 It would, of course, be possible to build a simple keyboard where each key was connected to its own GPIO pin, but that would require very many pins (and thick cables) for large keyboards. Instead, the keys in your computer keyboard, or your digital piano, for that matter, are usually connected similarly to this one. 
 
 The idea is that each pin is connected to one *row* or one *column* of keys. By pressing a button, you will connect one row pin with one column pin. So, if you wanted to know if, e.g., the button labeled `10` in the image was pressed, you could configure pin 2 (the pink column in the image) to be an input pin, with pull-up enabled, and you could output `0` on pin 6. 
-
+<!-- is it necessary to address the "two buttons on same column" sceneario here? I think it's a lot to digest here for the weaker students already -->
 * If no button is pressed, there is no connection, and you will read `1` from pin 2 (because of the pull-up)
 * If button number 10 is pressed, pin 6 and pin 2 are connected, and we will read `0` on pin 2. 
 * If button number 6 is pressed... well then it will depend on whether pin *5* outputs 0 or 1.
@@ -257,6 +263,7 @@ void main()
 
 ### Function parameters{#sec:intro:function_parameters}
 Unlike most modern languages (including C++), C *only* allows passing function parameters *by value*. That means that every time you call a function in C, the parameters are *copied* to the called function. Any changes that happen to the variables in the called function are local to that function:
+<!-- this is just a silly hobbyhorse of mine, but I think informative function names are always more pedagogical. So for example set_to_five(x) instead of f(x) :) -->
 ```C
 void f(int a) {
     a = 5;
@@ -335,6 +342,9 @@ void main()
     int b = a;
     unsigned char c = a * b;
 }
+<!-- typo: the code uses 200.501 but it says 200.5 in the text 
+maybe write 40100.2 in hexadecimal as well to make the casting easier to understand
+-->
 ```
 In the example above, on line 4, the value 200.5 is cast to an integer and stored in variable `b`. Since an integer cannot store a floating point value, it will be truncated to 200. On the next line `b` is first promoted to a floating point number, then `a * b` is calculated as a floating point number (40100.2), then that value is cast to an `unsigned char` and stored in the variable `c`. Since an unsigned char can only store values up to 255, only the lowest byte of the result (`0xA4`) will remain in c.
 
@@ -381,6 +391,7 @@ One important thing to note is that there is no `true` or `false` datatype in C.
 
 ### Conditional operator
 In some simple cases, when a variable is to be assigned a value based on some condition, the *conditional operator* can be a cleaner way to express your intention:
+<!-- "a is set to 20..." is clearer imo -->
 ```C
 // Conditional operator:
 // <variable> = <condition> ? <if condition is true> : <if condition is false>;
@@ -391,7 +402,7 @@ int a = (b > 5) ? 20 : 30; // a is 20 if b is more than 5 and 30 otherwise
 ### Iterating {#sec:language:iterations}
 Writing code that *iterates* or *loops* is also very similar to other imperative languages. The example below illustrates how `for` or `while` loops can be used to achieve the same thing:
 
-
+<!-- to make it even simpler you could write a function with only one argument, like factorial(n) -->
 <center>**for statement:**</center>
 
 ```C
@@ -418,7 +429,7 @@ int pow(int v, int p) {
 ```
 
 The `for` statement is generally used when we are iterating a known number of times, and the `while` statement is used when we only know that we should loop until some condition is met. In either case, we can use the `break` statement to immediately break out of the loop, or the `continue` statement to jump back to the beginning of the loop:
-
+<!-- it's worth reminding them that 1 is equal to true here since they only just learned that -->
 ```C
 int rand(); // Expecting this function to exist elsewhere
             // and that it returns a random number.
@@ -443,6 +454,7 @@ Most of the operators in C will be well known to you, if not from previous codin
 
 ### Arithmetic Operators, (`+, -, *`, etc)
 We have already seen these used in the text and you probably know how they work. Worth noting are the increment and decrement operators. Also make sure you understand the modulus operator.
+<!-- maybe write "Integer division", or is that unnecessarily complicated at this point? -->
 ```C
 int a = 10, b = 3;
 int c = a + b; // Addition

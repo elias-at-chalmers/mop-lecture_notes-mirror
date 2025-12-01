@@ -1,8 +1,8 @@
 # Control Flow and Arrays
 
 **Links:**
-https://projectf.io/posts/riscv-cheat-sheet/
-https://d3s.mff.cuni.cz/files/teaching/nswi200/202324/doc/riscv-abi.pdf
+[RISC-V Cheat Sheet](https://projectf.io/posts/riscv-cheat-sheet/)
+, [RISC-V ABI](https://d3s.mff.cuni.cz/files/teaching/nswi200/202324/doc/riscv-abi.pdf)
 
 **Text and excercises in the Workbook (Arbetsboken)**
 Chapter 1, Pages 17-24

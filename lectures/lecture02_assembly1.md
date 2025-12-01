@@ -1,6 +1,3 @@
----
-title: Lecture 02 - Assembly on RISC-V
----
 
 
 <!-- markdownlint-disable MD012 -->
@@ -9,15 +6,11 @@ title: Lecture 02 - Assembly on RISC-V
 
 **Links:**
 [Unpriveleged ISA](https://drive.google.com/file/d/1uviu1nH-tScFfgrovvFCrj7Omv8tFtkp/view)
-[RISC-V Assembly Programmer’sManual](https://github.com/riscv-non-isa/riscv-asm-manual/releases/download/v0.0.1/riscv-asm.pdf)
-
----
+, [RISC-V Assembly Programmer’sManual](https://github.com/riscv-non-isa/riscv-asm-manual/releases/download/v0.0.1/riscv-asm.pdf)
 
 **Text and excercises in the Workbook (Arbetsboken)**
 Chapter 1, Pages 7-16
 Chapter 1, Pages 24-33
-
----
 
 **Things that are in the Workbook that should possibly be in this lecture**
 MUL/DIV, (Arrays)

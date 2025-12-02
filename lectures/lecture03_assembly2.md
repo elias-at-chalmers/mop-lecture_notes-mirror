@@ -1,18 +1,11 @@
----
-title: Lecture 03 - More Assembly on RISC-V
----
 
 **Links:**
 [RISC-V Cheat Sheet](https://projectf.io/posts/riscv-cheat-sheet/)
 , [RISC-V ABI](https://d3s.mff.cuni.cz/files/teaching/nswi200/202324/doc/riscv-abi.pdf)
 
----
-
 **Text and excercises in the Workbook (Arbetsboken)**
 Chapter 1, Pages 17-24
 Chapter 1, Pages 34-56
-
----
 
 **Things that are in the Workbook that should possibly be in this lecture**
 Sign Extension (not as important in RISCV, but still needs to be handled somewhere)

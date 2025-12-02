@@ -17,7 +17,9 @@
 <p>
 Configuration of the port is done using the <code>CFGLR</code> and <code>CFGHR</code> for the lower eight and upper eight pins, respectively.
 For each pin, there are two bits to set the MODE (Input or Output, and speed of output pins), and two bits to set the CoNFiguration (the meaning of these pins depend on whether the pin is an input pin or an output pin):
+
 {{include quickguide/gpio-cfg.html}}
+
 </p>
 
 

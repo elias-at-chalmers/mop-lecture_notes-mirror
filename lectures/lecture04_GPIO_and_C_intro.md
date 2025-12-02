@@ -1,11 +1,13 @@
 # Introduction to GPIO and C
 
 **Links:**
+[Reference Manual](https://www.wch-ic.com/downloads/CH32FV2x_V3xRM_PDF.html)
 
-Reference Manual: https://www.wch-ic.com/downloads/CH32FV2x_V3xRM_PDF.html
 **Text and excercises in the Workbook (Arbetsboken)**
 
 **Things that are in the Workbook that should possibly be in this lecture**
+
+<hr>
 
 So far, we have focused on the *core* of our processor, the *Qingke V4F*, and how to move data between memory and registers. This would be quite pointless unless the processor was connected to the outside world somehow. Today we will start introducing how to communicate with off-chip devices using the GPIO ports.
 
@@ -18,7 +20,7 @@ A processor chip talks to the outside world through its tiny metal legs, called 
 
 By allowing the processor to directly read or control the logical status of these pins, they can be connected to almost anything, as long as the software drives them with the right values at the right time. In this course, you will go from connecting a single pin to an LED to make it turn on and off, to communicating with an ASCII display via a number of pins. In theory, there is nothing stopping you from connecting some of the pins to an HDMI cable, to drive a monitor, or to a bunch of motors, to drive a radio-controlled car.
 
-![](images/md307_ch32v307_zoom.png)
+![](../images/md307_ch32v307_zoom.png)
 
 The picture above illustrates how the processor chip is connected to the GPIO pins on the MD307. If you look close enough (and turn the board over at times) you can follow a very thin wire from most of the CH32V307's tiny pins to one of the more accessible pins on the top of the board. On this microcontroller, the pins are divided into 16-bit *ports*, labeled A-E. On the bottom of the board, you can see that the pins that make up the ports labeled E and D are also available in a nice little connector layout, that allows us to connect peripheral devices with a standard ribbon cable. The pins on the top of the board, in the image, provide access to the remaining GPIO ports (A-C). 
 
@@ -28,7 +30,7 @@ To read or set a pin's value, we read or write to a specific memory location (th
 When learning programming in almost any language, the starting example is "Hello World.". Similarly, when starting MCU programming, the first thing to try is "Blink", so let's start there. We want to plug in an LED to our MCU and make it blink. This will serve as a first introduction to GPIO programming, and then we will continue with more challenging tasks in the next lecture.
 
 <p align="center">
-  <img src="images/IDC_layout.png" alt="My image" width="80%"/>
+  <img src="../images/IDC_layout.png" alt="My image" width="80%"/>
 </p>
 
 The image above illustrates the physical connector corresponding to the lower byte (pin 0-7) of Port D. Eight of the pins (labeled bit0-bit7 in the image) carry a voltage (0 or 3.3V) depending on whether the corresponding bit in the data register is high or low. There are two additional pins: one is always 0V (GND) and one is always 3.3V.
@@ -203,7 +205,7 @@ In the next lecture, we will start using C to program our microcontroller, and l
 ### Compiling a C program to machine code
 We will now briefly explain how the C code is turned into a binary file that can be executed on your computer or microcontroller. To describe the process of compiling a whole C program, we will use a small example, consisting of a few files: 
 
-![](images/c_figure_3_1.png)
+![](../images/c_figure_3_1.png)
 
 The program consists of three C files: `main.c`, `functions.c`, and `math.c`. With each C file (except `main.c`) there is an accompanying `.h` file that *declares* the functions that we want to be visible to other `.c` files.
 
@@ -220,7 +222,7 @@ gcc -E -P math.c -o math.i
 
 Doing that will generate these three files: 
 
-![](images/c_figure_3_2.png)
+![](../images/c_figure_3_2.png)
 
 ##### The #include statement
 As you can see, the job of the preprocessor is mostly quite simple. When it comes across an `#include "filename"` statement, it will simply cut and paste the contents of the provided file into the `.c` file being preprocessed. For example, in `main.i` it has removed the include statement and inserted the function declatation from `functions.h`.
@@ -244,8 +246,10 @@ gcc -S math.i
 [^6]: In practice, the compiler might skip creating the actual assembly code and merge the compilation step with the assembler step that produces machine code, but sometimes it is very handy to see the human readable assembly code.
 
 The resulting assembly files are: 
+
 > ⚠️ **TODO:** Replace with RISCV example
-![](images/c_figure_3_3.png)
+
+![](../images/c_figure_3_3.png)
 
 You are not expected to understand this assembly code, but we will note a few important things about them. First, we can compile, for instance, the `main.i` file into assembly code *indepenently* of the other files. To create the assembly code for `main.i`, the compiler needs to know that *there exists* a function called `function`, that it returns a `float`, and that it takes a `float` as parameter, but it does not need to know what that function *does*. 
 
@@ -278,7 +282,7 @@ ld main.o functions.o math.o -o program
 
 The linker's main job is to arrange the code in memory, and turn all *symbols* (such as the call to a function called `function`) into actual memory addresses. 
 
-If you have run all of these commands on your host computer, with the appropriate gcc toolchain, the output will be an executable file that will run on your operating system (although it won't actually *do* anything visible). 
+If you had run all of these commands on your host computer, with the appropriate gcc toolchain, the output would be an executable file that would run on your operating system (although it won't actually *do* anything visible). 
 
 If you are cross-compiling for another machine (like the MD307) and have used the appropriate gcc toolchain, this last linking stage will not quite work. You will also have to supply some flags to inform the compiler that it should not expect to find a *runtime* library (which we will talk about later), and you would need to supply a *linker script* that tells the linker in what part of memory to place the functions and variables and where to start running the code.
 

@@ -1,18 +1,27 @@
-# Control Flow and Arrays
+---
+title: Lecture 03 - More Assembly on RISC-V
+---
 
 **Links:**
 [RISC-V Cheat Sheet](https://projectf.io/posts/riscv-cheat-sheet/)
 , [RISC-V ABI](https://d3s.mff.cuni.cz/files/teaching/nswi200/202324/doc/riscv-abi.pdf)
 
+---
+
 **Text and excercises in the Workbook (Arbetsboken)**
 Chapter 1, Pages 17-24
 Chapter 1, Pages 34-56
+
+---
 
 **Things that are in the Workbook that should possibly be in this lecture**
 Sign Extension (not as important in RISCV, but still needs to be handled somewhere)
 Stack frames? (I think överkurs)
 Arrays with multiple dimensions (definitely  överkurs)
 
+---
+
+# Control Flow and Arrays
 This lecture will focus on *Program Control Flow*, i.e., how to make jumps in our code, call subroutines, and make function calls. This will include using the ABI conventions for function parameters and return values, understanding how the *stack* works, and how to deal with *register spilling* (i.e., what to do when we do not have enough registers). We will round of the lecture with a discussion about *arrays* and how they are implemented in assembly.
 
 
@@ -30,7 +39,7 @@ There are only two instructions in RISC-V that perform unconditional jumps (`jal
 
 The word "Link" in these mnemonics means that we store the return address, so that we can return from the jump later.
 
-There are two versions of the jump and link instruction because the simpler one, `jal`, only allows us to jump a certain offset (which is limited to +/- 1MB) [^1] from the current value of `pc`. Since our SRAM (where the code normally resides) is only 64KB in size, that is not normally a problem for us. However, if we need to jump to code in FLASH memory, the distance would be too far for `jal` so we must put our address into a separate register, and then use `jalr`, instead. There are other reasons for using `jalr` which we will encounter shortly.
+There are two versions of the jump and link instruction because the simpler one, `jal`, only allows us to jump a certain offset (which is limited to +/- 1MB) [^1] from the current value of `pc`. Since our SRAM (where the code normally resides) is only 128KB in size, that is not normally a problem for us. However, if we need to jump to code in FLASH memory, the distance would be too far for `jal` so we must put our address into a separate register, and then use `jalr`, instead. There are other reasons for using `jalr` which we will encounter shortly.
 
 [^1]: If you are very awake, you might have noticed that a 20-bit offset should only allow us to jump +/- 0.5MB. However, since all instructions are guaranteed to be 2-byte aligned, the offset in the machine instruction is multiplied by 2 before being added to `pc`.
 
@@ -128,15 +137,17 @@ end:
   # t0 now contains the answer.
 ```
 
-Note that there are no *immediate* versions of the branch instructions. We cannot write `bgt t1, 5, end`, for example, but have to put the value you want to compare against into a register first.
+Note that there are no *immediate* versions of the branch instructions. We cannot write `bgt t1, 5, end`, for example. You have to put the value you want to compare against into a register first.
 
 💡 **Note:** *If you’ve worked with other CPU architectures (perhaps in a previous course), you may notice that branch handling is different on RISC-V. In many older architectures, a branch instruction is preceded by a compare instruction, which compares two values using the ALU and sets condition flags (e.g., Negative, Zero, etc.) in a flag register. In contrast, RISC-V performs these comparisons directly as part of the branch instruction. This design avoids the need for a global condition-code register, simplifying the hardware and reducing potential pipeline dependencies.*
 
+<!---
 ### Branchless (Advanced)
 Explain why branchless can be very good. (branch prediction...)
 Show a = min(b, c) branchless
 Connect to a = (b<c)?b:c
 (there should also be an example where the comparison is reused several times... perhaps not important)
+--->
 
 ## The Stack
 Before we move on to discuss how function calls are implemented, let's quickly recap the *Stack* and learn how it is used on a RISC-V architecture. The stack is a memory area where computer programs can store temporary data. The number of registers on any CPU are limited, so sometimes we need to *push* data to memory, temporarily, and then *pop* (or *pull*) it back into registers when we need it.
@@ -151,7 +162,7 @@ On many architectures, the process might look like this:
   POP {t0, t1, t2}        # Copy the values from the stack, back into t0, t1, and t2
 ```
 
-A stack has one associated register called the *stack pointer* (the ABI convention is to use register `x2`/`sp`). This register always holds the address to the *top of the stack*, i.e., where the last value was pushed. The stack pointer needs to be initialized to point at *the end of* some memory area that is known to be free (called the *bottom of the stack*). By convention, the stack grows downward, from higher to lower memory addresses. Then, when we need to store a value (let's say a 4 byte integer) on the stack, we can store it in memory, at the address held by `sp`, and then reduce the address stored in `sp` by 4 bytes.
+A stack has one associated register called the *stack pointer* (the RISC-V ABI convention is to use register `x2`/`sp`). This register always holds the address to the *top of the stack*, i.e., where the last value was pushed. The stack pointer needs to be initialized to point at *the end of* some memory area that is known to be free (called the *bottom of the stack*). By convention, the stack grows downward, from higher to lower memory addresses. Then, when we need to store a value (let's say a 4 byte integer) on the stack, we can store it in memory, at the address held by `sp`, and then reduce the address stored in `sp` by 4 bytes.
 
 On many architectures, *push* and *pop* are actual instructions, implemented by the hardware, but in RISC-V it is done explicitly with existing instructions. To push register `t0` to the stack, you would write:
 
@@ -179,7 +190,7 @@ As you will see soon, we often want to push several registers to the stack at th
 
 The process is also illustrated in the Figure above.
 
-To pop the values, we just do the same thing in reverse. We first use the current address in the stack-pointer to read out the last three values that were pushed, and then we increase the stack pointer. We do not *remove* the values from the stack, but any subsequent push operation will overwrite that memory:
+To pop the values, we just do the same thing in reverse. We first use the current address in the stack-pointer to read out the last three values that were pushed, and then we increase the stack pointer. We do not *remove* the values from the stack, we just move the pointer, but any subsequent push operation will overwrite that memory:
 
 ```
   lw t2, 0(sp)    # Read the values back into registers
@@ -189,7 +200,9 @@ To pop the values, we just do the same thing in reverse. We first use the curren
 ```
 
 ## Function Calls
-Most high-level languages have the concept of *functions* (sometimes called *subroutines*). A function takes a number of parameters and returns a value. The assembly language does *not* have function calls built into the language but even when writing pure assembly we often want to divide code into functions. Additionally, we want to be able to mix languages. Sometimes we want to write a function in assembly, and call it from our C code, or vice versa. For that to work, it is important that we, as assembly programmers, follow exactly the same rules as the C compiler does.
+Most high-level languages have the concept of *functions* (sometimes called *subroutines*). A function takes a number of parameters and returns a value. The assembly language does *not* have function calls built into the language but even when writing pure assembly we often want to divide code into functions. 
+
+Additionally, we want to be able to mix languages. Sometimes we want to write a function in assembly, and call it from our C code, or vice versa. For that to work, it is important that we, as assembly programmers, follow exactly the same rules as the C compiler does.
 
 Therefore, there are several *conventions* (described by the ABI) that define how function calls should be done. Let us consider a simple function that takes two parameters and returns the smallest:
 
@@ -225,6 +238,7 @@ min:
 In simpler cases, when there are at most eight parameters and each parameter fits into 4 bytes (one 32-bit register), the convention for passing arguments to a function is simple: The parameters are stored, in order, in the `a0`-`a7` registers (as many of them as needed) before calling the function. As long as the return value fits in a single 32-bit register, it is stored in `a0` before returning from the function.
 
 There are a few things to note about this:
+
 * In C, the arguments to a function are often of datatypes that are smaller than 4 bytes (`char` or `short`). In assembly, such variables are, by convention, kept in one 32-bit register each even if several of them *could* be packed into a single register.
 * When the parameters, or return value, are more advanced datatypes (structs in C, or classes in C++) the rules are more complex and they are sometimes sent in the `a` registers and sometimes pushed onto the stack instead. We will cover some of these cases later in this course.
 
@@ -249,6 +263,7 @@ There is one more important thing to consider when writing, or calling, function
 Let's say you have written the function `int max(int a, int b)` in C and that you are linking the compiled code with your assembly program [^2]. You are now given the task to write an assembly program that finds the largest of the *three* values stored in registers `t0`, `t1`, and `t2`. I.e., we want to calculate `max(max(t0, t1), t2)`
 
 You might write the following code:
+
 [^2]: You don't know how to do that just yet, but you will in a few lessons time.
 
 ```
@@ -297,6 +312,7 @@ call max         # After this line a0 contains max(max(t0, t1), t2)...
 In real programs, any code you write will usually be part of a function which means that you are always writing code for a *callee*, but sometimes that function calls another function, making it the *caller*.
 
 To keep things manageable, an assembly programmer will usually follow a simple procedure when writing a function `f`:
+
 * Do most calculations in the `t` (temporary) registers. You can use them freely without pushing to the stack, as the function that called `f` will have saved them if it needed to.
 * If you need any value to be preserved over a function call, use an `s` register instead. The function you call will make sure that it is not overwritten.
 * If you use an `s` register, you have to make sure to save it the first thing you do in the function, and restore it before you return.

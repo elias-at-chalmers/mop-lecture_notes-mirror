@@ -8,7 +8,7 @@
 #include <stdint.h>
 
 extern void copyvec(int src[], short dst[], int size);
-void copyelements(int src[], short dst[], int start, int end);
+int copyelements(int src[], short dst[], int start, int end);
 void decrypt_message(); 
 extern void hidden(char msg[]);
 
@@ -17,6 +17,7 @@ int src_backup[sizeof(src)/sizeof(src[0])];
 const int num_elements = sizeof(src)/sizeof(src[0]); 
 short dst[sizeof(src)/sizeof(src[0]) * 2];
 char message[] = "{{{NLK{ILXPHz{{{";
+char password[] = "KZHHDLIW";
 
 void init_vectors()
 {
@@ -33,6 +34,8 @@ int main(void)
 
     // Backup source
     for(int i=0; i<num_elements; i++) src_backup[i] = src[i]; 
+
+    int num_passed_tests = 0; 
     printf("Testing copyvec()\n");
     {
         init_vectors(); 
@@ -43,7 +46,7 @@ int main(void)
         for(int i=0; i<num_elements; i++) if(src[i] != dst[i]) passed = 0; 
         for(int i=num_elements; i<num_elements * 2; i++) if(dst[i] != 0) passed = 0; 
         for(int i=0; i<num_elements; i++) if(src[i] != src_backup[i]) passed = 0;  
-        if(passed) printf("passed.\n");
+        if(passed) { printf("passed.\n"); num_passed_tests++; }
         else printf("failed.\n");
     }
 
@@ -56,7 +59,7 @@ int main(void)
         for(int i=0; i<num_elements/2; i++) if(src[i] != dst[i]) passed = 0; 
         for(int i=num_elements/2; i<num_elements * 2; i++) if(dst[i] != 0) passed = 0; 
         for(int i=0; i<num_elements; i++) if(src[i] != src_backup[i]) passed = 0;  
-        if(passed) printf("passed.\n");
+        if(passed) { printf("passed.\n"); num_passed_tests++; }
         else printf("failed.\n");
     }
     
@@ -68,27 +71,49 @@ int main(void)
         int passed = 1;
         for(int i=0; i<num_elements * 2; i++) if(dst[i] != 0) passed = 0; 
         for(int i=0; i<num_elements; i++) if(src[i] != src_backup[i]) passed = 0;  
-        if(passed) printf("passed.\n");
+        if(passed) { printf("passed.\n"); num_passed_tests++; }
         else printf("failed.\n");
     }
 
     printf("Testing copyelements()\n");
     {
         init_vectors();
-        printf("Copy random slice: ...");
+        printf("  Copy random slice: ...");
         fflush(stdout); 
         int start = 3;
         int end = num_elements - 3;
+        int passed = 1;
+        int result = copyelements(src, dst, start, end);
+        if(result != end - start + 1) { printf("(wrong return value)"); passed = 0; } 
+        for(int i=0; i<start; i++) if(dst[i] != 0) passed = 0; 
+        for(int i=start; i<=end; i++) if(dst[i] != src[i]) passed = 0; 
+        for(int i=end+1; i<num_elements; i++) if(dst[i] != 0) passed = 0; 
+        for(int i=0; i<num_elements; i++) if(src[i] != src_backup[i]) passed = 0;  
+        if(passed) { printf("passed.\n"); num_passed_tests++; }
+        else printf("failed.\n");
+    } 
+    {
+        init_vectors();
+        printf("  Copy random slice: ...");
+        fflush(stdout); 
+        int start = 4;
+        int end = num_elements - 2;
         int passed = 1;
         copyelements(src, dst, start, end);
         for(int i=0; i<start; i++) if(dst[i] != 0) passed = 0; 
         for(int i=start; i<=end; i++) if(dst[i] != src[i]) passed = 0; 
         for(int i=end+1; i<num_elements; i++) if(dst[i] != 0) passed = 0; 
         for(int i=0; i<num_elements; i++) if(src[i] != src_backup[i]) passed = 0;  
-        if(passed) printf("passed.\n");
+        if(passed) { printf("passed.\n"); num_passed_tests++; }
         else printf("failed.\n");
-    } 
+    }     
 
+    if(num_passed_tests == 5) {
+        printf("\nAll tests passed! The Secret Password is:\n");
+        printf("%s\n", password);
+    } else {
+        printf("\nSome tests failed. Keep trying!\n");
+    }
 
 }
 
@@ -99,5 +124,8 @@ void decrypt_message()
 {
     for(unsigned int i=0; i < sizeof(message); i++) {
         message[i] = 'A' - (message[i] - 'Z');
+    }     
+    for(unsigned int i=0; i < sizeof(password); i++) {
+        password[i] = 'A' - (password[i] - 'Z');
     }     
 }

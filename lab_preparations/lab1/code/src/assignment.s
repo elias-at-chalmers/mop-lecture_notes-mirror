@@ -5,11 +5,13 @@
 #         function and the function will be tested by external C code. 
 #         The test harness will output results on the USART, so, if you are
 #         running on a simulator, you need to attach a Console to USART1
+#
+#         Start with Assignment 1 and work your way through the rest of the 
+#         assignments in order.
 ###############################################################################
 
-.global copyvec, hidden, copyelements # Make the assembly functions visible to main.c (C test harness code)
-
-
+# Make the assembly functions visible to main.c (C test harness code)
+.global copyvec, hidden, copyelements 
 
 hidden:
     ###########################################################################
@@ -143,3 +145,9 @@ copyelements:
     addi sp, sp, 8
 
     ret
+
+###############################################################################
+# Assignment 6:
+# If all tests passed, the secret password will be printed in the console.
+# Submit that along with the hidden message and address in Canvas.
+###############################################################################

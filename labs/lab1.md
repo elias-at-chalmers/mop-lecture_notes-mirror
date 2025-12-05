@@ -53,7 +53,20 @@ After that (assuming that OpenOCD and necessary drivers are installed), you can 
 
 
 ## Lab Exercise 1 - Debug somebody else's code
-Time to try it. Open an empty folder and run `CTRL+SHIFT+P->MDx07: Initialize Project...->Basic Templates->MD307 Assembly project`. Remove everything in main.s and replace with this code: 
+Time to try it. Open an empty folder and do: `CTRL+SHIFT+P->MDx07: Initialize Project...->Labs->Lab 1->Assignment 1`. This code is an attempt at solving the same task as you solved for the preparation, but unfortunately whoever wrote this was not as bright as you and it is riddled with bugs!
 
-```
-```
+In fact, if you try to run the code, it will just crash. So, start the program (`F5`, "build and run") and then slowly step through the program (use F11, "step into", rather than "F10, step over"). **Where did it crash** (it will probably just stop showing the yellow arrow that points to the next instruction)? 
+
+Now stop the program (`Shift+F5`), and start again (`F5`). Step until you are at the instruction where it crashed last time (but don't execute it, or it crashes again). Look at the register values, in the "Variables->Registers" dropdown to the left. **Why will this instruction crash the machine**? Look at the surrounding code and you should be able to fix the first bug. Write down what it was, so you can show the TA.
+
+If you run the program again it will still crash, but this time you should make it through the copyelements function. Place a breakpoint right after that function:
+![](../images/first_breakpoint.png)
+and run the program until you hit the breakpoint. Now keep stepping until you see where it crashes. **Where does it crash?** Restart the program and run to this line again. Look at the registers. Do the contents of the registers make sense? Where did they stop making sense (step through the program)? **Fix the bug.**
+
+Now place breakpoints at both of these lines: 
+![](../images/breakpoints.png)
+
+Run the program again (`F5`) and when it breaks on the first instruction, continue (`F5`) and the program will stop at the second of those lines, so there are still problems!
+
+Figure out why the program does not pass the test, then find a TA and show them your findings.
+

@@ -53,7 +53,7 @@ After that (assuming that OpenOCD and necessary drivers are installed), you can 
 
 
 ## Lab Exercise 1 - Debug somebody else's code
-Time to try it. Open an empty folder and do: `CTRL+SHIFT+P->MDx07: Initialize Project...->Labs->Lab 1->Assignment 1`. This code is an attempt at solving the same task as you solved for the preparation, but unfortunately whoever wrote this was not as bright as you and it is riddled with bugs!
+Time to try it. Open an empty folder and do: `CTRL+SHIFT+P->MDx07: Initialize Project...->Lab Assignments->Lab 1->Assignment 1`. This code is an attempt at solving the same task as you solved for the preparation, but unfortunately whoever wrote this was not as bright as you and it is riddled with bugs!
 
 In fact, if you try to run the code, it will just crash. So, start the program (`F5`, "build and run") and then slowly step through the program (use F11, "step into", rather than "F10, step over"). **Where did it crash** (it will probably just stop showing the yellow arrow that points to the next instruction)? 
 
@@ -70,3 +70,55 @@ Run the program again (`F5`) and when it breaks on the first instruction, contin
 
 Figure out why the program does not pass the test, then find a TA and show them your findings.
 
+## Lab Exercise 2 - Let there be light!
+Finally time to play with LED lights. By your MD307 you should have found a spider-like contraption looking something like this (or maybe just a single colored LED light with two legs): 
+![](../images/rgb_led_light.png)
+
+You next task is to make this light turn on. You can test it immediately by connecting the ground leg (the one with the resistor) to GND, and (one of) the other legs to 3.3V: 
+
+![](../images/LED.png)
+
+But obviously, the goal is to control it from your program, so connect the anode to one of the GPIO pins instead (PD6 could be a good one). Open an empty folder and do: `CTRL+SHIFT+P->MDx07: Initialize Project...->Lab Assignments->Lab 2->Assignment 2`. There is not much code there, so it's up to you now. 
+
+> ⚠️ **Important:** You will probably not have time to complete all of these assignments. It is much more important that you understand what you are doing than that you complete all the tasks.
+
+### Task 1: Turn it on. 
+You have seen this in the lectures and you might have done something very similar in exercises already. Configure your chosen pin as a Push-Pull, Output, pin and write a `1` to the corresponding bit in the `ODATA` register. 
+Step through your code and make sure the light goes on when you expect it to. 
+
+### Task 2: Make it blink
+Write a little `delay` function that is just a for loop that keeps the machine busy for a while. Then write a loop where you: 
+```
+    Turn the light on
+    delay
+    Turn the light off
+    delay
+    repeat
+```
+
+### Task 3: Making it pulsate...
+Now we want the light to go from off, to stronger and stronger. But how can we do that when all we can do is turn it on or off? We will use a trick call *Pulse Width Modulation* (PWM). The idea is that we divide time into a very short interval, just a few thousand clock-cycles (4096 will work pretty well). We will call this time interval a *period* (P). Then we say that the light will be *on* for a part of this interval (0-100%, we call this the *duty cycle*) and off for the remainder of the interval. 
+
+In other words, we make the lamp blink very very quickly. If our period is short enough, we will not percieve this as blinking; we will just see the light glowing with different strength. With a low duty cycle (say, 10% or 400 cycles), it will be very dim, and with a high duty cycle it will shine brightly.
+
+![](../images/duty_cycle.png)
+
+Start by making the light glow dimly, with a low duty cycle, and then try to write a loop where you increase the duty cycle gradually until you hit max. In pseudo code: 
+
+```
+duty cycle = 0
+loop: 
+    increase duty_cycle
+    if duty_cycle > 4096, set to 0
+    for i = 0 to 4096: 
+        if i < duty_cycle: 
+           light should be on
+        else 
+           light should be off
+    jump to loop
+```
+
+### Task 4: RGB Lights!
+If you have made it this far, great work! If you have time to complete this task as well, **wow!** Go find the TA and ask for an RGB LED, if you don't have one already. Then connect it and make it pulsate with all the colors of the rainbow. Then record it and show me for a gold star sticker[^1].
+
+[^1]: The gold star has no monetary value and does not affect your grade. It might also be a virtual gold star sticker if I cannot find a real one. 

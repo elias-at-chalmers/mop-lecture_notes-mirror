@@ -1,3 +1,7 @@
 {
-      "livePreview.autoRefreshPreview": "On Changes to Saved Files"
+      "livePreview.autoRefreshPreview": "On Changes to Saved Files",
+      "cSpell.words": [
+            "microcontroller",
+            "microcontrollers"
+      ]
 }

@@ -21,13 +21,27 @@ Exceptions are categorized in a number of different ways, and you will see that 
   - **Internal Interrupts** - This is when the signal to interrupt originates from within the microcontroller. When the fridge door opens, the programmer might start a SysTick timer, and configure it to interrupt the running code after 30 seconds. 
 * **TRAP** - Sometimes, the code itself might ask to be interrupted. This might sound strange, but in reality there are many cases where this is useful - for example when invoking system services or entering a debugger. We will return to this later.
 
+> **Note:**
+> This is the terminology we will use in this course, and what is used in many textbooks. Some textbooks and articles (and even the RISC-V specification) use slightly different, and sometimes contradictory, defenitions of these terms.
+
+## A quick aside: Control and Status Registers
+
+In the beginning of this course, we stated that a processor implementing RV32I only needs 33 registers
+(`x0–x31` plus the `pc`). That is still true - but such a processor would not support interrupts.
+
+Our microprocessor (CH32V307) implements RV32I together with the Privileged ISA and the `Zicsr` extension, which add support for interrupts and system control.
+As a result, the processor contains a number of additional registers called *Control and Status Registers* (CSRs). We will encounter a few of these later in the lecture. For now, all you need to know is that: 
+
+1. CSRs are real hardware registers like the GPRs, but they are not accessible with normal instructions.  
+2. They can only be read or modified using a small set of special CSR instructions.
+
 <div class="boxed">
 <small>
 **Enrichment:** The following is interesting and will help your understanding, but is not essential for the course. 
 </small>
 
 # Machine Privilege modes
-A RISC-V processor can run in different *privilege modes*. At lower privilege levels, some instructions are not allowed. It is easy to see why this is necessary on a desktop computer: if any program could execute any instruction and freely access the memory of other programs, it could cause serious **security problems** (reading or modifying private data) or **stability problems** (crashing the entire system). For this reason, the operating system runs with full system access, while user applications run with very limited privileges.
+A RISC-V processor (that implements the "Privileged Specification") can run in different *privilege modes*. At lower privilege levels, some instructions are not allowed. It is easy to see why this is necessary on a desktop computer: if any program could execute any instruction and freely access the memory of other programs, it could cause serious **security problems** (reading or modifying private data) or **stability problems** (crashing the entire system). For this reason, the operating system runs with full system access, while user applications run with very limited privileges.
 
 We will not explore this topic in depth in this course, but even on the small microcontrollers we use, privilege modes can be very useful. Consider a smart fridge as an example. Some parts of the system are **safety-critical**, such as temperature regulation, and are developed very carefully to run reliably for many years without change. Other parts, such as the touchscreen user interface, are updated frequently as features and visual designs evolve. If a bug is introduced while adding a new font to the clock app, it is crucial that this mistake cannot affect the safety-critical code and spoil the food.
 
@@ -92,13 +106,144 @@ But how can we combine these two programs? Since the `GetTemperature` function c
 
 ## What happens when an interrupt occurs? 
 
-New model of the processor state machine
+In an early lecture, we gave a brief introduction to the *instruction cycle* - the state machine the processor goes through for each instruction. Let's revisit that, and add a few steps to take care of interrupts [^1]: 
 
-Explain that it jumps to the entry in the vector table
+1. *Fetch Instruction* - Fetch the next instruction from memory (at the address stored in `PC`)
+2. *Decode Instruction* - Find which instruction it is, and prepare inputs to ALU, etc. 
+3. *Execute Instruction* - Execute the instruction (usually an ALU operation)
+4. *Store/Writeback* - Write results to memory or destination registers
+5. **Check Exceptions** - Check if any exception has occurred and if it is enabled and, *if so*:
+    1. Save current `PC` in CSR register `mepc`
+    2. Save the cause of the exception in CSR register `mcause`
+    3. Disable interrupts by writing a bit in CSR register `mstatus`
+    4. `PC` <- `mtvec` + offset for this exception
+
+[^1]: This description is still simplified, and interrupt handling is described as it works when the processor is configured for "vectored interrupts", which is all we cover in this course. 
+
+In other words, if an interrupt occurs, the current instruction will continue until done. Then machine state will be saved away and `PC` will change to an address specific to this exception. We will discuss some of these steps in detail below. 
+
+### The Interrupt Vector Table
+Is is important to understand *where* the processor will jump when an exception occurs. This is hardcoded by the processor manufacturer, and for our machine we can consult the following table (from the QuickGuide, only showing the beginning): 
+
+![](../images/vector_table_start.png)
+
+> TODO: Replace with autogenerated quickguide table
+
+We can ignore the first columns in this table for now and focus on the *name*, *description*, and *entry address*. Let's say you mistakenly try to read an integer from a misaligned address (and you probably have a few times by now). The CH32V307 considers this error a "Hard Fault" and so we find that entry in the list and see that its "entry address" is `0xC`. That means that, when your bad instruction completes, the processor will fetch the address from the `mtvec` CSR, add `0xC` to that address, and jump there (by immediately setting `PC` to that address). So, if the value of `mtvec` was `0x20001000` (for instance), the processor would next execute the instruction it finds at address `0x2000100C`.
+
+If, instead, our SysTick timer has caused an interrupt, we can see that its entry address is `0x30`, and so the processor will stop what it is doing and execute the instruction at `mtvec + 0x30`.
+
+> **Quiz**: So, should we just put our interrupt-handler code for systick at the address `mtvec + 0x30`? The answer is no, but stop and think about why...
+
+Since we only have room for a single instruction (32 bits) per interrupt cause, the instruction we put at this address pretty much has to be a 'Jump' instruction, that takes us to the actual handler code.
+
+### Interrupt handlers
+In most respects, an interrupt handler is just a "function" and we will implement it as a function in C, but there are two important caveats. 
+
+* **Returning from an interrupt handler**
+    When the interrupt handler is done, it cannot use the `ret` assembler instruction to return. If you recall, or look in the QuickGuide, the `ret` pseudo instruction is implemented as `jalr x0, 0(ra)`. That is, it will jump to whatever address is in the `ra` register but that will *not* be the address to the instruction that was interrupted!
+
+    Instead, an interrupt handler must use the `mret` instruction. This is a special instruction, only used by interrupt handlers, that copies the previously stored CSR `mepc` to `pc`, restores privilege levels and enables interrupts again (if they were enabled when the exception occured). 
+
+* **Register saving in an interrupt handler**
+    In normal C functions, the compiler will follow the conventions, set up by the ABI, for which registers shall be saved on the stack. Importantly, that means that the *caller* is expected to save the `t` registers (if it has further use for them) before calling a function, so the *callee* does not have to do that. 
+
+    Since an interrupt handler is not "called" in the conventional sense, the *caller* has no opportunity to save the `t` registers, and the interrupt handler has to assume that *all* registers it uses need to be saved on the stack. 
+
+Luckily, in practice, we rarely have to think about this distinction when programming in C. We simply tell the compiler that this specific function is an interrupt handler and the compiler will produce the correct code. 
 
 ## How to write an interrupt handler for systick
+Let us write an interrupt handler that will be called every time the SysTick counter reaches 0. The actual handler code can look like this: 
 
-# If this is too short, take some pointer stuff from lecture 06
+```C
+__attribute__((interrupt("machine")))
+void SysTick_Handler(void)
+{
+    *SYSTICK_SR = 0;        // Reset the status, so we will get a new interrupt in 2ms
+    *GPIOD_ODATA ^= 0x1;    // Flip GPIO D0 pin
+}
+```
+The first line tells the compiler that this is an interrupt handler and code must be generated accordingly.
+
+
+To make sure that this handler actually gets called, we can start by flipping a single bit in our previous systick-initialization code: 
+
+```
+    *SYSTICK_CMPH = 0x0;        // Set systick compare value to 2ms 
+    *SYSTICK_CMPL = 147000 * 2; //
+    *SYSTICK_CTLR = 0b101111;   // Start systick timer, count down, enable restart,
+                                // and ENABLE INTERRUPTS
+```
+
+But now our code is in a dangerous state! After this line has been executed, systick will start counting and after 2ms, an interrupt will be triggered. The processor will then use the `mtvec` CSR to decide where to jump, but we have not put anything useful into that register.
+
+The easiest way to set up a vector table for our program is to add a new assembly file to our project (we will call it `vector_table.s`): 
+
+```
+.section .text
+.global vector_table        # Make this variable available to the C code
+.extern SysTick_Handler     # Make the interrupt handler available to our code
+
+.align 2                    # The vector table must begin on an address divisible by 4
+vector_table: 
+.zero 12 * 4                # Reserve space for 12 interrupt vectors before systick
+j SysTick_Handler           # At `vector_table + 0x30` we place an instruction that 
+                            # jumps to our interrupt handler
+```
+
+When we compile this code and load it into memory on the machine, we don't know exactly where `vector_table` will begin (depends on the compiler), but we know that it will contain a table with 12 empty entries, and then a single jump instruction at offset `0x30`. So the next step is to tell the processor that `vector_table` is the base address it wants to use when looking for the systick interrupt handler. So, we have to put the address to `vector_table` into our `mtvec` CSR. This is easily done by adding a little function to our assembly file: 
+
+```
+.global init_interrupts     # Make this function available to our C code
+
+init_interrupts: 
+    la t0, vector_table     # Put the address of `vector_table` in t0
+    csrw mtvec, t0          # Move that value into the `mtvec` CSR
+    ret
+```
+
+And that is all there is to it! We can now write a single main C file, that plays a tone using an interrupt, and *in parallel* reads and updates the thermometer value: 
+
+```C
+
+extern void init_interrupts();
+
+__attribute__((interrupt("machine")))
+void SysTick_Handler(void)
+{
+    *SYSTICK_SR = 0;            // Reset the status, so we will get a new interrupt in 2ms
+    *GPIOD_ODATA ^= 0x1;        // Flip GPIO D0 pin
+}
+
+int main(void)
+{
+    // Configure Port D (buzzer)
+    *GPIOD_CFGLR = 0x00000002;  // Configure pin 0 as Output, Push-Pull, 2MHz
+    // Configure Port E (7-segment display)
+    *GPIOE_CFGLR = 0x22222222;  // Configure all pins as Output, Push-Pull, 20MHz
+    // Call the assembly function that initializes `mtvec`
+    init_interrupts();
+    // Configure SysTick
+    *SYSTICK_CMPH = 0x0;        // Set systick compare value to 2ms 
+    *SYSTICK_CMPL = 147000 * 2; //
+    *SYSTICK_CTLR = 0b101111;   // Start systick timer, count down, enable restart,
+                                // and ENABLE INTERRUPTS    
+
+    /////////////////////////////////////////////
+    // From here on, a tone will be played
+    /////////////////////////////////////////////
+
+    // Enter main loop that displays temperature
+    while(1) 
+    {
+        int t = GetTemperature(); 
+        *GPIOE_ODATA = Get7SegCode(t);
+    }
+}
+```
+
+
+### If this is too short, take some pointer stuff from lecture 06
 
 
 

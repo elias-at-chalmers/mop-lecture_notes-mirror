@@ -1,7 +1,9 @@
 {
       "livePreview.autoRefreshPreview": "On Changes to Saved Files",
       "cSpell.words": [
+            "bitmask",
             "microcontroller",
-            "microcontrollers"
+            "microcontrollers",
+            "Writeback"
       ]
 }

@@ -57,16 +57,20 @@ When the UI wants to update the screen or read a sensor, it triggers a special i
 </div>
 
 ## The Programmable Fast Interrupt Controller (PFIC)
-The module in the processor core on our microcontroller that collects all exceptions is called the *Programmable Fast Interrupt Controller* (PFIC). 
+The module in the processor core on our microcontroller that collects all exceptions is called the *Programmable Fast Interrupt Controller* (PFIC). We will discuss this in more detail in the next lecture bit will quickly introduce it here. Anything that *can* interrupt the processor is connected to this module, and all the possible interrupt sources are ordered and listed in the [Vector Table](vector_table.html) in the QuickGuide. 
+
+Whenever something wants to interrupt the processor, it will tell the PFIC and the PFIC will check if that interrupt is enabled, if there is another interrupt running at the moment and whether that interrupt should be interrupted or if the current interrupt should be queued. 
+
 <center>
 <img src= "../images/pfic.png" width=70%>
 </center>
 
+For this lecture, all we need to do to the PFIC is to *enable* interrupts from the SysTick timer, so let us look at a single set of registers: 
 
-{{python quickguide-generator/main.py overview-table PFIC}}
+{{python quickguide-generator/main.py overview-table PFIC IENR*}}
 
+These are the *Interupt Enable* registers and they contain one bit for each possible interrupt source (104 bits all together). The first register, `IENR1`, contains the bits corresponding to the first 32 interrupts in the [vector table](vector_table.html), the next register, `IENR2`, correspond to interrupts [32-63], and so on. 
 
-{{python quickguide-generator/main.py register-details PFIC .*}}
 
 # How to write a program with interrupts
 We will explore why and how we program with interrupts using a simple example. Let's say we are employed by a Fridge company, and they want a prototype program from us. When the fridge door has been left open for too long they want a microcontroller to play a loud and annoying note, while at the same time displaying the current temperature on a 7-segment display. 
@@ -75,7 +79,7 @@ Luckily, our PTB-110 IO board has both a little speaker (called "buzzer" in the 
 
 ![](../images/sound_and_graphics.png)
 
-Let's start with playing a note. A sound signal sent to a speaker is usually an analog signal with varying voltage, and all we know (yet) is how to output 0 or 3.3V from our GPIO ports. For us to perceive a signal as a note, however, all we need is a signal with a frequency in the 20Hz-20kHz range. So in fact, just flipping a GPIO pin between 0 and 1 (0 and 3.3V) every ~2 ms and connecting that signal to a speaker will produce a 261Hz signal that sounds like a middle C. 
+Let's start with playing a note. A sound signal sent to a speaker is usually an analog signal with varying voltage, and all we know (yet) is how to output 0 or 3.3V from our GPIO ports. For us humans to perceive a signal as a note, however, all we need is a signal with a frequency in the 20Hz-20kHz range. So in fact, just flipping a GPIO pin between 0 and 1 (0 and 3.3V) every ~2 ms and connecting that signal to a speaker will produce a 261Hz signal that sounds like a middle C on a piano (well, it has the same pitch, anyways).  
 
 We have already practiced sending signals to GPIO pins *and* precise timing (with SysTick), so we can immediately write the code for this. 
 ```C
@@ -135,7 +139,7 @@ In an early lecture, we gave a brief introduction to the *instruction cycle* - t
 In other words, if an interrupt occurs, the current instruction will continue until done. Then machine state will be saved away and `PC` will change to an address specific to this exception. We will discuss some of these steps in detail below. 
 
 ### The Interrupt Vector Table
-Is is important to understand *where* the processor will jump when an exception occurs. This is hardcoded by the processor manufacturer, and for our machine we can consult the following table (from the QuickGuide, only showing the beginning): 
+Is is important to understand *where* the processor will jump when an exception occurs. This is hardcoded by the processor manufacturer, and for our machine we can consult the [vector table](interrupt_vector_table.html) (from the QuickGuide, only showing the beginning): 
 
 ![](../images/vector_table_start.png)
 
@@ -164,8 +168,24 @@ In most respects, an interrupt handler is just a "function" and we will implemen
 
 Luckily, in practice, we rarely have to think about this distinction when programming in C. We simply tell the compiler that this specific function is an interrupt handler and the compiler will produce the correct code. 
 
-## How to write an interrupt handler for systick
-Let us write an interrupt handler that will be called every time the SysTick counter reaches 0. The actual handler code can look like this: 
+## Implementing our smart-fridge prototype
+To complete our prototype that can play a tone on the buzzer and show the temperature on the display at the same time, we will rewrite the tone generation so that it is triggered by a systick interrupt instead. 
+
+### Enabling interrupts from SysTick in the PFIC
+Since SysTick is interrupt number 12, we enable SysTickl interrupts by setting bit number 12 in the PFIC_IENR1 register: 
+
+```C
+#define PFIC_BASE       0xE000E000
+#define PFIC_IENR1     ((volatile uint32_t *)(PFIC_BASE + 0x100))
+int main(void)
+{
+    // Enable Systick Interrupt in PFIC
+    *PFIC_IENR1 |= (1 << 12);
+}
+```
+
+### Writing a SysTick interrupt handler
+Next, we will write an interrupt handler that will be called every time the SysTick counter reaches 0. The actual handler code can look like this: 
 
 ```C
 __attribute__((interrupt("machine")))
@@ -177,7 +197,7 @@ void SysTick_Handler(void)
 ```
 The first line tells the compiler that this is an interrupt handler and code must be generated accordingly.
 
-
+### Configuring SysTick to generate Interrupts
 To make sure that this handler actually gets called, we can start by flipping a single bit in our previous systick-initialization code: 
 
 ```
@@ -189,6 +209,7 @@ To make sure that this handler actually gets called, we can start by flipping a 
 
 But now our code is in a dangerous state! After this line has been executed, systick will start counting and after 2ms, an interrupt will be triggered. The processor will then use the `mtvec` CSR to decide where to jump, but we have not put anything useful into that register.
 
+### Generating a table of interrupt vectors in memory
 The easiest way to set up a vector table for our program is to add a new assembly file to our project (we will call it `vector_table.s`): 
 
 ```

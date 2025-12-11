@@ -32,7 +32,6 @@ def td(text):
     html += text + "</td>\n"
     return html
 
-isolate = "GPIOA"
 
 def ParseBitFields(fields):
     # The fields in a register are described _either_ as <bitOffset> and <bitWidth>
@@ -49,7 +48,7 @@ def ParseBitFields(fields):
     return fieldsdict
 
 
-def PrintPeripheralOverviewTable(p):
+def PrintPeripheralOverviewTable(p, register_regexp=None):
     html = ""
 
     numbits = 32 # Assuming 32 if nothing else stated
@@ -69,6 +68,11 @@ def PrintPeripheralOverviewTable(p):
     html += th("Register")
     html += "</tr>\n"
     for r in p.find('registers'):
+        # --- Skip if regexp is given and name does not match ---
+        regname = r.find('name').text
+        if register_regexp and not re.search(register_regexp, regname):
+            continue
+        # -------------------------------------------------------
 
         html += "<tr>\n"
         html += td(r.find('addressOffset').text)
@@ -86,6 +90,10 @@ def PrintPeripheralOverviewTable(p):
             # Draw field
             html += "<td colspan=" + str(f["width"]) + " " + td_css + ">" + " " + "</td>\n"            
             bit = f["offset"]
+            # Empty bits in the end
+            if bit > 0:
+                html += "<td colspan=" + str(bit) + " " + td_gray_css + "> </td>\n"
+
 
         #html += "<td>"+ r.find('name').text + "</td>"
         html += td(r.find('name').text)
@@ -205,8 +213,8 @@ def PrintRegisterDetails(r):
 # Ex: ./quickguide-generator.py baseaddress GPIO*
 
 if(sys.argv[1] == "overview-table"): 
-    if(len(sys.argv) != 3):     
-        print("Usage: " + sys.argv[0]  + "overview-table <peripheral>")
+    if(len(sys.argv) != 3 and len(sys.argv) != 4):     
+        print("Usage: " + sys.argv[0]  + "overview-table <peripheral> [register-regexp]")
         exit(1)
     
     found = False
@@ -217,7 +225,8 @@ if(sys.argv[1] == "overview-table"):
         if "derivedFrom" in p.attrib: 
             html += "<b>WARNING: Peripheral is derived from " + p.attrib["derivedFrom"] + ", and will not parse correctly yet</b><br>\n"
             continue
-        html += PrintPeripheralOverviewTable(p)
+        register_regexp = sys.argv[3] if len(sys.argv) > 3 else None
+        html += PrintPeripheralOverviewTable(p, register_regexp)
     if not found:
         print("Peripheral " + sys.argv[2] + " not found")
         exit(1)

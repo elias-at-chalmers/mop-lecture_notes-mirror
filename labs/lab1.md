@@ -1,6 +1,6 @@
 # Laboration 1
 
-In this lab you will finally get to run some code on, and connect rome real hardware to, the real MD307 microcontroller. By the time you take this lab you should know quite a lot about assembly programming on a RISC-V system, you should know the basics of how to put signals onto the GPIO pins, and you should be familiar with creating, compiling, and running an assembly program in the simulator environment. 
+In this lab, you will finally get to run some code on, and connect rome real hardware to, the real MD307 microcontroller. By the time you take this lab you should know quite a lot about assembly programming on a RISC-V system, you should know the basics of how to put signals onto the GPIO pins, and you should be familiar with creating, compiling, and running an assembly program in the simulator environment. 
 
 ## Preparations
 You MUST have done the preparation task for this lab, and have submitted your answers to Canvas. If you have not, this will take too much time so talk to a TA and see if there is room on a later Lab session. 
@@ -10,7 +10,7 @@ In all program development, but *especially* when you are programming close to t
 
 When you are ready to ship your program, you will compile it to an `.elf` file and use a tool to send it to your microcontrollers flash memory (so that it starts any time you turn the device on), but while developing the program, uploading, starting, and stopping is handled by the debugger. 
 
-In this course, we do all development is *Visual Studio Code* (VSCode), and so far you have been running your programs on a simulator, but from VSCode's point of view, the process is exactly the same. When you press `F5` to run the program, VSCode will start a `*GDB Client`. 
+In this course, we do all development is *Visual Studio Code* (VSCode), and so far you have been running your programs on a simulator. From VSCode's point of view, the process is exactly the same. When you press `F5` to run the program, VSCode will start a `*GDB Client`. 
 
 GDB (GNU DeBugger) is a command line tool, and a protocol. In the good old days, you would start GDB from the command line and write things like: 
 
@@ -35,9 +35,9 @@ Breakpoint 1 at 0x20000304: file src/assignment.s, line 22.
 Continuing.
 ```
 
-Sometimes we still have to use this command line tool (and it *is* worthwhile learning the basic commands) but in general we click buttons in VSCode and let VSCode turn that into text commands to talk to the client. 
+Sometimes we still have to use this command line tool (and it *is* worthwhile learning the basic commands) but in general we click buttons in VSCode and let VSCode turn that into text commands to talk to the debugger. 
 
-The GDB client is connected via TCP to a GCB *server*. When we are using the simulator, `SimServer` (the simulator) is also our GDB server. When you press the play (▷) symbol, VSCode will turn that into gdb commandd, that are sent over TCP to the SimServer. It will first send the compiled `.elf` file into the microcontrollers SRAM, and then tell the SimServer to start executing the machine code.
+The GDB client is connected via TCP to a GDB *server*. When we are using the simulator, `SimServer` (the simulator) is also our GDB server. When you press the play (▷) symbol, VSCode will turn that into gdb commandd, that are sent over TCP to the SimServer. It will first send the compiled `.elf` file into the microcontrollers SRAM, and then tell the SimServer to start executing the machine code.
 
 When (like today) you are connecting the real hardware to the machine, you do not start a simulator. Instead you will start a program called `OpenOCD` (this is done automatically when you start your program). `OpenOCD` is a GDB server that talks GDB to VSCode on one end, and "forwards" commands over a USB cable on the other end. 
 
@@ -53,6 +53,10 @@ After that (assuming that OpenOCD and necessary drivers are installed), you can 
 
 
 ## Lab Exercise 1 - Debug somebody else's code
+
+
+> **Important:** You should spend a maximum of one hour on this exercise. If you get stuck at some point for more than 15 minutes, grab a TA --- they will guide you to the next step. It is important that you proceed to the second exercise within an hour.
+
 Time to try it. Open an empty folder and do: `CTRL+SHIFT+P->MDx07: Initialize Project...->Lab Assignments->Lab 1->Assignment 1`. This code is an attempt at solving the same task as you solved for the preparation, but unfortunately whoever wrote this was not as bright as you and it is riddled with bugs!
 
 In fact, if you try to run the code, it will just crash. So, start the program (`F5`, "build and run") and then slowly step through the program (use F11, "step into", rather than "F10, step over"). **Where did it crash** (it will probably just stop showing the yellow arrow that points to the next instruction)? 
@@ -71,7 +75,7 @@ Run the program again (`F5`) and when it breaks on the first instruction, contin
 Figure out why the program does not pass the test, then find a TA and show them your findings.
 
 ## Lab Exercise 2 - Let there be light!
-Finally time to play with LED lights. By your MD307 you should have found a spider-like contraption looking something like this (or maybe just a single colored LED light with two legs): 
+Finally time to play with LED lights. In the box next to your MD307 you should have found a spider-like contraption looking something like this (or maybe just a single colored LED light with two legs): 
 ![](../images/rgb_led_light.png)
 
 You next task is to make this light turn on. You can test it immediately by connecting the ground leg (the one with the resistor) to GND, and (one of) the other legs to 3.3V: 
@@ -119,6 +123,6 @@ loop:
 ```
 
 ### Task 4: RGB Lights!
-If you have made it this far, great work! If you have time to complete this task as well, **wow!** Go find the TA and ask for an RGB LED, if you don't have one already. Then connect it and make it pulsate with all the colors of the rainbow. Then record it and show me for a gold star sticker[^1].
+If you have made it this far, great work! If you have time to complete this task as well, **wow!** Go find the TA and ask for an RGB LED, if you don't have one already. Then connect it and make it pulsate with all the colors of the rainbow. Then record it and show your lecturer for a gold star sticker[^1].
 
 [^1]: The gold star has no monetary value and does not affect your grade. It might also be a virtual gold star sticker if I cannot find a real one. 

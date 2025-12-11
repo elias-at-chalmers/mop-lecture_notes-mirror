@@ -16,7 +16,7 @@ Exceptions are categorized in a number of different ways, and you will see that 
 
 * **RESET** - A very special type of exception occurs when someone presses the *reset* button (or the processor was told to reset by the debug module). The running program is then interrupted, and the processor starts a RESET sequence (the program is never resumed).
 * **FAULT** - The running code might do something that is not allowed. For example, it might do an unaligned memory access (as we have discussed before), it might try to write to a protected part of the memory area, or it might simply try to divide a value by zero. All of these errors are likely to cause the machine to crash if not handled appropriately. Instead, the program can be immediately interrupted and some system code can run that handles the error in an appropriate way and then might allow the program to resume. 
-* **INTERRUPT** - "The developer of the program might *request* that the program be interrupted "if a specific thing happens. In this course we will divide interrupts into two different types: 
+* **INTERRUPT** - In this course we will divide interrupts into two different types: 
   - **External Interrupts** - This is when an interrupt originates from *outside* the microcontroller. The fridge door, for example, might be connected to one of the GPIO pins, and when the door opens the programmer wants the change in the GPIO pin's value to immediately interrupt the running program. 
   - **Internal Interrupts** - This is when the signal to interrupt originates from within the microcontroller. When the fridge door opens, the programmer might start a SysTick timer, and configure it to interrupt the running code after 30 seconds. 
 * **TRAP** - Sometimes, the code itself might ask to be interrupted. This might sound strange, but in reality there are many cases where this is useful - for example when invoking system services or entering a debugger. We will return to this later.
@@ -55,6 +55,18 @@ When the UI wants to update the screen or read a sensor, it triggers a special i
 
 > Quiz: If all interrupt handlers run in privileged mode, why couldn't a malicious programmer simply write an interrupt handler that does the malicious stuff?
 </div>
+
+## The Programmable Fast Interrupt Controller (PFIC)
+The module in the processor core on our microcontroller that collects all exceptions is called the *Programmable Fast Interrupt Controller* (PFIC). 
+<center>
+<img src= "../images/pfic.png" width=70%>
+</center>
+
+
+{{python quickguide-generator/main.py overview-table PFIC}}
+
+
+{{python quickguide-generator/main.py register-details PFIC .*}}
 
 # How to write a program with interrupts
 We will explore why and how we program with interrupts using a simple example. Let's say we are employed by a Fridge company, and they want a prototype program from us. When the fridge door has been left open for too long they want a microcontroller to play a loud and annoying note, while at the same time displaying the current temperature on a 7-segment display. 

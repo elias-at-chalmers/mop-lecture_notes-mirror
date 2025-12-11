@@ -5,8 +5,8 @@
 
 
 **Links:**
-[Unpriveleged ISA](https://drive.google.com/file/d/1uviu1nH-tScFfgrovvFCrj7Omv8tFtkp/view)
-, [RISC-V Assembly Programmer’sManual](https://github.com/riscv-non-isa/riscv-asm-manual/releases/download/v0.0.1/riscv-asm.pdf)
+[Unprivileged ISA](https://drive.google.com/file/d/1uviu1nH-tScFfgrovvFCrj7Omv8tFtkp/view)
+, [RISC-V Assembly Programmer’s Manual](https://github.com/riscv-non-isa/riscv-asm-manual/releases/download/v0.0.1/riscv-asm.pdf), [RISC-V ABI Specification](https://docs.riscv.org/reference/application-software/abi/_attachments/riscv-abi.pdf?utm_source=chatgpt.com)
 
 **Text and excercises in the Workbook (Arbetsboken)**
 Chapter 1, Pages 7-16
@@ -97,15 +97,15 @@ add x1, x2, x0        // Add 0 to x2 and store the result in x1
 
 This might look strange (to someone reading the machine code), but has exactly the same effect: the contents of x2 are copied to x1. Since we can implement `mv` with `add`, the processor simply reuses the `add` instruction. We will see many more examples of how pseudo-instructions are compiled into machine code later.
 
+<!-- TODO: Add an "enrichment" box about pipelining, or bring it up in a last lecture -->
 
 ### Load/Store architecture.
 
-Another important principle behind the development of the RISC-V architecture is that it is a "Load/Store" architecture. This means that the "load" and "store" instructions are the *only* instructions that communicate with the memory bus. All other instructions (e.g., arithmetic instructions, shifts, or branches) operate only on registers. As an example, the Intel x86 architecture has instructions like [^1] :
+Another important principle behind the development of the RISC-V architecture is that it is a "Load/Store" architecture. This means that the "load" and "store" instructions are the *only* instructions that communicate with the memory bus. All other instructions (e.g., arithmetic instructions, shifts, or branches) operate only on registers. As an example, other processors (like the Intel x86 architecture) have instructions like:
 
-[^1]: This is not actual x86 assembly code.
 
 ```
-add r0, [r1]           // Take the value in memory at the address pointed to by r1, and add it to r0
+add register_0, M(register_1)           // Take the value in memory at the address pointed to by r1, and add it to r0
 ```
 
 In RISC-V, this is expressed in two instructions:
@@ -135,7 +135,6 @@ When the machine turns on, it will enter a `RESET` phase, which initializes regi
 When the "store" phase is complete, the cycle starts again from the beginning.
 
 💡 **Note:** *If all of this were strictly true, the processor would only execute an instruction once every four clock-cycles when, in fact, it will execute approximately one instruction every clock-cycle. This is due to pipelining and instruction pre-fetching, which is out of scope for this course.*
-
 
 # Introduction to RISC-V Assembly Programming
 We will now look at how to write assembly code for a very simple program, and examine what machine code the assembler produces. Let's say we want our program to do the following:
@@ -170,12 +169,14 @@ Now let's see what happens if we compile this assembly program to machine code [
    addi    t0,zero,10
    loop:
    addi    t0,t0,-2
-   blt     zero,t0,4 loop
+   blt     zero,t0,
+   loop
 ```
 
 This is slightly different from the code we wrote! Let's see what changed and why:
+
 * `li t0, 10` ➔ `addi t0, zero, 10`: The "Load Immediate" instruction that we used is a pseudo instruction. The processor does not have to implement this instruction, because it already has the "Add Immediate" instruction. By adding the constant 10 to the "zero" register (which is always 0), and store the result in `t0`, we achieve the same thing.
-* `bgtz t0, loop` ➔ `blt zero,t0,4`: In our assembly code, we used the "Branch if Greater Than Zero" instruction, but the assembler has translated this into the "Branch if Less Than" instruction. It compares if 0 is less than `t0`, and jumps if that is true. This is equivalent because (x > y) ➔ (y < x).
+* `bgtz t0, loop` ➔ `blt zero,t0`: In our assembly code, we used the "Branch if Greater Than Zero" instruction, but the assembler has translated this into the "Branch if Less Than" instruction. It compares if 0 is less than `t0`, and jumps if that is true. This is equivalent because (x > y) ➔ (y < x).
 
 In this course, you will learn how to write *assembly code*, and we will not worry too much about what *machine code* it turns into, most of the time. It is important to understand, however, that even when writing assembly, the code you write is not always exactly the code that is executed. So far we have seen that the assembler will sometimes replace your pseudo instruction with an equivalent instruction and next we will see that some pseudo instructions will turn into *several* machine code instructions.
 
@@ -205,6 +206,8 @@ Since 1000000, in decimal, is `0xf4240` in hexadecimal, `t0` will be loaded with
 ## Arithmetic and Logical instructions
 
 The table below lists all the ALU instructions in RV32I (the instructions that perform some operation on the operands and stores the result in a register). These can be divided into "register-register" instructions where the operands consists only of registers, and "register-immediate" instructions, where one of the operands is a (small) constant that is embedded in the instruction's machine code. All immediate instructions end with i (for immediate), except for a few that use u to indicate unsigned interpretation of the immediate value.
+
+Throughtout this table, and the rest of the text, `rd` means "destination register" and `rs` means "source register".
 
 | Instruction | Explanation |
 |-------------|-------------|
@@ -253,7 +256,6 @@ In addition to these instructions, there are a number of pseudo instructions tha
 [^5]: This is not the exact ordering of the bits used in reality.
 
 ## Load and Store Operations
-
 We have seen the basic instructions that let us perform calculations on constants and values in registers. But there is very little point in doing that if we cannot somehow communicate the results to a user, or store them in memory. This is all done by the Load and Store instructions, which we will discuss next.
 
 It is important to understand that *all* communication with things outside the processor core happens via load/store operations. Our processor has an SRAM (a 64KB read/write memory module) mapped to the address range `0x20000000-0x2000FFFF`, so any reads or writes to addresses within that range will go to memory. Other memory areas are the "System Control Space" and the "Peripheral Registers" area. You can see an overview of the memory mapping in the figure below. We will talk about how these other areas are used later on in the course, but for now we will stick to the SRAM. 
@@ -264,16 +266,17 @@ It is important to understand that *all* communication with things outside the p
 
 Let's say we want to read the third byte in SRAM into a register. You could write: 
 ```
-   la x1, 0x20000002
-   lb x1, 0(x1)
+   la t0, 0x20000002
+   lb t0, 0(t0)
 ```
-The first instruction `la` (Load Address) takes two operands: a destination register (`x1`) and an address (`0x20000002`, the third byte in SRAM). Since we prepended the address with `0x`, the address will be expected to be in hexadecimal form. The result of this pseudoinstruction is that the address will end up in register `x1` and the instruction will be expanded into one `lui` and one `addi` instruction, just as for the `li` pseudoinstruction that we discussed in the previous section. 
+The first instruction `la` (Load Address) takes two operands: a destination register (`t0`) and an address (`0x20000002`, the third byte in SRAM). Since we prepended the address with `0x`, the address will be expected to be in hexadecimal form. The result of this pseudoinstruction is that the address will end up in register `t0` and the instruction will be expanded into one `lui` and one `addi` instruction, just as for the `li` pseudoinstruction that we discussed in the previous section. 
 
-The second assembler instruction, `lb` (Load Byte), takes three operands. The first operand (`x1`) is the destination register (as usual). The second operand (`0`) is the *offset* from the *base address*, which is the third operand (`x1`). 
+The second assembler instruction, `lb` (Load Byte), takes three operands. The first operand (`t0`) is the destination register (as usual). The second operand (`0`) is the *offset* from the *base address*, which is the third operand (`t0`). 
 
-When the address is put on the address bus, there is logic on the chip that will first note that this address is in the SRAM memory area (`0x20000000-0x2000FFFF`). It will subtract `0x20000000` from the address, and pass the resulting address (`2`) on to the SRAM module. Let's say the third byte contains the value `9`. The SRAM will read out this byte and put it on the 32-bit data bus by first sign-extending it to 32 bits [^6]. Whatever `x1` contained before, it will now contain the 32-bit value `0x00000009`.
+When the address is put on the address bus, there is logic on the chip that will first note that this address is in the SRAM memory area (`0x20000000-0x2000FFFF`). It will subtract `0x20000000` from the address, and pass the resulting address (`2`) on to the SRAM module. Let's say the third byte contains the value `9`. The SRAM will read out this byte and put it on the 32-bit data bus by first sign-extending it to 32 bits [^6]. Whatever `t0` contained before, it will now contain the 32-bit value `0x00000009`.
 
 There are a few important things to note about this simple read operation: 
+
 * The processor core and compiler have no idea whether you are trying to read from SRAM, FLASH, or anything else. It will put an address on the bus and let the memory system figure out the routing. 
 * The *name of the instruction* decides how many bytes you want to read, starting at the address. You can read 8 bits, 16 bits, or 32 bits with `lb` (Load Byte), `lh` (Load Halfword), or `lw` (Load Word) respectively. 
 * If you read less than 32 bits (8 or 16) from memory, they will be placed in the lower part of the 32-bit register rest of the register will be overwritten. 
@@ -303,6 +306,7 @@ On the first line, we load the base address `0x20000000` into `x1`. We will then
 This is then repeated for the second and third values, where the offsets are 2 and 4, respectively. 
 
 Things to note about the store instruction: 
+
 * Again, the name of the instruction tells the processor how many bytes you are writing. If you write a byte, or a halfword, only the lowest bytes in the register will be written to memory. There is no sign extension needed here.
 * The store instructions are the only instructions (that you will come across in this course) where the first operand is *not* the destination register. Instead, the first operand is the source register and the following operands define the destination.
 
@@ -342,13 +346,13 @@ To load a variable, `var_a` from memory, into register `x1`, with a single (pseu
 ```
 lb x1, var_a
 ```
-To store the contents of register `x1`, into a variable `var b`, with a single (pseudo) instruction, you can write: 
+To store the contents of register `x1`, into a variable `var b`, with a single (pseudo) instruction, you can write:
 ```
-sb x1, var, x2
+sb x1, var_b, x2
 ```
 Now, where did that `x2` come from? Think about the _actual_ instructions that this pseudo instruction has to create; In order to store the contents of x1 into the variable, it first has to calculate the address to the variable and put that into a register. The assembler cannot choose a register on its own, since it does not know what registers you (the programmer) want to preserve. Therefore, in the `sb` instruction, you supply a _temporary_ register that it can use for the address calculation. 
 
-In the former example, with the `lb` instruction, we do not have to supply a temporary register, since the assembler knows that it is going to overwrite the contents of `x1` and can use the same register for address calculations. 
+In the former example (with the `lb` instruction) we do not have to supply a temporary register, since the assembler knows that it is going to overwrite the contents of `x1` and can use the same register for address calculations. 
 
 💡 **Note:** *If you look at the machine instructions created when using these pseudo instructions, you will probably see that they turn into two instructions, one `auipc` instruction and one `lb`/`sb` instruction, rather than the three instructions you would get from `la` and then `lb`. This is just the most efficient way of implementing it.*
 

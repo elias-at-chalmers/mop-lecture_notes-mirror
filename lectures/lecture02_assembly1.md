@@ -33,6 +33,7 @@ Let's consider a few examples:
 
 - **A TV remote control** will need a little microcontroller to recognize when you press a button and send the appropriate infrared signal to your TV. This microcontroller does not do any advanced processing of any kind, and does not have to be very fast. The basic 32-bit integer instruction set (called RV32I) will be sufficient.
 - **A calculator** can be a similarly simple device, but will be quite useless if it cannot handle very large numbers. You would probably choose the 64-bit version of the basic instruction set for this (called RV64I). It would also be silly to create a calculator that can only handle integers, so you would want a microcontroller with the **F** (*single-precision floating point*) or **D** (*double-precision floating point*) extensions. If a processor implements these extensions, it means it can handle an additional set of instructions that deal with floating-point numbers.
+<!-- ÖA: An alternative would be to still use 32-bit which would save some cost but take som time, but a calculator may not be time critical!? -->
 - **A simple digital watch** needs to be extremely power efficient (so that you don't have to charge the battery several times every day). Among other things, that means reducing the amount of memory and the number of memory transactions required. Such a device might require the **C** (*compressed instructions*) extension. This extension adds a number of 16-bit wide machine instructions, and will be discussed a bit more later in the course.
 <!-- LATER: Discuss this in depth when covering how instructions are executed -->
 - **A modern desktop PC**, on the other hand, will require LOTS of memory and should be able to run many processes at once, and as quickly as possible. Power efficiency is not as important. A processor for a desktop computer will need to use the (RV64I) basic instruction set (so it can access more than 4GB of memory), it will need to use several additional extensions that allow for *virtual memory*, *atomic operations*, *vector processing*, etc. These extensions are all out of scope for this course.
@@ -45,6 +46,8 @@ Before we go any further in describing how a RISC-V processor works, it's import
 For example, the ISA specifies that the processor must have 32 general-purpose 32-bit registers, but it doesn’t define what each register is used for. The ABI, on the other hand, specifies that when a function returns an integer, it should place the result in register x10 (also known as a0). If your assembly program - or your C compiler - follows that rule, it can seamlessly interoperate with other code that follows the same ABI.
 
 In this course, all compilers and assembly code will adhere to the ABI. This not only ensures compatibility between different pieces of code, but also makes assembly programs much easier to understand and maintain.
+
+<!-- ÖA: ABI seems important to me and I am not sure that I fully understand all of it. I am not sure that it is mentioned in the book either. Can we make a reference to a more complete description or compare it to a standard or example from "real life" as driving rules (driving on the right side, etc.) --> 
 
 ## The Basic 32-bit Integer Instruction Set Architecture (RV32I)
 
@@ -97,6 +100,8 @@ add x1, x2, x0        // Add 0 to x2 and store the result in x1
 
 This might look strange (to someone reading the machine code), but has exactly the same effect: the contents of x2 are copied to x1. Since we can implement `mv` with `add`, the processor simply reuses the `add` instruction. We will see many more examples of how pseudo-instructions are compiled into machine code later.
 
+<!-- ÖA: I think that we need to briefly explain pipelining, because I think it is the main reason to why we use RISC processors and it also explains why RISC-V uses 10 bits immediate which I do not consider simple. -->
+<!-- ÖA: I think it would be good with a table/picture describing the different notions of high-level code, assembler code, psuedo instructions, machine code, directives, ABI, etc. -->
 
 ### Load/Store architecture.
 
@@ -107,7 +112,7 @@ Another important principle behind the development of the RISC-V architecture is
 ```
 add r0, [r1]           // Take the value in memory at the address pointed to by r1, and add it to r0
 ```
-
+<!-- ÖA: Maybe you need to explain that r0 and r1 are registers for x86? -->
 In RISC-V, this is expressed in two instructions:
 
 ``` asm
@@ -135,7 +140,7 @@ When the machine turns on, it will enter a `RESET` phase, which initializes regi
 When the "store" phase is complete, the cycle starts again from the beginning.
 
 💡 **Note:** *If all of this were strictly true, the processor would only execute an instruction once every four clock-cycles when, in fact, it will execute approximately one instruction every clock-cycle. This is due to pipelining and instruction pre-fetching, which is out of scope for this course.*
-
+<!-- ÖA: Here is an excellent place where pipelining could be explained briefly! --> 
 
 # Introduction to RISC-V Assembly Programming
 We will now look at how to write assembly code for a very simple program, and examine what machine code the assembler produces. Let's say we want our program to do the following:
@@ -176,6 +181,7 @@ Now let's see what happens if we compile this assembly program to machine code [
 This is slightly different from the code we wrote! Let's see what changed and why:
 * `li t0, 10` ➔ `addi t0, zero, 10`: The "Load Immediate" instruction that we used is a pseudo instruction. The processor does not have to implement this instruction, because it already has the "Add Immediate" instruction. By adding the constant 10 to the "zero" register (which is always 0), and store the result in `t0`, we achieve the same thing.
 * `bgtz t0, loop` ➔ `blt zero,t0,4`: In our assembly code, we used the "Branch if Greater Than Zero" instruction, but the assembler has translated this into the "Branch if Less Than" instruction. It compares if 0 is less than `t0`, and jumps if that is true. This is equivalent because (x > y) ➔ (y < x).
+<!-- ÖA: I think you need to explain where the 4 came from also. -->
 
 In this course, you will learn how to write *assembly code*, and we will not worry too much about what *machine code* it turns into, most of the time. It is important to understand, however, that even when writing assembly, the code you write is not always exactly the code that is executed. So far we have seen that the assembler will sometimes replace your pseudo instruction with an equivalent instruction and next we will see that some pseudo instructions will turn into *several* machine code instructions.
 
@@ -201,10 +207,12 @@ So there are 7 bits for the opcode (which allows for 128 different opcodes), 3 b
 Instead, it will translate your assembly instruction into *two* machine instructions. The first instruction, `lui`, stands for "Load Upper Immediate". It takes a destination register and a 20-bit value as operands, and it loads the 20-bit value into the 20 upper bits of the destination register.
 
 Since 1000000, in decimal, is `0xf4240` in hexadecimal, `t0` will be loaded with the value `0x000F4000` after the `lui` instruction. The next instruction has to fill in the lower 12 bits, which can be achieved with an `add` instruction (where we have 12 bits for the value).
+<!-- ÖA: I think that this is a very good example and explanation! It would be good to mention a bit when and how decimal and hex figures are used. -->
 
 ## Arithmetic and Logical instructions
 
 The table below lists all the ALU instructions in RV32I (the instructions that perform some operation on the operands and stores the result in a register). These can be divided into "register-register" instructions where the operands consists only of registers, and "register-immediate" instructions, where one of the operands is a (small) constant that is embedded in the instruction's machine code. All immediate instructions end with i (for immediate), except for a few that use u to indicate unsigned interpretation of the immediate value.
+<!-- ÖA: It would be good to explain rd, rs1, rs2 and imm to make sure that everyone understands. -->
 
 | Instruction | Explanation |
 |-------------|-------------|
@@ -253,6 +261,7 @@ In addition to these instructions, there are a number of pseudo instructions tha
 [^5]: This is not the exact ordering of the bits used in reality.
 
 ## Load and Store Operations
+<!-- ÖA: I think it would be good to list all load and store instructions in a table already here rather than as the last section -->
 
 We have seen the basic instructions that let us perform calculations on constants and values in registers. But there is very little point in doing that if we cannot somehow communicate the results to a user, or store them in memory. This is all done by the Load and Store instructions, which we will discuss next.
 
@@ -267,6 +276,8 @@ Let's say we want to read the third byte in SRAM into a register. You could writ
    la x1, 0x20000002
    lb x1, 0(x1)
 ```
+<!-- ÖA: I think it would be good to explain when we use the ABI name of registers and when we use RISC-V name when we write assembler code and then try to be consistent. This is valid for all lectures. -->
+
 The first instruction `la` (Load Address) takes two operands: a destination register (`x1`) and an address (`0x20000002`, the third byte in SRAM). Since we prepended the address with `0x`, the address will be expected to be in hexadecimal form. The result of this pseudoinstruction is that the address will end up in register `x1` and the instruction will be expanded into one `lui` and one `addi` instruction, just as for the `li` pseudoinstruction that we discussed in the previous section. 
 
 The second assembler instruction, `lb` (Load Byte), takes three operands. The first operand (`x1`) is the destination register (as usual). The second operand (`0`) is the *offset* from the *base address*, which is the third operand (`x1`). 
@@ -305,6 +316,7 @@ This is then repeated for the second and third values, where the offsets are 2 a
 Things to note about the store instruction: 
 * Again, the name of the instruction tells the processor how many bytes you are writing. If you write a byte, or a halfword, only the lowest bytes in the register will be written to memory. There is no sign extension needed here.
 * The store instructions are the only instructions (that you will come across in this course) where the first operand is *not* the destination register. Instead, the first operand is the source register and the following operands define the destination.
+<!-- ÖA: THe bullets above did not come out as bullets in the pdf I received. -->
 
 ## Variables
 
@@ -342,7 +354,8 @@ To load a variable, `var_a` from memory, into register `x1`, with a single (pseu
 ```
 lb x1, var_a
 ```
-To store the contents of register `x1`, into a variable `var b`, with a single (pseudo) instruction, you can write: 
+To store the contents of register `x1`, into a variable `var b`, with a single (pseudo) instruction, you can write:
+<!-- ÖA: I think it should be var_b both above and below. --> 
 ```
 sb x1, var, x2
 ```
@@ -355,6 +368,7 @@ In the former example, with the `lb` instruction, we do not have to supply a tem
 [^8]: To be precise, the final address is actually calculated by the *linker*, but we will cover that in a later lecture. 
 
 ## Load/Store Instructions
+<!-- I would prefer to have the table below as the first thing you see when starting to discuss load and store. -->
 To summarize, every load or store operation requires calculating the address where we want to read or write the value. Often, this is done with the pseudoinstruction `la` (Load Address): 
 
 ```

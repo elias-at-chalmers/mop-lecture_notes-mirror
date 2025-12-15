@@ -4,6 +4,7 @@ from collections import defaultdict
 import sys
 
 
+
 with open("quickguide-generator/ch32v30x.svd", "r", encoding="utf-8") as f:
     xml = f.read()
 
@@ -11,7 +12,22 @@ root = ET.fromstring(xml)
 
 peripherals = root.find('peripherals')
 
-html = ""
+html = """
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".fold-table .summary").forEach(summary => {
+    summary.addEventListener("click", () => {
+      let row = summary.nextElementSibling;
+
+      while (row && !row.classList.contains("summary")) {
+        row.classList.toggle("open");
+        row = row.nextElementSibling;
+      }
+    });
+  });
+});
+</script>
+"""
 
 table_css = "style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'"
 shrink_css = "style = 'width: 5%;'"
@@ -48,6 +64,45 @@ def ParseBitFields(fields):
     return fieldsdict
 
 
+def GetRegisterGroups(p): 
+    groups = defaultdict(list)
+
+    for r in p.find('registers'):
+        name = r.find('name').text
+        match = re.match(r"([A-Za-z_]+)(\d+)$", name)
+        if match:
+            prefix, number = match.groups()
+            groups[prefix].append(r)
+    return groups
+
+def IsInGroup(r, groups):
+    name = r.find('name').text
+    match = re.match(r"([A-Za-z_]+)(\d+)$", name)
+    if match:
+        prefix, number = match.groups()
+        if len(groups[prefix]) > 1: 
+            return True
+        else:  return False
+    else:  return False
+
+def GetFirstInGroup(r, groups):
+    name = r.find('name').text
+    match = re.match(r"([A-Za-z_]+)(\d+)$", name)
+    if match:
+        prefix, number = match.groups()
+        return groups[prefix][0]
+    else: 
+        return None
+
+def GetLastInGroup(r, groups):
+    name = r.find('name').text
+    match = re.match(r"([A-Za-z_]+)(\d+)$", name)
+    if match:
+        prefix, number = match.groups()
+        return groups[prefix][-1]
+    else: 
+        return None    
+
 def PrintPeripheralOverviewTable(p, register_regexp=None):
     html = ""
 
@@ -55,7 +110,7 @@ def PrintPeripheralOverviewTable(p, register_regexp=None):
     if(p.find('size')) is not None:
         numbits = int(p.find('size').text)
 
-    html += '<table ' + table_css + '>\n'
+    html += '<table class="fold-table" ' + table_css + '>\n'
     html += "<colgroup>"
     html += "<col " + shrink_css +">"
     for i in range(0, 32): html += "<col " + middle_css + ">"
@@ -67,6 +122,9 @@ def PrintPeripheralOverviewTable(p, register_regexp=None):
     for i in range(0, 32): html += th(str(31 - i))
     html += th("Register")
     html += "</tr>\n"
+
+    groups = GetRegisterGroups(p)
+
     for r in p.find('registers'):
         # --- Skip if regexp is given and name does not match ---
         regname = r.find('name').text
@@ -74,9 +132,33 @@ def PrintPeripheralOverviewTable(p, register_regexp=None):
             continue
         # -------------------------------------------------------
 
-        html += "<tr>\n"
+
+        #######################################################################
+        # If this register is part of a group, create a foldable summary row
+        #######################################################################
+        if IsInGroup(r, groups): 
+            if r == GetFirstInGroup(r, groups):
+                first = GetFirstInGroup(r, groups)
+                last = GetLastInGroup(r, groups)
+                html += "<tr class = 'summary'>\n"
+                html += td(first.find('addressOffset').text + " - <br>" + last.find('addressOffset').text)
+                html += "<td colspan=32 " + td_css + "><i>\n"
+                if r.find('description') is not None:
+                    html += "Group: " + r.find('description').text + "\n"
+                else: html += "Group: <click to expand>\n"
+                html += "</i></td>\n"
+                html += td(f"{first.find('name').text} ..<br> {last.find('name').text}")
+                html += "</tr>\n"
+        #######################################################################
+
+            
+
+
+        if IsInGroup(r, groups): html += "<tr class='detail'>\n"
+        else: html += "<tr>\n"
         html += td(r.find('addressOffset').text)
 
+        fields = []
         if r.find('fields') is not None:
             fields = ParseBitFields(r.find('fields'))
             fields.sort(key=lambda item: item["offset"], reverse=True)
@@ -192,6 +274,9 @@ def PrintRegisterDetails(r):
                 html += "<td colspan=" + str(f["width"]) + " " + td_css + ">" 
             html += "<small>" + f["name"] + "</small></td>\n"
             bit = f["offset"]        
+        # Empty bits in the end
+        if bit > 0:
+            html += "<td colspan=" + str(bit) + " " + td_gray_css + "> </td>\n"            
 
         html += '</tr>'
     html += '</table>'

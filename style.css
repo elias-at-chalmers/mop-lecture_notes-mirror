@@ -139,3 +139,19 @@ hr {
     margin: 1em 0;
     border-radius: 4px;
 }
+
+/* For foldable things in table */
+.fold-table .detail {
+  display: none;
+}
+
+.fold-table .detail.open {
+  display: table-row;
+}
+
+.fold-table .summary {
+  cursor: pointer;
+  background: #EfEfEf;
+  color: black;
+  /*font-weight: 600;*/
+}

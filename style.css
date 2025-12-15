@@ -30,6 +30,32 @@ p {
     margin-bottom: 1rem;
 }
 
+
+summary {
+  display: list-item;              /* ← required for arrow */
+  width: 100%;
+  box-sizing: border-box;
+
+  background-color: #8f8f8f;
+  color: #ffffff;
+
+  /*padding: 0.75em 1em;*/
+  /*padding-left: 2.25em;             space for arrow */
+
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* Optional: nicer hover/focus */
+summary:hover {
+  background-color: #3a3a3a;
+}
+
+summary:focus {
+  outline: 2px solid #6aa9ff;
+  outline-offset: -2px;
+}
+
 /* Links */
 a {
     color: #1a73e8;

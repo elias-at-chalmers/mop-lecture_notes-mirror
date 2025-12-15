@@ -141,7 +141,11 @@ def summarize_fields(fields):
 
 
 def PrintRegisterDetails(r):
-    html = "<b>" + r.find('name').text + "</b>\n"
+    html = ""
+    html += "<details>\n"
+    html += "<summary>\n"
+    html += r.find('name').text
+    html += "</summary>\n"
     html += "<p>\n";
     if r.find('description') is not None:
         html += r.find('description').text + "<br>\n"
@@ -198,7 +202,8 @@ def PrintRegisterDetails(r):
         for line in summarize_fields(fields):
             html += line + "<br>\n"
         
-    html += "<hr>\n"
+    html += "</details>\n"
+    #html += "<hr>\n"
 
     return html
 

@@ -1,18 +1,19 @@
 <p>The General Purpose Input Output module consists of five identical register blocks, one for each GPIO port</p>
 
 <p>
-<b> Base addresses: </b>
+<details>
+<summary>Base addresses</summary>
 
 {{python quickguide-generator/main.py baseaddress GPIO*}}
 
-</p>
+</details>
 
-<p>
-<b> Register Block Overview </b>
+<details open>
+<summary>
+Register Block Overview
+</summary>
 
 {{python quickguide-generator/main.py overview-table GPIOA}}
-
-</p>
 
 <p>
 Configuration of the port is done using the <code>CFGLR</code> and <code>CFGHR</code> for the lower eight and upper eight pins, respectively.
@@ -21,6 +22,7 @@ For each pin, there are two bits to set the MODE (Input or Output, and speed of 
 {{include quickguide/gpio-cfg.html}}
 
 </p>
+</details>
 
 
 <p>

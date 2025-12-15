@@ -77,10 +77,9 @@ def PrintPeripheralOverviewTable(p, register_regexp=None):
         html += "<tr>\n"
         html += td(r.find('addressOffset').text)
 
-        if(r.find('fields') is not None):
+        if r.find('fields') is not None:
             fields = ParseBitFields(r.find('fields'))
             fields.sort(key=lambda item: item["offset"], reverse=True)
-
 
         bit = 32
         for f in fields:
@@ -90,9 +89,9 @@ def PrintPeripheralOverviewTable(p, register_regexp=None):
             # Draw field
             html += "<td colspan=" + str(f["width"]) + " " + td_css + ">" + " " + "</td>\n"            
             bit = f["offset"]
-            # Empty bits in the end
-            if bit > 0:
-                html += "<td colspan=" + str(bit) + " " + td_gray_css + "> </td>\n"
+        # Empty bits in the end
+        if bit > 0:
+            html += "<td colspan=" + str(bit) + " " + td_gray_css + "> </td>\n"
 
 
         #html += "<td>"+ r.find('name').text + "</td>"

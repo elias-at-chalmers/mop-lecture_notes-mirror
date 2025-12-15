@@ -5,5 +5,8 @@
             "microcontroller",
             "microcontrollers",
             "Writeback"
-      ]
-}
+      ],
+      "cSpell.enabledFileTypes": {
+            "python": false
+      }
+}      

@@ -1,98 +1,158 @@
+#!/usr/bin/env python3
+
 import json
-
-html = ""
-
-table_css = "style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'"
-shrink_css = "style = 'width: 5%;'"
-middle_css = "style = 'width: 1%;'"
-unused_css = "style = 'background-color: lightgray;'"
-th_css = "style = 'border: 1px solid black;  padding: 1px;  text-align: left;  white-space: nowrap; font-family: \"Arial Narrow\", sans-serif;'"
-td_css = "style = 'border: 1px solid black;  padding: 1px;  text-align: left;  white-space: nowrap; font-family: \"Arial Narrow\", sans-serif;'"
-td_gray_css = "style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: left;  white-space: nowrap; font-family: \"Arial Narrow\", sans-serif;'"
-
-def th(text): 
-    html = "<th " + th_css + ">"
-    html += text + "</th>\n"
-    return html
-def td(text): 
-    html = "<td " + td_css + ">"
-    html += text + "</td>\n"
-    return html
-
-# Load the JSON file
-with open("quickguide-generator/instructions.json", "r") as f:
-    data = json.load(f)
+import argparse
+import re
+import sys
+sys.stdout.reconfigure(encoding="utf-8")
+from html import escape
 
 
-def PrintCategoryInstructions(instructions, pseudo):
-    ret = ""
-    for instr in instructions:         
-        name = instr["instruction"]
-        operands = instr["operands"]
-        restrictions = instr["restrictions"]
-        description = instr["description"]
-        is_pseudo = instr["is_pseudo"]
-        implementation = instr.get("implementation")
-        if is_pseudo != pseudo: continue
-        ret += "<tr>\n"
-        ret += "<td colspan = 2><code>" + name + "</code> - " + description + "</td>\n"
-        ret += "</tr>\n"
-        ret += "<tr><td colspan = 2>\n"
-        ret += "<italic>This is a longer description that should be fetched from the data file, or omitted if not needed. It could be really long and span multiple lines. It really could.</italic>\n"
-        ret += "</td></tr>\n"
+# -----------------------------
+# Helper functions
+# -----------------------------
 
-        ret += "<tr>\n"
-        ret += "<td>Syntax:</td>\n"
-        ret += "<td><code>" + name + " " + ', '.join(operands) + "</code></td>\n"
-        ret += "</tr>\n"
-
-        for i in range(len(operands)):
-            ret += "<tr>\n"
-            ret += "<td>" + operands[i] + "</td>\n"
-            if restrictions[i] is None: 
-                restriction = "None"
-            else: restriction = restrictions[i]
-
-            if operands[i] == "rd": restriction = "Destination register"
-            elif operands[i] == "rs": restriction = "Source register"
-            elif operands[i] == "rs1": restriction = "Source register 1"
-            elif operands[i] == "rs2": restriction = "Source register 2"
-
-            ret += "<td>" + restriction + "</td>\n"
-            ret += "</tr>\n"
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ("true", "yes", "1"):
+        return True
+    if v.lower() in ("false", "no", "0"):
+        return False
+    raise argparse.ArgumentTypeError("Boolean value expected.")
 
 
-        if is_pseudo: 
-            ret += "<tr>\n"
-            ret += "<td>Implementation:</td>\n"
-            ret += "<td><code>" + implementation + "</code></td>\n"
-            ret += "</tr>\n"
+def operand_default_explanation(op):
+    if op == "rd":
+        return "Destination register"
+    if op in ("rs", "rs1", "rs2"):
+        return "Source register"
+    if "(" in op:
+        return "Memory address"
+    return "Immediate / value"
 
-        ret += "<tr><td colspan=2><hr></td></tr>\n"
 
-    return ret
+def instruction_matches(instr, name_re, include_pseudo):
+    if not include_pseudo and instr.get("is_pseudo", False):
+        return False
+    if name_re and not re.search(name_re, instr["instruction"], re.IGNORECASE):
+        return False
+    return True
 
-# Iterate through categories
+
+# -----------------------------
+# Argument parsing
+# -----------------------------
+
+parser = argparse.ArgumentParser(description="Generate HTML instruction reference")
+parser.add_argument("-category", type=str, default=None, help="Regex to filter categories")
+parser.add_argument("-name", type=str, default=None, help="Regex to filter instruction names")
+parser.add_argument("-category-header", type=str2bool, default=True)
+parser.add_argument("-pseudo-instructions", type=str2bool, default=True)
+parser.add_argument("-short", type=str2bool, default=True)
+
+args = parser.parse_args()
+
+category_re = re.compile(args.category, re.IGNORECASE) if args.category else None
+name_re = args.name
+
+# -----------------------------
+# Load JSON
+# -----------------------------
+
+try:
+    with open("quickguide-generator/instructions.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+except FileNotFoundError:
+    sys.exit("Error: instructions.json not found")
+except json.JSONDecodeError as e:
+    sys.exit(f"Error parsing JSON: {e}")
+
+# -----------------------------
+# HTML output
+# -----------------------------
+
+print("<!DOCTYPE html>")
+print("<html><head>")
+print("<meta charset='utf-8'>")
+print("<style>")
+print("body { font-family: sans-serif; }")
+print("table { border-collapse: collapse; width: 100%; }")
+print("th, td { border: 1px solid #ccc; padding: 6px; }")
+print("th { background: #eee; }")
+print("code { background: #f4f4f4; padding: 2px 4px; }")
+print("</style>")
+print("</head><body>")
+
 for category, instructions in data.items():
-    html += "<h1>" + category + "</h1>\n"
-    html += "<table " + table_css + ">\n"
 
-    html += "<colgroup>"
-    html += "<col " + middle_css +">"
-    html += "<col " + shrink_css + ">"
-    html += "</colgroup>"
+    if category_re and not category_re.search(category):
+        continue
 
-    # Real instructions
-    html += "<tr>\n"
-    html += "<td colspan = 2 " + td_gray_css + "> Real Instructions </td>\n"
-    html += "</tr>\n"
-    html += PrintCategoryInstructions(instructions, pseudo=False)
-    # Pseudo-instructions
-    html += "<tr><td colspan = 2 " + td_gray_css + "> Pseudo Instructions </td></tr>\n"
-    html += PrintCategoryInstructions(instructions, pseudo=True)
-    html += "</table>\n"
-    html += "<br>\n"
+    filtered = [
+        instr for instr in instructions
+        if instruction_matches(instr, name_re, args.pseudo_instructions)
+    ]
 
-# Write to output HTML file
-with open("quickguide-generator/instructions.html", "w") as f:
-    f.write(html)
+    if not filtered:
+        continue
+
+    if args.category_header:
+        print(f"<h2>{escape(category)}</h2>")
+
+    # -------------------------
+    # SHORT MODE
+    # -------------------------
+    if args.short:
+        print("<table>")
+        print("<tr><th>Instruction</th><th>Description</th></tr>")
+
+        for instr in filtered:
+            operands = instr.get("operands", [])
+            syntax = instr["instruction"]
+            if operands:
+                syntax += " " + ", ".join(operands)
+
+            print("<tr>")
+            print(f"<td><code>{escape(syntax)}</code></td>")
+            print(f"<td>{escape(instr.get('shortdesc', ''))}</td>")
+            print("</tr>")
+
+        print("</table>")
+
+    # -------------------------
+    # LONG MODE
+    # -------------------------
+    else:
+        for instr in filtered:
+            print(f"<h3>{escape(instr['instruction'])}</h3>")
+            print(f"<p>{escape(instr.get('description', ''))}</p>")
+
+            operands = instr.get("operands", [])
+            restrictions = instr.get("restrictions", [])
+
+            syntax = instr["instruction"]
+            if operands:
+                syntax += " " + ", ".join(operands)
+
+            print(f"<p><b>Syntax:</b> <code>{escape(syntax)}</code></p>")
+
+            if operands:
+                print("<table>")
+                print("<tr><th>Operand</th><th>Explanation</th></tr>")
+
+                for i, op in enumerate(operands):
+                    expl = operand_default_explanation(op)
+                    if i < len(restrictions) and restrictions[i]:
+                        expl = restrictions[i]
+
+                    print("<tr>")
+                    print(f"<td><code>{escape(op)}</code></td>")
+                    print(f"<td>{escape(expl)}</td>")
+                    print("</tr>")
+
+                print("</table>")
+
+            print("<hr>")
+
+print("</body></html>")

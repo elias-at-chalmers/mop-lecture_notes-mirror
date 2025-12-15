@@ -12,22 +12,8 @@ root = ET.fromstring(xml)
 
 peripherals = root.find('peripherals')
 
-html = """
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".fold-table .summary").forEach(summary => {
-    summary.addEventListener("click", () => {
-      let row = summary.nextElementSibling;
 
-      while (row && !row.classList.contains("summary")) {
-        row.classList.toggle("open");
-        row = row.nextElementSibling;
-      }
-    });
-  });
-});
-</script>
-"""
+html = ""
 
 table_css = "style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'"
 shrink_css = "style = 'width: 5%;'"

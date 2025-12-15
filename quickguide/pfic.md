@@ -25,3 +25,17 @@ Register Block Overview
 </p>
 
 
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".fold-table .summary").forEach(summary => {
+    summary.addEventListener("click", () => {
+      let row = summary.nextElementSibling;
+
+      while (row && !row.classList.contains("summary")) {
+        row.classList.toggle("open");
+        row = row.nextElementSibling;
+      }
+    });
+  });
+});
+</script>

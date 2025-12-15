@@ -8,6 +8,13 @@ local function read_file(path)
   return content
 end
 
+local function normalize_dashes(s)
+  -- replace en dash and em dash with ASCII hyphen
+  s = s:gsub("–", "-")  -- U+2013
+  s = s:gsub("—", "-")  -- U+2014
+  return s
+end
+
 local function strip_outer_html(html)
   -- remove <!DOCTYPE html>
   html = html:gsub("<!DOCTYPE html>", "")
@@ -42,6 +49,7 @@ local function handle_placeholder(text)
   -- {{python script.py arg1 arg2}}
   local cmd = text:match("^{{python%s+([^}]+)}}$")
   if cmd then
+    cmd = normalize_dashes(cmd)
     local args = {}
     for word in cmd:gmatch("%S+") do
       table.insert(args, word)

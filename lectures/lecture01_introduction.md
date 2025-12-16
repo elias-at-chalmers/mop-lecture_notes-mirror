@@ -12,7 +12,7 @@ What is Machine Oriented Programming?
 
 What is a microcontroller?
 ===============================================================================
-
+<!-- ÖA: test -->
 Let's say we want to build a simple thermometer that measures the temperature in the room and displays it in a readable form. We would first have to buy ourselves a [*temperature sensor*](https://se.rs-online.com/web/p/temperature-humidity-sensor-ics/5335878?gb=s) of some kind, and a [suitable display](https://se.rs-online.com/web/p/led-displays/8305139?gb=s). The temperature sensor will output the measured temperature as a _voltage_ on one pin.  The display will have one pin per LED-segment, so that the segment lights up if the corresponding pin is \ref{fig:fig1} monkey. 
 
 To connect the two components, we would have to buy an *Analogue to Digital Converter* (ADC) that could turn the measured voltage into a binary number, and a *Decoder* chip that turns that number into a corresponding combination of 1's and 0's for the display (see Figure @fig:fig1.

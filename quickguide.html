@@ -111,8 +111,23 @@
         const dropdown = document.getElementById("peripheral-select");
         const frame = document.getElementById("content-frame");
 
+        const STORAGE_KEY = "quickguide-selected-page";
+
+        // Restore saved selection on page load
+        const savedPage = localStorage.getItem(STORAGE_KEY);
+        if (savedPage) {
+            dropdown.value = savedPage;
+            frame.src = savedPage;
+        } else {
+            // Load the default (first option)
+            frame.src = dropdown.value;
+        }
+
+        // Save selection and update iframe when changed
         dropdown.addEventListener("change", () => {
-            frame.src = dropdown.value || "";
+            const value = dropdown.value;
+            frame.src = value;
+            localStorage.setItem(STORAGE_KEY, value);
         });
     </script>
 

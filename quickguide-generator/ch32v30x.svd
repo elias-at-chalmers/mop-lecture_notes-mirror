@@ -37232,7 +37232,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
         <register>
           <name>IENR1</name>
           <displayName>IENR1</displayName>
-          <description>Interrupt Setting Register</description>
+          <description>Interrupt Enable Set Register</description>
           <addressOffset>0x100</addressOffset>
           <size>0x20</size>
           <access>write-only</access>
@@ -37240,7 +37240,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
           <fields>
             <field>
               <name>INTEN</name>
-              <description>INTEN</description>
+              <description>Bit number x in IENRn corresponds to interrupt 32 * n + x. Writing 1 enables interrupt.</description>
               <bitOffset>12</bitOffset>
               <bitWidth>20</bitWidth>
             </field>
@@ -37249,7 +37249,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
 		 <register>
           <name>IENR2</name>
           <displayName>IENR2</displayName>
-          <description>Interrupt Setting Register</description>
+          <description>Interrupt Enable Set Register</description>
           <addressOffset>0x104</addressOffset>
           <size>0x20</size>
           <access>write-only</access>
@@ -37257,7 +37257,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
           <fields>
             <field>
               <name>INTEN</name>
-              <description>INTEN</description>
+              <description>Bit number x in IENRn corresponds to interrupt 32 * n + x. Writing 1 enables interrupt.</description>
               <bitOffset>0</bitOffset>
               <bitWidth>32</bitWidth>
             </field>
@@ -37266,7 +37266,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
         <register>
           <name>IENR3</name>
           <displayName>IENR3</displayName>
-          <description>Interrupt Setting Register</description>
+          <description>Interrupt Enable Set Register</description>
           <addressOffset>0x108</addressOffset>
           <size>0x20</size>
           <access>write-only</access>
@@ -37274,7 +37274,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
           <fields>
             <field>
               <name>INTEN</name>
-              <description>INTEN</description>
+              <description>Bit number x in IENRn corresponds to interrupt 32 * n + x. Writing 1 enables interrupt.</description>
               <bitOffset>0</bitOffset>
               <bitWidth>32</bitWidth>
             </field>
@@ -37283,7 +37283,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
         <register>
           <name>IENR4</name>
           <displayName>IENR4</displayName>
-          <description>Interrupt Setting Register</description>
+          <description>Interrupt Enable Set Register</description>
           <addressOffset>0x10C</addressOffset>
           <size>0x20</size>
           <access>write-only</access>
@@ -37291,7 +37291,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
           <fields>
             <field>
               <name>INTEN</name>
-              <description>INTEN</description>
+              <description>Bit number x in IENRn corresponds to interrupt 32 * n + x. Writing 1 enables interrupt.</description>
               <bitOffset>0</bitOffset>
               <bitWidth>8</bitWidth>
             </field>

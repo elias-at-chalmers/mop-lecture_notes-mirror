@@ -210,10 +210,29 @@ def summarize_fields(fields):
 
 def PrintRegisterDetails(r):
     html = ""
-    html += "<details>\n"
-    html += "<summary>\n"
-    html += r.find('name').text
-    html += "</summary>\n"
+
+    #######################################################################
+    # If this register is in a group, fold all together
+    #######################################################################
+    if IsInGroup(r, groups): 
+        first = GetFirstInGroup(r, groups)
+        last = GetLastInGroup(r, groups)
+        if r == first:
+            ###############################################################
+            # If first, start detail block
+            ###############################################################
+            html += "<details>"
+            html += "<summary>" + first.find('name').text + " ... " + last.find('name').text + "</summary>"
+            
+    #######################################################################
+    # If not in group, fold by itself
+    #######################################################################
+    else: 
+        html += "<details>\n"
+        html += "<summary>\n"
+        html += r.find('name').text
+        html += "</summary>\n"
+
     html += "<p>\n";
     if r.find('description') is not None:
         html += r.find('description').text + "<br>\n"
@@ -272,8 +291,12 @@ def PrintRegisterDetails(r):
     if(r.find('fields') is not None):
         for line in summarize_fields(fields):
             html += line + "<br>\n"
-        
-    html += "</details>\n"
+
+    #######################################################################
+    # CLose details, unless we are in the middle of a group
+    #######################################################################
+    if not IsInGroup(r, groups) or (r == last): 
+        html += "</details>\n"
     #html += "<hr>\n"
 
     return html
@@ -353,6 +376,8 @@ if(sys.argv[1] == "register-details"):
         if "derivedFrom" in p.attrib: 
             html += "<b>WARNING: Peripheral is derived from " + p.attrib["derivedFrom"] + ", and will not parse correctly yet</b><br>\n"
             continue
+
+        groups = GetRegisterGroups(p)
 
         for r in p.find('registers'):        
             if not pattern.match(r.find('name').text): continue

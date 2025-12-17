@@ -4,17 +4,7 @@
         {
             "label": "Compile Markdown to HTML",
             "type": "shell",
-            "command": "pandoc",
-            "args": [
-                "${file}",
-                "-o",
-                "${fileDirname}/../html/${fileBasenameNoExtension}.html",
-                "--lua-filter=quickguide-generator/include-html.lua",
-                "--standalone",
-                "--css",
-                "../style.css",
-                "--ascii"
-            ],
+            "command": "make",
             "group": {
                 "kind": "build",
                 "isDefault": true

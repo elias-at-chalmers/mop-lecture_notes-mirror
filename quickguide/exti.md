@@ -1,4 +1,4 @@
-<p>Short text about |EXTI</p>
+<p>Short text about EXTI</p>
 
 <p>
 <details>

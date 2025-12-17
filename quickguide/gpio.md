@@ -21,6 +21,7 @@ For each pin, there are two bits to set the MODE (Input or Output, and speed of 
 
 {{include quickguide/gpio-cfg.html}}
 
+
 </p>
 </details>
 

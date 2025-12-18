@@ -141,7 +141,25 @@ In an early lecture, we gave a brief introduction to the *instruction cycle* - t
 In other words, if an interrupt occurs, the current instruction will continue until done. Then machine state will be saved away and `PC` will change to an address specific to this exception. We will discuss some of these steps in detail below. 
 
 ### Interrupt handler address
-So how does the processor know where to jump (i.e., where in memory the interrupt handler is), when an interrupt occurs? There are actually several different ways that the CH32V307 can handle this, and they will be discussed in the next lecture. For this lecture, we will use the simplest possible way: Put the *address* of the interrupt handler function into the CSR `mtvec`. 
+So how does the processor know where to jump (i.e., where in memory the interrupt handler is), when an interrupt occurs? There are actually several different ways that the CH32V307 can handle this, and they will be discussed in the next lecture. For this lecture, we will use the simplest possible way: Put the *address* of the interrupt handler function into the CSR `mtvec`.
+
+Since the C language is platform independent, there is now special C code that can write to the CSR registers. Instead, we either have to implement this in an assembly file:
+```
+.extern Interrupt_Handler  # Assuming there is a C function with this name
+.global write_mtvec        # Make this function available to C code
+write_mtvec:               # void write_mtvec()
+la t0, Interrupt_Handler   # Load the address of that function to t0
+csrw mtvec, t0             # And write it into mtvec
+ret
+```
+, or we can use *inline assembly* in our C code to achieve the same thing: 
+```C
+// Set mtvec to address of Interrupt_Handler
+asm volatile ("csrw mtvec, %0" :: "r"(Interrupt_Handler));
+```
+
+Either way, when an interrupt is enabled and triggers, the processor will now expect a handler routine at the address stored in the `mtvec` register, and jump to that address. 
+
 
 ### Interrupt handlers
 In most respects, an interrupt handler is just a "function" and we will implement it as a function in C, but there are two important caveats. 
@@ -185,7 +203,17 @@ void SysTick_Handler(void)
     *GPIOD_ODATA ^= 0x1;    // Flip GPIO D0 pin
 }
 ```
-The first line tells the compiler that this is an interrupt handler and code must be generated accordingly.
+The first line tells the compiler that this is an interrupt handler and code must be generated accordingly. Note that the systick module will not generate a new interrupt until the last one has been taken care of. You inform the module that this has been done by setting the status register back to 0. 
+
+We also have to inform the processor that this is the function that we want to be called when an interrupt occurs. As discussed earlier, we do this by putting the address to it into the `mtvec` CSR register: 
+
+```C
+void main() {
+    ...
+    asm volatile ("csrw mtvec, %0" :: "r"(SysTick_Handler));
+    ...
+}
+```
 
 ### Configuring SysTick to generate Interrupts
 To make sure that this handler actually gets called, we can start by flipping a single bit in our previous systick-initialization code: 
@@ -199,72 +227,10 @@ To make sure that this handler actually gets called, we can start by flipping a 
 
 But now our code is in a dangerous state! After this line has been executed, systick will start counting and after 2ms, an interrupt will be triggered. The processor will then use the `mtvec` CSR to decide where to jump, but we have not put anything useful into that register.
 
-### Generating a table of interrupt vectors in memory
-The easiest way to set up a vector table for our program is to add a new assembly file to our project (we will call it `vector_table.s`): 
 
-```
-.section .text
-.global vector_table        # Make this variable available to the C code
-.extern SysTick_Handler     # Make the interrupt handler available to our code
+And that is all there is to it! We can now write a single main C file, that plays a tone using an interrupt, and *in parallel* reads and updates the thermometer value.
 
-.align 2                    # The vector table must begin on an address divisible by 4
-vector_table: 
-.zero 12 * 4                # Reserve space for 12 interrupt vectors before systick
-j SysTick_Handler           # At `vector_table + 0x30` we place an instruction that 
-                            # jumps to our interrupt handler
-```
-
-When we compile this code and load it into memory on the machine, we don't know exactly where `vector_table` will begin (depends on the compiler), but we know that it will contain a table with 12 empty entries, and then a single jump instruction at offset `0x30`. So the next step is to tell the processor that `vector_table` is the base address it wants to use when looking for the systick interrupt handler. So, we have to put the address to `vector_table` into our `mtvec` CSR. This is easily done by adding a little function to our assembly file: 
-
-```
-.global init_interrupts     # Make this function available to our C code
-
-init_interrupts: 
-    la t0, vector_table     # Put the address of `vector_table` in t0
-    csrw mtvec, t0          # Move that value into the `mtvec` CSR
-    ret
-```
-
-And that is all there is to it! We can now write a single main C file, that plays a tone using an interrupt, and *in parallel* reads and updates the thermometer value: 
-
-```C
-
-extern void init_interrupts();
-
-__attribute__((interrupt("machine")))
-void SysTick_Handler(void)
-{
-    *SYSTICK_SR = 0;            // Reset the status, so we will get a new interrupt in 2ms
-    *GPIOD_ODATA ^= 0x1;        // Flip GPIO D0 pin
-}
-
-int main(void)
-{
-    // Configure Port D (buzzer)
-    *GPIOD_CFGLR = 0x00000002;  // Configure pin 0 as Output, Push-Pull, 2MHz
-    // Configure Port E (7-segment display)
-    *GPIOE_CFGLR = 0x22222222;  // Configure all pins as Output, Push-Pull, 20MHz
-    // Call the assembly function that initializes `mtvec`
-    init_interrupts();
-    // Configure SysTick
-    *SYSTICK_CMPH = 0x0;        // Set systick compare value to 2ms 
-    *SYSTICK_CMPL = 147000 * 2; //
-    *SYSTICK_CTLR = 0b101111;   // Start systick timer, count down, enable restart,
-                                // and ENABLE INTERRUPTS    
-
-    /////////////////////////////////////////////
-    // From here on, a tone will be played
-    /////////////////////////////////////////////
-
-    // Enter main loop that displays temperature
-    while(1) 
-    {
-        int t = GetTemperature(); 
-        *GPIOE_ODATA = Get7SegCode(t);
-    }
-}
-```
-
+> **TODO:** Point them to an exercise where they get to do exactly this. 
 
 ### If this is too short, take some pointer stuff from lecture 06
 

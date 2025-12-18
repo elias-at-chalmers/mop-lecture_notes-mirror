@@ -31,13 +31,13 @@ assets: $(addprefix $(HTML_DIR)/,$(ASSETS))
 
 
 $(HTML_DIR)/style.css: style.css
-	mkdir -p $(HTML_DIR)
+	$(MKDIR) -p $(HTML_DIR)
 	cp $< $@
 
 $(HTML_DIR)/images: images
-	mkdir -p $(HTML_DIR)
+	$(MKDIR) -p $(HTML_DIR)
 	cp -r $< $@
 
 $(HTML_DIR)/quickguide.html: quickguide.html
-	mkdir -p $(HTML_DIR)
+	$(MKDIR) -p $(HTML_DIR)
 	cp $< $@

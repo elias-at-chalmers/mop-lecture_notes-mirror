@@ -3,6 +3,92 @@ import re
 from collections import defaultdict
 import sys
 
+###############################################################################
+# Argument parser
+###############################################################################
+import argparse
+
+def build_parser():
+    parser = argparse.ArgumentParser(
+        prog="program",
+        description="Peripheral/register inspection tool"
+    )
+
+    # Common flags
+    def add_common_flags(p):
+        p.add_argument(
+            "-no-grouping",
+            action="store_true",
+            help="Disable grouping in output"
+        )
+        p.add_argument(
+            "-no-headers",
+            action="store_true",
+            help="Disable column headers in output"
+        )
+
+    subparsers = parser.add_subparsers(
+        dest="command",
+        required=True
+    )
+
+    # ------------------------------------------------------------
+    # overview-table
+    # ------------------------------------------------------------
+    p_overview = subparsers.add_parser(
+        "overview-table",
+        help="Show overview table for a peripheral"
+    )
+    p_overview.add_argument(
+        "peripheral",
+        help="Peripheral name (exact match)"
+    )
+    p_overview.add_argument(
+        "register_regexp",
+        nargs="?",
+        default=None,
+        help="Optional register name regexp"
+    )
+    add_common_flags(p_overview)
+
+    # ------------------------------------------------------------
+    # baseaddress
+    # ------------------------------------------------------------
+    p_base = subparsers.add_parser(
+        "baseaddress",
+        help="Show base addresses of peripherals"
+    )
+    p_base.add_argument(
+        "peripheral_regexp",
+        help="Peripheral name regexp"
+    )
+    add_common_flags(p_base)
+
+    # ------------------------------------------------------------
+    # register-details
+    # ------------------------------------------------------------
+    p_details = subparsers.add_parser(
+        "register-details",
+        help="Show detailed register information"
+    )
+    p_details.add_argument(
+        "peripheral",
+        help="Peripheral name (exact match)"
+    )
+    p_details.add_argument(
+        "register_regexp",
+        help="Register name regexp"
+    )
+    add_common_flags(p_details)
+
+    return parser
+
+
+def parse_args(argv=None):
+    parser = build_parser()
+    return parser.parse_args(argv)
+###############################################################################
+args = parse_args()
 
 
 with open("quickguide-generator/ch32v30x.svd", "r", encoding="utf-8") as f:
@@ -62,6 +148,7 @@ def GetRegisterGroups(p):
     return groups
 
 def IsInGroup(r, groups):
+    if(args.no_grouping): return False
     name = r.find('name').text
     match = re.match(r"([A-Za-z_]+)(\d+)$", name)
     if match:
@@ -302,39 +389,27 @@ def PrintRegisterDetails(r):
     return html
 
 
-# Things I want it to do: 
-# * Print the overview table for a peripheral
-# Ex: ./quickguide-generator.py overview-table GPIOA
-# * Print the details for each register in the peripheral
-# Ex: ./quickguide-generator.py register-details GPIOA CFG*
-# * Print the base adresses for a peripheral regexp
-# Ex: ./quickguide-generator.py baseaddress GPIO*
 
-if(sys.argv[1] == "overview-table"): 
-    if(len(sys.argv) != 3 and len(sys.argv) != 4):     
-        print("Usage: " + sys.argv[0]  + "overview-table <peripheral> [register-regexp]")
-        exit(1)
-    
+
+
+
+if(args.command == "overview-table"): 
     found = False
     for p in peripherals:
-        if p.find('name').text != sys.argv[2]: continue
+        if p.find('name').text != args.peripheral: continue
         found = True
         p_name = p.find('name').text
         if "derivedFrom" in p.attrib: 
             html += "<b>WARNING: Peripheral is derived from " + p.attrib["derivedFrom"] + ", and will not parse correctly yet</b><br>\n"
             continue
-        register_regexp = sys.argv[3] if len(sys.argv) > 3 else None
+        register_regexp = args.register_regexp
         html += PrintPeripheralOverviewTable(p, register_regexp)
     if not found:
-        print("Peripheral " + sys.argv[2] + " not found")
+        print("Peripheral " + args.peripheral + " not found")
         exit(1)
 
-if sys.argv[1] == "baseaddress":
-    if len(sys.argv) != 3:
-        print("Usage: " + sys.argv[0] + " baseaddress <peripheral-regexp>")
-        exit(1)
-
-    pattern = re.compile(sys.argv[2])
+if(args.command == "baseaddress"):
+    pattern = re.compile(args.peripheral_regexp)
 
     matches = []
     for p in peripherals:
@@ -343,7 +418,7 @@ if sys.argv[1] == "baseaddress":
             matches.append(p)
 
     if not matches:
-        print("Peripheral matching " + sys.argv[2] + " not found")
+        print("Peripheral matching " + args.peripheral_regexp + " not found")
         exit(1)
 
     # Exactly one match: Don't print name
@@ -360,17 +435,13 @@ if sys.argv[1] == "baseaddress":
             base = p.find("baseAddress").text
             html += p_name + ": <code>" + base + "</code><br>\n"
 
-if(sys.argv[1] == "register-details"):
-    if(len(sys.argv) != 4):     
-        print("Usage: " + sys.argv[0]  + "register-details <peripheral> <register-regexp>")
-        exit(1)
-    
-    pattern = re.compile(sys.argv[3])
+if(args.command == "register-details"):
+    pattern = re.compile(args.register_regexp)
 
     found = False
     for p in peripherals:
 
-        if p.find('name').text != sys.argv[2]: continue
+        if p.find('name').text != args.peripheral: continue
         found = True
         p_name = p.find('name').text
         if "derivedFrom" in p.attrib: 
@@ -383,7 +454,7 @@ if(sys.argv[1] == "register-details"):
             if not pattern.match(r.find('name').text): continue
             html += PrintRegisterDetails(r)
     if not found:
-        print("Peripheral " + sys.argv[2] + " not found")
+        print("Peripheral " + args.peripheral + " not found")
         exit(1)
 
 print(html)

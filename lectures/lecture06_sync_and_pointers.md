@@ -26,7 +26,7 @@ int main()
 The variables `a` and `b` are both global variables, and their location in memory is known when the program starts. These variables will reside in the same place in memory throughout the execution of the program and can be read and written from anywhere. The variable `a` is assigned a value when it is declared in the global scope, and will be copied from the executable file into the *initialized data area* which, in memory, will come right after the program code: 
 
 <p align="center">
-  <img src="images/memory.png" alt="My image" width="50%" />
+  <img src="../images/memory.png" alt="My image" width="50%" />
 </p>
 
 The variable `b` is not initialized, and will be allocated a space in the *uninitialized data area*. The required size of this area is known when we compile our code, and it will be initialized to 0 when the program starts.
@@ -80,7 +80,7 @@ On the first line, we create a global integer variable called `b` and initialize
 
 
 <p align="center">
-  <img src="images/pointer_memory.png" alt="My image" width="50%" />
+  <img src="../images/pointer_memory.png" alt="My image" width="50%" />
 </p>
 <-- nitpicking: to reduce cognitive load by maybe 1% i would dim the "uninteresting" areas of memory and give a special color to the two occurences of "0x2100" and/or add a coloured arrow between them -->
 
@@ -229,7 +229,7 @@ To make our blinky program optimizer safe, we change the first two lines to:
 So far, we have talked about plugging in an LED, a push-button, and simple keyboard to our microcontroller. These components are *passive* and instantaneously respond to the current state of the connected GPIO pins. When we plug in something more complicated, like a display, or a motor, or an old-school text terminal, we often have to follow a *communication protocol*. Many devices (such as the TFT display we will be using later in the course) use standardized protocols (RS-232, CAN, SPI, ...), which are supported by the microcontrollers hardware. These will be discussed later, but first we will look at a simpler, *active*, device: the 1602 ASCII LCD display: 
 
 <p align="center">
-  <img src="images/ascii-display.png" alt="My image" width="50%" />
+  <img src="../images/ascii-display.png" alt="My image" width="50%" />
 </p>
 
 A standard LCD display that you would buy [off-the-shelf](https://www.electrokit.com/lcd-2x16-tecken-rgb-seriell-qwiic) actually consists of an LCD *panel* and a *controller chip* (often confusingly called a *driver*). This controller chip is *itself* a little microcontroller that runs code to put characters on the display. So, when you want your LCD display to show a string of text, the code you write on the MD307 has to communicate with the microcontroller in the display, according to a specific communication protocol. The protocol is usually described in the display's *datasheet*. 
@@ -237,7 +237,7 @@ A standard LCD display that you would buy [off-the-shelf](https://www.electrokit
 To communicate with our ASCII display, we can write *commands* (such as "clear the display" or "move the cursor") or *data* (the text we want to show) to it. To do this, we must follow a *timing diagram* that we can find in the datasheet: 
 
 <p align="center">
-  <img src="images/ascii_timing_write.png" alt="My image" width="90%" />
+  <img src="../images/ascii_timing_write.png" alt="My image" width="90%" />
 </p>
 
 This figure shows us that there are 11 signals (GPIO pins on our MD307, connected to pins on the display, via wires) that we use to communicate with the display: 
@@ -527,7 +527,7 @@ int main()
 ```
 
 <p align="center">
-  <img src="images/doublepointer.png" alt="My image" width="75%" />
+  <img src="../images/doublepointer.png" alt="My image" width="75%" />
 </p>
 
 

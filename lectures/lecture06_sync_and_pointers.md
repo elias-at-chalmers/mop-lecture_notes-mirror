@@ -29,7 +29,9 @@ The variables `a` and `b` are both global variables, and their location in memor
   <img src="images/memory.png" alt="My image" width="50%" />
 </p>
 
-The variable `b` is not initialized, and will be allocated a space in the *uninitialized data area*. The required size of this area is known from the executable file, and it will be initialized to 0 when the program starts.
+The variable `b` is not initialized, and will be allocated a space in the *uninitialized data area*. The required size of this area is known when we compile our code, and it will be initialized to 0 when the program starts.
+
+Pay attention to the difference between the two variables: `a` is assigned a value directly when it's declared, while `b` is not assigned a value until `main()` is run. This has consequences for where "a" and "b" will reside in memory!
 
 All other variables in the program are declared inside functions. These are called *local variables* and will only "exist" while the function is executing.  Usually, this means that they will exist on the stack, which grows every time a function is called, and shrinks when the function returns. In some cases, local variables do not need to reside in memory at all, but only exist temporarily in processor registers.
 
@@ -37,6 +39,7 @@ All other variables in the program are declared inside functions. These are call
 In some cases, we want a variable that ”exists” throughout the program, but that is only visible in a specific function or scope. This is achieved using the `static` qualifier:
 ```C
 int counted_function(int v) {
+    // This will be initialized only once, before the program starts
     static int times_the_function_has_been_called = 0;
     times_the_function_has_been_called += 1;
     ...
@@ -75,19 +78,23 @@ int main()
 
 On the first line, we create a global integer variable called `b` and initialize it with the value `20`. It will reside at the first memory location in the initialized data area when we start the program. In this  example, the address where b resides in memory is: 0x2100.
 
+
 <p align="center">
   <img src="images/pointer_memory.png" alt="My image" width="50%" />
 </p>
+<-- nitpicking: to reduce cognitive load by maybe 1% i would dim the "uninteresting" areas of memory and give a special color to the two occurences of "0x2100" and/or add a coloured arrow between them -->
 
 On the next, we create another variable called `ptr_to_b`. The type of this variable is `int *`. The asterisk here means that `ptr_to_b` is of the type "pointer to integer". This variable resides in the next available memory in the initialized data area, address `0x2104`. 
 
 We immediately initialize this variable to be `&b`. The ampersand (&) here means "the address of b", so the value stored at memory address `0x2104` is `0x2100`.
 
-Next, in the `main` function, we *dereference* the variable `ptr_to_b` and assign a new value to it. Dereferencing a pointer means "give me the variable that this pointer points to", and is done by putting an asterisk (`*`) in front of the pointer [^1]
+Next, in the `main` function, we *dereference* the variable `ptr_to_b` and assign a new value to it. Dereferencing a pointer means "give me the variable that this pointer points to", and is done by putting an asterisk (`*`) in front of the pointer [^1] : `*ptr_to_b = 40;`
 
 [^1]: So, in a *statement*, the asterisk means "dereference", but in a *declaration* it means "is a pointer".
 
-So when the compiler sees `*ptr_to_b = 40` it will read the value stored at 0x2104 and read that as a memory address (`0x2100`). It then assigns the value 40 to the integer at memory address `0x2100`. Therefore, the next time we read the variable `b` (which resides at memory address `0x2100`) we will read the value 40.
+So when the compiler sees `*ptr_to_b = 40` it will read the value stored at 0x2104 and treat that as a memory address (`0x2100`). It then assigns the value 40 to the integer at memory address `0x2100`. Therefore, the value of the variable "b" (which resides at memory address `0x2100`) will have changed to 40.
+
+This is why we call `ptr_to_b` a *pointer*; it *points* to the value of variable `b`. 
 
 If you're feeling lost right now, take a deep breath and try again. It is essential to understand that *a pointer is a variable containing the address of another variable, of a specific type*. Once that is clear, working with pointers will become second nature.
 
@@ -95,9 +102,11 @@ If you're feeling lost right now, take a deep breath and try again. It is essent
 One reason that pointers are important in machine oriented programming is that
 they allow us to express reading and writing from arbitrary memory addresses.
 When we do not have an operating system and drivers, the only way for the processor to communicate with peripheral hardware is through memory load and store
-operations.
+operations. One reason that pointers are important in machine oriented programming is that they allow us to express reading and writing, not only from variables, but from any arbitrary memory addresses
 
 You have already seen examples of this when writing to GPIO ports. Let us consider another toy example:  
+
+<-- We haven't seen examples of using pointers for GPIO ports yet, or have I missed something? -->
 
 Our program is loaded into a 32kb SRAM chip that is mapped to addresses `0x20000000` - `0x20007FFF`. Let's say there is also a second 128kb SRAM chip mapped to addresses `0x30000000`- `0x3001FFFF`. Our program needs to read some data into memory for future processing. Since there is a lot of data to read, this data will not fit together with our program on the smaller SRAM, so we will put it on the larger SRAM: 
 
@@ -163,16 +172,16 @@ Note that this is exactly the same thing. The preprocessor will just cut'n'paste
 
 The whole blinky program could look like: 
 ```C
-#define GPIOD_CFGLR *((unsigned int *)0x40011400)
-#define GPIOD_OUTDR *((unsigned int *)0x4001140C)
+#define GPIOD_CFGLR ((unsigned int *)0x40011400)
+#define GPIOD_OUTDR ((unsigned int *)0x4001140C)
 
 void main()
 {
     // Configure pin 6 as output
-    GPIOD_CFGLR = 0x02000000;
+    *GPIOD_CFGLR = 0x02000000;
     while(1) { // Do forever
-        GPIOD_OUTDR = 0b01000000; // Turn on the LED at pin 6
-        GPIOD_OUTDR = 0b00000000; // Turn off the LED at pin 6
+        *GPIOD_OUTDR = 0b01000000; // Turn on the LED at pin 6
+        *GPIOD_OUTDR = 0b00000000; // Turn off the LED at pin 6
     }
 }
 ```
@@ -195,8 +204,8 @@ Let's look at the C code above. In the while loop, we first write the value 5 to
 
 Now look at these two lines from our little blinky program: 
 ```C
-        GPIOD_OUTDR = 0b01000000; // Turn on the LED at pin 6
-        GPIOD_OUTDR = 0b00000000; // Turn off the LED at pin 6
+        *GPIOD_OUTDR = 0b01000000; // Turn on the LED at pin 6
+        *GPIOD_OUTDR = 0b00000000; // Turn off the LED at pin 6
 ```
 The optimizer will reason in exactly the same way here. There is no point in writing `0b010000000` to the variable, if we are just going to immediately overwrite it with `0b00000000`. So it will remove the first line. 
 
@@ -211,8 +220,8 @@ So... we have to inform the optimizer that these particular pointers are not to 
 
 To make our blinky program optimizer safe, we change the first two lines to: 
 ```C
-#define GPIOD_CFGLR *((volatile unsigned int *)0x40011400)
-#define GPIOD_OUTDR *((volatile unsigned int *)0x4001140C)
+#define GPIOD_CFGLR ((volatile unsigned int *)0x40011400)
+#define GPIOD_OUTDR ((volatile unsigned int *)0x4001140C)
 ```
 
 ## Synchronization
@@ -233,10 +242,11 @@ To communicate with our ASCII display, we can write *commands* (such as "clear t
 
 This figure shows us that there are 11 signals (GPIO pins on our MD307, connected to pins on the display, via wires) that we use to communicate with the display: 
 
-* **Register Select (RS)**: This signal is used to tell the display whether we are sending/receiving a command or data. 
+* **Register Select (RS)**: This signal is used to tell the display whether it's a command or data that we are sending/receiving. 
+
 * **Read/Write (R/W)**: This signal is used to tell the display whether we want to send data to it, or receive data from it. 
 * **Enable (E)**: This signal is used to initiate communication with the display
-* **Data Lines (DB0-DB7)**: These lines contain the command or data that we want to send (one byte).
+* **Data Lines (DB0-DB7)**: These 8 lines contain the command or data that we want to send (one byte).
 
 To run a command, or read/write data from/to the display we have to follow the timing constraints given by this diagram. We *prepare* the device for a command by setting the **E**(enable) signal high, and then we *execute* the command by setting **E** low again. 
 
@@ -285,16 +295,17 @@ Base address:
 
 {{python quickguide-generator/main.py register-details SysTick .*CTLR}}
 
-As you can see, this peripheral can be used in quite a number of ways, but for this lecture we will only focus on the most basic use. The registers `STK_CNTL` and `STK_CNTH` make up a 64 bit counter value. That means that the counter can count up to eighteen *quantillion* clock cycles, before it has to restart from zero. (That would take about 4 thousand years, at 144MHz). Usually, we need to count much shorter intervals than that and a long as we are looking at periods shorter than ~30sek (2^32 clocks), we can ignore the `STK_CNTH` register. 
+As you can see, this peripheral can be used in quite a number of ways, but for this lecture we will only focus on the most basic use. The two 32-bit registers `STK_CNTL` and `STK_CNTH` make up a 64 bit counter value. That means that the counter can count up to eighteen *quantillion* clock cycles, before it has to restart from zero. (That would take about 4 thousand years, at 144MHz). Usually, we need to count much shorter intervals than that and a long as we are looking at periods shorter than ~30sek (2^32 clocks), we can ignore the `STK_CNTH` register. 
 
-So, if all we want to do is wait for a specific time interval, *t*, we would usually: 
+So, if all we want to do is wait for a specific time interval, *t* seconds, we would usually: 
+
 * Calculate the number of clockcycles, `c` that t corresponds to: 
   - c = t [sec] * 144000000 [clocks/sec]
 * Set `STK_CNTL` and `STK_CNTH` to zero. 
 * Enable the timer, by setting the first bit (`STE: Enable`) in `STK_CTLR`.
 * Wait until `STK_CNTL` has reached `c`
 
-In C, this would look like: 
+In C, waiting for one second would look like: 
 
 ```C
 #define SYSTICK_CTLR ((volatile uint32_t *)0xE000F000)
@@ -386,7 +397,6 @@ This might seem strange, but actually leads to much cleaner code in many cases. 
 #define SYSTICK_CNTL ((volatile uint32_t *)BASE_ADDRESS + 0x8)
 #define SYSTICK_CNTH ((volatile uint32_t *)BASE_ADDRESS + 0xC)
 ```
-
 Here, when the compiler calculates the address for `SYSTICK_SR`, for instance, it will *first* cast `BASE_ADDRESS` to a `uint32_t *`, and *then* add 4. Since it adds to a pointer to a four byte value, the actual address will become `BASE_ADDRESS + 4 * 4`, which is completely wrong. In this case, the fix is to add a parenthesis: 
 ```C
 #define SYSTICK_SR   ((volatile uint32_t *)(BASE_ADDRESS + 0x4))
@@ -426,6 +436,8 @@ int main()
 
 Hopefully, the syntax is fairly intuitive from your knowledge of other imperative languages (e.g., Java). On the first line, we declare that we want an array of `short` (2 byte) elements. The square brackets can be empty, because we immediately define the values of the array on the same line (comma-separated within the curly brackets). Since this array is declared outside of any function, the memory for the array will be allocated in the *initialized data area*. The compiler will count the number of elements and knows the size of each element and allocates memory for the array before the program starts. The variable `value_array` is a `const` pointer (a pointer that cannot be changed) to the first element of the allocated array.
 
+It might be surprising, coming from higher level languages like Java, but in C an array is *just a pointer* to the first element. 
+
 On line 4, another array is declared. This time, no initial values are given and so the size of the array must be given within the square brackets. Since this array is local, it will be allocated on the stack and will only "exist" while the function is running. Note that, unlike higher level languages, an array in C is always of constant size, since the compiler needs to know the size when producing the code [^2].
 
 [^2]: Allocating memory dynamically is possible, and common practice, when writing programs for machines with operating systems. How this works is discussed in detail in the Course Book, Chapter 6. 
@@ -433,7 +445,8 @@ On line 4, another array is declared. This time, no initial values are given and
 The program then enters a loop and, at each iteration, the i:th element in the first array is squared and the result is stored in the second array. This is done, just as in the previous sections, using the pointers to the start of the arrays in memory (`value_array` and `square_array`). 
 
 #### Pointers as Function Parameters
-Let's say we want to isolate the code that squares the values of an array in a function. This is done by passing the pointers to the start of the arrays as arguments to the function: 
+Let's say we want isolate the code that squares the values of an array in a function, so we can re-use it for any array. In order for this to work, the function needs to know three things: the start addresses of both the source array and the destination array (the results), and the size of the arrays: 
+
 ```C
 void SquareArray(short * src_array, int * dst_array, int num_elements) {
     for(int i=0; i<num_elements; i++) {
@@ -449,7 +462,7 @@ int main()
 }
 ```
 
-After the call to `SquareArray` on line 11, the array `square_array` will contain the squares, just as before. It is worth remembering here that we have claimed previously that *all* function parameters in C are sent *by value*. Yet, the contents of `square_array` are changed after the function call. This is because the array itself is *not* a function parameter. The parameter is a single *pointer* to the start of the array, and that pointer is copied as a function parameter.
+After the call to `SquareArray` on line 11, the array `square_array` will contain the squares, just as before. It is worth remembering here that we have claimed previously that *all* function parameters in C are sent *by value*. Yet, the contents of `square_array` are changed after the function call. This is because we're not sending the *array itself* as an argument to the function. What we use instead is a *pointer* (the address) to the start of the array, and the fact that the function is receiving a copy of this pointer doesn't matter, it still points to the same location in memory!
 
 In the same way, we can use pointers to variables when we want to change the value of "a parameter" (where we would have used pass by reference in other languages): 
 ```C
@@ -469,7 +482,7 @@ int main()
 This example was discussed in the introduction, but bears repeating now that you have a better grasp of what pointers are. The function `swap` takes as input *pointers* to two integers, which allows it to modify the values that they point at. 
 
 #### Strings
-In C, there is no built-in or otherwise special datatype to represent strings. Instead, a string is simply a certain number of characters (bytes) stored contiguously in memory, i.e., an array of `char`. Each character is represented by a single byte (which can have a value between 0 and 255) and each character is assigned a certain value. The mapping between byte values and characters is defined in the ASCII standard[^3]. This standard also contains some non-characters. For instance, the byte value 10 means "end of line" and the byte value 0 means "end of string". When we want to do operations on strings, for example compare two strings and see if they are equal, we do this by passing around the \textit{pointer} to the beginning of the strings:
+In C, there is no built-in or otherwise special datatype to represent strings. Instead, a string is simply a certain number of characters (bytes) stored contiguously in memory, i.e., an array of `char`. Each character is represented by a single byte (which can have a value between 0 and 255) and each character is assigned a certain value. The mapping between byte values and characters is defined in the ASCII standard[^3]. This standard also contains some non-printable characters. For instance, the byte value 10 means "end of line" and the byte value 0 means "end of string". When we want to do operations on strings, for example compare two strings and see if they are equal, we do this by passing around the \textit{pointer} to the beginning of the strings:
 
 [^3]: More info on the ASCII standard at [https://en.wikipedia.org/wiki/ASCII](https://en.wikipedia.org/wiki/ASCII)
 
@@ -501,6 +514,7 @@ All of these declarations represent exactly the same string.
 
 
 #### Pointers to Pointers
+
 We have seen how pointers can be used to point to basic datatypes such as `int` or `char`. In this section we will see that we often need pointers that point to other pointers. 
 
 ```C

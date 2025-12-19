@@ -469,7 +469,7 @@ These are the operators we use to compare variables and they are all probably kn
 int a = 20 + (a > c); // 21 if a is more than c
 ```
 
-### Logical Operators, `\&\&, ||, !`
+### Logical Operators, `&&, ||, !`
 These are logical operators and are mostly used as in other languages:
 ```C
 if(a && b) // If a is non-zero AND b is non-zero

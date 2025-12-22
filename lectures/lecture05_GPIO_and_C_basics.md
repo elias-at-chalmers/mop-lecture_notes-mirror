@@ -103,7 +103,7 @@ Once the GPIO port is configured, we can read the current status of the input pi
 In assembly, a program that loops until the button has been pushed could look like:
 ```
 la t0, GPIO_D_CFGLR      # Configure pin 2 as input with pull up/down active
-li t1, 0x00000200        # Binary: ... 0000 0010 0000 0000
+li t1, 0x00000800        # Binary: ... 0000 1000 0000 0000
                          # Pin:    ...   3    2    1    0
 sw t1, 0(t0)
 la t0, GPIO_D_OUTDR      # Make it pull UP
@@ -158,7 +158,7 @@ la t0, 0x40011400    # GPIO_D_CFGLR
 lh t1, 0(t0)         # Load the current value of CFGLR into t1
 li t2, 0xFFFFF0FF    # Load a mask into t2
 and t1, t1, t2       # Clear the four bits you want to change
-li t2, 0x00000200    # Set the bits you want to set in t2
+li t2, 0x00000800    # Set the bits you want to set in t2
 or t1, t1, t2        # And set these bits in t1 
                      # (without changing what was there before)
 sw t1, 0(t0)         # Write back to CFGLR

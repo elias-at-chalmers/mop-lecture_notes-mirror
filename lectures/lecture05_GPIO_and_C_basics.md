@@ -91,9 +91,9 @@ We want to plug in a button as in the image above, so we want to configure pin2 
 
 To activate the pull up/down resistor, we set `CNF` to `10`. The possible configurations for an input pin are: 
 
-* *Analog* (00) -- Used when the input voltage varies anywhere between 0 and 3.3V and we want to read its value. You might want to try this out towards the end of the course, but we leave it for now, 
-* *Floating* (10) -- this is when we don't want any pull up/down resistor connected, 
-* *Pull-up/Pull-down* (10) -- Activates the resistor, and 
+* *Analog* (00) -- Used when the input voltage varies anywhere between 0 and 3.3V and we want to read its value. You might want to try this out towards the end of the course, but we leave it for now. 
+* *Floating* (10) -- When we don't want any pull up/down resistor connected.
+* *Pull-up/Pull-down* (10) -- Activates the resistor based on the value in `OUTDR`.
 * *Reserved* (11) -- Not used.
 
 
@@ -340,14 +340,11 @@ void main()
     int b = a;
     unsigned char c = a * b;
 }
-<!-- typo: the code uses 200.501 but it says 200.5 in the text 
-maybe write 40100.2 in hexadecimal as well to make the casting easier to understand
--->
 ```
-In the example above, on line 4, the value 200.5 is cast to an integer and stored in variable `b`. Since an integer cannot store a floating point value, it will be truncated to 200. On the next line `b` is first promoted to a floating point number, then `a * b` is calculated as a floating point number (40100.2), then that value is cast to an `unsigned char` and stored in the variable `c`. Since an unsigned char can only store values up to 255, only the lowest byte of the result (`0xA4`) will remain in c.
+In the example above, on line 4, the value 200.501 is cast to an integer and stored in variable `b`. Since an integer cannot store a floating point value, it will be truncated to 200. On the next line `b` is first promoted to a floating point number, then `a * b` is calculated as a floating point number 40100.2, then that value is cast to an `unsigned char` and stored in the variable `c`. The result is again truncated to a whole number 40100 (`0x9CA4`), and since an unsigned char can only store values up to 255, only the lowest byte of the result (`0xA4`) will remain in `c`.
 
 If this seems a bit complicated, that is because it is. The C specification has a large number of very strict rules about what happens, and in what order, when casting between datatypes, but it can be hard to remember. Therefore, it is often better to *explicitly* describe what casts should be done:
-```
+```C
     float a = 200.501f;
     int b = (int) a;
     unsigned char c = (unsigned char)(a * (float) b);
@@ -401,6 +398,7 @@ Writing code that *iterates* or *loops* is also very similar to other imperative
 
 <!-- to make it even simpler you could write a function with only one argument, like factorial(n)
      ERIK: Valid point, but I don't have the strength today. TODO. 
+     Sergei: Counter-point: students who read/need this may not know what factorial is. Power is an easier function. :)
  -->
 <center>**for statement:**</center>
 
@@ -471,7 +469,7 @@ These are the operators we use to compare variables and they are all probably kn
 int a = 20 + (a > c); // 21 if a is more than c
 ```
 
-### Logical Operators, `\&\&, ||, !`
+### Logical Operators, `&&, ||, !`
 These are logical operators and are mostly used as in other languages:
 ```C
 if(a && b) // If a is non-zero AND b is non-zero
@@ -479,7 +477,7 @@ if(a || b) // If a OR b is non-zero
 if(!a)     // If a is NOT non-zero (i.e., if a is zero)
 ```
 
-### Bitwise Operators, `\&, |, \^{, \(\sim \), <<, >>`
+### Bitwise Operators, `&, |, ^, ~, <<, >>`
 The bitwise operators are easy to confuse with the logical operators, but they are *not* the same thing. The result of these operators is not a boolean value, but an integer where the operation has been performed per bit. While these operations look the same in most modern languages, you may not have come across them as often, and they will be very important in this course, so make sure you understand the following:
 ```C
 // Assume a = (binary) 10101010 and b is 00001111

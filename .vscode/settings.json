@@ -8,5 +8,6 @@
       ],
       "cSpell.enabledFileTypes": {
             "python": false
-      }
+      },
+      "livePreview.defaultPreviewPath": "/quickguide.html"
 }      

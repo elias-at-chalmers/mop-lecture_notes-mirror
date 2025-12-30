@@ -11,87 +11,205 @@ Every possible interrupt that can occur has an assigned *interrupt vector number
 </center>
 > <b>TODO</b> Update quickguide snippet with corret numbers...
 
-## Basic Timers
-> TODO: ** These will be covered, along with a struct interface, in lecture 07 instead **
+We will start with an example where we want three LEDs to blink at different frequencies, `f1`, `f2`, and `f3`.
 
-<div class='boxed'>
-<details open>
-<summary>Base addresses</summary>
+Couldn't we just use SysTick for this? If the frequencies are `f1 = 1Hz`, `f2 = 2 * f1`, and `f3 = 4 * f1`, we could create a SysTick interrupt that triggered at frequency `f3` and do: 
 
-{{python quickguide-generator/main.py baseaddress ^TIM(6|7)}}
-
-</details>
-
-<details open>
-<summary>
-Register Block Overview
-</summary>
-
-{{python quickguide-generator/main.py overview-table -no-grouping TIM6}}
-
-</details>
-
-{{python quickguide-generator/main.py register-details -no-grouping TIM6 CTLR1}}
-
-<!--
-{{python quickguide-generator/main.py register-details -no-grouping TIM6 CTLR2}}
-
-{{python quickguide-generator/main.py register-details -no-grouping TIM6 DMAINTENR}}
-
-{{python quickguide-generator/main.py register-details -no-grouping TIM6 INTFR}}
-
-{{python quickguide-generator/main.py register-details -no-grouping TIM6 SWEVGR}}
-
-{{python quickguide-generator/main.py register-details -no-grouping TIM6 CNT}}
-
-{{python quickguide-generator/main.py register-details -no-grouping TIM6 PSC}}
-
-{{python quickguide-generator/main.py register-details -no-grouping TIM6 ATRLR}}
-
-{{python quickguide-generator/main.py register-details -no-grouping TIM6 .*}} -->
-</div>
-
-
-Show an example where we start systick, timer6 and timer7 to blink three lights at different frequencies. 
-
-```
-// Set up timers at three frequencies
-main() {
-    SYSTICK * systick = 0x....; 
-    BASIC_TIMER * timer6 = 0x40001000; 
-    BASIC_TIMER * timer7 = 0x40001400; 
-}
-```
-
-Set up PFIC for TIMER6 and 7 as well. 
-
-Set up a single interrupt handler as in previous lecture
-Explain that we now have to look at `mcause` to find out which timer started the interrupt
-
-```
-void SysTick_Handler() { flip_one_light }
-void Timer6() { flip_another_light }
-void Timer7() { flip_yet_another_light }
-
-void Interrupt_Handler()
+```C
+uint32_t ctr = 0; 
+void Interrupt_Handler() // Runs at frequency f3
 {
-    check mcause; 
-    call one of the handlers
+    toggle_LED3();   // Always toggle LED3 to get frequency f3
+    if(ctr % 2 == 0) toggle_LED2(); // Toggle every 2:nd time to get frequency f2
+    if(ctr % 4 == 0) toggle_LED1(); // Toggle every 4:th time to get frequency f1
 }
 ```
 
-Point out that this is potentially quite a lot of code to run through to flip a single bit, and that interrupt handlers have to be fast. 
-Consider the case where one of the interrupts happen every few nanoseconds. 
+This would work, but it is a special case. We want our leds to blink at *any* three frequencies. If the frequencies we wanted were `f1 = 1Hz`, `f2 = 3 * f1`, and `f3 = 5 * f1`, we would be in trouble because our interrupt would have to run at a frequency that is the *lowest common denominator*: `LCD(1,3,5) = 15Hz`. Therefore we would have to interrupt our processor very often, only to increase a counter. There are tricks for this, but it is much easier and more efficient to use one timer per LED. 
+
+We can set up SysTick, TIMER6, and TIMER7 to generate interrupts at 1Hz, 3Hz, and 5Hz, respectively, like[^1] this:
+
+[^1]: We covered the basic timers and prescalers in a previous lecture, so go there and do the exercises if this looks confusing to you.
+
+```C
+    // Set up systick for 1 second delay (1Hz)
+    *systick = (SYSTICK_t){0}; // Clear everything to 0
+    systick->CMP = 144000000; // Set up to count to one second (assuming 144 MHz clock)
+    systick->ctrl.clksrc = 1; // Use HCLK
+    systick->ctrl.reload = 1; // Enable reload
+    systick->ctrl.intenable = 1; // Enable interrupt
+    systick->ctrl.enable = 1; // Start counting
+
+    // Set up timer 6 at 3Hz
+    *timer6 = (TIMER_t){0}; // Clear everything to 0
+    timer6->PSC = 9600;    // Timer increases every 9600th clock -> 144Mhz / 9600 = 15kHz
+    timer6->ATRLR = 5000;  // Generate interrupt every 5000 ticks -> 15kHz / 5000 = 3Hz
+    timer6->ctrl1.enable = 1; // Enable timer
+    timer6->DMAINTENR = 1; // Enable update interrupt
+
+    // Set up timer 7 at 5Hz
+    *timer7 = (TIMER_t){0}; // Clear everything to 0
+    timer7->PSC = 9600;     // Timer increases every 9600th clock -> 144Mhz / 9600 = 15kHz
+    timer7->ATRLR = 3000;   // Generate interrupt every 3000 ticks -> 15kHz / 3000 = 5Hz
+    timer7->ctrl1.enable = 1; // Enable timer
+    timer7->DMAINTENR = 1; // Enable update interrupt
+```
+
+Next, we have to tell the PFIC to allow interrupts for all three timers. So, we have to use the interrupt vector number (which we find in the QuickGuide) to calculate which of the PFIC_IENRx registers it resides in, and then set the correct bit in that register. We can do this quite elegantly as: 
+
+```C
+#define PFIC_IENR     ((volatile uint32_t *)(0xE000E000 + 0x100))
+...
+    PFIC_IENR[SYSTICK_IRQ_NUM / 32] |= (1 << (SYSTICK_IRQ_NUM % 32));
+    PFIC_IENR[TIMER6_IRQ_NUM / 32] |= (1 << (TIMER6_IRQ_NUM % 32));
+    PFIC_IENR[TIMER7_IRQ_NUM / 32] |= (1 << (TIMER7_IRQ_NUM % 32));
+```
+
+Finally, we need to write an interrupt handler, and point `mtvec` to that interrupt handler (just as in the previous lecture): 
+
+```C
+
+__attribute__((interrupt("machine")))
+void Interrupt_Handler(void)
+{
+    ...
+}
+
+int main(void)
+{
+    // Set mtvec to address of Interrupt_Handler
+    __asm volatile ("csrw mtvec, %0" :: "r"(Interrupt_Handler));
+    ...
+```
+
+But now what? With this code, all three timers will generate interrupts, and out interrupt handler will run whenever one of them fires, but how do we know *which* timer triggered the interrupt? 
+
+When the processor interrupts the code to run an interrupt handler, it places the *source* of the interrupt (the interrupt vector number from the quickguide) in the CSR register `mcause`: 
+
+<center>
+<img src= "../images/mcause.png" width=100%>
+</center>
+> <b>TODO</b> Put CSRs in QuickGuide and include here
+
+To handle the correct timer, we have to first make sure that it really was an interrupt that occurred (and not another exception, like an unaligned memory access), and then do the proper thing depending on which interrupt it was: 
+
+```C
+__attribute__((interrupt("machine")))
+void Interrupt_Handler(void)
+{
+    uint32_t cause;
+    // The `mcause` register is not directly available to C, 
+    // so we read it with inline assembly. 
+    __asm volatile ("csrr %0, mcause" : "=r"(cause) :: "memory");
+    if(cause & 0x80000000){ // Check bit 31
+        // This is an interrupt
+        cause = cause & 0x7FFFFFFF; // Mask out the MSB
+        if(cause == SYSTICK_IRQ_NUM){
+            *GPIOD_OUTDR ^= 0x1;    // Toggle LED1
+            systick->SR = 0;        // Acknowledge the interrupt
+        }
+        else if(cause == TIMER6_IRQ_NUM){
+            *GPIOD_OUTDR ^= 0x2;    // Toggle LED2
+            timer6->INTFR = 0;      // Acknowledge the interrupt
+        }
+        else if(cause == TIMER7_IRQ_NUM){
+            *GPIOD_OUTDR ^= 0x4;    // Toggle LED3
+            timer7->INTFR = 0;      // Acknowledge the interrupt
+            return;
+        }
+    }
+    else {
+        // Exception. Freak out. 
+        while(1);
+    }
+}
+```
+
+Note that you **must** acknowledge the basic timer interrupts (just as you must acknowledge a SysTick interrupt) when you have handled it. Otherwise the processor will just run the interrupt handler again, as soon as it is finished. 
+
+Another important thing to note here is that even this quite simple interrupt handler becomes quite a large number of instructions (35 machine code instructions when I compiled it). 
+Meanwhile, all we really need to do when we get, e.g., a SysTick interrupt is to flip one bit, acknowledge, and return (5 instructions). This can quickly become a bottleneck when we have to handle many interrupts and the interrupts need to be handled quickly.
+
+It would be much better if the CPU could immediately call a specific interrupt handler, based on the cause of the interrupt, and that is what we will cover next. 
 
 ## Vectored Interrupt Handling
-Explain mode 2, and how we encode the mode in the last two bits of `mtvec`.
+So far, we have simply put the address to the interrupt handler into the `mtvec` CSR and when an interrupt occurs the processor has jumped to that address. This is only one of three *modes* that the CH32V307 can operate in, however. We choose the mode using the two least significant bits of the `mtvec` register (see image below). Since all instructions (and therefore, all functions) on our system must begin at a four-byte aligned address, any valid interrupt-handler address will have zeroes as its two least significant bits, so, without thinking about it, we have always chosen **mode 0** so far. 
 
-> image that shows the difference
+The possible configurations of the two least significant bits are: 
 
-Show how we can create the vector table in an assembly file
+* **00 - mode 0** - When an interrupt occurs, the processor jumps directly to the address stored in `mtvec`, i.e: `pc = mtvec`.
+* **01 - mode 1** - When an interrupt occurs, the processor will fetch the address from `mtvec` but will then *add 4 x* `cause` to the address (where cause is the value of the `mcause` CSR, with the MSB masked out). In other words: `pc = mtvec + 4 * (mcause & 0x7FFFFFFF)`. This is called a *vectored* mode, and we would normally have a jump instruction at that address (see image below). 
+* **10 - reserved**
+* **11 - mode 3** - In this mode, the processor will fetch the new address from a list of *function pointers* starting at `mtvec` with an offset taken from `mcause`. `pc = M[mtvec + 4 * (mcause & 0x7FFFFFFF)]`. This last mode is discussed further in your workbook, but as it is not a standard RISC-V mode, we will not explore it further in this course. [^mode_3_footnote]
 
-### The WCH Mode
-Just briefly, with an image. Possibly "advanced". 
+[^mode_3_footnote]: This is how vectored interrupts are handled on ARM processors, and it is implemented in this microcontroller by WCH to ease the transition for ARM developers. 
+
+<div class="boxed"> 
+> **Quiz** (advanced, answer in footnote[^quiz_answer]) - Why was mode 1 chosen instead of mode 3 as the standard way for RISC-V to handle interrupts? Can you think of any case where it can be faster? 
+</div>
+
+We will use *mode 1* to make our processor jump directly to the interrupt handler for the specific timer, by placing a list containing jump instructions somewhere in memory.
+
+[^quiz_answer]: If you need an interrupt to be handled extremely quickly, you can place its instructions *directly* into the vector table. This only works if the instructions do not overwrite another entry that you need. Useful for very fast (MHz range) signals. 
+
+<center>
+<img src= "../images/interrupt_modes.png" width=100%>
+</center>
+
+The remaining question is how to create that list of jump instructions, at some place in memory? The easiest, and most common, way to achieve this is to write the list in an assembly file, and compile it with the program: 
+
+```
+.section .text
+# Make the (C code) interrupt handlers addresses available to our assembly code
+.extern SysTick_Handler  
+.extern Timer6_Handler 
+.extern Timer7_Handler 
+
+.align 2        # Create a label that is the start of our list in memory
+vector_table:   # and make sure it is at a 4-byte aligned address
+.org vector_table + 12 * 4   # "Move" to the place in memory where we want out SysTick handler
+j SysTick_Handler            #  And place a jump instruction there
+.org vector_table + 70 * 4   # "Move" to the place in memory where we want out Timer6 handler
+j Timer6_Handler             #  And place a jump instruction there
+.org vector_table + 71 * 4   #  etc... 
+j Timer7_Handler             #  etc... 
+```
+
+We do not really care where in memory our vector table is, so we just let the compiler decide on a place (the label `vector_table`), as we do for any variable. Since SysTick is interrupt number 12, we want the jump instruction that jumps to the SysTick handler top be at address `vector_table + 4 * 12` (because that is where the CPU will jump, when a SysTick interrupt is triggered). We could achieve this by just leaving `.space 4*12` after the `vector_table` label and before the `j SysTick_Handler` instruction, but it is easier to use the `.org <address>` directive. You can think of this as telling the assembler to "move the cursor" to somewhere in memory, and that is where the next instruction will be placed. 
+
+Finally, we need to put the address of our vector table into `mtvec` and set the least significant bit so the processor knows that it should use mode 1. Since we already have an assembly file, this is easiest to do with a little assembly function: 
+
+```
+init_interrupts: 
+    la t0, vector_table     # Address of vector table to t0
+    ori t0, t0, 1           # Choose `mode 1` by setting the LSB
+    csrw mtvec, t0          # Write t0 into `mtvec`
+    ret
+```
+
+We can now rewrite our c program so that it has three separate interrupt handlers: 
+
+```C
+__attribute__((interrupt("machine")))
+void SysTick_Handler(void) { ... }
+
+__attribute__((interrupt("machine")))
+void Timer6_Handler(void) { ... }
+
+__attribute__((interrupt("machine")))
+void Timer7_Handler(void) { ... }
+
+int main()
+{
+    // Configure timers (as before)
+    ...
+    // Enable interrupts in PFIC (as before)
+    ...
+    // Set up processor to use vector table: 
+    init_interrupts(); 
+    // LEDs will blink frome here on
+}
+```
 
 ## Nested Interupts
 

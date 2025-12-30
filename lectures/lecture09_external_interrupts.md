@@ -1,46 +1,104 @@
 # External Interrupts
-So far we have seen how to interrupt the program when a single, *internal*, interrupt occurs (SysTick counted to zero). In this lecture we will dive deeper into interrupt handling, and show how we can handle interrupts from modules outside the Qingke processor and finally from interrupts originating from the GPIO pins. 
+So far we have seen how to interrupt the program when a single, *internal*, interrupt occurs (SysTick counted to zero). In this lecture we will dive deeper into interrupt handling, and show how we can handle several simultaneous interrupts from modules outside the Qingke processor and finally from interrupts originating from the GPIO pins. 
 
 ## Configuring multiple interrupts
 Recall from the previous lecture that every module that can cause an interrupt on the chip will have a hard-coded connection to the *Programmable Fast Interrupt Controller* (PFIC) module. When, for instance, the "Ethernet Wakeup" signal comes in from the ethernet cable, the ethernet module will signal the PFIC, and the PFIC will (if it has been configured to do so) interrupt the running code and make the processor run an interrupt handler. 
 
+Every possible interrupt that can occur has an assigned *interrupt vector number* which you can find in the [QuickGuide](../quickguide/interrupt_vector_table.html).
+
 <center>
 <img src= "../images/interrupts.png" width=100%>
 </center>
+> <b>TODO</b> Update quickguide snippet with corret numbers...
 
-In the previous lecture, we simply put the address of the interrupt handler into the `mtvec` CSR register, and whenever any interrupt occured, the code at that address would run. When we have many possible interrupts (the machine might be simultaneously listening to ethernet, USB, two timers and some GPIO pins) it becomes inefficient and quite cumbersome to have a single interrupt handler. 
+## Basic Timers
+> TODO: ** These will be covered, along with a struct interface, in lecture 07 instead **
 
-To play a tone on a little buzzer, we used SysTick to interrupt the processor at a frequency that corresponded to the tone we wanted to play. Imagine a situation where we wanted to play *two* different notes on two speakers. We can set up SysTick to interrupt the processor at a specific frequency, but how do we handle the second tone? Luckily, most microcontrollers come with a number of extra timers, so we could set up one of those 
+<div class='boxed'>
+<details open>
+<summary>Base addresses</summary>
+
+{{python quickguide-generator/main.py baseaddress ^TIM(6|7)}}
+
+</details>
+
+<details open>
+<summary>
+Register Block Overview
+</summary>
+
+{{python quickguide-generator/main.py overview-table -no-grouping TIM6}}
+
+</details>
+
+{{python quickguide-generator/main.py register-details -no-grouping TIM6 CTLR1}}
+
+<!--
+{{python quickguide-generator/main.py register-details -no-grouping TIM6 CTLR2}}
+
+{{python quickguide-generator/main.py register-details -no-grouping TIM6 DMAINTENR}}
+
+{{python quickguide-generator/main.py register-details -no-grouping TIM6 INTFR}}
+
+{{python quickguide-generator/main.py register-details -no-grouping TIM6 SWEVGR}}
+
+{{python quickguide-generator/main.py register-details -no-grouping TIM6 CNT}}
+
+{{python quickguide-generator/main.py register-details -no-grouping TIM6 PSC}}
+
+{{python quickguide-generator/main.py register-details -no-grouping TIM6 ATRLR}}
+
+{{python quickguide-generator/main.py register-details -no-grouping TIM6 .*}} -->
+</div>
 
 
-
-It would be possible to handle this with a single interrupt handler, but:
-* The interrupt handler would have to go through some code to find out which 
-* It is much easier to have a separate handler for the second tone. 
-
-
-### Generating a table of interrupt vectors in memory
-The easiest way to set up a vector table for our program is to add a new assembly file to our project (we will call it `vector_table.s`): 
+Show an example where we start systick, timer6 and timer7 to blink three lights at different frequencies. 
 
 ```
-.section .text
-.global vector_table        # Make this variable available to the C code
-.extern SysTick_Handler     # Make the interrupt handler available to our code
-
-.align 2                    # The vector table must begin on an address divisible by 4
-vector_table: 
-.zero 12 * 4                # Reserve space for 12 interrupt vectors before systick
-j SysTick_Handler           # At `vector_table + 0x30` we place an instruction that 
-                            # jumps to our interrupt handler
+// Set up timers at three frequencies
+main() {
+    SYSTICK * systick = 0x....; 
+    BASIC_TIMER * timer6 = 0x40001000; 
+    BASIC_TIMER * timer7 = 0x40001400; 
+}
 ```
 
-When we compile this code and load it into memory on the machine, we don't know exactly where `vector_table` will begin (depends on the compiler), but we know that it will contain a table with 12 empty entries, and then a single jump instruction at offset `0x30`. So the next step is to tell the processor that `vector_table` is the base address it wants to use when looking for the systick interrupt handler. So, we have to put the address to `vector_table` into our `mtvec` CSR. This is easily done by adding a little function to our assembly file: 
+Set up PFIC for TIMER6 and 7 as well. 
+
+Set up a single interrupt handler as in previous lecture
+Explain that we now have to look at `mcause` to find out which timer started the interrupt
 
 ```
-.global init_interrupts     # Make this function available to our C code
+void SysTick_Handler() { flip_one_light }
+void Timer6() { flip_another_light }
+void Timer7() { flip_yet_another_light }
 
-init_interrupts: 
-    la t0, vector_table     # Put the address of `vector_table` in t0
-    csrw mtvec, t0          # Move that value into the `mtvec` CSR
-    ret
+void Interrupt_Handler()
+{
+    check mcause; 
+    call one of the handlers
+}
 ```
+
+Point out that this is potentially quite a lot of code to run through to flip a single bit, and that interrupt handlers have to be fast. 
+Consider the case where one of the interrupts happen every few nanoseconds. 
+
+## Vectored Interrupt Handling
+Explain mode 2, and how we encode the mode in the last two bits of `mtvec`.
+
+> image that shows the difference
+
+Show how we can create the vector table in an assembly file
+
+### The WCH Mode
+Just briefly, with an image. Possibly "advanced". 
+
+## Nested Interupts
+
+Talk, quite briefly, about what happens when an interrupt with a higher priority interrupts. 
+Talk about pending and active interrupts and how we can read this in registers. 
+
+
+## Interupts from GPIO pins
+
+We can use as an example that we want to be able to flip a fourth LED with a dipswitch. 

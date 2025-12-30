@@ -35,8 +35,8 @@ $(HTML_DIR)/style.css: style.css
 	cp $< $@
 
 $(HTML_DIR)/images: images
-	$(MKDIR) -p $(HTML_DIR)
-	cp -r $< $@
+	$(MKDIR) -p $(HTML_DIR)/images
+	cp -r $</. $@
 
 $(HTML_DIR)/quickguide.html: quickguide.html
 	$(MKDIR) -p $(HTML_DIR)

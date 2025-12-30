@@ -13,7 +13,7 @@
 Register Block Overview
 </summary>
 
-{{python quickguide-generator/main.py overview-table TIM6}}
+{{python quickguide-generator/main.py overview-table -no-grouping TIM6}}
 
 </details>
 
@@ -21,7 +21,7 @@ Register Block Overview
 <p>
 <hr>
 
-{{python quickguide-generator/main.py register-details TIM6 .*}}
+{{python quickguide-generator/main.py register-details -no-grouping TIM6 .*}}
 
 </p>
 

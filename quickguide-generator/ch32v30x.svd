@@ -29400,7 +29400,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
     </peripheral>	
 	<peripheral>
 <name>TIM6</name>
-<description>Basic timer</description>
+<description>Basic timer. Can be used to trigger interrupts, DMA transfers, and DAC/ADC events. When counter is enabled, it increases CNT by 1 every "Peripheral Bus 1" (PB1) clockcycle. (48Mhz on out system)</description>
 <groupName>TIM</groupName>
 <baseAddress>0x40001000</baseAddress>
  <addressBlock>
@@ -29426,25 +29426,25 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
           <fields>
             <field>
               <name>ARPE</name>
-              <description>Auto-reload preload enable</description>
+              <description>Auto-reload preload enable (double buffer preload register)</description>
               <bitOffset>7</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
             <field>
               <name>OPM</name>
-              <description>One-pulse mode</description>
+              <description>One-pulse mode (0: Restart and reload, 1: Stop after first time.)</description>
               <bitOffset>3</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
             <field>
               <name>URS</name>
-              <description>Update request source</description>
+              <description>Update request source (1: disallow software triggers)</description>
               <bitOffset>2</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
             <field>
               <name>UDIS</name>
-              <description>Update disable</description>
+              <description>Update disable (turn off any interrupts or events)</description>
               <bitOffset>1</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
@@ -29567,7 +29567,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
         <register>
           <name>ATRLR</name>
           <displayName>ATRLR</displayName>
-          <description>auto-reload register</description>
+          <description>When the counter reaches this value, it is reset to 0. Maximum 16 bits (65536).</description>
           <addressOffset>0x2C</addressOffset>
           <size>0x20</size>
           <access>read-write</access>

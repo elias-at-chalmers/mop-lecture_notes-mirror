@@ -211,12 +211,30 @@ int main()
 }
 ```
 
-## Nested Interupts
+### Nested Interupts
+It would be reasonable at this point to ask ourselves: "What happens if an interrupt occurs while an interrupt hadler is running?". The answer is that "it depends" on a lot of things. A RISC-V processor has the capability for *nested* exceptions, i.e., one exception interrupts another exception handler. 
 
-Talk, quite briefly, about what happens when an interrupt with a higher priority interrupts. 
-Talk about pending and active interrupts and how we can read this in registers. 
+**Can an interrupt from one source (e.g. SysTick) interrupt itself?** - No. When the processor starts handling a specific interrupt, it sets the corresponding *active* bit in the *Interrupt Active* register (`PFIC_IACTR`) register. If the same interrupt should fire again, the processor will detect that it is active and will not start the handler again immediately. Instead, it will set the corresponding bit in the *Interrupt Pending* register (`PFIC_IPR`). 
+
+When the interrupt handler returns, the active bit will be cleared. If the processor finds that a new interrupt is pending, it will handle that interrupt before returning to the program code. 
+
+Thus, there is no risk of an interrupt interrupting itself: The interrupt handler will always complete before another interrupt of the same type is handled. What *can* happen, if you, e.g., set the SysTick frequency too fast, is that the systick interrupt handler is always pending, and the processor never returns to the program code. We say that the program is *starved*.
+
+**Can a fault (e.g. unaligned memory access) interrupt a running interrupt handler?** - Yes. An exception caused by the currently running instruction (called a *synchronous* exception) *will* interrupt the interrupt handler. This gives the processor a chance to transfer control to an exception handler, if an interrupt handler behaves badly.
+
+**Can another interrupt (e.g. Timer6) interrupt a running interrupt handler (e.g. SysTick)?** - The RISC-V ISA does *not* require this to be possible, so on many architectures the new interrupt will be "pending" and its handler will run directly after the current handler returns. 
+
+On the CH32V307, different interrupt sources can have different *priorities* (set in the `IPRIO` registers). If an interrupt with a higher priority occurs while a lower-priority interrupt handler is running, the new interrupt handler will run immediately, pre-empting the current one. The pre-empted handler will then continue and complete once the higher-priority handler returns.
+
+**What if a fault occurs while a fault-handler is running?** - Infinite exception loop. Crash and Burn. Don't do this. 
+
+We will not delve much deeper into nested interrupts in this course, but it is worthwhile understanding that nested interrupts and priorities can be quite important. Let's say we have a program where SysTick is used to output signal (perhaps a clock signal, or a note to a speaker) with a specific frequency. Meanwhile, Timer6 is used to turn on the night-light every evening. If the interrupt handler for Timer6 run a few milliseconds little later than intended, that is usually acceptable. But if the SysTick interrupt handler is delayed by even a few nanoseconds, that might mean that the clock signal falls out-of-sync with other parts of the system or, even worse, the played note becomes slightly flat!
+
+The mechanism for nested interrupts does not have to be very complicated at all, on RISC-V. Since an interrupt handler is already handled differently than normal functions, and always saves all registers it might modify on the stack, interrupts can in principle interrupt each other arbitrarily, as long as there is sufficient stack space available.
+
+On the CH32V307, there is a special *hardware stack*, that allows up to three nested interrupt handlers without  using the in-memory stack at all. This significantly reduces interrupt latency and enables extremely fast interrupt response times.
 
 
-## Interupts from GPIO pins
+## Interrupts from GPIO pins
 
 We can use as an example that we want to be able to flip a fourth LED with a dipswitch. 

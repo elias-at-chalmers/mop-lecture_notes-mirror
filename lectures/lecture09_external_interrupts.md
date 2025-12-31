@@ -237,4 +237,7 @@ On the CH32V307, there is a special *hardware stack*, that allows up to three ne
 
 ## Interrupts from GPIO pins
 
-We can use as an example that we want to be able to flip a fourth LED with a dipswitch. 
+Finally, we will see how we can configure an interrupt for a GPIO pin. On the CH32V307, any GPIO pin can cause an interrupt, but we are not free to use the pins entirely arbitrarily. 
+<center>
+<img src= "../images/afio_exti.png" width=100%>
+</center>

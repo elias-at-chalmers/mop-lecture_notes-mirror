@@ -22,6 +22,11 @@ def build_parser():
             help="Disable grouping in output"
         )
         p.add_argument(
+            "-no-folding",
+            action="store_true",
+            help="Disable grouping in output"
+        )
+        p.add_argument(
             "-no-headers",
             action="store_true",
             help="Disable column headers in output"
@@ -298,27 +303,28 @@ def summarize_fields(fields):
 def PrintRegisterDetails(r):
     html = ""
 
-    #######################################################################
-    # If this register is in a group, fold all together
-    #######################################################################
-    if IsInGroup(r, groups): 
-        first = GetFirstInGroup(r, groups)
-        last = GetLastInGroup(r, groups)
-        if r == first:
-            ###############################################################
-            # If first, start detail block
-            ###############################################################
-            html += "<details>"
-            html += "<summary>" + first.find('name').text + " ... " + last.find('name').text + "</summary>"
-            
-    #######################################################################
-    # If not in group, fold by itself
-    #######################################################################
-    else: 
-        html += "<details>\n"
-        html += "<summary>\n"
-        html += r.find('name').text
-        html += "</summary>\n"
+    if not args.no_folding:
+        #######################################################################
+        # If this register is in a group, fold all together
+        #######################################################################
+        if IsInGroup(r, groups): 
+            first = GetFirstInGroup(r, groups)
+            last = GetLastInGroup(r, groups)
+            if r == first:
+                ###############################################################
+                # If first, start detail block
+                ###############################################################
+                html += "<details>"
+                html += "<summary>" + first.find('name').text + " ... " + last.find('name').text + "</summary>"
+                
+        #######################################################################
+        # If not in group, fold by itself
+        #######################################################################
+        else: 
+            html += "<details>\n"
+            html += "<summary>\n"
+            html += r.find('name').text
+            html += "</summary>\n"
 
     html += "<p>\n";
     if r.find('description') is not None:
@@ -382,9 +388,10 @@ def PrintRegisterDetails(r):
     #######################################################################
     # CLose details, unless we are in the middle of a group
     #######################################################################
-    if not IsInGroup(r, groups) or (r == last): 
-        html += "</details>\n"
-    #html += "<hr>\n"
+    if not args.no_folding:
+        if not IsInGroup(r, groups) or (r == last): 
+            html += "</details>\n"
+        #html += "<hr>\n"
 
     return html
 

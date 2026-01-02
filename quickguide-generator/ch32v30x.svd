@@ -21148,25 +21148,25 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
           <fields>
             <field>
               <name>EXTI0</name>
-              <description>EXTI0 configuration</description>
+              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
               <bitOffset>0</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
             <field>
               <name>EXTI1</name>
-              <description>EXTI1 configuration</description>
+              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
               <bitOffset>4</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
             <field>
               <name>EXTI2</name>
-              <description>EXTI2 configuration</description>
+              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
               <bitOffset>8</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
             <field>
               <name>EXTI3</name>
-              <description>EXTI3 configuration</description>
+              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
               <bitOffset>12</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
@@ -21184,25 +21184,25 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
           <fields>
             <field>
               <name>EXTI4</name>
-              <description>EXTI4 configuration</description>
+              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
               <bitOffset>0</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
             <field>
               <name>EXTI5</name>
-              <description>EXTI5 configuration</description>
+              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
               <bitOffset>4</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
             <field>
               <name>EXTI6</name>
-              <description>EXTI6 configuration</description>
+              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
               <bitOffset>8</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
             <field>
               <name>EXTI7</name>
-              <description>EXTI7 configuration</description>
+              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
               <bitOffset>12</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
@@ -21220,25 +21220,25 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
           <fields>
             <field>
               <name>EXTI8</name>
-              <description>EXTI8 configuration</description>
+              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
               <bitOffset>0</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
             <field>
               <name>EXTI9</name>
-              <description>EXTI9 configuration</description>
+              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
               <bitOffset>4</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
             <field>
               <name>EXTI10</name>
-              <description>EXTI10 configuration</description>
+              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
               <bitOffset>8</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
             <field>
               <name>EXTI11</name>
-              <description>EXTI11 configuration</description>
+              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
               <bitOffset>12</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
@@ -21256,25 +21256,25 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
           <fields>
             <field>
               <name>EXTI12</name>
-              <description>EXTI12 configuration</description>
+              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
               <bitOffset>0</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
             <field>
               <name>EXTI13</name>
-              <description>EXTI13 configuration</description>
+              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
               <bitOffset>4</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
             <field>
               <name>EXTI14</name>
-              <description>EXTI14 configuration</description>
+              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
               <bitOffset>8</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
             <field>
               <name>EXTI15</name>
-              <description>EXTI15 configuration</description>
+              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
               <bitOffset>12</bitOffset>
               <bitWidth>4</bitWidth>
             </field>

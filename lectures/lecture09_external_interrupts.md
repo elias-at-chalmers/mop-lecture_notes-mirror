@@ -237,7 +237,125 @@ On the CH32V307, there is a special *hardware stack*, that allows up to three ne
 
 ## Interrupts from GPIO pins
 
-Finally, we will see how we can configure an interrupt for a GPIO pin. On the CH32V307, any GPIO pin can cause an interrupt, but we are not free to use the pins entirely arbitrarily. 
+Finally, we will see how we can configure an interrupt for a GPIO pin. We will extend our program so that (in addition to the timed LEDs) another LED will turn on when we flick a switch connected to a GPIO pin, and of when we flick it back. We will use interrupts for this as well, so the processor is free to run any application we might want. 
+
+ On the CH32V307, any GPIO pin can cause an interrupt, but we are not free to use the pins entirely arbitrarily. The image below illustrates the path from a physical GPIO pin to the interrupt signal sent to the PFIC (and on to the processor): 
+
 <center>
 <img src= "../images/afio_exti.png" width=100%>
 </center>
+
+As an example, we will connect a switch to GPIO Port E, pin 1. It would of course be possible for a microcontroller to connect every single GPIO pin on every port to a specific interrupt line, but this would be very resource intensive and costly. On the CH32V307, pin 1 on *all* ports (A-F) is connected to a MUX that will only let one of the signals through. This means that we *cannot* trigger an interrupt from pin 1 on Port D *and* pin 1 on Port E; we have to choose. 
+
+### Routing 
+To decide which port gets to forward the signal from a specific pin, we use the *Alternative Function I/O* (AFIO) module, and specifically the `AFIO_EXTICR1` - `AFIO_EXTICR4` registers (see QuickGuide). These are 16 bit registers and every register contains four groups of four bits, where each group decides which port should forward a specific pin. 
+
+<div class='boxed'>
+
+{{python quickguide-generator/main.py register-details AFIO EXTICR1 -no-folding}}
+
+</div>
+
+Since we want an interrupt to fire for pin 1 in GPIO port E, we will set the four bits corresponding to `EXTI1`, in `AFIO_CR1`, to `4`: 
+
+```C
+#define AFIO_EXTICR1 ((volatile uint16_t *)0x40010008)
+int main() {
+    ...
+    // Configure AFIO to allow pin1 interrupts for port E
+    *AFIO_EXTICR1 &= 0xFF0F; // Zero the corresponding bits
+    *AFIO_EXTICR1 |= 0x0040; // Set EXTI1 to 4 (Port E)
+    ...
+}
+```
+
+### Configuring interrupt triggers (EXTI)
+If the value from our pin is chosen as an interrupt source in the `AFIO` module, it will be sent on to the `EXTI` module. This is where we can decide if and when a change in signal value should cause an interrupt. The behaviour of this module is illustrated in the image and QuickGuide snippet below: 
+
+<center>
+<img src= "../images/exti.png" width=100%>
+</center>
+
+{{python quickguide-generator/main.py overview-table EXTI}}
+
+The first thing to notice is that the incoming signal is connected to an *edge detection curcuit*. This circuit will output a short *pulse* of `1` when it detects that the incoming signal changes between 0 and 1, or from 1 to 0. As long as the input signal is a steady 0 or 1, the circuit outputs 0. We can configure the edge-detection circuit to react on *rising edges* (the value goes from 0 to 1) or *falling edges* (the value going from 1 to 0), or both, by writing the `EXTI_RTENR` and `EXTI_FENR` resgisters. 
+
+In all the EXTI registers, each bit affects a single input line (the signals coming from pins 0-15). We want our interrupt to fire whenever we flick the switch connected to pin 1, so we will configure the edge-detection circuit to react on *both* rising and falling triggers: 
+
+```C
+    *EXTI_RTENR |= 0b10; // Generate a pulse when pin1 goes from 0 to 1
+    *EXTI_FTENR  |= 0b10; // Generate a pulse when pin1 goes from 1 to 0
+```
+
+> **Note:** You may have noticed that there are 20 bits in each of the EXTI registers, but only 16 GPIO pins (per port). This is because there are other external signals, like USB Wakeup and Power Voltage Detector signals, that can trigger interrupts in the same way. We will not talk more about these in the course.  
+
+Next, we see that the pulse is ORed with the corresponding bit in the *Software Interrupt Event Register* (SWIER). This register is normally all zeroes, but by writing a one to either of the bits we can *force* an interrupt for that pin, regardless of the actual value on the pin. 
+
+Then, the pulse is ANDed with the corresponding bit in the `EXTI_INTENR` register. This allows us to turn interrupts off for a specific pin, by setting the corresponding bit to zero. Since we only want to allow interrupts from pin 1, we configure this in our code: 
+
+```C
+    *EXTI_INTENR = 0b10; // Enable interrupts only for pin 1
+```
+
+If the input pin has changed its value, and triggered a pulse in the edge-detection circuit that has made it past this AND gate, an interrupt request should be sent to the PFIC. If *another* pulse appears, before this interrupt has been handled, we do *not* want to send another interrupt request to the PFIC. Therefore, the pulse is finally *latched* into the `EXTI_INTFR` register. That is, a single pulse will set the corresponding bit in `EXTI_INTFR` to 1, but that bit will *stay* set until our interrupt handler explicitly zeroes it in the interrupt handler. This way we ensure that multiple edges occurring before the handler runs collapse into a single pending interrupt, guaranteeing reliable event detection without overwhelming the interrupt controller.
+
+Finally, we should note that only pins 0 to 4 have their own connections to the PFIC. If an interrupt is triggered on *either* of pins 5-9, the *same* interrupt line in the PFIC will be triggered. In these cases, our interrupt handler code must read the `EXTI_INTFR` register to see which pin actually triggered the interrupt. 
+
+## Completing the program
+That is all that is really new about GPIO interrupts, but for completeness, let's go through the final things your program needs to respond to a GPIO interrupt. 
+
+### Configuring GPIO pins
+For any signal to make it through to the EXTI module, and then PFIC, we have to configure the pin as an *input* pin. If we use our DIP-switch as the input device, we need to configure it as pull-down: 
+
+> **TODO:** Double check that pull down is correct. 
+
+```C
+GPIOE_CFGLR = 0x00000080; // Configure pin 1 as input and pull down
+```
+
+### Configure PFIC
+Just as when we set up interrupt handlers for our timers, we need to enable the interrupt in the PFIC. We can see in the vector table in the QuickGuide that `EXTI1` has interrupt vetor number 22, so we write: 
+
+```C
+#define EXTI1_IRQ_NUM 22
+...
+PFIC_IENR[EXTI1_IRQ_NUM / 32] |= (1 << (EXTI1_IRQ_NUM % 32));
+```
+
+### Write the interrupt handler
+Then we need an interrupt handler that takes care of our new interrupt. 
+
+```C
+__attribute__((interrupt("machine")))
+void EXTI1_Handler(void) 
+{
+    uitn32_t current_value = *GPIOE_INDR & 0b10; // Read the current value of the switch
+    *GPIOD_OUTDR &= ~0x8;           // Zero the fourth LED
+    *GPIOD_OUTDR |= current_value;  // Set it to 1 if the switch is on, 0 otherwise
+    EXTI_INTFR   |= 0b10;  // Acknowledge the interrupt (zeroes the corresponding bit in EXTI_INTFR)
+}
+```
+
+One thing that may surprise you is that the interrupt is acknowledged by writing `1` to the corresponding bit, even though the actual result is that the bit is zeroed [^why_one_to_clear].
+
+[^why_one_to_clear]: Interrupt flags are cleared by writing 1 so that software can acknowledge an event atomically, without risking the loss of new events occurring at the same time.
+
+### Put the interupt handler address into the vector table
+Finally, we add a single jump instruction at the right place in our vector table: 
+
+```
+.align 2
+vector_table: 
+.org vector_table + 12 * 4
+j SysTick_Handler  # IRQ 12:  SysTick Handler
+
+.org vector_table + 22 * 4
+j EXTI1_Handler  # IRQ 22:  EXTI1 handler
+
+.org vector_table + 70 * 4
+j Timer6_Handler  # IRQ 70: Timer 6 Handler
+.org vector_table + 71 * 4
+j Timer7_Handler  # IRQ 71: Timer 7 Handler 
+```
+
+And that's it! When running the program we will now see three LEDs blinking at different frequencies and a fourth LED can be turned on and off by a switch, all handled by interrupt routines, so the CPU is free to run whatever other code it wants to.

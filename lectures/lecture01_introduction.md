@@ -19,23 +19,20 @@ Even if you have decided, once and for all, that you only want to work with the 
 
 What is a microcontroller?
 ===============================================================================
+So, what *is* a microcontroller, and how does it compare to the CPU you plug into your desktop computer's motherboard? Both general-purpose CPUs and microcontrollers are *Integrated Circuits* (ICs) fabricated on silicon using CMOS VLSI technology. In other words, they are both little silicon chips with spider legs (these are called *pins*). The chips contain millions of transistors that make up all of the internal logic. Part of that logic is the ALU and data path that you have encountered before, but there are *many* more modules attached to this core processor. In both cases, the spider legs are their only means of communication with the outside world, so both must be placed onto a *Printed Circuit Board* (PCB). This is a plastic board with thin copper lines that connect all of the pins to various other subsystems, such as memory (FLASH/DRAM), I/O busses (PCI-Express/USB/Ethernet), or *General Purpose Input/Output* pins (more about these later). 
+
+<image showing, e.g. a pico, with the chip and PCB>
+
+The main difference is that microcontrollers are *tiny* in comparison and lack a number of features that are standard on a general purpose CPU: 
+
+* A modern microcontroller often has several orders of magnitude fewer transistors than a modern desktop CPU. 
+* A single microcrontroller chip might cost 1 to 50SEK, while a CPU costs several hundred, to thousands.
+* The microcontroller is extremely energy efficient, and can be powered for quite some time from a standard 9V battery from the supermarket. 
+* The microcontroller has *very* restricted memory; usually just a few kB of SRAM, while a CPU has a huge memory subsystem with several layers of caches.
+* The microcontroller usually runs without any operating system, and is designed to run one specific task.
 
 
 
-
-Let's say we want to build a simple thermometer that measures the temperature in the room and displays it in a readable form. We would first have to buy ourselves a [*temperature sensor*](https://se.rs-online.com/web/p/temperature-humidity-sensor-ics/5335878?gb=s) of some kind, and a [suitable display](https://se.rs-online.com/web/p/led-displays/8305139?gb=s). The temperature sensor will output the measured temperature as a _voltage_ on one pin.  The display will have one pin per LED-segment, so that the segment lights up if the corresponding pin is \ref{fig:fig1} monkey. 
-
-To connect the two components, we would have to buy an *Analogue to Digital Converter* (ADC) that could turn the measured voltage into a binary number, and a *Decoder* chip that turns that number into a corresponding combination of 1's and 0's for the display (see Figure @fig:fig1.
-
-![Figure 1: A 1970's style digital thermometer](images/test.png){#fig:fig1}
-
-The Decoder chip is an example of an *Application Specific Integrated Circuit* (ASIC), and you can buy this particular chip off the shelf from any electronics retailer. But now let's imagine that we want our thermometer to have more functionality. If the temperature is more than 37 degrees, we want an alarm to go off and a red light to start blinking. 
-
-We *could* implement this behaviour using more ICs, but adding more ICs means paying more money, and spending more time connecting cables between different components. As soon as we need anything but the most standard behavior it can be a good idea to instead invest in a *microcontroller*.
-
-*Microcontrollers are used in everything* 
-
-*Different kinds of microcontrollers*
 
 *Development boards (PCB, IC)*
 

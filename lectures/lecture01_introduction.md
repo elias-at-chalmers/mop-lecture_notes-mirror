@@ -58,39 +58,33 @@ The simulator
 -------------------------------------------------------------------------------
 Since we do not have enough MD307 development boards to hand out to all of you, much of your development will happen on a simulator. This is an *Instruction Set Simulator* (ISS), meaning that it decodes and runs machine code instructions and maintains a model of the processor's registers and state but simplifies many micro-architectural details. Thus, you can compile and run your code and expect the same behavior as if it was the real machine, but it will not be exact in terms of the number of cycles an instruction takes. This is usually sufficient for most development work, and is a common approach to developing software before hardware is available.
 
-
-The processor: RISC-V
--------------------------------------------------------------------------------
-[QuingKe V4 Processor Manual](https://www.wch-ic.com/downloads/file/367.html?time=2024-05-30%2013:33:33&code=rH4Ri4yAJQE2UN9yMb7X6nzd5fwIOYLYDEoPSX0O)
-Developed by WCH
-
-> - ISA: RV32IMAC[F]
-> - Pipeline: Level 3
-> - FPU: Supports single-precision floating-point
-> - Branch prediction: BHT/BTB/RAS
-> - Instruction cache: Support up to 64KB
-> - Interrupt: Supports a total of 256 interrupts including exceptions, and supports VTF
-> - HPE: Supports up to 3 levels of HPE (HPE refers to a hardware-accelerated mechanism for automatically handling the saving and restoring of register states when entering or exiting an interrupt service routine (ISR) or a function call. This is particularly important in > real-time or embedded systems where performance and low-latency interrupt handling are critical.)
-> - PMP: Supports 4 memory protection zones
-> - Low-power consumption mode: Supports Sleep and Deep sleep modes, and support WFI and WFE sleep methods
-> - Extended instruction set: Supports half-word and byte operation compression instructions
-> - Debug: 1/2-wire SDI, standard RISC-V debug 
-
-*Talk about RISC-V in general and Quinkewhatever in particular*
-*The CPU, nvic, memory bus, fpu, mpu, debugability*
-
-The MD307 memory and address space
--------------------------------------------------------------------------------
-
-
-Creating a program that runs on the MD307
--------------------------------------------------------------------------------
-*Very briefly how a program ends up in memory and starts running. Use an example that flashes a LED or something*
-
-
 Course organization
 ===============================================================================
+The course consists of lectures, labs, and self-studies. Since the course goals are to prepare you for programming real microcontrollers in the real world, you are expected to spend a lot of time actually programming and doing exercises; just attending lectures or reading through the lecture notes will not be enough to pass the exam.
 
+## Lectures
+There will be two lectures per week (but a few of the lecture slots will be used for repetition and exam preparation) and each lecture will introduce some new theory along with practical examples. The lectures are not mandatory, but history has shown a *clear* correlation between going to the lectures and passing the exam. Even if you feel like you can get all the theory through reading, just getting out of the couch and discussing the topics with your class-mates can be a good enough reason to go to class.
 
+### Lecture notes
+On Canvas, there is one module per lecture where you can find the lecture notes. These notes are intended as a text version of the lecture, and while *some* content may differ, they should suffice if you miss a class for some reason, or when you want to repeat parts of the lecture. 
+
+### Quizzes
+Each lecture module on Canvas also contains one or more quizzes. These quizzes have multiple choice answers and are intended mainly as a way for you to check if you have retained the information in the class or lecture notes. Doing them takes only a few minutes and should help you find what parts of the notes you need to re-read. Completing the quiz with a full score does *not* mean that you have mastered the lecture, however. You will also need practical experience with the topics of each lecture, and that is what the lab and exercises are for. 
+
+### Exercises
+The exercises for each lecture are built into our Visual Studio Code environment, and are meant to help you with practical experience. There are programming exercises for each lecture, that will force you too look back into the lecture notes and the QuickGuide. Please note that the exam does *not*, to any great extent, test what you remember of the text, or rote-learning. It will test if you are able to perform certain programming tasks, so doing exercises is essential to performing well in the course. 
+
+### Workbook
+In addition to the lecture notes and the exercises, there is a workbook (available at Chalmers Store) which contains alternative descriptions, a large number of examples, and several more exercises. It is highly recommended that you follow this book as well, especially if you are struggling. 
+
+## Exercise Sessions
+Every week you will have the opportunity to go to exercise sessions where TAs will be available to answer your questions. Having direct help from people who know the topic well while studying is one of the main luxuries of studying at a University, and it is highly recommended that you go to these sessions. 
+
+On the exercise sessions there will also be hardware available to those who want to try developing directly for the machine instead. The exercise sessions are booked in advance on a first-come first-served basis (with some restrictions), so if you have a restrictive schedule it might be wise to book early.
+
+## Labs
+There are three mandatory labs, and one optional lab that can give bonus points on the exam. For each lab, there is a "lab preparation" assignment on Canvas. This assignment must be completed (and you need to understand what you did) before you come to the lab. The actual time-slot when you can do the lab in the lab room will be booked in advance like the exercises. 
+
+In the lab room, you will get to try some tasks that are hard to do without access to the real hardware. While passing the labs is mandatory for completing the course, doing so is not going to be at all difficult as long as you have done the preparation. The point of the labs is to enforce your learning, and understanding the labs is essential (and almost sufficient) to passing the exam. 
 
 

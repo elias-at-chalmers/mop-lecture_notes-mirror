@@ -19,40 +19,45 @@ Even if you have decided, once and for all, that you only want to work with the 
 
 What is a microcontroller?
 ===============================================================================
-So, what *is* a microcontroller, and how does it compare to the CPU you plug into your desktop computer's motherboard? Both general-purpose CPUs and microcontrollers are *Integrated Circuits* (ICs) fabricated on silicon using CMOS VLSI technology. In other words, they are both little silicon chips with spider legs (these are called *pins*). The chips contain millions of transistors that make up all of the internal logic. Part of that logic is the ALU and data path that you have encountered before, but there are *many* more modules attached to this core processor. In both cases, the spider legs are their only means of communication with the outside world, so both must be placed onto a *Printed Circuit Board* (PCB). This is a plastic board with thin copper lines that connect all of the pins to various other subsystems, such as memory (FLASH/DRAM), I/O busses (PCI-Express/USB/Ethernet), or *General Purpose Input/Output* pins (more about these later). 
-
-<image showing, e.g. a pico, with the chip and PCB>
+So, what *is* a microcontroller, and how does it compare to the CPU you plug into your desktop computer's motherboard? Both general-purpose CPUs and microcontrollers are *Integrated Circuits* (ICs) fabricated on silicon using CMOS VLSI technology. In other words, they are both little silicon chips with spider legs (these are called *pins*). The chips contain millions of transistors that make up all of the internal logic. Part of that logic is the ALU and data path that you have encountered before, but there are *many* more modules attached to this core processor. In both cases, the spider legs are their only means of communication with the outside world, so both must be placed onto a *Printed Circuit Board* (PCB). This is a plastic board with thin copper lines that connect all of the pins to various other subsystems, such as memory (Flash, SRAM, or external DRAM), I/O busses (PCI-Express/USB/Ethernet), or *General Purpose Input/Output* pins (more about these later). 
 
 The main difference is that microcontrollers are *tiny* in comparison and lack a number of features that are standard on a general purpose CPU: 
 
 * A modern microcontroller often has several orders of magnitude fewer transistors than a modern desktop CPU. 
-* A single microcrontroller chip might cost 1 to 50SEK, while a CPU costs several hundred, to thousands.
+* A single microcontroller chip might cost 1 to 50SEK, while a CPU costs several hundred, to thousands.
 * The microcontroller is extremely energy efficient, and can be powered for quite some time from a standard 9V battery from the supermarket. 
 * The microcontroller has *very* restricted memory; usually just a few kB of SRAM, while a CPU has a huge memory subsystem with several layers of caches.
 * The microcontroller usually runs without any operating system, and is designed to run one specific task.
 
+It is important to realize that while microcontrollers are relatively simple, and very cheap to buy, they are much too expensive to produce specifically for one product. Fabricating a single chip would cost *at least* 100k-1M SEK. They only become cheap when you produce (and sell) millions of them.
 
+PCBs, on the other hand, are very cheap to make these days (you can design one and order 5 copies for 50 SEK), so when designing a product (let's say an alarm system) you would usually: 
 
+* Buy the cheapest microcontroller *development board* that you think will fit your needs. A development board is (at minimum) a PCB with the microcontroller and some debugging equipment that lets you connect it to your computer for development. 
+* Connect it to the sensors (movement sensors, for example) and other components (flash memory, or AD converters, perhaps) you need on a "breadboard" (see image below)
+* Write the software you need on a desktop computer and send it over to the development board for testing. 
 
-*Development boards (PCB, IC)*
+> TODO: image of pico with a few components on a breadboard
 
-> Consider starting earlier, with an example of a simple sensor, connected to a simple display. 
-> We can explain that these are ICs found on a PCB. 
-> Now say that we want our thing to do something more complicated, enter the MCU. 
+Once you are satisfied that the software works, you can design a schematic for a PCB [^kicad] and order the whole thing (with microcontroller and components soldered on) from a manufacturer.
 
-*Also clarify that a microprocessor is usually what we find in a computer, and that it usually incorporates cache hierarchies and MMUs, but expects peripherals like memory and USB controllers to be outside.*
+[^kicad]: This is quite easy, and surprisingly fun. You can use free software like [KiCad](www.kicad.org) for this.
 
 The lab computer, MD307
 ===============================================================================
-*MD307 is a development board. It hosts a CH32V307 microcontroller, two USB ports (one for debugging), and a number of GPIO pins.*
+In this course, you will learn to program the MD307 development board [^md307]. It consists of a [CH32V307](https://www.wch-ic.com/products/CH32V307.html) microcontroller, a debug interface so you can connect it to Visual Studio Code, and a number of *General Purpose I/O* (GPIO) pins, that you will connect to peripheral equipment. 
 
-The microcontroller
+The CH32V307 is a RISC-V [^riscv] microcontroller running at 144MHz, with (up to) 192kB SRAM and (up to) 256kB FLASH memory. The chip also contains various I/O modules (like USB, USART, and Ethernet), DACs, ADCs, and several timers. You will learn how to program many of these in the course.
+
+[^md307]: This is a reasonably student-proof development board developed at chalmers, but very similar boards are available to buy off-the-shelf.
+[^riscv]: See next lecture.
+
+![](../images/md307.png)
+
+The simulator
 -------------------------------------------------------------------------------
-[CH32V307](https://www.wch-ic.com/products/CH32V307.html)
-Developed by WCH
+Since we do not have enough MD307 development boards to hand out to all of you, much of your development will happen on a simulator. This is an *Instruction Set Simulator* (ISS), meaning that it decodes and runs machine code instructions and maintains a model of the processor's registers and state but simplifies many micro-architectural details. Thus, you can compile and run your code and expect the same behavior as if it was the real machine, but it will not be exact in terms of the number of cycles an instruction takes. This is usually sufficient for most development work, and is a common approach to developing software before hardware is available.
 
-*The microcontroller is the chip in the image. Everything that happens on the board is initiated by an electrical signal coming into, or out of, one of the little spider legs."
-*The microcontroller is not just a processor (also SRAM/EXTI/USB/USART/etc.)*
 
 The processor: RISC-V
 -------------------------------------------------------------------------------

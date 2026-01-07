@@ -535,3 +535,8 @@ sum_loop:
 .align 2                                            # Make sure our numbers are aligned to 4 bytes
 numbers: .word 2, 4, 6, 8, 0, 1, 2, 3, 4, 5         # Allocate 10*4 bytes for the array
 ```
+
+
+### Further reading
+This lecture almost concludes our assembly adventures, as we will start looking into C programming in the next lecture. If you want more, or are looking for in depth details, we can recommend the free online book: 
+[An Introduction to Assembly Programming with RISC-V](https://riscv-programming.org/book/riscv-book.html).

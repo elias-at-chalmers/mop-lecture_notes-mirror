@@ -12,8 +12,8 @@
 Chapter 1, Pages 7-16
 Chapter 1, Pages 24-33
 
-**Things that are in the Workbook that should possibly be in this lecture**
-MUL/DIV, (Arrays)
+<!-- **Things that are in the Workbook that should possibly be in this lecture**
+MUL/DIV, (Arrays) -->
 
 ---
 In this lecture you will learn about the basics of assembly programming on a small RISC-V processor. 
@@ -105,14 +105,15 @@ Another important principle behind the development of the RISC-V architecture is
 
 
 ```
-add register_0, M(register_1)           // Take the value in memory at the address pointed to by r1, and add it to r0
+add register_0, M(register_1)     // Take the value in memory at the address 
+                                  // pointed to by r1, and add it to r0
 ```
 
 In RISC-V, this is expressed in two instructions:
 
 ``` asm
 lw x3, 0(x2)         // Load the value in memory at the address pointed to by x2
-add x1, x3           // Add that value to x1
+add x1, x1, x3       // Add that value to x1
 ```
 
 This might seem unnecessary, but there are several reasons behind this choice. Firstly, it greatly simplifies the hardware design (simpler hardware usually means faster and less error-prone hardware). Secondly, it makes pipelining simpler [^2] and allows the compiler to make optimizations that make the code run faster.
@@ -169,8 +170,7 @@ Now let's see what happens if we compile this assembly program to machine code [
    addi    t0,zero,10
    loop:
    addi    t0,t0,-2
-   blt     zero,t0,
-   loop
+   blt     zero, t0, loop
 ```
 
 This is slightly different from the code we wrote! Let's see what changed and why:

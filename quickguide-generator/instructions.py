@@ -39,6 +39,9 @@ def instruction_matches(instr, name_re, include_pseudo):
         return False
     return True
 
+def instr_anchor(instr):
+    # Unique, stable anchor: category + instruction name
+    return f"instr-{instr['instruction']}"
 
 # -----------------------------
 # Argument parsing
@@ -50,6 +53,7 @@ parser.add_argument("-name", type=str, default=None, help="Regex to filter instr
 parser.add_argument("-category-header", type=str2bool, default=True)
 parser.add_argument("-pseudo-instructions", type=str2bool, default=True)
 parser.add_argument("-short", type=str2bool, default=True)
+parser.add_argument("-links", type=str2bool, default=True, help="Whether to include links to long mode version")
 
 args = parser.parse_args()
 
@@ -114,7 +118,11 @@ for category, instructions in data.items():
                 syntax += " " + ", ".join(operands)
 
             print("<tr>")
-            print(f"<td><code>{escape(syntax)}</code></td>")
+            if(args.links): 
+                anchor = instr_anchor(instr)
+                print(f"<td><code><a href='#{anchor}'>{escape(syntax)}</a></code></td>")
+            else:
+                print(f"<td><code>{escape(syntax)}</code></td>")                
             print(f"<td>{escape(instr.get('shortdesc', ''))}</td>")
             print("</tr>")
 
@@ -125,7 +133,8 @@ for category, instructions in data.items():
     # -------------------------
     else:
         for instr in filtered:
-            print(f"<h3>{escape(instr['instruction'])}</h3>")
+            anchor = instr_anchor(instr)
+            print(f"<h3 id='{anchor}'>{escape(instr['instruction'])}</h3>")
             print(f"<p>{escape(instr.get('description', ''))}</p>")
 
             operands = instr.get("operands", [])

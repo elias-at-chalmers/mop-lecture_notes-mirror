@@ -1,437 +1,186 @@
 {
-  "Arithmetic Instructions": [
-    {
-      "instruction": "LUI",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "Load upper immediate into rd",
-      "shortdesc": "rd ← imm << 12",
-      "operands": ["rd", "imm"],
-      "restrictions": [
-        "Destination register cannot be x0 (writes ignored if rd=x0)",
-        "12-bit signed immediate (-2048 to 2047)"
-      ]
-    },
-    {
-      "instruction": "AUIPC",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "Add upper immediate to PC",
-      "shortdesc": "rd ← PC + (imm << 12)",
-      "operands": ["rd", "imm"],
-      "restrictions": [
-        "Destination register cannot be x0 (writes ignored if rd=x0)",
-        "12-bit signed immediate (-2048 to 2047)"
-      ]
-    },
-    {
-      "instruction": "ADDI",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "Add immediate",
-      "shortdesc": "rd ← rs1 + imm",
-      "operands": ["rd", "rs1", "imm"],
-      "restrictions": [
-        "Destination register cannot be x0 (writes ignored if rd=x0)",
-        null,
-        "12-bit signed immediate (-2048 to 2047)"
-      ]
-    },
-    {
-      "instruction": "XORI",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "XOR immediate",
-      "shortdesc": "rd ← rs1 ^ imm",
-      "operands": ["rd", "rs1", "imm"],
-      "restrictions": [
-        "Destination register cannot be x0 (writes ignored if rd=x0)",
-        null,
-        "12-bit signed immediate (-2048 to 2047)"
-      ]
-    },
-    {
-      "instruction": "ORI",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "OR immediate",
-      "shortdesc": "rd ← rs1 | imm",
-      "operands": ["rd", "rs1", "imm"],
-      "restrictions": [
-        "Destination register cannot be x0 (writes ignored if rd=x0)",
-        null,
-        "12-bit signed immediate (-2048 to 2047)"
-      ]
-    },
-    {
-      "instruction": "ANDI",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "AND immediate",
-      "shortdesc": "rd ← rs1 & imm",
-      "operands": ["rd", "rs1", "imm"],
-      "restrictions": [
-        "Destination register cannot be x0 (writes ignored if rd=x0)",
-        null,
-        "12-bit signed immediate (-2048 to 2047)"
-      ]
-    },
-    {
-      "instruction": "SLLI",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "Shift left logical immediate",
-      "shortdesc": "rd ← rs1 << shamt",
-      "operands": ["rd", "rs1", "shamt"],
-      "restrictions": [
-        "Destination register cannot be x0 (writes ignored if rd=x0)",
-        null,
-        "5-bit shift amount (0-31)"
-      ]
-    },
-    {
-      "instruction": "SRLI",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "Shift right logical immediate",
-      "shortdesc": "rd ← rs1 >> shamt",
-      "operands": ["rd", "rs1", "shamt"],
-      "restrictions": [
-        "Destination register cannot be x0 (writes ignored if rd=x0)",
-        null,
-        "5-bit shift amount (0-31)"
-      ]
-    },
-    {
-      "instruction": "SRAI",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "Shift right arithmetic immediate",
-      "shortdesc": "rd ← rs1 >>> shamt",
-      "operands": ["rd", "rs1", "shamt"],
-      "restrictions": [
-        "Destination register cannot be x0 (writes ignored if rd=x0)",
-        null,
-        "5-bit shift amount (0-31)"
-      ]
-    },
-    {
-      "instruction": "ADD",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "Add",
-      "shortdesc": "rd ← rs1 + rs2",
-      "operands": ["rd", "rs1", "rs2"],
-      "restrictions": [
-        "Destination register cannot be x0 (writes ignored if rd=x0)",
-        null,
-        null
-      ]
-    },
-    {
-      "instruction": "SUB",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "Subtract",
-      "shortdesc": "rd ← rs1 − rs2",
-      "operands": ["rd", "rs1", "rs2"],
-      "restrictions": [
-        "Destination register cannot be x0 (writes ignored if rd=x0)",
-        null,
-        null
-      ]
-    },
-    {
-      "instruction": "XOR",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "XOR",
-      "shortdesc": "rd ← rs1 ^ rs2",
-      "operands": ["rd", "rs1", "rs2"],
-      "restrictions": [
-        "Destination register cannot be x0 (writes ignored if rd=x0)",
-        null,
-        null
-      ]
-    },
-    {
-      "instruction": "OR",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "OR",
-      "shortdesc": "rd ← rs1 | rs2",
-      "operands": ["rd", "rs1", "rs2"],
-      "restrictions": [
-        "Destination register cannot be x0 (writes ignored if rd=x0)",
-        null,
-        null
-      ]
-    },
-    {
-      "instruction": "AND",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "AND",
-      "shortdesc": "rd ← rs1 & rs2",
-      "operands": ["rd", "rs1", "rs2"],
-      "restrictions": [
-        "Destination register cannot be x0 (writes ignored if rd=x0)",
-        null,
-        null
-      ]
-    },
-    {
-      "instruction": "li",
-      "is_pseudo": true,
-      "implementation": "LUI + ADDI",
-      "description": "Load immediate",
-      "shortdesc": "rd ← imm",
-      "operands": ["rd", "imm"],
-      "restrictions": [
-        "Destination register cannot be x0 (writes ignored if rd=x0)",
-        "Immediate must fit after expansion"
-      ]
-    },
-    {
-      "instruction": "mv",
-      "is_pseudo": true,
-      "implementation": "ADDI rd, rs, 0",
-      "description": "Move register",
-      "shortdesc": "rd ← rs",
-      "operands": ["rd", "rs"],
-      "restrictions": [
-        "Destination register cannot be x0 (writes ignored if rd=x0)",
-        null
-      ]
-    },
-    {
-      "instruction": "neg",
-      "is_pseudo": true,
-      "implementation": "SUB rd, x0, rs",
-      "description": "Negate",
-      "shortdesc": "rd ← −rs",
-      "operands": ["rd", "rs"],
-      "restrictions": [
-        "Destination register cannot be x0 (writes ignored if rd=x0)",
-        null
-      ]
-    },
-    {
-      "instruction": "not",
-      "is_pseudo": true,
-      "implementation": "XORI rd, rs, -1",
-      "description": "Bitwise NOT",
-      "shortdesc": "rd ← ~rs",
-      "operands": ["rd", "rs"],
-      "restrictions": [
-        "Destination register cannot be x0 (writes ignored if rd=x0)",
-        null
-      ]
-    }
+  "Immediate & Address Construction": [
+    { "instruction": "lui", "is_pseudo": false, "implementation": null, "description": "Load upper immediate", "shortdesc": "rd ← imm << 12", "operands": ["rd", "imm"], "restrictions": ["rd ≠ x0", "20-bit immediate"] },
+    { "instruction": "auipc", "is_pseudo": false, "implementation": null, "description": "Add upper immediate to PC", "shortdesc": "rd ← PC + (imm << 12)", "operands": ["rd", "imm"], "restrictions": ["rd ≠ x0", "20-bit immediate"] },
+    { "instruction": "li", "is_pseudo": true, "implementation": "lui/addi", "description": "Load immediate", "shortdesc": "rd ← imm", "operands": ["rd", "imm"], "restrictions": ["rd ≠ x0", "Assembler-expanded"] },
+    { "instruction": "la", "is_pseudo": true, "implementation": "auipc + addi", "description": "Load address", "shortdesc": "rd ← address", "operands": ["rd", "symbol"], "restrictions": ["rd ≠ x0", "Assembler-expanded"] },
+    { "instruction": "lla", "is_pseudo": true, "implementation": "auipc + addi (local)", "description": "Load local address", "shortdesc": "rd ← local address", "operands": ["rd", "symbol"], "restrictions": ["rd ≠ x0", "Assembler-expanded"] }
+  ],
+
+  "Integer Arithmetic & Logic": [
+    { "instruction": "addi", "is_pseudo": false, "implementation": null, "description": "Add immediate", "shortdesc": "rd ← rs1 + imm", "operands": ["rd", "rs1", "imm"], "restrictions": ["rd ≠ x0", null, "12-bit signed immediate"] },
+    { "instruction": "xori", "is_pseudo": false, "implementation": null, "description": "XOR immediate", "shortdesc": "rd ← rs1 ^ imm", "operands": ["rd", "rs1", "imm"], "restrictions": ["rd ≠ x0", null, "12-bit signed immediate"] },
+    { "instruction": "ori", "is_pseudo": false, "implementation": null, "description": "OR immediate", "shortdesc": "rd ← rs1 | imm", "operands": ["rd", "rs1", "imm"], "restrictions": ["rd ≠ x0", null, "12-bit signed immediate"] },
+    { "instruction": "andi", "is_pseudo": false, "implementation": null, "description": "AND immediate", "shortdesc": "rd ← rs1 & imm", "operands": ["rd", "rs1", "imm"], "restrictions": ["rd ≠ x0", null, "12-bit signed immediate"] },
+
+    { "instruction": "add", "is_pseudo": false, "implementation": null, "description": "Add", "shortdesc": "rd ← rs1 + rs2", "operands": ["rd", "rs1", "rs2"], "restrictions": ["rd ≠ x0", null, null] },
+    { "instruction": "sub", "is_pseudo": false, "implementation": null, "description": "Subtract", "shortdesc": "rd ← rs1 − rs2", "operands": ["rd", "rs1", "rs2"], "restrictions": ["rd ≠ x0", null, null] },
+    { "instruction": "xor", "is_pseudo": false, "implementation": null, "description": "XOR", "shortdesc": "rd ← rs1 ^ rs2", "operands": ["rd", "rs1", "rs2"], "restrictions": ["rd ≠ x0", null, null] },
+    { "instruction": "or", "is_pseudo": false, "implementation": null, "description": "OR", "shortdesc": "rd ← rs1 | rs2", "operands": ["rd", "rs1", "rs2"], "restrictions": ["rd ≠ x0", null, null] },
+    { "instruction": "and", "is_pseudo": false, "implementation": null, "description": "AND", "shortdesc": "rd ← rs1 & rs2", "operands": ["rd", "rs1", "rs2"], "restrictions": ["rd ≠ x0", null, null] }
+  ],
+
+  "Shifts & Bit Manipulation": [
+    { "instruction": "slli", "is_pseudo": false, "implementation": null, "description": "Shift left logical immediate", "shortdesc": "rd ← rs1 << shamt", "operands": ["rd", "rs1", "shamt"], "restrictions": ["rd ≠ x0", null, "0–31"] },
+    { "instruction": "srli", "is_pseudo": false, "implementation": null, "description": "Shift right logical immediate", "shortdesc": "rd ← rs1 >> shamt", "operands": ["rd", "rs1", "shamt"], "restrictions": ["rd ≠ x0", null, "0–31"] },
+    { "instruction": "srai", "is_pseudo": false, "implementation": null, "description": "Shift right arithmetic immediate", "shortdesc": "rd ← rs1 >>> shamt", "operands": ["rd", "rs1", "shamt"], "restrictions": ["rd ≠ x0", null, "0–31"] },
+    { "instruction": "not", "is_pseudo": true, "implementation": "xori rd, rs, -1", "description": "Bitwise NOT", "shortdesc": "rd ← ~rs", "operands": ["rd", "rs"], "restrictions": ["rd ≠ x0", null] }
+  ],
+
+  "Comparison & Set Instructions": [
+    { "instruction": "slti", "is_pseudo": false, "implementation": null, "description": "Set less than immediate (signed)", "shortdesc": "rd ← rs1 < imm", "operands": ["rd", "rs1", "imm"], "restrictions": ["rd ≠ x0", null, "12-bit signed immediate"] },
+    { "instruction": "sltiu", "is_pseudo": false, "implementation": null, "description": "Set less than immediate (unsigned)", "shortdesc": "rd ← rs1 < imm (unsigned)", "operands": ["rd", "rs1", "imm"], "restrictions": ["rd ≠ x0", null, "12-bit immediate"] },
+    { "instruction": "slt", "is_pseudo": false, "implementation": null, "description": "Set less than (signed)", "shortdesc": "rd ← rs1 < rs2", "operands": ["rd", "rs1", "rs2"], "restrictions": ["rd ≠ x0", null, null] },
+    { "instruction": "sltu", "is_pseudo": false, "implementation": null, "description": "Set less than (unsigned)", "shortdesc": "rd ← rs1 < rs2 (unsigned)", "operands": ["rd", "rs1", "rs2"], "restrictions": ["rd ≠ x0", null, null] },
+
+    { "instruction": "seqz", "is_pseudo": true, "implementation": "sltiu rd, rs, 1", "description": "Set if equal to zero", "shortdesc": "rd ← (rs == 0)", "operands": ["rd", "rs"], "restrictions": ["rd ≠ x0", null] },
+    { "instruction": "snez", "is_pseudo": true, "implementation": "sltu rd, x0, rs", "description": "Set if not equal to zero", "shortdesc": "rd ← (rs ≠ 0)", "operands": ["rd", "rs"], "restrictions": ["rd ≠ x0", null] },
+    { "instruction": "sltz", "is_pseudo": true, "implementation": "slt rd, rs, x0", "description": "Set if less than zero", "shortdesc": "rd ← (rs < 0)", "operands": ["rd", "rs"], "restrictions": ["rd ≠ x0", null] },
+    { "instruction": "sgtz", "is_pseudo": true, "implementation": "slt rd, x0, rs", "description": "Set if greater than zero", "shortdesc": "rd ← (rs > 0)", "operands": ["rd", "rs"], "restrictions": ["rd ≠ x0", null] }
+  ],
+
+  "Register Move & Unary": [
+    { "instruction": "nop", "is_pseudo": true, "implementation": "addi x0, x0, 0", "description": "No operation", "shortdesc": "No effect", "operands": [], "restrictions": [] },
+    { "instruction": "mv", "is_pseudo": true, "implementation": "addi rd, rs, 0", "description": "Move register", "shortdesc": "rd ← rs", "operands": ["rd", "rs"], "restrictions": ["rd ≠ x0", null] },
+    { "instruction": "neg", "is_pseudo": true, "implementation": "sub rd, x0, rs", "description": "Negate", "shortdesc": "rd ← −rs", "operands": ["rd", "rs"], "restrictions": ["rd ≠ x0", null] }
   ],
 
   "Control Flow Instructions": [
-    {
-      "instruction": "JAL",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "Jump and link",
-      "shortdesc": "rd ← PC+4; PC ← PC+offset",
-      "operands": ["rd", "offset"],
-      "restrictions": [
-        "Destination register cannot be x0 (writes ignored if rd=x0)",
-        "12-bit signed offset"
-      ]
-    },
-    {
-      "instruction": "JALR",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "Jump and link register",
-      "shortdesc": "rd ← PC+4; PC ← rs1+offset",
-      "operands": ["rd", "rs1", "offset"],
-      "restrictions": [
-        "Destination register cannot be x0 (writes ignored if rd=x0)",
-        null,
-        "12-bit signed offset"
-      ]
-    },
-    {
-      "instruction": "BEQ",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "Branch if equal",
-      "shortdesc": "if rs1 = rs2 then PC ← PC+offset",
-      "operands": ["rs1", "rs2", "offset"],
-      "restrictions": [null, null, "12-bit signed offset"]
-    },
-    {
-      "instruction": "BNE",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "Branch if not equal",
-      "shortdesc": "if rs1 ≠ rs2 then PC ← PC+offset",
-      "operands": ["rs1", "rs2", "offset"],
-      "restrictions": [null, null, "12-bit signed offset"]
-    },
-    {
-      "instruction": "BLT",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "Branch if less than",
-      "shortdesc": "if rs1 < rs2 then PC ← PC+offset",
-      "operands": ["rs1", "rs2", "offset"],
-      "restrictions": [null, null, "12-bit signed offset"]
-    },
-    {
-      "instruction": "BGE",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "Branch if greater or equal",
-      "shortdesc": "if rs1 ≥ rs2 then PC ← PC+offset",
-      "operands": ["rs1", "rs2", "offset"],
-      "restrictions": [null, null, "12-bit signed offset"]
-    },
-    {
-      "instruction": "j",
-      "is_pseudo": true,
-      "implementation": "JAL x0, label",
-      "description": "Jump",
-      "shortdesc": "PC ← label",
-      "operands": ["label"],
-      "restrictions": [null]
-    },
-    {
-      "instruction": "jr",
-      "is_pseudo": true,
-      "implementation": "JALR x0, 0(rs)",
-      "description": "Jump register",
-      "shortdesc": "PC ← rs",
-      "operands": ["rs"],
-      "restrictions": [null]
-    },
-    {
-      "instruction": "ret",
-      "is_pseudo": true,
-      "implementation": "JALR x0, 0(x1)",
-      "description": "Return from function",
-      "shortdesc": "PC ← ra",
-      "operands": [],
-      "restrictions": []
-    },
-    {
-      "instruction": "call",
-      "is_pseudo": true,
-      "implementation": "JAL x1, symbol",
-      "description": "Call function",
-      "shortdesc": "ra ← PC+4; PC ← function",
-      "operands": ["symbol"],
-      "restrictions": [null]
-    }
+    { "instruction": "jal", "is_pseudo": false, "implementation": null, "description": "Jump and link", "shortdesc": "rd ← PC+4; PC ← PC+offset", "operands": ["rd", "offset"], "restrictions": ["rd ≠ x0", "20-bit signed offset"] },
+    { "instruction": "jalr", "is_pseudo": false, "implementation": null, "description": "Jump and link register", "shortdesc": "rd ← PC+4; PC ← rs1+offset", "operands": ["rd", "rs1", "offset"], "restrictions": ["rd ≠ x0", null, "12-bit signed offset"] },
+
+    { "instruction": "beq", "is_pseudo": false, "implementation": null, "description": "Branch if equal", "shortdesc": "if rs1 = rs2", "operands": ["rs1", "rs2", "offset"], "restrictions": [null, null, "12-bit signed offset"] },
+    { "instruction": "bne", "is_pseudo": false, "implementation": null, "description": "Branch if not equal", "shortdesc": "if rs1 ≠ rs2", "operands": ["rs1", "rs2", "offset"], "restrictions": [null, null, "12-bit signed offset"] },
+    { "instruction": "blt", "is_pseudo": false, "implementation": null, "description": "Branch if less than (signed)", "shortdesc": "if rs1 < rs2", "operands": ["rs1", "rs2", "offset"], "restrictions": [null, null, "12-bit signed offset"] },
+    { "instruction": "bge", "is_pseudo": false, "implementation": null, "description": "Branch if greater or equal (signed)", "shortdesc": "if rs1 ≥ rs2", "operands": ["rs1", "rs2", "offset"], "restrictions": [null, null, "12-bit signed offset"] },
+    { "instruction": "bltu", "is_pseudo": false, "implementation": null, "description": "Branch if less than (unsigned)", "shortdesc": "if rs1 < rs2 (u)", "operands": ["rs1", "rs2", "offset"], "restrictions": [null, null, "12-bit signed offset"] },
+    { "instruction": "bgeu", "is_pseudo": false, "implementation": null, "description": "Branch if greater or equal (unsigned)", "shortdesc": "if rs1 ≥ rs2 (u)", "operands": ["rs1", "rs2", "offset"], "restrictions": [null, null, "12-bit signed offset"] },
+
+    { "instruction": "beqz", "is_pseudo": true, "implementation": "beq rs, x0, offset", "description": "Branch if equal to zero", "shortdesc": "if rs = 0 then PC ← PC+offset", "operands": ["rs", "offset"], "restrictions": [null, "12-bit signed offset"] },
+    { "instruction": "bnez", "is_pseudo": true, "implementation": "bne rs, x0, offset", "description": "Branch if not equal to zero", "shortdesc": "if rs ≠ 0 then PC ← PC+offset", "operands": ["rs", "offset"], "restrictions": [null, "12-bit signed offset"] },
+    { "instruction": "bgt", "is_pseudo": true, "implementation": "blt rs2, rs1, offset", "description": "Branch if greater than (signed)", "shortdesc": "if rs1 > rs2", "operands": ["rs1", "rs2", "offset"], "restrictions": [null, null, "12-bit signed offset"] },
+    { "instruction": "ble", "is_pseudo": true, "implementation": "bge rs2, rs1, offset", "description": "Branch if less or equal (signed)", "shortdesc": "if rs1 ≤ rs2", "operands": ["rs1", "rs2", "offset"], "restrictions": [null, null, "12-bit signed offset"] },
+    { "instruction": "bgtu", "is_pseudo": true, "implementation": "bltu rs2, rs1, offset", "description": "Branch if greater than (unsigned)", "shortdesc": "if rs1 > rs2 (u)", "operands": ["rs1", "rs2", "offset"], "restrictions": [null, null, "12-bit signed offset"] },
+    { "instruction": "bleu", "is_pseudo": true, "implementation": "bgeu rs2, rs1, offset", "description": "Branch if less or equal (unsigned)", "shortdesc": "if rs1 ≤ rs2 (u)", "operands": ["rs1", "rs2", "offset"], "restrictions": [null, null, "12-bit signed offset"] },
+
+    { "instruction": "tail", "is_pseudo": true, "implementation": "jalr x0, rs, 0", "description": "Tail call", "shortdesc": "PC ← rs (no return)", "operands": ["rs"], "restrictions": [null] },
+    { "instruction": "j", "is_pseudo": true, "implementation": "jal x0, label", "description": "Unconditional jump", "shortdesc": "PC ← label", "operands": ["label"], "restrictions": [null] },
+    { "instruction": "jr", "is_pseudo": true, "implementation": "jalr x0, rs, 0", "description": "Jump register", "shortdesc": "PC ← rs", "operands": ["rs"], "restrictions": [null] },
+    { "instruction": "ret", "is_pseudo": true, "implementation": "jalr x0, ra, 0", "description": "Return", "shortdesc": "PC ← ra", "operands": [], "restrictions": [] },
+    { "instruction": "call", "is_pseudo": true, "implementation": "jal ra, symbol", "description": "Call function", "shortdesc": "ra ← PC+4; PC ← fn", "operands": ["symbol"], "restrictions": [null] }
   ],
 
   "Load and Store Instructions": [
-    {
-      "instruction": "LB",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "Load byte",
-      "shortdesc": "rd ← sext(MEM8[rs1+offset])",
-      "operands": ["rd", "offset(rs1)"],
-      "restrictions": [
-        "Destination register cannot be x0 (writes ignored if rd=x0)",
-        null
-      ]
-    },
-    {
-      "instruction": "LH",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "Load halfword",
-      "shortdesc": "rd ← sext(MEM16[rs1+offset])",
-      "operands": ["rd", "offset(rs1)"],
-      "restrictions": [
-        "Destination register cannot be x0 (writes ignored if rd=x0)",
-        null
-      ]
-    },
-    {
-      "instruction": "LW",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "Load word",
-      "shortdesc": "rd ← MEM32[rs1+offset]",
-      "operands": ["rd", "offset(rs1)"],
-      "restrictions": [
-        "Destination register cannot be x0 (writes ignored if rd=x0)",
-        null
-      ]
-    },
-    {
-      "instruction": "SB",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "Store byte",
-      "shortdesc": "MEM8[rs1+offset] ← rs2",
-      "operands": ["rs2", "offset(rs1)"],
-      "restrictions": [null, null]
-    },
-    {
-      "instruction": "SH",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "Store halfword",
-      "shortdesc": "MEM16[rs1+offset] ← rs2",
-      "operands": ["rs2", "offset(rs1)"],
-      "restrictions": [null, null]
-    },
-    {
-      "instruction": "SW",
-      "is_pseudo": false,
-      "implementation": null,
-      "description": "Store word",
-      "shortdesc": "MEM32[rs1+offset] ← rs2",
-      "operands": ["rs2", "offset(rs1)"],
-      "restrictions": [null, null]
-    }
+    { "instruction": "lb", "is_pseudo": false, "implementation": null, "description": "Load byte (signed)", "shortdesc": "rd ← sext(MEM8)", "operands": ["rd", "offset(rs1)"], "restrictions": ["rd ≠ x0", null] },
+    { "instruction": "lh", "is_pseudo": false, "implementation": null, "description": "Load halfword (signed)", "shortdesc": "rd ← sext(MEM16)", "operands": ["rd", "offset(rs1)"], "restrictions": ["rd ≠ x0", null] },
+    { "instruction": "lw", "is_pseudo": false, "implementation": null, "description": "Load word", "shortdesc": "rd ← MEM32", "operands": ["rd", "offset(rs1)"], "restrictions": ["rd ≠ x0", null] },
+    { "instruction": "lbu", "is_pseudo": false, "implementation": null, "description": "Load byte unsigned", "shortdesc": "rd ← MEM8", "operands": ["rd", "offset(rs1)"], "restrictions": ["rd ≠ x0", null] },
+    { "instruction": "lhu", "is_pseudo": false, "implementation": null, "description": "Load halfword unsigned", "shortdesc": "rd ← MEM16", "operands": ["rd", "offset(rs1)"], "restrictions": ["rd ≠ x0", null] },
+
+    { "instruction": "sb", "is_pseudo": false, "implementation": null, "description": "Store byte", "shortdesc": "MEM8 ← rs2", "operands": ["rs2", "offset(rs1)"], "restrictions": [null, null] },
+    { "instruction": "sh", "is_pseudo": false, "implementation": null, "description": "Store halfword", "shortdesc": "MEM16 ← rs2", "operands": ["rs2", "offset(rs1)"], "restrictions": [null, null] },
+    { "instruction": "sw", "is_pseudo": false, "implementation": null, "description": "Store word", "shortdesc": "MEM32 ← rs2", "operands": ["rs2", "offset(rs1)"], "restrictions": [null, null] }
   ],
 
   "System Instructions": [
+    { "instruction": "fence", "is_pseudo": false, "implementation": null, "description": "Memory fence", "shortdesc": "Order memory ops", "operands": ["pred", "succ"], "restrictions": [null, null] },
+    { "instruction": "fence.i", "is_pseudo": false, "implementation": null, "description": "Instruction fence", "shortdesc": "Synchronise instruction stream", "operands": [], "restrictions": [] },
+    { "instruction": "ecall", "is_pseudo": false, "implementation": null, "description": "Environment call", "shortdesc": "Trap to OS", "operands": [], "restrictions": [] },
+    { "instruction": "ebreak", "is_pseudo": false, "implementation": null, "description": "Breakpoint", "shortdesc": "Trap to debugger", "operands": [], "restrictions": [] }
+  ],
+
+  "CSR Instructions": [
     {
-      "instruction": "FENCE",
+      "instruction": "csrrw",
       "is_pseudo": false,
       "implementation": null,
-      "description": "Memory fence",
-      "shortdesc": "Order memory operations",
-      "operands": ["pred", "succ"],
-      "restrictions": [null, null]
+      "description": "Atomic read/write CSR",
+      "shortdesc": "rd ← csr; csr ← rs1",
+      "operands": ["rd", "csr", "rs1"],
+      "restrictions": ["rd may be x0", "CSR must be accessible", null]
     },
     {
-      "instruction": "FENCE.I",
+      "instruction": "csrrs",
       "is_pseudo": false,
       "implementation": null,
-      "description": "Instruction fence",
-      "shortdesc": "Synchronize instruction stream",
-      "operands": [],
-      "restrictions": []
+      "description": "Atomic read and set CSR bits",
+      "shortdesc": "rd ← csr; csr ← csr | rs1",
+      "operands": ["rd", "csr", "rs1"],
+      "restrictions": ["rd may be x0", "CSR must be accessible", null]
     },
     {
-      "instruction": "ECALL",
+      "instruction": "csrrc",
       "is_pseudo": false,
       "implementation": null,
-      "description": "Environment call",
-      "shortdesc": "Trap to operating system",
-      "operands": [],
-      "restrictions": []
+      "description": "Atomic read and clear CSR bits",
+      "shortdesc": "rd ← csr; csr ← csr & ~rs1",
+      "operands": ["rd", "csr", "rs1"],
+      "restrictions": ["rd may be x0", "CSR must be accessible", null]
     },
     {
-      "instruction": "EBREAK",
+      "instruction": "csrrwi",
       "is_pseudo": false,
       "implementation": null,
-      "description": "Breakpoint",
-      "shortdesc": "Trap to debugger",
-      "operands": [],
-      "restrictions": []
+      "description": "Atomic read/write CSR (immediate)",
+      "shortdesc": "rd ← csr; csr ← zimm",
+      "operands": ["rd", "csr", "zimm"],
+      "restrictions": ["rd may be x0", "CSR must be accessible", "5-bit immediate"]
+    },
+    {
+      "instruction": "csrrsi",
+      "is_pseudo": false,
+      "implementation": null,
+      "description": "Atomic read and set CSR bits (immediate)",
+      "shortdesc": "rd ← csr; csr ← csr | zimm",
+      "operands": ["rd", "csr", "zimm"],
+      "restrictions": ["rd may be x0", "CSR must be accessible", "5-bit immediate"]
+    },
+    {
+      "instruction": "csrrci",
+      "is_pseudo": false,
+      "implementation": null,
+      "description": "Atomic read and clear CSR bits (immediate)",
+      "shortdesc": "rd ← csr; csr ← csr & ~zimm",
+      "operands": ["rd", "csr", "zimm"],
+      "restrictions": ["rd may be x0", "CSR must be accessible", "5-bit immediate"]
+    },
+
+    {
+      "instruction": "csrr",
+      "is_pseudo": true,
+      "implementation": "csrrs rd, csr, x0",
+      "description": "Read CSR",
+      "shortdesc": "rd ← csr",
+      "operands": ["rd", "csr"],
+      "restrictions": ["rd ≠ x0", "CSR must be accessible"]
+    },
+    {
+      "instruction": "csrw",
+      "is_pseudo": true,
+      "implementation": "csrrw x0, csr, rs",
+      "description": "Write CSR",
+      "shortdesc": "csr ← rs",
+      "operands": ["csr", "rs"],
+      "restrictions": ["CSR must be accessible", null]
+    },
+    {
+      "instruction": "csrs",
+      "is_pseudo": true,
+      "implementation": "csrrs x0, csr, rs",
+      "description": "Set CSR bits",
+      "shortdesc": "csr ← csr | rs",
+      "operands": ["csr", "rs"],
+      "restrictions": ["CSR must be accessible", null]
+    },
+    {
+      "instruction": "csrc",
+      "is_pseudo": true,
+      "implementation": "csrrc x0, csr, rs",
+      "description": "Clear CSR bits",
+      "shortdesc": "csr ← csr & ~rs",
+      "operands": ["csr", "rs"],
+      "restrictions": ["CSR must be accessible", null]
     }
   ]
+
 }

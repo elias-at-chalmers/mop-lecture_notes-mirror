@@ -58,19 +58,7 @@ The first register, ``x0``, is special; it is hardwired to always be zero, and w
 
 While the **ISA** puts no restrictions on how these registers are used, the **ABI** suggests which registers are to be used for what, and gives them special names.
 
-|Register     |ABI Name   |Recommended Usage (ABI)
-|---------    |---------- |----------
-|x0           |zero       |Hard-wired to zero
-|x1           |ra         |Return Address
-|x2	          |sp	      |Stack pointer
-|x3	          |gp	      |Global pointer
-|x4	          |tp	      |Thread pointer
-|x5-x7	      |t0-t2	  |Temporary
-|x8	          |s0 / fp	  |Frame pointer
-|x9	          |s1	      |Saved register
-|x10-x17	  |a0-a7	  |Function argument / Return value
-|x18-x27      |s2-s11     |Saved Register
-|x28-x31  	  |t3-t6	  |Temporary
+{{include quickguide/registers_gp.md}}
 
 We will return to all of these different uses later on, and for now it is sufficient that you are aware that, in assembly code, you can refer to either the register name (e.g., `x5`) or the ABI name (`t0`), and it really makes no difference other than for compatibility and readability.
 
@@ -85,6 +73,7 @@ The RV32I instruction set only contains 47 distinct instructions. RISC (Reduced 
 However, this also means that a program written directly in machine instructions is not always easy for a programmer to understand. Therefore, we usually use *assembly language* as the lowest-level language in which we write programs. The assembly language includes all the instructions that the machine understands, but also a number of *pseudo instructions* that the "assembler" translates into one or more machine instructions.
 
 As a simple example, you will have seen in previous courses that one thing we often want to do is to copy a value from one register to another. In assembly language, this looks like:
+
 
 ```
 mv x1, x2              // Move (actually copy) the contents of x2 to x1

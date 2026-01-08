@@ -8,6 +8,8 @@ local function read_file(path)
   return content
 end
 
+
+
 local function normalize_dashes(s)
   -- replace en dash and em dash with ASCII hyphen
   s = s:gsub("–", "-")  -- U+2013
@@ -43,6 +45,8 @@ local function handle_placeholder(text)
         local doc = pandoc.read(content, "markdown")
         return doc.blocks
       end
+    else
+      print ("Could not find file: " .. inc)
     end
   end
 

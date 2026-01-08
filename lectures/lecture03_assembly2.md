@@ -64,37 +64,31 @@ jr t0                   // Jump to that address
 ## Branching
 Conditionally jumping based on some condition is called "branching" and we wouldn't be able to do much with our computers without it. The real instruction that we use for branching are listed in the table below:
 
-| Instr   | Mnemonic                   | Use                  | Condition (jump if)                        |
-|---------|----------------------------|----------------------|-------------------------------|
-| beq     | Branch Equal               | beq rs1, rs2, label    | rs1 == rs2)      |
-| bne     | Branch Not Equal           | bne rs1, rs2, label    | rs1 ≠ rs2)       |
-| blt     | Branch Less Than           | blt rs1, rs2, label    | rs1 < rs2)       |
-| bge     | Branch Greater or Equal    | bge rs1, rs2, label    | rs1 ≥ rs2)       |
-| bltu    | Branch Less Than Unsigned  | bltu rs1, rs2, label   | rs1 < rs2)       |
-| bgeu    | Branch Greater or Equal Unsigned | bgeu rs1, rs2, label | rs1 ≥ rs2)   |
+<div class="boxed">
+
+{{python quickguide-generator/instructions.py -short True -category-header False -name ^(beq|bne|blt|bge|bltu|bgeu)$ -links False}}
+
+</div>
 
 You might think that this looks limited. Why is there no "Branch Greater Than" or "Branch Less or Equal"? The answer, as usual, is that this functionality can be implemented with existing instructions. Since a < b => b > a, `bgt rs1, rs2, label` (Branch Greater Than) can be written as `blt rs2, rs1, label`. There are pseudoinstructions that cover all of the missing operations:
 
-| Pseudo Instr   | Mnemonic                | Use                  |  Condition (jump if)                         |
-|---------|----------------------------|----------------------|-------------------------------|
-| bgt     | *Branch Greater Than*  | bgt rs1, rs2, label    | rs1 > rs2
-| ble     | *Branch Less or Equal* | ble rs1, rs2, label    | rs1 ≤ rs2
-| bgtu    | *Branch Greater Than Unsigned* | bgtu rs1, rs2, label | rs1 > rs
-| bleu    | *Branch Less or Equal Unsigned* | bleu rs1, rs2, label | rs1 ≤ rs2
+
+<div class="boxed">
+
+{{python quickguide-generator/instructions.py -short True -category-header False -name ^(bgt|ble|bgtu|bleu)$ -links False}}
+
+</div>
+
 
 Many of these instructions exist in a signed and an unsigned version (e.g., `blt` and `bltu`). This is necessary since the processor does not know if you consider the value in a register to be a signed or an unsigned number. Consider the instruction `blt x1, zero`. If `x1` contains `0xFFFFFFFB`, it is less than zero if we consider it a signed integer (-5), but *much* more than zero if we consider it unsigned (4294967291).
 
 Additionally, there are a number of pseudoinstructions that compare a register's value to zero. These are just for convenience and are easily implemented using the correspoding instructions and using `zero` as one of the operands:
 
-| Instr   | Mnemonic                | Use                  | Condition (jump if)                         |
-|---------|----------------------------|----------------------|-------------------------------|
-| beqz    | *Branch Equal Zero*    | beqz rs1, label        | rs1 == 0        |
-| bnez    | *Branch Not Equal Zero*| bnez rs1, rs2, label   | rs1 ≠ 0         |
-| bltz    | *Branch Less Than Zero*| bltz rs1, label        | rs1 < 0         |
-| bgtz    | *Branch Greater Than Zero* | bgtz rs1, label       | rs1 > 0         |
-| blez    | *Branch Less or Equal Zero* | blez rs1, label       | rs1 ≤ 0         |
-| bgez    | *Branch Greater or Equal Zero* | bgez rs1, label      | rs1 ≥ 0        |
+<div class="boxed">
 
+{{python quickguide-generator/instructions.py -short True -category-header False -name ^(beqz|bnez|bltz|bgtz|blez|bgez)$ -links False}}
+
+</div>
 
 Let's put this to use. We want to calculate the factorial of 5 (5! = 5 * 4 * 3 * 2 * 1). In C, or any C-like high-level language, this could look like:
 ```c
@@ -106,7 +100,7 @@ for(int i=1; i<=5; i++) {
 
 We can write this same program in RISC-V assembly language as (read and make sure you follow):
 
-```riscv
+```s
 li t0, 1              # Use register t0 for `y`, and set it to 1
 li t1, 1              # Use register t1 for `i`, and set it to 1
 forloop:
@@ -149,14 +143,14 @@ A stack has one associated register called the *stack pointer* (the RISC-V ABI c
 
 On many architectures, *push* and *pop* are actual instructions, implemented by the hardware, but in RISC-V it is done explicitly with existing instructions. To push register `t0` to the stack, you would write:
 
-```
+```s
   addi sp, sp, -4       # Reduce the stack pointer so it points to where we will store t0
   sw  t0, 0(sp)         # Store t0 at the address held by sp
 ```
 
 As you will see soon, we often want to push several registers to the stack at the same time. If we needed to push `t0`, `t1`, and `t2` to the stack, we could write:
 
-```
+```s
 0:  addi sp, sp, -12      # Reduce the stack pointer so it points to where we will store
 1:                        # the LAST value we push (t2)
 2:  sw t0, 8(sp)          # Store the three registers
@@ -167,7 +161,7 @@ As you will see soon, we often want to push several registers to the stack at th
 
 
 <figure>
-  <img src="images/pushing_on_stack.png">
+  <img src="../images/pushing_on_stack.png">
   <figcaption style="text-align: center;"><em> Left: Initial state, stack pointer is at end-of-stack. Middle: At Line 2, stack pointer moved. Right: Line 5: All registers copied to stack.</em></figcaption>
 </figure>
 
@@ -175,7 +169,7 @@ The process is also illustrated in the Figure above.
 
 To pop the values, we just do the same thing in reverse. We first use the current address in the stack-pointer to read out the last three values that were pushed, and then we increase the stack pointer. We do not *remove* the values from the stack, we just move the pointer, but any subsequent push operation will overwrite that memory:
 
-```
+```s
   lw t2, 0(sp)    # Read the values back into registers
   lw t1, 4(sp)
   lw t0, 8(sp)
@@ -208,7 +202,7 @@ Since the return address is available in `ra`, returning from a function can alw
 
 So to call and return from a function we can write:
 
-```
+```s
 call min      # Stores the return address in ra and jumps to min
 <min will return to here>
 ...
@@ -227,7 +221,7 @@ There are a few things to note about this:
 
 We are now ready to implement our `min` function and call it:
 
-```
+```s
 li a0, 20     # Load the value 20 into register a0
 li a1, 10     # Load the value 10 into register a1
 call min      # Stores the return address in ra and jumps to min
@@ -249,7 +243,7 @@ You might write the following code:
 
 [^2]: You don't know how to do that just yet, but you will in a few lessons time.
 
-```
+```s
 mv a0, t0        # Use t0 as the first parameter
 mv a1, t1        # and t1 as the second parameter
 call max         # After this line, the maximum of t0 and t1 is in a0
@@ -274,7 +268,7 @@ Put differently, whenever calling a function, you have to think about which of `
 
 So, for our example to be guaranteed to work, we need to save `t2` to the stack before calling `max` the first time. Note that `max` might also overwrite `a0`, `a1`, `a2`, and `t1` but since we do not need those values any more we do not need to save them:
 
-```
+```s
 mv a0, t0        # Use t0 as the first parameter
 mv a1, t1        # and t1 as the second parameter
 
@@ -302,7 +296,7 @@ To keep things manageable, an assembly programmer will usually follow a simple p
 
 Let us revisit the problem above. We now want to write a function `int max_of_three(int a, int b, int c)`, using the `int max(a, b)` function:
 
-```
+```s
 # int max_of_three(int a, int b, int c)
 # =================================================================================
 # a0: a
@@ -398,19 +392,20 @@ We will return to arrays in C later in the course, but for now we shall see how 
 ### Globally allocated arrays
 If we want to allocate an array of chars *globally* (i.e., that exists throughout the programs lifetime and is available to any function), this is very similar to allocating a single-byte variable:
 
-```
+```s
 numbers: .byte 10, 20, 30, 40, 50
 ```
 
 This line will allocate space for 5 bytes (starting at the current address, which depends on preceding instructions in the code) and initialize them to the given values.
 
 If we want to allocate an empty (i.e., uninitialized) array, we can write:
-```
+```s
 numbers: .space 5          # Allocate 5 bytes for the array
 ```
 
 Loading or storing an element from/to the array is done in the same way that we accessed a single variable in the previous lecture. Let's say we want to copy the value of `numbers[4]` into `numbers[0]`
-```
+
+```s
 la t0, numbers             # Load the address to where the array starts into t0
 lb t1, 4(t0)               # Load numbers[4] (the fifth element) into t1
 sb t1, 0(t0)               # And store it into numbers[0]
@@ -420,7 +415,7 @@ numbers: .space 5          # Allocate 5 bytes for the array
 
 In other words, we put the *starting address* of the array into a register, and then access individual elements with an *offset* from that address. When our array consists of `char` (bytes) the offset is the same as the element. Let's do the same thing for an array of `short` (halfwords, 2 bytes):
 
-```
+```s
 la t0, numbers             # Load the address to where the array starts into t0
 lh t1, 8(t0)               # Load numbers[4] (the fifth element) into t1
 sh t1, 0(t0)               # And store it into numbers[0]
@@ -429,9 +424,8 @@ sh t1, 0(t0)               # And store it into numbers[0]
 numbers: .space 10          # Allocate 10 bytes for the array
 ```
 
-```
-<<< An image would be good here >>>
-```
+
+<!-- An image would be good here -->
 
 Firstly, we have to allocate twice as much space (10 bytes for 5 elements, since each `short` is two bytes). Secondly, we now use the offset 8 to access element number 4, again, this is because each element takes up 2 bytes, so the fifth element lies 2*4 bytes from the arrays starting address [^3].
 
@@ -449,7 +443,7 @@ for(int i=0; i<10; i++) {
 }
 ```
 In assembly, we could write this as:
-```
+```s
  1: li t0, 0                                            # We use t0 for i
  2: li t1, 0                                            # We use t1 for the sum
  3: la t2, numbers                                      # t2 <- address of first element in array
@@ -471,13 +465,13 @@ In assembly, we could write this as:
 
 Note that we have to manually multiply the offset by the size of the element type, to get the correct address. In the example above, we did this with the `mul` instruction (on lines 5-6), but we can do it slightly more efficiently with:
 
-```
- 5: slli t3, t0, 2                                      # Shifting left by two steps is the same as multiplying by 4
+```s
+ 5: slli t3, t0, 2            # Shifting left by two steps is the same as multiplying by 4
 ```
 
 ### Locally allocated arrays
 Sometimes we need an array *locally* in a function. Perhaps the function should read 10 words from disk, calculate the sum, and return the sum. Since the memory for the array is only needed until the function returns, that array will be put on the *stack* instead. Consider the example in C:
-```
+```C
 void f() {
   int array[10];
   <read data into array>
@@ -487,7 +481,7 @@ void f() {
 ```
 In assembly, this could look like:
 
-```
+```s
 function:
   addi sp, sp, -40            # Make room on the stack for 10 integers
   mv t0, sp                   # t0 now holds the address to the start of the array
@@ -501,7 +495,7 @@ We will se later in the course how the stack is used for *all* local variables (
 ### Arrays as function parameters
 It is very common that we want to send an array as a parameter to a function. We might, for instance, want to write a function that calculates the sum of an arbitrary array of integers. Since an array might consist of hundreds or thousands of elements, it does not make sense to try to pack them into the `a` registers. It usually also does not make sense to copy the array into the stack (we would have to copy thousands of bytes just to call a function). Instead, the usual approach to "sending" an array to a function is to simply send the starting address and the size of the array as parameters to the function:
 
-```
+```s
 main:
   la a0, numbers        # Load address of array as first parameter
   li a1, 10             # Size of array as second parameter
@@ -528,7 +522,7 @@ numbers: .word 2, 4, 6, 8, 0, 1, 2, 3, 4, 5         # Allocate 10*4 bytes for th
 
 
 ### Further reading
-This lecture almost concludes our assembly adventures, as we will start looking into C programming in the next lecture. If you want more, or are looking for in depth details, we can recommend the free online book: 
+This lecture almost concludes our assembly adventures, as we will start looking into C programming in the next lecture. If you want more, or are looking for in-depth details, we can recommend the free online book: 
 [An Introduction to Assembly Programming with RISC-V](https://riscv-programming.org/book/riscv-book.html).
 
 

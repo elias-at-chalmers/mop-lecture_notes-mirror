@@ -134,7 +134,11 @@ for category, instructions in data.items():
     else:
         for instr in filtered:
             anchor = instr_anchor(instr)
-            print(f"<h3 id='{anchor}'>{escape(instr['instruction'])}</h3>")
+            title = instr["instruction"]
+            if instr.get("is_pseudo"):
+                title += " (pseudo instruction)"
+            print(f"<h3 id='{anchor}'>{escape(title)}</h3>")
+
             print(f"<p>{escape(instr.get('description', ''))}</p>")
 
             operands = instr.get("operands", [])
@@ -143,9 +147,14 @@ for category, instructions in data.items():
             syntax = instr["instruction"]
             if operands:
                 syntax += " " + ", ".join(operands)
-
             print(f"<p><b>Syntax:</b> <code>{escape(syntax)}</code></p>")
 
+            impl = instr.get("implementation")
+            if impl:
+                print("<p><b>Implementation: </b>")
+                print(f"<code>{escape(impl)}</code>")
+                print("</p>")
+                
             if operands:
                 print("<table>")
                 print("<tr><th>Operand</th><th>Explanation</th></tr>")

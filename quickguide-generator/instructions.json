@@ -21,9 +21,9 @@
   ],
 
   "Shifts & Bit Manipulation": [
-    { "instruction": "slli", "is_pseudo": false, "implementation": null, "description": "Shift left logical immediate", "shortdesc": "rd ← rs1 << shamt", "operands": ["rd", "rs1", "shamt"], "restrictions": ["rd ≠ x0", null, "0–31"] },
-    { "instruction": "srli", "is_pseudo": false, "implementation": null, "description": "Shift right logical immediate", "shortdesc": "rd ← rs1 >> shamt", "operands": ["rd", "rs1", "shamt"], "restrictions": ["rd ≠ x0", null, "0–31"] },
-    { "instruction": "srai", "is_pseudo": false, "implementation": null, "description": "Shift right arithmetic immediate", "shortdesc": "rd ← rs1 >>> shamt", "operands": ["rd", "rs1", "shamt"], "restrictions": ["rd ≠ x0", null, "0–31"] },
+    { "instruction": "slli", "is_pseudo": false, "implementation": null, "description": "Shift left logical immediate", "shortdesc": "rd ← rs1 << imm", "operands": ["rd", "rs1", "imm"], "restrictions": ["rd ≠ x0", null, "0–31"] },
+    { "instruction": "srli", "is_pseudo": false, "implementation": null, "description": "Shift right logical immediate", "shortdesc": "rd ← rs1 >> imm", "operands": ["rd", "rs1", "imm"], "restrictions": ["rd ≠ x0", null, "0–31"] },
+    { "instruction": "srai", "is_pseudo": false, "implementation": null, "description": "Shift right arithmetic immediate", "shortdesc": "rd ← rs1 >>> imm", "operands": ["rd", "rs1", "imm"], "restrictions": ["rd ≠ x0", null, "0–31"] },
     { "instruction": "not", "is_pseudo": true, "implementation": "xori rd, rs, -1", "description": "Bitwise NOT", "shortdesc": "rd ← ~rs", "operands": ["rd", "rs"], "restrictions": ["rd ≠ x0", null] }
   ],
 
@@ -71,15 +71,15 @@
   ],
 
   "Load and Store Instructions": [
-    { "instruction": "lb", "is_pseudo": false, "implementation": null, "description": "Load byte (signed)", "shortdesc": "rd ← sext(MEM8)", "operands": ["rd", "offset(rs1)"], "restrictions": ["rd ≠ x0", null] },
-    { "instruction": "lh", "is_pseudo": false, "implementation": null, "description": "Load halfword (signed)", "shortdesc": "rd ← sext(MEM16)", "operands": ["rd", "offset(rs1)"], "restrictions": ["rd ≠ x0", null] },
-    { "instruction": "lw", "is_pseudo": false, "implementation": null, "description": "Load word", "shortdesc": "rd ← MEM32", "operands": ["rd", "offset(rs1)"], "restrictions": ["rd ≠ x0", null] },
-    { "instruction": "lbu", "is_pseudo": false, "implementation": null, "description": "Load byte unsigned", "shortdesc": "rd ← MEM8", "operands": ["rd", "offset(rs1)"], "restrictions": ["rd ≠ x0", null] },
-    { "instruction": "lhu", "is_pseudo": false, "implementation": null, "description": "Load halfword unsigned", "shortdesc": "rd ← MEM16", "operands": ["rd", "offset(rs1)"], "restrictions": ["rd ≠ x0", null] },
+    { "instruction": "lb", "is_pseudo": false, "implementation": null, "description": "Load byte (signed)", "shortdesc": "rd ← sext(M(rs1 + offset)) [1 byte]", "operands": ["rd", "offset(rs1)"], "restrictions": ["rd ≠ x0", null] },
+    { "instruction": "lh", "is_pseudo": false, "implementation": null, "description": "Load halfword (signed)", "shortdesc": "rd ← sext(M(rs1 + offset)) [2 bytes]", "operands": ["rd", "offset(rs1)"], "restrictions": ["rd ≠ x0", null] },
+    { "instruction": "lw", "is_pseudo": false, "implementation": null, "description": "Load word", "shortdesc": "rd ← M(rs1 + offset) [4 bytes]", "operands": ["rd", "offset(rs1)"], "restrictions": ["rd ≠ x0", null] },
+    { "instruction": "lbu", "is_pseudo": false, "implementation": null, "description": "Load byte unsigned", "shortdesc": "rd ← zext(M(rs1 + offset)) [1 byte]", "operands": ["rd", "offset(rs1)"], "restrictions": ["rd ≠ x0", null] },
+    { "instruction": "lhu", "is_pseudo": false, "implementation": null, "description": "Load halfword unsigned", "shortdesc": "rd ← zext(M(rs1 + offset)) [2 bytes]", "operands": ["rd", "offset(rs1)"], "restrictions": ["rd ≠ x0", null] },
 
-    { "instruction": "sb", "is_pseudo": false, "implementation": null, "description": "Store byte", "shortdesc": "MEM8 ← rs2", "operands": ["rs2", "offset(rs1)"], "restrictions": [null, null] },
-    { "instruction": "sh", "is_pseudo": false, "implementation": null, "description": "Store halfword", "shortdesc": "MEM16 ← rs2", "operands": ["rs2", "offset(rs1)"], "restrictions": [null, null] },
-    { "instruction": "sw", "is_pseudo": false, "implementation": null, "description": "Store word", "shortdesc": "MEM32 ← rs2", "operands": ["rs2", "offset(rs1)"], "restrictions": [null, null] }
+    { "instruction": "sb", "is_pseudo": false, "implementation": null, "description": "Store byte", "shortdesc": "M(rs1 + offset) ← rs2 [1 byte]", "operands": ["rs2", "offset(rs1)"], "restrictions": [null, null] },
+    { "instruction": "sh", "is_pseudo": false, "implementation": null, "description": "Store halfword", "shortdesc": "M(rs1 + offset) ← rs2 [2 bytes]", "operands": ["rs2", "offset(rs1)"], "restrictions": [null, null] },
+    { "instruction": "sw", "is_pseudo": false, "implementation": null, "description": "Store word", "shortdesc": "M(rs1 + offset) ← rs2 [4 bytes]", "operands": ["rs2", "offset(rs1)"], "restrictions": [null, null] }
   ],
 
   "System Instructions": [

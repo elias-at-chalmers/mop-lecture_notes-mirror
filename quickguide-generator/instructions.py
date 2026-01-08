@@ -102,7 +102,7 @@ for category, instructions in data.items():
         continue
 
     if args.category_header:
-        print(f"<h2>{escape(category)}</h2>")
+        print(f"<b>{escape(category)}</b>")
 
     # -------------------------
     # SHORT MODE
@@ -154,7 +154,7 @@ for category, instructions in data.items():
                 print("<p><b>Implementation: </b>")
                 print(f"<code>{escape(impl)}</code>")
                 print("</p>")
-                
+
             if operands:
                 print("<table>")
                 print("<tr><th>Operand</th><th>Explanation</th></tr>")

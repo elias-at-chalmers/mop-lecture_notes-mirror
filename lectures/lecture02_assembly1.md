@@ -64,7 +64,7 @@ We will return to all of these different uses later on, and for now it is suffic
 
 Apart from the general purpose registers, the only other register is the program counter, ``pc``. This register always contains the address to the next instruction to be executed, and exists in almost all processor designs.
 
-💡 **Note:** *If you have previous experience with assembly programming on other processors you might be surprised that all registers are general-purpose and that there is no specific stack pointer, link register, or even a flag register described in the ISA. There are good reasons for this, and we will address why RISC-V does not need them in upcoming chapters.*
+💡 **Note:** *If you have previous experience with assembly programming on other processors you might be surprised that all registers are general-purpose and that there is no specific stack pointer, link register, or even a flag register described in the ISA. There are good reasons for this, and we will address why RISC-V does not need them in upcoming sections.*
 
 
 ### Instruction Set and Assembly Code
@@ -75,12 +75,12 @@ However, this also means that a program written directly in machine instructions
 As a simple example, you will have seen in previous courses that one thing we often want to do is to copy a value from one register to another. In assembly language, this looks like:
 
 
-```
+```s
 mv x1, x2              // Move (actually copy) the contents of x2 to x1
 ```
 However, the RV32I instruction set does not include a specific instruction for copying values between registers. Instead, the `mv` pseudo-instruction will be translated by the assembler into:
 
-```
+```s
 add x1, x2, x0        // Add 0 to x2 and store the result in x1
 ```
 
@@ -100,7 +100,7 @@ add register_0, M(register_1)     // Take the value in memory at the address
 
 In RISC-V, this is expressed in two instructions:
 
-``` asm
+```s
 lw x3, 0(x2)         // Load the value in memory at the address pointed to by x2
 add x1, x1, x3       // Add that value to x1
 ```
@@ -136,7 +136,7 @@ We will now look at how to write assembly code for a very simple program, and ex
 ```
 
 In RISC-V assembly code, we could write this as:
-```
+```s
     li t0, 10         # 1. Load 10 into t0
 loop:
     addi t0, t0, -2   # 2. Subtract 2 from t0
@@ -153,9 +153,9 @@ loop:
 
 ## Pseudo Instructions and Machine Code
 
-Now let's see what happens if we compile this assembly program to machine code [^4]. If we take the machine code created by the assembler and ask the `objdump` tool to tell us what instructions it represents, the answer is:
+Now let's see what happens if we compile this assembly program to machine code. If we take the machine code created by the assembler and ask the `objdump` tool to tell us what instructions it represents, the answer is:
 
-```
+```s
    addi    t0,zero,10
    loop:
    addi    t0,t0,-2
@@ -172,20 +172,22 @@ In this course, you will learn how to write *assembly code*, and we will not wor
 ### Loading a large constant
 
 We will now change the very first line of our program to:
-```
+```s
    li t0, 1000000
 ```
 The only difference is that we load the register with one million, rather than 10. If we examine the machine code now, we will see that this turns into:
-```
+```s
    lui     t0,0xf4
    add     t0,t0,0x240
 ```
 Feel free to raise an eybrow and shake your head a little at this point. When you are done, let's see what happened.
 When we asked the assembler to put the value 10 into `t0`, this could be achieved with a single "addi" instruction. In machine code, any instruction is coded into a 32-bit value, and the processor knows how to decode this value. The value will consist of an "opcode" that identifies the type of instruction, and some operands to the instruction. In the case of the `addi` instruction, this looks like[^5]
 :
-```
-[Opcode(7 bits) | Function(3 bits) | Source Register(5 bits) | Destination Register(5 bits) | Value (12 bits)]
-```
+
+|Opcode | Function | Source Register | Destination Register | Value
+|-------|----------|-----------------|----------------------|---------
+|7 bits | 3 bits   | 5 bits          | 5 bits               | 12 bits
+
 So there are 7 bits for the opcode (which allows for 128 different opcodes), 3 bits for the "function" (different variants of the same instruction), 5 bits for the registers (which let's us point out any of the 32 general-purpose registers) and 12 bits for the value that we want to add. When the assembler is asked to load a value that does *not* fit into 12 bits, it simply cannot express that in a single, 32-bit, instruction.
 
 Instead, it will translate your assembly instruction into *two* machine instructions. The first instruction, `lui`, stands for "Load Upper Immediate". It takes a destination register and a 20-bit value as operands, and it loads the 20-bit value into the 20 upper bits of the destination register.
@@ -196,52 +198,16 @@ Since 1000000, in decimal, is `0xf4240` in hexadecimal, `t0` will be loaded with
 
 The table below lists all the ALU instructions in RV32I (the instructions that perform some operation on the operands and stores the result in a register). These can be divided into "register-register" instructions where the operands consists only of registers, and "register-immediate" instructions, where one of the operands is a (small) constant that is embedded in the instruction's machine code. All immediate instructions end with i (for immediate), except for a few that use u to indicate unsigned interpretation of the immediate value.
 
-Throughtout this table, and the rest of the text, `rd` means "destination register" and `rs` means "source register".
+Throughout this table, and the rest of the text, `rd` means "destination register" and `rs` means "source register".
 
-| Instruction | Explanation |
-|-------------|-------------|
-| **Arithmetic Instructions** ||
-| `add rd, rs1, rs2` | rd = rs1 + rs2 |
-| `sub rd, rs1, rs2` | rd = rs1 - rs2 |
-| `addi rd, rs1, imm` | rd = rs1 + imm (sign-extended 12-bit immediate) |
-| **Shift Instructions** ||
-| `sll rd, rs1, rs2` | rd = rs1 << rs2 (logical shift left) |
-| `srl rd, rs1, rs2` | rd = rs1 >> rs2 (logical shift right, fill with 0) |
-| `sra rd, rs1, rs2` | rd = rs1 >> rs2 (arithmetic shift right, sign-extended) |
-| `slli rd, rs1, imm` | rd = rs1 << imm (logical shift left by immediate) |
-| `srli rd, rs1, imm` | rd = rs1 >> imm (logical shift right by immediate, fill 0) |
-| `srai rd, rs1, imm` | rd = rs1 >> imm (arithmetic shift right by immediate, sign-extended) |
-| **Bitwise Logical Instructions** ||
-| `xor rd, rs1, rs2` | rd = rs1 ⊕ rs2 (bitwise XOR) |
-| `or rd, rs1, rs2` | rd = rs1 ∨ rs2 (bitwise OR) |
-| `and rd, rs1, rs2` | rd = rs1 ∧ rs2 (bitwise AND) |
-| `xori rd, rs1, imm` | rd = rs1 ⊕ imm |
-| `ori rd, rs1, imm` | rd = rs1 ∨ imm |
-| `andi rd, rs1, imm` | rd = rs1 ∧ imm |
-| **Compare Instructions** ||
-| `slt rd, rs1, rs2` | rd = (rs1 < rs2) ? 1 : 0 (signed compare) |
-| `sltu rd, rs1, rs2` | rd = (rs1 < rs2) ? 1 : 0 (unsigned compare) |
-| `slti rd, rs1, imm` | rd = (rs1 < imm) ? 1 : 0 (signed compare with imm) |
-| `sltiu rd, rs1, imm` | rd = (rs1 < imm) ? 1 : 0 (unsigned compare with imm) |
+<div class="boxed">
 
-The last category of instructions (the "compare" instructions) will be discussed further in a later lesson when we talk about branching.
+{{python quickguide-generator/instructions.py -short True -category Immediate|Arithmetic|Shifts|Unary -links False}}
 
-In addition to these instructions, there are a number of pseudo instructions that are convenient to use in your assembly code, but will be compiled into one or two "real" instructions by the assembler:
+</div>
 
-| Pseudo Instruction | Expands to | Meaning |
-|--------|-----------|---------|
-| `nop` | `addi x0, x0, 0` | No operation |
-| `li rd, imm` | `addi` / `lui` + `ori` (depending on imm size) | Load immediate |
-| `mv rd, rs` | `addi rd, rs, 0` | Copy register |
-| `not rd, rs` | `xori rd, rs, -1` | Bitwise NOT |
-| `neg rd, rs` | `sub rd, x0, rs` | Two’s complement negate |
-| `seqz rd, rs` | `sltiu rd, rs, 1` | Set if equal to zero |
-| `snez rd, rs` | `sltu rd, x0, rs` | Set if not equal to zero |
-| `sltz rd, rs` | `slt rd, rs, x0` | Set if less than zero |
-| `sgtz rd, rs` | `slt rd, x0, rs` | Set if greater than zero |
+Several of these instructions are actually pseudo instructions. You can find out how they are implemented and other useful information in the [QuickGuide](https://www.cse.chalmers.se/edu/resources/mop/lecture_notes/quickguide.html).
 
-
-[^4]: For information on how to compile, run, and disassemble programs, please see LINK.
 [^5]: This is not the exact ordering of the bits used in reality.
 
 ## Load and Store Operations
@@ -254,7 +220,7 @@ It is important to understand that *all* communication with things outside the p
 ### Loading data from memory
 
 Let's say we want to read the third byte in SRAM into a register. You could write: 
-```
+```s
    la t0, 0x20000002
    lb t0, 0(t0)
 ```
@@ -278,7 +244,7 @@ Storing data works in very much the same way. We first load a base address into 
 
 As an example, let's say we want to store the values 1, 2, and 3 into the first three *half-words* of the SRAM [^7]. We could write: 
 
-```
+```s
    la x1, 0x20000000    // Put the base address 0x20000000 (start of SRAM) in x1
    li x2, 1             // Put the value 1 into x2
    sh x2, 0(x1)         // Store the lower two bytes of x2 into memory at address
@@ -305,7 +271,7 @@ So far, we have read and written data to memory at *absolute addresses*. Sometim
 
 Let's look at a final example where we have two variables, `var_a` and `var_b`, each one byte in size, and we want to add them together and store the result in `x1`:
 
-```
+```s
    // Load the value of var_a into x2
    la x1, var_a
    lb x2, 0(x1)
@@ -323,7 +289,7 @@ Let's look at a final example where we have two variables, `var_a` and `var_b`, 
 When the assembler [^8] sees the first line: `la x1, var_a`, it replaces the variable name with the address of the label var_a. We *could* calculate that address ourselves (by counting the instructions that precede the label) but that would be terribly annoying and rather pointless.
 
 At the end of the code, we "allocate" space for the variables: 
-```
+```s
    var_a: .byte 10
 ```
 Here, `var_a:` is a label that marks a memory location, and `.byte 10` reserves one byte at that location and initializes it to 10. The same applies to `var_b`.
@@ -332,11 +298,11 @@ Here, `var_a:` is a label that marks a memory location, and `.byte 10` reserves 
 Since loading variables to registers from memory and storing variables from register to memory are very common operations, there are very useful pseudo instructions available that simplify this in the assembly language. 
 
 To load a variable, `var_a` from memory, into register `x1`, with a single (pseudo) instruction, you can write: 
-```
+```s
 lb x1, var_a
 ```
 To store the contents of register `x1`, into a variable `var b`, with a single (pseudo) instruction, you can write:
-```
+```s
 sb x1, var_b, x2
 ```
 Now, where did that `x2` come from? Think about the _actual_ instructions that this pseudo instruction has to create; In order to store the contents of x1 into the variable, it first has to calculate the address to the variable and put that into a register. The assembler cannot choose a register on its own, since it does not know what registers you (the programmer) want to preserve. Therefore, in the `sb` instruction, you supply a _temporary_ register that it can use for the address calculation. 
@@ -350,25 +316,20 @@ In the former example (with the `lb` instruction) we do not have to supply a tem
 ## Load/Store Instructions
 To summarize, every load or store operation requires calculating the address where we want to read or write the value. Often, this is done with the pseudoinstruction `la` (Load Address): 
 
-```
+```s
 la rd, address       // Put the address into the destination register rd
 ```
 
 The `address` can either be an absolute address (e.g., 0x20000002) or a *variable name*. 
 The load and store operations themselves are given in the following table. Some of these you have seen and some will be discussed further in the next lecture.
 
-| Instruction | Meaning |
-|--------|-----------|
-| `lb rd, offset(base)` | Load a byte. Sign extend. 
-| `lbu rd, offset(base)` | Load a byte. Zero extend. 
-| `lh rd, offset(base)` | Load a halfword. Sign extend. 
-| `lhu rd, offset(base)` | Load a halfword. Zero extend. 
-| `lw rd, offset(base)` | Load a word. No extension necessary.
-| `sb rs, offset(base)` | Store a byte.
-| `sh rs, offset(base)` | Store a halfword.
-| `sw rs, offset(base)` | Store a word.
+<div class="boxed">
 
-In all of these instructions, `offset` is a small number (12 bits) and `base` is a register containing the base address. 
+{{python quickguide-generator/instructions.py -short True -category Store -links False}}
+
+</div>
+
+In all of these instructions, `offset` is a small number (12 bits) and `rs1` is a register containing the base address. `sext` means "sign extend", and `zext` means "zero extend". 
 
 
 # Memory alignment
@@ -415,7 +376,7 @@ In this course, you will encounter many scenarios where you accidentally break o
 
 Let's revisit the example code with variables above, but this time, `var_b` is a four byte word: 
 
-```
+```s
    // Load the value of var_a into x2
    la x1, var_a
    lb x2, 0(x1)
@@ -432,7 +393,7 @@ Since the first machine code instruction starts at 0x20000000, and all machine c
 
 To avoid this, we simply tell the compiler that we want `var_b` to be word aligned: 
 
-```
+```s
    var_a: .byte 10
    .align 2
    var_b: .word 20

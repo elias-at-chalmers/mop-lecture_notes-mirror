@@ -52,7 +52,7 @@ As previously mentioned, any communication between the processor core and the ou
 
 <div class="boxed">
 
-{{include html/gpio-short.html}}
+{{include html/quickguide/gpio-short.html}}
 
 </div>
 

@@ -1,16 +1,9 @@
-
-**Links:**
-[RISC-V Cheat Sheet](https://projectf.io/posts/riscv-cheat-sheet/)
-, [RISC-V ABI](https://d3s.mff.cuni.cz/files/teaching/nswi200/202324/doc/riscv-abi.pdf)
-
-**Text and excercises in the Workbook (Arbetsboken)**
-Chapter 1, Pages 17-24
-Chapter 1, Pages 34-56
-
+<!--
 **Things that are in the Workbook that should possibly be in this lecture**
 Sign Extension (not as important in RISCV, but still needs to be handled somewhere)
 Stack frames? (I think överkurs)
 Arrays with multiple dimensions (definitely  överkurs)
+-->
 
 ---
 
@@ -21,14 +14,11 @@ This lecture will focus on *Program Control Flow*, i.e., how to make jumps in ou
 ## Jump and Link
 There are only two instructions in RISC-V that perform unconditional jumps (`jal` and `jalr`). These are used for a number of pseudoinstructions that make the code easier to read. The table below describes these two instructions.
 
-| Instruction | Mnemonic            | Meaning                                      |
-|------------------|----------------|----------------------------------------------|
-| `jal r, offset` | Jump And Link  | Store return address in `r`.                |
-|                  |                | Jump to `pc + offset`.                       |
-|                  |                | `offset` must fit in 20 bits                 |
-| `jalr r, offset(rs)` | Jump And Link Register | Store return address in `r`    |
-|                       |                        | Jump to `rs + offset`           |
-|                       |                        | `offset` must fit in 12 bits           |
+<div class="boxed">
+
+{{python quickguide-generator/instructions.py -short True -category-header False -name jal|jalr -links False}}
+
+</div>
 
 The word "Link" in these mnemonics means that we store the return address, so that we can return from the jump later.
 
@@ -540,3 +530,13 @@ numbers: .word 2, 4, 6, 8, 0, 1, 2, 3, 4, 5         # Allocate 10*4 bytes for th
 ### Further reading
 This lecture almost concludes our assembly adventures, as we will start looking into C programming in the next lecture. If you want more, or are looking for in depth details, we can recommend the free online book: 
 [An Introduction to Assembly Programming with RISC-V](https://riscv-programming.org/book/riscv-book.html).
+
+
+**Links:**
+[RISC-V Cheat Sheet](https://projectf.io/posts/riscv-cheat-sheet/)
+, [RISC-V ABI](https://d3s.mff.cuni.cz/files/teaching/nswi200/202324/doc/riscv-abi.pdf)
+
+**Text and excercises in the Workbook (Arbetsboken)**
+Chapter 1, Pages 17-24
+Chapter 1, Pages 34-56
+

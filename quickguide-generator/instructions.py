@@ -43,6 +43,20 @@ def instr_anchor(instr):
     # Unique, stable anchor: category + instruction name
     return f"instr-{instr['instruction']}"
 
+# A not very pretty solution to the fact that we cannot always just concatenate the operands
+# For example, for load/store instructions we want to show offset(rs1) instead of rs1, offset
+def get_syntax(instr):
+    operands = list(instr.get("operands", []))
+    syntax = instr["instruction"]
+    addressing_mode = instr.get("addressing_mode")
+    if addressing_mode:
+        rendered = operands[:-2] + [addressing_mode]
+    else:
+        rendered = operands
+    if rendered:
+        syntax += " " + ", ".join(rendered)
+    return syntax
+
 # -----------------------------
 # Argument parsing
 # -----------------------------
@@ -51,6 +65,8 @@ parser = argparse.ArgumentParser(description="Generate HTML instruction referenc
 parser.add_argument("-category", type=str, default=None, help="Regex to filter categories")
 parser.add_argument("-name", type=str, default=None, help="Regex to filter instruction names")
 parser.add_argument("-category-header", type=str2bool, default=True)
+parser.add_argument("-mnemonic", type=str2bool, default=True)
+parser.add_argument("-rtl", type=str2bool, default=True)
 parser.add_argument("-pseudo-instructions", type=str2bool, default=True)
 parser.add_argument("-short", type=str2bool, default=True)
 parser.add_argument("-links", type=str2bool, default=True, help="Whether to include links to long mode version")
@@ -109,21 +125,24 @@ for category, instructions in data.items():
     # -------------------------
     if args.short:
         print("<table>")
-        print("<tr><th>Instruction</th><th>Description</th></tr>")
+        print("<tr><th>Instruction</th>")
+        if args.mnemonic: print("<th>Mnemonic</th>")
+        if args.rtl: print("<th>Result</th>")
+        print("</tr>")
 
         for instr in filtered:
-            operands = instr.get("operands", [])
-            syntax = instr["instruction"]
-            if operands:
-                syntax += " " + ", ".join(operands)
+
+            syntax = get_syntax(instr)
 
             print("<tr>")
-            if(args.links): 
+            if(args.links):
                 anchor = instr_anchor(instr)
                 print(f"<td><code><a href='#{anchor}'>{escape(syntax)}</a></code></td>")
             else:
-                print(f"<td><code>{escape(syntax)}</code></td>")                
-            print(f"<td>{escape(instr.get('shortdesc', ''))}</td>")
+                print(f"<td><code>{escape(syntax)}</code></td>")
+
+            if args.mnemonic: print(f"<td>{escape(instr.get('description', ''))}</td>")
+            if args.rtl: print(f"<td>{escape(instr.get('shortdesc', ''))}</td>")
             print("</tr>")
 
         print("</table>")
@@ -144,9 +163,7 @@ for category, instructions in data.items():
             operands = instr.get("operands", [])
             restrictions = instr.get("restrictions", [])
 
-            syntax = instr["instruction"]
-            if operands:
-                syntax += " " + ", ".join(operands)
+            syntax = get_syntax(instr)
             print(f"<p><b>Syntax:</b> <code>{escape(syntax)}</code></p>")
 
             impl = instr.get("implementation")

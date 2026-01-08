@@ -46,8 +46,8 @@
   ],
 
   "Control Flow Instructions": [
-    { "instruction": "jal", "is_pseudo": false, "implementation": null, "description": "Jump and link", "shortdesc": "rd ← PC+4; PC ← PC+offset", "operands": ["rd", "offset"], "restrictions": ["rd ≠ x0", "20-bit signed offset"] },
-    { "instruction": "jalr", "is_pseudo": false, "implementation": null, "description": "Jump and link register", "shortdesc": "rd ← PC+4; PC ← rs1+offset", "operands": ["rd", "rs1", "offset"], "restrictions": ["rd ≠ x0", null, "12-bit signed offset"] },
+    { "instruction": "jal",  "is_pseudo": false, "implementation": null, "description": "Jump and link",           "shortdesc": "rd ← PC+4; PC ← PC+offset",   "operands": ["rd", "offset"],        "addressing_mode": "offset(pc)",  "restrictions": ["rd ≠ x0", "signed 20-bit immediate" ] },
+    { "instruction": "jalr", "is_pseudo": false, "implementation": null, "description": "Jump and link register",  "shortdesc": "rd ← PC+4; PC ← rs1+offset",  "operands": ["rd", "rs1", "offset"], "addressing_mode": "offset(rs1)", "restrictions": ["rd ≠ x0", null, "signed 12-bit immediate" ] },
 
     { "instruction": "beq", "is_pseudo": false, "implementation": null, "description": "Branch if equal", "shortdesc": "if rs1 = rs2", "operands": ["rs1", "rs2", "offset"], "restrictions": [null, null, "12-bit signed offset"] },
     { "instruction": "bne", "is_pseudo": false, "implementation": null, "description": "Branch if not equal", "shortdesc": "if rs1 ≠ rs2", "operands": ["rs1", "rs2", "offset"], "restrictions": [null, null, "12-bit signed offset"] },
@@ -71,15 +71,15 @@
   ],
 
   "Load and Store Instructions": [
-    { "instruction": "lb", "is_pseudo": false, "implementation": null, "description": "Load byte (signed)", "shortdesc": "rd ← sext(M(rs1 + offset)) [1 byte]", "operands": ["rd", "offset(rs1)"], "restrictions": ["rd ≠ x0", null] },
-    { "instruction": "lh", "is_pseudo": false, "implementation": null, "description": "Load halfword (signed)", "shortdesc": "rd ← sext(M(rs1 + offset)) [2 bytes]", "operands": ["rd", "offset(rs1)"], "restrictions": ["rd ≠ x0", null] },
-    { "instruction": "lw", "is_pseudo": false, "implementation": null, "description": "Load word", "shortdesc": "rd ← M(rs1 + offset) [4 bytes]", "operands": ["rd", "offset(rs1)"], "restrictions": ["rd ≠ x0", null] },
-    { "instruction": "lbu", "is_pseudo": false, "implementation": null, "description": "Load byte unsigned", "shortdesc": "rd ← zext(M(rs1 + offset)) [1 byte]", "operands": ["rd", "offset(rs1)"], "restrictions": ["rd ≠ x0", null] },
-    { "instruction": "lhu", "is_pseudo": false, "implementation": null, "description": "Load halfword unsigned", "shortdesc": "rd ← zext(M(rs1 + offset)) [2 bytes]", "operands": ["rd", "offset(rs1)"], "restrictions": ["rd ≠ x0", null] },
+    { "instruction": "lb",  "is_pseudo": false, "implementation": null, "description": "Load byte (signed)",          "shortdesc": "rd ← sext(M(rs1 + offset)) [1 byte]", "operands": ["rd", "rs1", "offset"], "addressing_mode": "offset(rs1)", "restrictions": [ "rd ≠ x0", null, "signed 12-bit immediate" ] },
+    { "instruction": "lh",  "is_pseudo": false, "implementation": null, "description": "Load halfword (signed)",      "shortdesc": "rd ← sext(M(rs1 + offset)) [2 bytes]", "operands": ["rd", "rs1", "offset"], "addressing_mode": "offset(rs1)", "restrictions": [ "rd ≠ x0", null, "signed 12-bit immediate" ] },
+    { "instruction": "lw",  "is_pseudo": false, "implementation": null, "description": "Load word",                   "shortdesc": "rd ← M(rs1 + offset) [4 bytes]",       "operands": ["rd", "rs1", "offset"], "addressing_mode": "offset(rs1)", "restrictions": [ "rd ≠ x0", null, "signed 12-bit immediate" ] },
+    { "instruction": "lbu", "is_pseudo": false, "implementation": null, "description": "Load byte unsigned",          "shortdesc": "rd ← zext(M(rs1 + offset)) [1 byte]",  "operands": ["rd", "rs1", "offset"], "addressing_mode": "offset(rs1)", "restrictions": [ "rd ≠ x0", null, "signed 12-bit immediate" ] },
+    { "instruction": "lhu", "is_pseudo": false, "implementation": null, "description": "Load halfword unsigned",      "shortdesc": "rd ← zext(M(rs1 + offset)) [2 bytes]", "operands": ["rd", "rs1", "offset"], "addressing_mode": "offset(rs1)", "restrictions": [ "rd ≠ x0", null, "signed 12-bit immediate" ] },
 
-    { "instruction": "sb", "is_pseudo": false, "implementation": null, "description": "Store byte", "shortdesc": "M(rs1 + offset) ← rs2 [1 byte]", "operands": ["rs2", "offset(rs1)"], "restrictions": [null, null] },
-    { "instruction": "sh", "is_pseudo": false, "implementation": null, "description": "Store halfword", "shortdesc": "M(rs1 + offset) ← rs2 [2 bytes]", "operands": ["rs2", "offset(rs1)"], "restrictions": [null, null] },
-    { "instruction": "sw", "is_pseudo": false, "implementation": null, "description": "Store word", "shortdesc": "M(rs1 + offset) ← rs2 [4 bytes]", "operands": ["rs2", "offset(rs1)"], "restrictions": [null, null] }
+    { "instruction": "sb",  "is_pseudo": false, "implementation": null, "description": "Store byte",                  "shortdesc": "M(rs1 + offset) ← rs2 [1 byte]",       "operands": ["rs2", "rs1", "offset"], "addressing_mode": "offset(rs1)", "restrictions": [ null, null, "signed 12-bit immediate" ] },
+    { "instruction": "sh",  "is_pseudo": false, "implementation": null, "description": "Store halfword",              "shortdesc": "M(rs1 + offset) ← rs2 [2 bytes]",      "operands": ["rs2", "rs1", "offset"], "addressing_mode": "offset(rs1)", "restrictions": [ null, null, "signed 12-bit immediate" ] },
+    { "instruction": "sw",  "is_pseudo": false, "implementation": null, "description": "Store word",                  "shortdesc": "M(rs1 + offset) ← rs2 [4 bytes]",      "operands": ["rs2", "rs1", "offset"], "addressing_mode": "offset(rs1)", "restrictions": [ null, null, "signed 12-bit immediate" ] }
   ],
 
   "System Instructions": [

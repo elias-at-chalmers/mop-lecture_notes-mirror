@@ -3,7 +3,7 @@
 **Links:**
 [Reference Manual](https://www.wch-ic.com/downloads/CH32FV2x_V3xRM_PDF.html)
 
-**Text and excercises in the Workbook (Arbetsboken)**
+**Text and exercises in the Workbook (Arbetsboken)**
 
 **Things that are in the Workbook that should possibly be in this lecture**
 
@@ -24,7 +24,7 @@ By allowing the processor to directly read or control the logical status of thes
 
 The picture above illustrates how the processor chip is connected to the GPIO pins on the MD307. If you look close enough (and turn the board over at times) you can follow a very thin wire from most of the CH32V307's tiny pins to one of the more accessible pins on the top of the board. On this microcontroller, the pins are divided into 16-bit *ports*, labeled A-E. On the bottom of the board, you can see that the pins that make up the ports labeled E and D are also available in a nice little connector layout, that allows us to connect peripheral devices with a standard ribbon cable. The pins on the top of the board, in the image, provide access to the remaining GPIO ports (A-C). 
 
-To read or set a pin's value, we read or write to a specific memory location (the GPIO Port's *In or Out Data Register*, which we will discuss soon). When the memory subsystem sees that the address we are trying to write to from the CPU is, e.g., `0x4001400C` it knows (this is implemented at the hardware level) that that write operation should be sent on to the *GPIO Module*. The GPIO Module, in turn, knows that this address means "the Out Data Register for Port D". If the value we write is `0b00001111` it will set the first four GPIOD pins (some of the little spider legs in the image of the chip, above) to 1 (3.3V) and the others to 0 (0V). These pins are connected with wires to the pins in the connector. 
+To read or set a pin's value, we read or write to a specific memory location (the GPIO Port's *In or Out Data Register*, which we will discuss soon). When the memory subsystem sees that the address we are trying to write to from the CPU is, e.g., `0x4001140C` it knows (this is implemented at the hardware level) that the write operation should be sent on to the *GPIO Module*. The GPIO Module, in turn, knows that this address means "the Out Data Register for Port D". If the value we write is `0b00001111` it will set the first four GPIOD pins (some of the little spider legs in the image of the chip, above) to 1 (3.3V) and the others to 0 (0V). These pins are connected with wires to the pins in the connector. 
 
 ### Blink
 When learning programming in almost any language, the starting example is "Hello World.". Similarly, when starting MCU programming, the first thing to try is "Blink", so let's start there. We want to plug in an LED to our MCU and make it blink. This will serve as a first introduction to GPIO programming, and then we will continue with more challenging tasks in the next lecture.
@@ -32,6 +32,7 @@ When learning programming in almost any language, the starting example is "Hello
 <p align="center">
   <img src="../images/IDC_layout.png" alt="My image" width="80%"/>
 </p>
+
 
 The image above illustrates the physical connector corresponding to the lower byte (pin 0-7) of Port D. Eight of the pins (labeled bit0-bit7 in the image) carry a voltage (0 or 3.3V) depending on whether the corresponding bit in the data register is high or low. There are two additional pins: one is always 0V (GND) and one is always 3.3V.
 
@@ -42,7 +43,7 @@ Now, if we *set* bit 6 in Port D, the pin will be at 3.3V, and current will run 
 ### Configuring a pin for output
 Each pin in the port can *either* be an input pin *or* an output pin, at any given time. If the pin is configured as an input pin, we can read the corresponding bit to find out if the pin is at 3.3V (bit is 1) or 0V (bit is 0). Right now, we want pin 6 to act as an output bit, so we have to configure Port D accordingly.
 
-As previously mentioned, any communication between the processor core and the outside is achieved by reading from or writing to the memory subsystem. We have, for instance, seen that we can access the SRAM module by writing to the `0x20000000` - `0x2000FFFF` region. In the same way, to communicate with the GPIO module, we read and write to the `0x4001800`-`0x40011BFF` region. In that region, there are a number of registers for each GPIO Port. To find out which registers there are, and how to configure our GPIO Module, we would normally refer to the microcontrollers reference manual, but in this course we have prepared an easier-to-read [QuickGuide](TODO_nolinkyet). The section about the GPIO Module looks like: 
+As previously mentioned, any communication between the processor core and the outside is achieved by reading from or writing to the memory subsystem. We have, for instance, seen that we can access the SRAM module by writing to the `0x20000000` - `0x2000FFFF` region. In the same way, to communicate with the GPIO module, we read and write to the `0x40010800`-`0x40011BFF` region. In that region, there are a number of registers for each GPIO Port. To find out which registers there are, and how to configure our GPIO Module, we would normally refer to the microcontroller's reference manual, but in this course we have prepared an easier-to-read [QuickGuide](TODO_nolinkyet). The section about the GPIO Module looks like: 
 
 <!--
 <p align="center">
@@ -67,14 +68,14 @@ For each GPIO port, the configuration information for its pins is stored in two 
 * CFGLR (Configuration Low Register) → holds settings for pins 0–7.
 * CFGHR (Configuration High Register) → holds settings for pins 8–15.
 
-Inside these registers, each pin has is assigned 4 bits:
+Inside these registers, each pin is assigned 4 bits:
 
 * 2 bits define the MODE (input/output modes).
 * 2 bits define the CNF (the pin’s specific configuration, what the bits mean depend on whether the pin is in *input* or one of the *output* modes).
 
 To find the address to a specific register, you must pay attention to the base addresses of each port, and the offset of each of its registers. Example: to determine the address of Port D's CFGHR, we calculate `base address` + `offset` (`0x40011400` + `0x4` = `0x40011404`.)
 
-We want to set pin 6 as an *output* pin. From the table we can see that we then want to set `MODE` to be `01`, `10`, or `11` depending on what *maximum frequency* we need. If the frequency is set to 10Mhz, that means that we can flip the value of the pin 10 million times per second, and get a reliable output. If we were going to use the pin to send out some digital signal that changed quickly, we might need to worry about that, but since we are just going to turn a light on and off, 2Mhz is more than enough (and this consumes the least energy). So we want to set `MODE` to `10`.
+We want to set pin 6 as an *output* pin. From the table we can see that we then want to set `MODE` to be `01`, `10`, or `11` depending on what *maximum frequency* we need. If the frequency is set to 10 MHz, that means that we can flip the value of the pin 10 million times per second, and get a reliable output. If we were going to use the pin to send out some digital signal that changed quickly, we might need to worry about that, but since we are just going to turn a light on and off, 2 MHz is more than enough (and this consumes the least energy). So we want to set `MODE` to `10`.
 
 Since `MODE` is an *output* mode, the `CNF` value lets us choose between `Push-Pull`, `Open Drain`, `Alternative Function Push-Pull`, and `Alternative Function Open Drain`. We will go through the meaning of this in the next lecture. For now, we set it to `Push-Pull` (`00`), which means that it will output 0V if the corresponding bit in `OUTDR` is set to 0 and 3.3V if set to 1. 
 
@@ -190,7 +191,7 @@ We now provide the function definition of the `main` function. This is where pro
 
 Next, we define a new integer variable, `square_of_number`, also of type `int`. Because it is defined inside a function, this is a *temporary* variable which only exists (on the stack, or in registers) while we are executing this function. We call the function `square` with the global variable `number` as an argument, and store the returned value in `square_of_number`. 
 
-Finally, we print the result to the console. This is achieved by calling the function `printf` which has been declared in the `stdio.h` file. The `printf` function takes as its first argument a string [^3]. Within this string we have inserted *tags*, on the form `%i`. The first such tag means that `printf` should substitute the tag with the value of the second parameter and that that parameter is of type `int`. The next tag will be substituted for the third parameter, and so on[^4]. The final two characters in the string, `\n`, denote a `newline` character and mean that the next text sent to the console will appear at the beginning of the next line.
+Finally, we print the result to the console. This is achieved by calling the function `printf` which has been declared in the `stdio.h` file. The `printf` function takes as its first argument a string [^3]. Within this string we have inserted *tags*, on the form `%i`. The first such tag means that `printf` should substitute the tag with the value of the second parameter and that the parameter is of type `int`. The next tag will be substituted for the third parameter, and so on[^4]. The final two characters in the string, `\n`, denote a `newline` character and mean that the next text sent to the console will appear at the beginning of the next line.
 
 [^3]: To be precise, it takes a pointer to a string of characters (bytes) in memory.
 [^4]: More detailed descriptions of `printf` are widely available on the [internet](https://cplusplus.com/reference/cstdio/printf/)
@@ -225,7 +226,7 @@ Doing that will generate these three files:
 ![](../images/c_figure_3_2.png)
 
 ##### The #include statement
-As you can see, the job of the preprocessor is mostly quite simple. When it comes across an `#include "filename"` statement, it will simply cut and paste the contents of the provided file into the `.c` file being preprocessed. For example, in `main.i` it has removed the include statement and inserted the function declatation from `functions.h`.
+As you can see, the job of the preprocessor is mostly quite simple. When it comes across an `#include "filename"` statement, it will simply cut and paste the contents of the provided file into the `.c` file being preprocessed. For example, in `main.i` it has removed the include statement and inserted the function declaration from `functions.h`.
 
 It is important to realize that the preprocessor is not smarter than this. Whatever text is in the included file will be inserted, in its entirety, into the preprocessed file. 
 
@@ -251,7 +252,7 @@ The resulting assembly files are:
 
 ![](../images/c_figure_3_3.png)
 
-You are not expected to understand this assembly code, but we will note a few important things about them. First, we can compile, for instance, the `main.i` file into assembly code *indepenently* of the other files. To create the assembly code for `main.i`, the compiler needs to know that *there exists* a function called `function`, that it returns a `float`, and that it takes a `float` as parameter, but it does not need to know what that function *does*. 
+You are not expected to understand this assembly code, but we will note a few important things about them. First, we can compile, for instance, the `main.i` file into assembly code *independently* of the other files. To create the assembly code for `main.i`, the compiler needs to know that *there exists* a function called `function`, that it returns a `float`, and that it takes a `float` as parameter, but it does not need to know what that function *does*. 
 
 Secondly, this assembler code can be created without any knowledge of where this code will reside in memory. Connecting the symbols (function and variable names) between the assembly files and placing them at specific places in memory is the job of the *Linker*, which we will discuss soon.
 

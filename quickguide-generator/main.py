@@ -31,6 +31,11 @@ def build_parser():
             action="store_true",
             help="Disable column headers in output"
         )
+        p.add_argument(
+            "-all-open",
+            action="store_true",
+            help="Make all foldable sections open by default"
+        )
 
     subparsers = parser.add_subparsers(
         dest="command",
@@ -314,21 +319,35 @@ def PrintRegisterDetails(r):
                 ###############################################################
                 # If first, start detail block
                 ###############################################################
-                html += "<details>"
+                html += "<details" + (" open" if getattr(args, "all_open", False) else "") + ">"
                 html += "<summary>" + first.find('name').text + " ... " + last.find('name').text + "</summary>"
                 
         #######################################################################
         # If not in group, fold by itself
         #######################################################################
         else: 
-            html += "<details>\n"
+            html += "<details" + (" open" if getattr(args, "all_open", False) else "") + ">\n"
             html += "<summary>\n"
             html += r.find('name').text
             html += "</summary>\n"
 
-    html += "<p>\n";
-    if r.find('description') is not None:
-        html += r.find('description').text + "<br>\n"
+    # Handle description: allow embedded block-level HTML (tables, divs, lists)
+    desc_elem = r.find('description')
+    if desc_elem is not None:
+        parts = []
+        if desc_elem.text:
+            parts.append(desc_elem.text)
+        for child in desc_elem:
+            parts.append(ET.tostring(child, encoding='unicode'))
+            if child.tail:
+                parts.append(child.tail)
+        desc_html = ''.join(parts).strip()
+
+        # Emit block-level HTML as-is, otherwise wrap in a paragraph
+        if re.search(r"<(table|div|ul|ol|pre|h[1-6])", desc_html, re.IGNORECASE):
+            html += desc_html + "\n<br>\n"
+        else:
+            html += "<p>\n" + desc_html + "<br>\n</p>\n"
     html += "<small>"
     if r.find('access') is not None:
         html += "Access: " + r.find('access').text + "  "
@@ -337,7 +356,6 @@ def PrintRegisterDetails(r):
     if r.find('resetMask') is not None:
         html += "Reset Mask: " + r.find('resetMask').text + "  "
     html += "</small>\n"
-    html += "</p>\n"
 
 
     html += '<table ' + table_css + '>\n'

@@ -1,1 +1,0 @@
-{{python quickguide-generator/main.py register-details GPIOA CFG*}}

@@ -43,7 +43,7 @@ Now, if we *set* bit 6 in Port D, the pin will be at 3.3V, and current will run 
 ### Configuring a pin for output
 Each pin in the port can *either* be an input pin *or* an output pin, at any given time. If the pin is configured as an input pin, we can read the corresponding bit to find out if the pin is at 3.3V (bit is 1) or 0V (bit is 0). Right now, we want pin 6 to act as an output bit, so we have to configure Port D accordingly.
 
-As previously mentioned, any communication between the processor core and the outside is achieved by reading from or writing to the memory subsystem. We have, for instance, seen that we can access the SRAM module by writing to the `0x20000000` - `0x2000FFFF` region. In the same way, to communicate with the GPIO module, we read and write to the `0x40010800`-`0x40011BFF` region. In that region, there are a number of registers for each GPIO Port. To find out which registers there are, and how to configure our GPIO Module, we would normally refer to the microcontroller's reference manual, but in this course we have prepared an easier-to-read [QuickGuide](TODO_nolinkyet). The section about the GPIO Module looks like: 
+As previously mentioned, any communication between the processor core and the outside is achieved by reading from or writing to the memory subsystem. We have, for instance, seen that we can access the SRAM module by writing to the `0x20000000` - `0x2000FFFF` region. In the same way, to communicate with the GPIO module, we read and write to the `0x40010800`-`0x40011BFF` region. In that region, there are a number of registers for each GPIO Port. To find out which registers there are, and how to configure our GPIO Module, we would normally refer to the microcontroller's reference manual, but in this course we have prepared an easier-to-read [QuickGuide](TODO_nolinkyet). The section about the GPIO Module begins: 
 
 <!--
 <p align="center">
@@ -53,7 +53,18 @@ As previously mentioned, any communication between the processor core and the ou
 
 <div class="boxed">
 
-{{include html/quickguide/gpio-short.html}}
+<b> Base addresses: </b>
+
+{{python quickguide-generator/main.py baseaddress GPIO*}}
+
+<b> Register Block Overview </b>
+
+{{python quickguide-generator/main.py overview-table GPIOA}}
+
+<b> Register Details: </b>
+
+{{python quickguide-generator/main.py register-details -all-open GPIOA CFG* }}
+
 
 </div>
 
@@ -82,7 +93,7 @@ Since `MODE` is an *output* mode, the `CNF` value lets us choose between `Push-P
 So, we want to set `MODE` for pin 6 (bits 25:24 in `CFGLR`) to `10`, and `CNF` for pin 6 (bits 27:26 in `CFGLR`) to `00`. We do not care about the other pins, and will just set them to `0`, so we should write the binary value <code>0000 <b>0010</b> 0000 0000 0000 0000 0000 0000</code>, or, in hexadecimal `0x02000000` to `CFGLR` to configure our pin. 
 
 In assembly, that looks like: 
-```
+```s
 la t0, 0x40011400    # Address of CFGLR to t0
 li t1, 0x02000000    # Configuration value to t1
 sw t1, 0(t0)         # Write the configuration to CFGLR                    
@@ -93,7 +104,7 @@ Now that the configuration is done, all we have to do is set bit 6 in the *out d
 
 We want to set bit 6 to make pin 6 go to 3.3V and turn on the LED: 
 
-```
+```s
 la t0, 0x4001140C  # Address to GPIOD_OUTDR to t0
 li t1, 0b1000000   # Set bit number 6 in t1 (equivalent to 0x40)
 sh t1, 0(t0)       # Set pin 6 to 3.3V (and all others to 0V)
@@ -103,7 +114,7 @@ Nothing new here, the only thing you should note is that when we write to `OUTDR
 
 Let's put all of this together into a little Blink program: 
 
-```
+```s
 la t0, 0x40011400    # Address of CFGLR to t0
 li t1, 0x02000000    # Configuration value to t1
 sw t1, 0(t0)         # Write the configuration to CFGLR                    

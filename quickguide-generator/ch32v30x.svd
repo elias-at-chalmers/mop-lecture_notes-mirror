@@ -20034,7 +20034,51 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
         <register>
           <name>CFGLR</name>
           <displayName>CFGLR</displayName>
-          <description>Configure port for the lower 8 pins</description>
+<description><![CDATA[
+<b>Configuration of GPIO port, for lower 8 pins.</b>
+
+Configuration of the port is done using the CFGLR and CFGHR for the lower eight and upper eight pins, respectively. For each pin, there are two bits to set the MODE (Input or Output, and speed of output pins), and two bits to set the CoNFiguration (the meaning of these pins depend on whether the pin is an input pin or an output pin):
+
+<table style="width:100%; table-layout:auto">
+  <tr>
+    <th colspan="2">CNF</th>
+    <th colspan="2">MODE</th>
+  </tr>
+
+  <!-- Input mode rows -->
+  <tr>
+    <td>00</td><td>Analog</td>
+    <td rowspan="4">00</td><td rowspan="4">Input Mode</td>
+  </tr>
+  <tr>
+    <td>01</td><td>Floating</td>
+  </tr>
+  <tr>
+    <td>10</td><td>Pull-up/Pull-down</td>
+  </tr>
+  <tr>
+    <td>11</td><td>Reserved</td>
+  </tr>
+
+  <!-- Output mode rows -->
+  <tr>
+    <td>00</td><td>Push Pull</td>
+    <td rowspan="4" colspan="1">
+      01<br>
+      10<br>
+      11
+    </td>
+    <td rowspan="4" colspan="1">
+      Output Mode 10Mhz<br>
+      Output Mode 2Mhz<br>
+      Output Mode 50Mhz
+    </td>
+  </tr>
+  <tr><td>01</td><td>Open Drain</td></tr>
+  <tr><td>10</td><td>Alternate Function, Push Pull</td></tr>
+  <tr><td>11</td><td>Alternate Function, Open Drain</td></tr>
+</table>
+]]></description>          
           <addressOffset>0x0</addressOffset>
           <size>0x20</size>
           <access>read-write</access>
@@ -20042,13 +20086,13 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
           <fields>
             <field>
               <name>MODE0</name>
-              <description>Set pin mode</description>
+              <description>Set MODE for pin n</description>
               <bitOffset>0</bitOffset>
               <bitWidth>2</bitWidth>
             </field>
             <field>
               <name>CNF0</name>
-              <description>Set pin configuration</description>
+              <description>Set CONF for pin n</description>
               <bitOffset>2</bitOffset>
               <bitWidth>2</bitWidth>
             </field>
@@ -20148,8 +20192,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
         <register>
           <name>CFGHR</name>
           <displayName>CFGHR</displayName>
-          <description>Port configuration register high
-          (GPIOn_CFGHR)</description>
+          <description>Configure port for the upper 8 pins. (See CFGLR for details)</description>
           <addressOffset>0x4</addressOffset>
           <size>0x20</size>
           <access>read-write</access>
@@ -20157,14 +20200,13 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
           <fields>
             <field>
               <name>MODE8</name>
-              <description>Port n.8 mode bits</description>
+              <description>Set MODE for pin n</description>
               <bitOffset>0</bitOffset>
               <bitWidth>2</bitWidth>
             </field>
             <field>
               <name>CNF8</name>
-              <description>Port n.8 configuration
-              bits</description>
+              <description>Set CONF for pin n</description>
               <bitOffset>2</bitOffset>
               <bitWidth>2</bitWidth>
             </field>
@@ -20264,8 +20306,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
         <register>
           <name>INDR</name>
           <displayName>INDR</displayName>
-          <description>Port input data register
-          (GPIOn_INDR)</description>
+          <description>Port input data register</description>
           <addressOffset>0x8</addressOffset>
           <size>0x20</size>
           <access>read-only</access>
@@ -20273,7 +20314,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
           <fields>
             <field>
               <name>IDR0</name>
-              <description>Port input data</description>
+              <description>Reflects the logic level of pin n, if the port is configured as an input port.</description>
               <bitOffset>0</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
@@ -20372,8 +20413,9 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
         <register>
           <name>OUTDR</name>
           <displayName>OUTDR</displayName>
-          <description>Port output data register
-          (GPIOn_OUTDR)</description>
+<description><![CDATA[
+Port output data register.
+]]></description>
           <addressOffset>0xC</addressOffset>
           <size>0x20</size>
           <access>read-write</access>
@@ -20381,7 +20423,14 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
           <fields>
             <field>
               <name>ODR0</name>
-              <description>Port output data</description>
+<description><![CDATA[
+<br/>
+<small>
+If pin is configured as <b>output</b>: Set logic value of GPIO Port pin n<br>
+If pin is configured as <b>input</b>: Configures pull-up (1) or pull-down (0), if enabled in CFGLR/CFGHR.<br>
+Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not the pin.
+</small>
+]]></description>
               <bitOffset>0</bitOffset>
               <bitWidth>1</bitWidth>
             </field>

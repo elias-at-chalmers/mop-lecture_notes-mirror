@@ -93,7 +93,7 @@ def parse_args(argv=None):
     parser = build_parser()
     return parser.parse_args(argv)
 ###############################################################################
-args = parse_args()
+args = None
 
 
 with open("quickguide-generator/ch32v30x.svd", "r", encoding="utf-8") as f:
@@ -397,71 +397,77 @@ def PrintRegisterDetails(r):
 
 
 
+def main(): 
+    global args
+    global html
+    global groups
+    args = parse_args()
+    if(args.command == "overview-table"): 
+        found = False
+        for p in peripherals:
+            if p.find('name').text != args.peripheral: continue
+            found = True
+            p_name = p.find('name').text
+            if "derivedFrom" in p.attrib: 
+                html += "<b>WARNING: Peripheral is derived from " + p.attrib["derivedFrom"] + ", and will not parse correctly yet</b><br>\n"
+                continue
+            register_regexp = args.register_regexp
+            html += PrintPeripheralOverviewTable(p, register_regexp)
+        if not found:
+            print("Peripheral " + args.peripheral + " not found")
+            exit(1)
 
+    if(args.command == "baseaddress"):
+        pattern = re.compile(args.peripheral_regexp)
 
+        matches = []
+        for p in peripherals:
+            name = p.find('name').text
+            if pattern.match(name):
+                matches.append(p)
 
-if(args.command == "overview-table"): 
-    found = False
-    for p in peripherals:
-        if p.find('name').text != args.peripheral: continue
-        found = True
-        p_name = p.find('name').text
-        if "derivedFrom" in p.attrib: 
-            html += "<b>WARNING: Peripheral is derived from " + p.attrib["derivedFrom"] + ", and will not parse correctly yet</b><br>\n"
-            continue
-        register_regexp = args.register_regexp
-        html += PrintPeripheralOverviewTable(p, register_regexp)
-    if not found:
-        print("Peripheral " + args.peripheral + " not found")
-        exit(1)
+        if not matches:
+            print("Peripheral matching " + args.peripheral_regexp + " not found")
+            exit(1)
 
-if(args.command == "baseaddress"):
-    pattern = re.compile(args.peripheral_regexp)
-
-    matches = []
-    for p in peripherals:
-        name = p.find('name').text
-        if pattern.match(name):
-            matches.append(p)
-
-    if not matches:
-        print("Peripheral matching " + args.peripheral_regexp + " not found")
-        exit(1)
-
-    # Exactly one match: Don't print name
-    if len(matches) == 1:
-        p = matches[0]
-        p_name = p.find("name").text
-        base = p.find("baseAddress").text
-        html += f"<code>{base}</code><br>\n"
-
-    # Multiple matches → normal output
-    else:
-        for p in matches:
+        # Exactly one match: Don't print name
+        if len(matches) == 1:
+            p = matches[0]
             p_name = p.find("name").text
             base = p.find("baseAddress").text
-            html += p_name + ": <code>" + base + "</code><br>\n"
+            html += f"<code>{base}</code><br>\n"
 
-if(args.command == "register-details"):
-    pattern = re.compile(args.register_regexp)
+        # Multiple matches → normal output
+        else:
+            for p in matches:
+                p_name = p.find("name").text
+                base = p.find("baseAddress").text
+                html += p_name + ": <code>" + base + "</code><br>\n"
 
-    found = False
-    for p in peripherals:
+    if(args.command == "register-details"):
+        pattern = re.compile(args.register_regexp)
 
-        if p.find('name').text != args.peripheral: continue
-        found = True
-        p_name = p.find('name').text
-        if "derivedFrom" in p.attrib: 
-            html += "<b>WARNING: Peripheral is derived from " + p.attrib["derivedFrom"] + ", and will not parse correctly yet</b><br>\n"
-            continue
+        found = False
+        for p in peripherals:
 
-        groups = GetRegisterGroups(p)
+            if p.find('name').text != args.peripheral: continue
+            found = True
+            p_name = p.find('name').text
+            if "derivedFrom" in p.attrib: 
+                html += "<b>WARNING: Peripheral is derived from " + p.attrib["derivedFrom"] + ", and will not parse correctly yet</b><br>\n"
+                continue
 
-        for r in p.find('registers'):        
-            if not pattern.match(r.find('name').text): continue
-            html += PrintRegisterDetails(r)
-    if not found:
-        print("Peripheral " + args.peripheral + " not found")
-        exit(1)
+            groups = GetRegisterGroups(p)
 
-print(html)
+            for r in p.find('registers'):        
+                if not pattern.match(r.find('name').text): continue
+                html += PrintRegisterDetails(r)
+        if not found:
+            print("Peripheral " + args.peripheral + " not found")
+            exit(1)
+
+    print(html)
+
+if __name__ == '__main__':
+    import sys
+    sys.exit(main())

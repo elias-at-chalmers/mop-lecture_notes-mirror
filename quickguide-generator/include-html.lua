@@ -59,10 +59,15 @@ local function handle_placeholder(text)
       table.insert(args, word)
     end
     local script = table.remove(args, 1)
-    local output = pandoc.pipe("python", {script, table.unpack(args)}, "")
+    local ok, output_or_err = pcall(function() return pandoc.pipe("python", {script, table.unpack(args)}, "") end)
+    if not ok then
+      -- pandoc.pipe raised an error (for example, python exited non-zero)
+      local err = tostring(output_or_err)
+      return {pandoc.RawBlock("html", "<pre class='python-error'>Python error: " .. pandoc.utils.stringify(err) .. "</pre>")}
+    end
 
     -- wrap in table to replace the whole Para
-    return {pandoc.RawBlock("html", output)}
+    return {pandoc.RawBlock("html", output_or_err)}
   end
 
   return nil

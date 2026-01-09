@@ -1,12 +1,5 @@
 # Introduction to GPIO and C
 
-**Links:**
-[Reference Manual](https://www.wch-ic.com/downloads/CH32FV2x_V3xRM_PDF.html)
-
-**Text and exercises in the Workbook (Arbetsboken)**
-
-**Things that are in the Workbook that should possibly be in this lecture**
-
 <hr>
 
 So far, we have focused on the *core* of our processor, the *Qingke V4F*, and how to move data between memory and registers. This would be quite pointless unless the processor was connected to the outside world somehow. Today we will start introducing how to communicate with off-chip devices using the GPIO ports.
@@ -223,6 +216,8 @@ The program consists of three C files: `main.c`, `functions.c`, and `math.c`. Wi
 
 Normally, when compiling a program from inside an *Integrated Development Environment* (IDE), like CodeLite or Visual Studio Code, we simply press the "build" button and do not have to care much about what actually happens. In this section, however, we will go through the actual compilation steps, since it can be very useful to know how this works when things go wrong. 
 
+> **Note:** The following assumes a system where gcc is installed and on the path, which is not the case on your machines. You do not have to run these commands, they are just here to show how it would work.
+
 #### Preprocessor
 The first step in compiling a program is to run the *preprocessor* on all `.c` files. We can invoke the preprocessor alone on the command-line like this: 
 
@@ -259,9 +254,7 @@ gcc -S math.i
 
 The resulting assembly files are: 
 
-> ⚠️ **TODO:** Replace with RISCV example
-
-![](../images/c_figure_3_3.png)
+![](../images/c_figure_3_3_riscv.png)
 
 You are not expected to understand this assembly code, but we will note a few important things about them. First, we can compile, for instance, the `main.i` file into assembly code *independently* of the other files. To create the assembly code for `main.i`, the compiler needs to know that *there exists* a function called `function`, that it returns a `float`, and that it takes a `float` as parameter, but it does not need to know what that function *does*. 
 
@@ -278,9 +271,7 @@ as -c functions.s
 as -c math.s
 ```
 
-An object file is a binary file[^7], containing the machine code that will eventually run on the processor. Note, however, that this file is not an executable program. We still don't know the final addresses of variables and functions. The `bl function` command in `main.s`, for instance, has been assembled into the appropriate machine code for the `bl` instruction, but the *address* it should jump to is not yet available. 
-
-> ⚠️ **TODO:** Replace with RISCV example
+An object file is a binary file[^7], containing the machine code that will eventually run on the processor. Note, however, that this file is not an executable program. We still don't know the final addresses of variables and functions. The `call function` command in `main.s`, for instance, has been assembled into the appropriate machine code for the `call` instruction, but the *address* it should jump to is not yet available. 
 
 
 [^7]: The actual format of this file depends on the compiler. `gcc` will produce files on the ELF format.
@@ -297,4 +288,10 @@ The linker's main job is to arrange the code in memory, and turn all *symbols* (
 If you had run all of these commands on your host computer, with the appropriate gcc toolchain, the output would be an executable file that would run on your operating system (although it won't actually *do* anything visible). 
 
 If you are cross-compiling for another machine (like the MD307) and have used the appropriate gcc toolchain, this last linking stage will not quite work. You will also have to supply some flags to inform the compiler that it should not expect to find a *runtime* library (which we will talk about later), and you would need to supply a *linker script* that tells the linker in what part of memory to place the functions and variables and where to start running the code.
+
+**Links:**
+[CH32V307 Reference Manual](https://www.wch-ic.com/downloads/CH32FV2x_V3xRM_PDF.html)
+
+**Text and exercises in the Workbook (Arbetsboken)**: 76-78
+
 

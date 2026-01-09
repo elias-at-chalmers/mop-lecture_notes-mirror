@@ -34,10 +34,15 @@ $(HTML_DIR)/style.css: style.css
 	$(MKDIR) -p $(HTML_DIR)
 	cp $< $@
 
-$(HTML_DIR)/images: images
-	$(MKDIR) -p $(HTML_DIR)/images
-	cp -r $</. $@
+IMAGE_SRC := $(wildcard images/*)
+IMAGE_DST := $(patsubst images/%,$(HTML_DIR)/images/%,$(IMAGE_SRC))
 
+$(HTML_DIR)/images: $(IMAGE_DST)
+
+$(HTML_DIR)/images/%: images/%
+	$(MKDIR) -p $(dir $@)
+	cp $< $@
+	
 $(HTML_DIR)/quickguide.html: quickguide.html
 	$(MKDIR) -p $(HTML_DIR)
 	cp $< $@

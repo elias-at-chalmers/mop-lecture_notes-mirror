@@ -272,14 +272,14 @@ So, for our example to be guaranteed to work, we need to save `t2` to the stack 
 mv a0, t0        # Use t0 as the first parameter
 mv a1, t1        # and t1 as the second parameter
 
-addi sp, -4      # Decrease the stack pointer
+addi sp, sp, -4  # Decrease the stack pointer
 sw   t2, 0(sp)   # Save t2 for later
 
 call max         # After this line, the maximum of t0 and t1 is in a0
                  # Since a0 is already max(t0, t1) we do not have to do anything for the first parameter
 
 lw   t2, 0(sp)    # Restore t2 from the stack
-addi sp, 4        # And increase the stack pointer
+addi sp, sp, 4    # And increase the stack pointer
 
 mv a1, t2        # Use t2 as the second parameter
 call max         # After this line a0 contains max(max(t0, t1), t2)...
@@ -530,7 +530,7 @@ This lecture almost concludes our assembly adventures, as we will start looking 
 [RISC-V Cheat Sheet](https://projectf.io/posts/riscv-cheat-sheet/)
 , [RISC-V ABI](https://d3s.mff.cuni.cz/files/teaching/nswi200/202324/doc/riscv-abi.pdf)
 
-**Text and excercises in the Workbook (Arbetsboken)**
+**Text and exercises in the Workbook (Arbetsboken)**
 Chapter 1, Pages 17-24
 Chapter 1, Pages 34-56
 

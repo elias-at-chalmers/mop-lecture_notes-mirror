@@ -143,8 +143,8 @@ In other words, if an interrupt occurs, the current instruction will continue un
 ### Interrupt handler address
 So how does the processor know where to jump (i.e., where in memory the interrupt handler is), when an interrupt occurs? There are actually several different ways that the CH32V307 can handle this, and they will be discussed in the next lecture. For this lecture, we will use the simplest possible way: Put the *address* of the interrupt handler function into the CSR `mtvec`.
 
-Since the C language is platform independent, there is now special C code that can write to the CSR registers. Instead, we either have to implement this in an assembly file:
-```
+Since the C language is platform independent, there is no special C code that can write to the CSR registers. Instead, we either have to implement this in an assembly file:
+```s
 .extern Interrupt_Handler  # Assuming there is a C function with this name
 .global write_mtvec        # Make this function available to C code
 write_mtvec:               # void write_mtvec()
@@ -155,7 +155,7 @@ ret
 , or we can use *inline assembly* in our C code to achieve the same thing: 
 ```C
 // Set mtvec to address of Interrupt_Handler
-asm volatile ("csrw mtvec, %0" :: "r"(Interrupt_Handler));
+__asm__ volatile ("csrw mtvec, %0" :: "r"(Interrupt_Handler));
 ```
 
 Either way, when an interrupt is enabled and triggers, the processor will now expect a handler routine at the address stored in the `mtvec` register, and jump to that address. 
@@ -180,7 +180,7 @@ Luckily, in practice, we rarely have to think about this distinction when progra
 To complete our prototype that can play a tone on the buzzer and show the temperature on the display at the same time, we will rewrite the tone generation so that it is triggered by a systick interrupt instead. 
 
 ### Enabling interrupts from SysTick in the PFIC
-Since SysTick is interrupt number 12, we enable SysTickl interrupts by setting bit number 12 in the PFIC_IENR1 register: 
+Since SysTick is interrupt number 12, we enable SysTick interrupts by setting bit number 12 in the PFIC_IENR1 register: 
 
 ```C
 #define PFIC_BASE       0xE000E000

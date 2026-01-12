@@ -35,7 +35,7 @@ We can set up SysTick, TIMER6, and TIMER7 to generate interrupts at 1Hz, 3Hz, an
     // Set up systick for 1 second delay (1Hz)
     *systick = (SYSTICK_t){0}; // Clear everything to 0
     systick->CMP = 144000000; // Set up to count to one second (assuming 144 MHz clock)
-    systick->ctrl.clksrc = 1; // Use HCLK
+    systick->ctrl.clksrc = 1; // Use HCLK (update at full speed, not divided by 8)
     systick->ctrl.reload = 1; // Enable reload
     systick->ctrl.intenable = 1; // Enable interrupt
     systick->ctrl.enable = 1; // Start counting
@@ -256,7 +256,7 @@ To decide which port gets to forward the signal from a specific pin, we use the 
 
 </div>
 
-Since we want an interrupt to fire for pin 1 in GPIO port E, we will set the four bits corresponding to `EXTI1`, in `AFIO_CR1`, to `4`: 
+Since we want an interrupt to fire for pin 1 in GPIO port E, we will set the four bits corresponding to `EXTI1`, in `AFIO_EXTICR1`, to `4`: 
 
 ```C
 #define AFIO_EXTICR1 ((volatile uint16_t *)0x40010008)
@@ -332,7 +332,7 @@ void EXTI1_Handler(void)
     uitn32_t current_value = *GPIOE_INDR & 0b10; // Read the current value of the switch
     *GPIOD_OUTDR &= ~0x8;           // Zero the fourth LED
     *GPIOD_OUTDR |= current_value;  // Set it to 1 if the switch is on, 0 otherwise
-    EXTI_INTFR   |= 0b10;  // Acknowledge the interrupt (zeroes the corresponding bit in EXTI_INTFR)
+    *EXTI_INTFR   |= 0b10;  // Acknowledge the interrupt (zeroes the corresponding bit in EXTI_INTFR)
 }
 ```
 

@@ -255,7 +255,7 @@ The important numbers are:
 * **t<sub>su1</sub>** - Before setting E high, we have to tell the display whether it should perform a *command* or a *data-transfer* and whether we want to write to the display or read from it. This is done by setting the **RS** and **R/W** signals. Since these signals are connected to GPIO pins on our MD307, we simply set the corresponding bits in the GPIO `ODATA` register, as we have done before. This will (almost) immediately set the corresponding *pins* to 0V, but it will take some time (*t<sub>su1</sub> = 40ns*) for the electrical signal to propagate through the display. 
 * **t<sub>su2</sub>** - When we have told the display to prepare for a command, by setting E=1, it needs the data to be available on the GPIO pins for *at least* *t<sub>su1</sub> = 80ns* before we can tell it to actually execute the command. Again, this is to be certain that the signals have propagated.  
 * **t<sub>w</sub>** - We *also* have to make certain that the E signal is high for at least *t<sub>w</sub> = 230ns* before E is set to 0 again.
-* **t<sub>h</sub>** - After starting the command (by setting E=0), all signals must be available for another *t<sub>su1</sub> = 10ns*. 
+* **t<sub>h</sub>** - After starting the command (by setting E=0), all signals must be available for another *t<sub>h</sub> = 10ns*. 
 * **t<sub>c</sub>** - Finally, the cycle time (the time between two commands) must be at least 500ns.
 
 In the workbook, you will also find the timing diagrams for reading data from the device, what commands are available, and a suggestion of how to write code that follows this timing protocol. Before you start writing anything there is a much more fundamental question that we have to answer, however: *How do we tell our microcontroller to wait a specific length of time?*. 
@@ -265,20 +265,20 @@ The only way we can measure the passage of time on a processor is by the *clock 
 
 Since we know that our microcontroller will execute *approximately* one instruction per clock, we can get an approximate delay with just a little for loop. If we want to wait for 1 ms, and we know that amounts to approximately (1000ns/7ns ≈) **143** clock cycles, and the loop is two instructions, we could write:  
 
-```
+```s
 li t0, 143
 loop: 
   addi t0, -2   # Two more instructions have been executed
   bnz loop      # If not zero, go again.
 ```
 
-This is not very exact, however. Firstly, due to pipelining (see Lecture ??), and instruction caches, and other clever tricks that our processor might do, we do not *know* exactly how many clock cycles each instruction takes. Secondly, as you will learn in a future lecture, the processor is frequently *interrupted* by other processes, and when the CPU starts running our code again, we have no idea how many cycles have passed. 
+This is not very exact, however. Firstly, due to pipelining, instruction caches, and other clever tricks that our processor might do, we do not *know* exactly how many clock cycles each instruction takes. Secondly, as you will learn in a future lecture, the processor is frequently *interrupted* by other processes, and when the CPU starts running our code again, we have no idea how many cycles have passed. 
 
 Instead, all processors come with one or more *timer peripherals*. These are separate modules (on the same chip) that listen to the same clock signal as the CPU does, but whose only job is to count how many cycles have passed, and provide that information to the program running on the CPU. 
 
-On the MD307, the simplest, and most commonly used, timer peripheral is called *SysTick* and it has the following register block: 
-<hr>
+On the MD307, the simplest, and most commonly used, timer peripheral is called *SysTick*. This is the beginning of the description from the QuickGuide: 
 
+<div class="boxed">
 <large><b>SysTick</b></large>
 
 Base address: 
@@ -293,7 +293,9 @@ Base address:
 </p>
 <hr>
 
-{{python quickguide-generator/main.py register-details SysTick .*CTLR}}
+{{python quickguide-generator/main.py register-details -all-open SysTick .*CTLR}}
+
+</div>
 
 As you can see, this peripheral can be used in quite a number of ways, but for this lecture we will only focus on the most basic use. The two 32-bit registers `STK_CNTL` and `STK_CNTH` make up a 64 bit counter value. That means that the counter can count up to eighteen *quantillion* clock cycles, before it has to restart from zero. (That would take about 4 thousand years, at 144MHz). Usually, we need to count much shorter intervals than that and a long as we are looking at periods shorter than ~30sek (2^32 clocks), we can ignore the `STK_CNTH` register. 
 
@@ -308,14 +310,14 @@ So, if all we want to do is wait for a specific time interval, *t* seconds, we w
 In C, waiting for one second would look like: 
 
 ```C
-#define SYSTICK_CTLR ((volatile uint32_t *)0xE000F000)
-#define SYSTICK_CNTL ((volatile uint32_t *)0xE000F008)
+#define STK_CTLR ((volatile uint32_t *)0xE000F000)
+#define STK_CNTLR ((volatile uint32_t *)0xE000F008)
 
 void main()
 {
-  *SYSTICK_CNTL = 0;                // Clear counter
-  *SYSTICK_CTLR |= 0b101;           // Start the clock and use the system clock (STCLK=1)
-  while(*SYSTICK_CNTL < 144000000); // Wait for one second. 
+  *STK_CNTL = 0;                // Clear counter
+  *STK_CTLR |= 0b101;           // Start the clock and use the system clock (STCLK=1)
+  while(*STK_CNTLR < 144000000); // Wait for one second. 
   // ...
 }
 ```
@@ -323,20 +325,20 @@ void main()
 Alternatively, we can set the *compare value* (`STK_CMPLR` and `STK_CMPHR`) to the number of clock cycles we want to wait, and then check the lowest bit of the *status register*, `STK_SR`. This bit will flip over to 1 when `STK_CNT` reaches `STK_CMP`: 
 
 ```C
-#define SYSTICK_CTLR ((volatile uint32_t *)0xE000F000)
-#define SYSTICK_SR   ((volatile uint32_t *)0xE000F004)
-#define SYSTICK_CNTL ((volatile uint32_t *)0xE000F008)
-#define SYSTICK_CNTH ((volatile uint32_t *)0xE000F00C)
-#define SYSTICK_CMPL ((volatile uint32_t *)0xE000F010)
-#define SYSTICK_CMPH ((volatile uint32_t *)0xE000F014)
+#define STK_CTLR ((volatile uint32_t *)0xE000F000)
+#define STK_SR   ((volatile uint32_t *)0xE000F004)
+#define STK_CNTLR ((volatile uint32_t *)0xE000F008)
+#define STK_CNTHR ((volatile uint32_t *)0xE000F00C)
+#define STK_CMPLR ((volatile uint32_t *)0xE000F010)
+#define STK_CMPHR ((volatile uint32_t *)0xE000F014)
 void main()
 {
-  *SYSTICK_CNTL = 0;                // Clear counter
-  *SYSTICK_CNTH = 0; 
-  *SYSTICK_CMPL = 144000000;        // Set Compare value
-  *SYSTICK_CMPH = 0;  
-  *SYSTICK_CTLR |= 0b101;           // Start the clock and use the system clock (STCLK=1)
-  while(*SYSTICK_SR == 0); // Wait for one second. 
+  *STK_CNTLR = 0;                // Clear counter
+  *STK_CNTHR = 0; 
+  *STK_CMPLR = 144000000;        // Set Compare value
+  *STK_CMPHR = 0;  
+  *STK_CTLR |= 0b101;           // Start the clock and use the system clock (STCLK=1)
+  while(*STK_SR == 0); // Wait for one second. 
   // ...
 }
 ```
@@ -375,7 +377,9 @@ int main()
 }
 ```
 
-This code would work just fine, which might surprise you, considering line 8. Since we are now reading and storing floating point values (four bytes), the address that `output_pointer` points to must be increased by 4, in every iteration of the loop. When adding **x** to a pointer that points to a value of type **y**, we are telling the compiler to add `x * sizeof(y)` to the address. So, for example: 
+This code would work just fine, which might surprise you. Since we are now reading and storing floating point values (four bytes), the address that `output_pointer` points to must be increased by *4*, in every iteration of the loop, but we write: `output_pointer = output_pointer + 1`.
+
+This works because of how C works with pointer arithmetic: When adding **x** to a pointer that points to a value of type **y**, we are telling the compiler to add `x * sizeof(y)` to the address. So, for example: 
 
 ```C
 int main() {
@@ -391,15 +395,15 @@ int main() {
 This might seem strange, but actually leads to much cleaner code in many cases. You will probably end up in situations where you get this wrong, however, and one of them might be when you write something like this: 
 
 ```C
-#define SYSTICK_BASE_ADDRESS 0xE000F000
-#define SYSTICK_CTLR ((volatile uint32_t *)BASE_ADDRESS + 0x0)
-#define SYSTICK_SR   ((volatile uint32_t *)BASE_ADDRESS + 0x4)
-#define SYSTICK_CNTL ((volatile uint32_t *)BASE_ADDRESS + 0x8)
-#define SYSTICK_CNTH ((volatile uint32_t *)BASE_ADDRESS + 0xC)
+#define STK_BASE_ADDRESS 0xE000F000
+#define STK_CTLR ((volatile uint32_t *)BASE_ADDRESS + 0x0)
+#define STK_SR   ((volatile uint32_t *)BASE_ADDRESS + 0x4)
+#define STK_CNTL ((volatile uint32_t *)BASE_ADDRESS + 0x8)
+#define STK_CNTH ((volatile uint32_t *)BASE_ADDRESS + 0xC)
 ```
-Here, when the compiler calculates the address for `SYSTICK_SR`, for instance, it will *first* cast `BASE_ADDRESS` to a `uint32_t *`, and *then* add 4. Since it adds to a pointer to a four byte value, the actual address will become `BASE_ADDRESS + 4 * 4`, which is completely wrong. In this case, the fix is to add a parenthesis: 
+Here, when the compiler calculates the address for `STK_SR`, for instance, it will *first* cast `BASE_ADDRESS` to a `uint32_t *`, and *then* add 4. Since it adds to a pointer to a four byte value, the actual address will become `BASE_ADDRESS + 4 * 4`, which is completely wrong. In this case, the fix is to add a parenthesis: 
 ```C
-#define SYSTICK_SR   ((volatile uint32_t *)(BASE_ADDRESS + 0x4))
+#define STK_SR   ((volatile uint32_t *)(BASE_ADDRESS + 0x4))
 ```
 
 
@@ -482,7 +486,7 @@ int main()
 This example was discussed in the introduction, but bears repeating now that you have a better grasp of what pointers are. The function `swap` takes as input *pointers* to two integers, which allows it to modify the values that they point at. 
 
 #### Strings
-In C, there is no built-in or otherwise special datatype to represent strings. Instead, a string is simply a certain number of characters (bytes) stored contiguously in memory, i.e., an array of `char`. Each character is represented by a single byte (which can have a value between 0 and 255) and each character is assigned a certain value. The mapping between byte values and characters is defined in the ASCII standard[^3]. This standard also contains some non-printable characters. For instance, the byte value 10 means "end of line" and the byte value 0 means "end of string". When we want to do operations on strings, for example compare two strings and see if they are equal, we do this by passing around the \textit{pointer} to the beginning of the strings:
+In C, there is no built-in or otherwise special datatype to represent strings. Instead, a string is simply a certain number of characters (bytes) stored contiguously in memory, i.e., an array of `char`. Each character is represented by a single byte (which can have a value between 0 and 255) and each character is assigned a certain value. The mapping between byte values and characters is defined in the ASCII standard[^3]. This standard also contains some non-printable characters. For instance, the byte value 10 means "end of line" and the byte value 0 means "end of string". When we want to do operations on strings, for example compare two strings and see if they are equal, we do this by passing around the *pointer* to the first character of the strings:
 
 [^3]: More info on the ASCII standard at [https://en.wikipedia.org/wiki/ASCII](https://en.wikipedia.org/wiki/ASCII)
 

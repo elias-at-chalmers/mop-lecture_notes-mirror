@@ -13,7 +13,6 @@ Innan ni drar igång med den här övningen förväntas ni ha gått igenom Före
 
 Så fort ni börjat skriva kommer alternativet att dyka upp. Kommandopaletten används till det mesta i VSCode, och vi kommer stöta på den igen senare i övningen. Tryck på `<enter>` för att välja kommandot och välj sedan foldern "Basic templates" och i denna “MD307 empty assembly project” för att initiera ett assemblerprojekt.
 Ni skall nu se något i den här stilen på skärmen (om ni inte gör det så klicka på den inringade ikonen som öppnar "explorer" vyn): 
-<!--- ERIK: Inte inringad-->
 
 <p align="center">
   <img src="../images/Picture2.png" alt="My image" width="80%"/>
@@ -46,9 +45,7 @@ som genast lägger sig och väntar på att VSCode skall ladda upp ett program.
   <img src="../images/Picture3.png" alt="My image" width="80%"/>
 </p>
 
-Vi har på mening skrivit en felaktig instruktion ("lii" är inte en RISC-V assembler instruktion) för att ni skall se hur syntax highlighting kan hjälpa er med enkla misstag. Låt misstaget vara kvar och försök nu kompilera och köra programmet:
-<!-- ERIK: men... den verkar inte belysas av syntax highlighting i bilden? -->
-
+Vi har på mening skrivit en felaktig instruktion ("lii" är inte en RISC-V assembler instruktion) för att ni skall se hur VSCode hjälper er att uptäcka enkla misstag. Låt misstaget vara kvar och försök nu kompilera och köra programmet:
 
 <p align="center">
   <img src="../images/Picture4.png" alt="My image" width="80%"/>
@@ -85,12 +82,10 @@ Efter en liten stund kommer eran skärm se ut så här:
 VSCode har nu kompilerat assemblerkoden till maskinkod och laddat upp den till simulatorn. Sedan instruerades simulatorn att starta programmet, men att avbryta ("break") så fort den kommit fram till funktionen "main". Den gulmarkerade raden visar nästa instruktion som kommer att köras. Vi skall nu stega igenom vårat lilla program och se vad som händer. 
 
 Säg åt debuggern att exekvera den gulmarkerade instruktionen genom att trycka på "step into" knappen (eller trycka på F11): 
-<!-- ERIK: Bytte till step into här. Debuggern uppför sig illa ibland om man använder step over för assemblerinstruktioner. -->
 
 <p align="center">
   <img src="../images/Picture8.png" alt="My image" width="50%"/>
 </p>
-<!-- ERIK: "Discconect är inringat i bilden, inte "step into"-->
 
 Instruktionen `li t0, 10` borde ha lagt värdet 10 i register `t0`. För att se om det verkligen hänt öppnar ni "Registers" fliken i "Build and Debug" vyn till vänster:
 
@@ -100,8 +95,7 @@ Instruktionen `li t0, 10` borde ha lagt värdet 10 i register `t0`. För att se 
 
 Här kan ni se värdet på alla processorns register, och i `t0` ligger mycket riktigt 0xa som är hexadecimalt för 10. Stega nu över nästa rad och kontrollera att register `t1` får värdet 0x14 (hexadecimalt för 20). Om ni stegar över nästa instruktion igen så kommer ni till `j main` instruktionen och nu kan ni se att `t0` fått värdet 0x1e d.v.s. 30 decimalt. Om inte `j main` instruktionen funnits hade all information om register och den gula raden försvunnit eftersom VSCode försöker visa nästa instruktion, men det då inte funnits någon nästa instruktion att visa.
 
-När du vill avsluta programmet och återgå till att koda trycker du på "stop" knappen (eller Shift+F5):
-<!-- Restart är inringat, inte stop (och den heter "disconnect" tror jag) -->
+När du vill avsluta programmet och återgå till att koda trycker du på "disconnect" knappen (eller Shift+F5):
 
 <p align="center">
   <img src="../images/Picture10.png" alt="My image" width="50%"/>

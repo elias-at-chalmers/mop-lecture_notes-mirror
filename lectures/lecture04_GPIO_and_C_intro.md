@@ -36,7 +36,7 @@ Now, if we *set* bit 6 in Port D, the pin will be at 3.3V, and current will run 
 ### Configuring a pin for output
 Each pin in the port can *either* be an input pin *or* an output pin, at any given time. If the pin is configured as an input pin, we can read the corresponding bit to find out if the pin is at 3.3V (bit is 1) or 0V (bit is 0). Right now, we want pin 6 to act as an output bit, so we have to configure Port D accordingly.
 
-As previously mentioned, any communication between the processor core and the outside is achieved by reading from or writing to the memory subsystem. We have, for instance, seen that we can access the SRAM module by writing to the `0x20000000` - `0x2000FFFF` region. In the same way, to communicate with the GPIO module, we read and write to the `0x40010800`-`0x40011BFF` region. In that region, there are a number of registers for each GPIO Port. To find out which registers there are, and how to configure our GPIO Module, we would normally refer to the microcontroller's reference manual, but in this course we have prepared an easier-to-read [QuickGuide](TODO_nolinkyet). The section about the GPIO Module begins: 
+As previously mentioned, any communication between the processor core and the outside is achieved by reading from or writing to the memory subsystem. We have, for instance, seen that we can access the SRAM module by writing to the `0x20000000` - `0x2000FFFF` region. In the same way, to communicate with the GPIO module, we read and write to the `0x40010800`-`0x40011BFF` region. In that region, there are a number of registers for each GPIO Port. To find out which registers there are, and how to configure our GPIO Module, we would normally refer to the microcontroller's reference manual, but in this course we have prepared an easier-to-read [QuickGuide](https://www.cse.chalmers.se/edu/resources/mop/lecture_notes/quickguide.html). The section about the GPIO Module begins: 
 
 <!--
 <p align="center">
@@ -93,7 +93,7 @@ sw t1, 0(t0)         # Write the configuration to CFGLR
 ```
 
 ### Turning on the LED
-Now that the configuration is done, all we have to do is set bit 6 in the *out data* register for GPIO Port D. We look at the [QuickGuide](TODO_nolinkyet) again (or the snippet above) to see that the *base address* for GPIO Port D is still `0x40011400`, and that the *offset* for the out data register, `OUTDR`, is `0xC`. So the address to `GPIOD_OUTDR` is `0x40011400 + 0xC` = `0x4001140C`. 
+Now that the configuration is done, all we have to do is set bit 6 in the *out data* register for GPIO Port D. We look at the [QuickGuide](https://www.cse.chalmers.se/edu/resources/mop/lecture_notes/quickguide.html) again (or the snippet above) to see that the *base address* for GPIO Port D is still `0x40011400`, and that the *offset* for the out data register, `OUTDR`, is `0xC`. So the address to `GPIOD_OUTDR` is `0x40011400 + 0xC` = `0x4001140C`. 
 
 We want to set bit 6 to make pin 6 go to 3.3V and turn on the LED: 
 
@@ -159,7 +159,7 @@ Starting from line one, we see that the program begins with an `#include` statem
 ```c
 #include <stdio.h>
 ```
-This line says that the contents of the file `stdio.h` will be included at the top of this c file before compilation. This file is part of the C Standard Library (which we will talk more about later) and contains *declarations* of a number of useful functions that deal with user input and output. This is similar to they way the `import` statements work in Java or Python but the `#include` statement is much more rudimentary. 
+This line says that the contents of the file `stdio.h` will be included at the top of this c file before compilation. This file is part of the C Standard Library (which we will talk more about later) and contains *declarations* of a number of useful functions that deal with user input and output. This is similar to the way the `import` statements work in Java or Python but the `#include` statement is much more rudimentary. 
 
 The next line: 
 ```c
@@ -202,7 +202,7 @@ Finally, we print the result to the console. This is achieved by calling the fun
 
 As you can see, the general structure and syntax of a C program is very similar to other imperative languages (Java, C++, C#, Javascript, Go, Rust, Swift, ...).
 
-In the next lecture, we will start using C to program our microcontroller, and learn more details about the language, but the course will not teach you everything. If you would like to dive deeper There are several books and online sources that delve much deeper, and provide online learning examples [^5].
+In the next lecture, we will start using C to program our microcontroller, and learn more details about the language, but the course will not teach you everything. If you would like to dive deeper, there are several books and online sources that delve much deeper, and provide online learning examples [^5].
 
 [^5]: Some good places to start are: https://www.w3schools.com/c/index.php, https://www.programiz.com/c-programming, and https://www.tutorialspoint.com/cprogramming/index.htm
 

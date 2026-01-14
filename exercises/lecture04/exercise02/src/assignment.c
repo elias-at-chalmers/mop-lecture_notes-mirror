@@ -1,7 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
-// In this C exercise, you will test some very basic
-// C programming by implementing a small part of a 
-// simple RPG combat system. 
+// In this C exercise, you will test some very basic C programming by 
+// implementing a small part of a simple RPG combat system. 
 // 
 // Start simserver with a console connected as usual, 
 // and try to pass all tests. 
@@ -67,8 +66,8 @@ int hero_damage()
     ///////////////////////////////////////////////////////////////////////////
     // Assignment 1: 
     // ====================================================
-    // Calculate damage dealt in unarmed combat against
-    // a monster without armour:
+    // Calculate and return damage done by hero as:
+    // 
     // DAMAGE = STRENGTH * 2 + DEXTERITY + 
     //              (weapon_bonus() - enemy_armour())
     ///////////////////////////////////////////////////////////////////////////

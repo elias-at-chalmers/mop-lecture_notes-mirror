@@ -40,6 +40,14 @@ These are the instructions for setting up the programming environment you will u
 
 If you have any problems, go to one of the exercise sessions and ask a TA to help you. Otherwise, you are done and can start the course!
 
+## Turn off your AI "friend"
+
+*If* you have GitHub copilot installed, it will immediately start "helping" you by suggesting the next instruction for you. This can be extremely useful for you in the future, when you know assembly programming well, but is disastrous for learning purposes. So (for your own sake) turn it off by unchecking the boxes in the image below.
+
+<p align="center">
+  <img src="../images/turn_off_ai.png" alt="My image" width="50%"/>
+</p>
+
 ## If you have 'åäö' in your project path on Windows:
 
 If you have any non-ascii-character like 'åäö' in your username, your "Documents" or "Desktop" paths will have that as well. This may cause problems in VSCode and GDB. You can circumvent the problem by activating support for UTF-8 in your paths (Or just put your code in another directory, like "C:\MOP\").

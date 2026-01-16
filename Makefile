@@ -41,7 +41,7 @@ $(HTML_DIR)/images: $(IMAGE_DST)
 
 $(HTML_DIR)/images/%: images/%
 	$(MKDIR) -p $(dir $@)
-	cp $< $@
+	cp -r $< $@
 	
 $(HTML_DIR)/quickguide.html: quickguide.html
 	$(MKDIR) -p $(HTML_DIR)

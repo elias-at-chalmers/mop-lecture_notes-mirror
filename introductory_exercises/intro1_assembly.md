@@ -28,6 +28,12 @@ I listan till vänster ser ni alla filer som ligger i mappen där ni startade VS
 * `Makefile`: Detta är en textfil som beskriver hur programmet skall kompileras. Ni kommer lära er lite mer om kompilatorn senare i kursen. För tillfället kan ni låta den vara.
 * `md307-runtime.a`: Det här är ett "runtime bibliotek", grundläggande funktioner som behövs för att C skall fungera. Vi pratar mer om det senare i kursen. 
 
+## Stäng av din AI "kompis"
+*Om* du har GitHub copilot installerat så kommer den omeddelbart börja föreslå vilka instruktioner du skall skriva. Det här kan vara extremt användbart senare, när du kan assemblerprogrammering, men är katastrofalt dåligt när man skall lära sig. Så, för din egen skull, stäng av AI hjälpen genom att avchecka boxarna i bilden: 
+
+<p align="center">
+  <img src="../images/turn_off_ai.png" alt="My image" width="50%"/>
+</p>
 
 ## Starta simulatorn
 Eftersom ni inte har en MD307 till hands kommer ni att köra er kod på en simulator. Vi kompilerar och kör våra program precis på samma sätt som om koden körde på riktig hårdvara. Senare i kursen (Laboration 1) kommer ni lära er lite mer om hur detta fungerar och kommer få testa att köra er kod på riktig hårdvara. 

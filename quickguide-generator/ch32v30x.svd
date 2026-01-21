@@ -20538,7 +20538,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
           <fields>
             <field>
               <name>BS0</name>
-              <description>Set bit n in OUTDR to 1</description>
+              <description>Writing 1 to BSn sets bit n in OUTDR to 1</description>
               <bitOffset>0</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
@@ -20634,7 +20634,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
             </field>
             <field>
               <name>BR0</name>
-              <description>Reset bit n in OUTDR to 0</description>
+              <description>Writing 1 to BRn resets bit n in OUTDR to 1</description>
               <bitOffset>16</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
@@ -20742,7 +20742,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
           <fields>
             <field>
               <name>BR0</name>
-              <description>Reset bit 0</description>
+              <description>Writing 1 to BRn resets bit n in OUTDR to 0</description>
               <bitOffset>0</bitOffset>
               <bitWidth>1</bitWidth>
             </field>

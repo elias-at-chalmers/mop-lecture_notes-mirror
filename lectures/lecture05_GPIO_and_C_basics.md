@@ -1,15 +1,5 @@
 # Basics of GPIO and C
 
-**Links:**
-
-**Text and excercises in the Workbook (Arbetsboken)**
-
-Chapter 2, up untill 2.2
-
-**Things that are in the Workbook that should possibly be in this lecture**
-
-Schmidt Trigger
-
 In the previous lecture, we learned how to control the voltage on a GPIO pin to switch an LED on or off. We also saw how to configure a pin as either an output or an input, but we glossed over a few important details.
 
 When we write software for regular computers, we can usually live in blissful ignorance of the fact that all those ones and zeros flying around are really electrical signals. But when we start connecting real devices to microcontrollers, that abstraction breaks down. To make our circuits work properly (and preferably not burn) we need to understand a few fundamental electrical concepts, which require us to think a bit when configuring our input and output ports.
@@ -78,12 +68,7 @@ Now, let's revisit relevant parts from the [Quickguide](LINK) to see how we conf
 
 <div class="boxed">
 
-{{include quickguide/gpio-cfg.html}}
-
-> TODO: Put CNF on left side, since it is first in the bit order
-
-{{include quickguide/gpio-cfg-regs.html}}
-
+{{python quickguide-generator/main.py register-details -all-open GPIOA CFG* }}
 
 </div>
 
@@ -101,7 +86,7 @@ To choose pull *down*, rather than pull up, resistor, we set bit 2 in `OUTDR` to
 Once the GPIO port is configured, we can read the current status of the input pin by reading the corresponding bit (bit 2 in this case) of the `INDR` register.
 
 In assembly, a program that loops until the button has been pushed could look like:
-```
+```s
 la t0, GPIO_D_CFGLR      # Configure pin 2 as input with pull up/down active
 li t1, 0x00000800        # Binary: ... 0000 1000 0000 0000
                          # Pin:    ...   3    2    1    0
@@ -153,7 +138,7 @@ Especially when programming "close to the metal", as in this course, you will of
 
 The standard way of handling this is to break the operation into two operations, where you first *clear* all the bits you want to want to change with an AND operation, and then *set* the desired bits with an OR operation: 
 
-```
+```s
 la t0, 0x40011400    # GPIO_D_CFGLR
 lh t1, 0(t0)         # Load the current value of CFGLR into t1
 li t2, 0xFFFFF0FF    # Load a mask into t2
@@ -167,14 +152,18 @@ sw t1, 0(t0)         # Write back to CFGLR
 This works fine, but is a bit cumbersome and not very fast. Therefore, some peripherals have specific registers for setting or clearing bits in a single operation: 
 
 <div class="boxed">
-{{include quickguide/gpio-bshr-bcr.html}}
+
+{{python quickguide-generator/main.py register-details -all-open GPIOA BSHR* }}
+
+{{python quickguide-generator/main.py register-details -all-open GPIOA BCR* }}
+
 </div>
 
 The `BSHR` register allows you to set some bits and clear some bits in a single 32-bit write operation, which can be useful in some cases. Normally, though, we will use the lower 16 bits in the `BSHR` register to set bits, and the lower 16 bits in the `BCR` register to clear bits. 
 
 So, if we wanted to just blink an LED connected to pin 2 on and off as fast as we could, without changing the values of the other bits, write: 
 
-```
+```s
 la t0, 0x40011410    # GPIO_D_BSHR
 la t1, 0x40011414    # GPIO_D_BCR
 li t2, 0b100         # Only bit 2 
@@ -501,3 +490,6 @@ c ^= b;   // Same as c = c ^ b
 
 ### Precedence of operators
 There are strict rules for which operators take precedence in C. For example, `a = b * c + d` means that we first multiply b and c, then add d. These rules are hard to remember for every single operator, however, and it is usually a good idea to make precedence clear using parentheses whenever precedence is not absolutely obvious.
+
+**Text and excercises in the Workbook (Arbetsboken)**
+Chapter 2, up until 2.2

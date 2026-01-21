@@ -1,5 +1,5 @@
 # Inledande Övning 1 - Utvecklingsmiljön och Inledande Assemblerprogrammering
-I den här övningen introduceras utvecklingsmiljön vi använader i kursen. Vi går igenom hur ni skriver och kör assemblerkod på MD307 (i simulatorn). Ni skall bekanta er med Visual Studio Code (hädanefter VSCode), som vi senare också kommer använda för utveckling i C.
+I den här övningen introduceras utvecklingsmiljön vi använder i kursen. Vi går igenom hur ni skriver och kör assemblerkod på MD307 (i simulatorn). Ni skall bekanta er med Visual Studio Code (hädanefter VSCode), som vi senare också kommer använda för utveckling i C.
 
 ## Skapa ett assemblerprojekt
 Innan ni drar igång med den här övningen förväntas ni ha gått igenom Föreläsning 1, och sedan installerat simulatorn och VSCode enligt anvisningarna [här](https://www.cse.chalmers.se/edu/resources/mop/lecture_notes/introductory_exercises/Getting_Started_with_Visual_Studio_Code.html). Om ni inte startat om VSCode sedan installationen, gör detta nu (annars hittar inte VSCode's terminal GDB!) Starta sedan VSCode i ett nytt, tomt directory. Skapa ett tomt assemblerprojekt: 
@@ -23,13 +23,13 @@ I listan till vänster ser ni alla filer som ligger i mappen där ni startade VS
 * Underkatalogen `.vscode`: Denna innehåller inställningar för VSCode, och kan oftast ignoreras.
 * Underkatalogen `device`: Innehåller konfigurationsfiler för vår utvecklingsmiljö. 
 * Underkatalogen `src`: Här ligger assemblerkodfilerna som skall bli till ett program.
-    * `main.s`: Det här är filen där ni skall skriva eran kod. Från början innehåller den bara ett program som inte gör någonting.
+    * `main.s`: Det här är filen där ni skall skriva er kod. Från början innehåller den bara ett program som inte gör någonting.
     * `startup.s`: Den här filen innehåller lite initialiseringskod som körs innan varje program. Ni behöver inte bry er om den förrän i slutet av kursen. 
 * `Makefile`: Detta är en textfil som beskriver hur programmet skall kompileras. Ni kommer lära er lite mer om kompilatorn senare i kursen. För tillfället kan ni låta den vara.
 * `md307-runtime.a`: Det här är ett "runtime bibliotek", grundläggande funktioner som behövs för att C skall fungera. Vi pratar mer om det senare i kursen. 
 
 ## Stäng av din AI "kompis"
-*Om* du har GitHub copilot installerat så kommer den omeddelbart börja föreslå vilka instruktioner du skall skriva. Det här kan vara extremt användbart senare, när du kan assemblerprogrammering, men är katastrofalt dåligt när man skall lära sig. Så, för din egen skull, stäng av AI hjälpen genom att avchecka boxarna i bilden: 
+*Om* du har GitHub copilot installerat så kommer den omedelbart börja föreslå vilka instruktioner du skall skriva. Det här kan vara extremt användbart senare, när du kan assemblerprogrammering, men är katastrofalt dåligt när man skall lära sig. Så, för din egen skull, stäng av AI hjälpen genom att avchecka boxarna i bilden: 
 
 <p align="center">
   <img src="../images/turn_off_ai.png" alt="My image" width="50%"/>
@@ -51,7 +51,7 @@ som genast lägger sig och väntar på att VSCode skall ladda upp ett program.
   <img src="../images/Picture3.png" alt="My image" width="80%"/>
 </p>
 
-Vi har på mening skrivit en felaktig instruktion ("lii" är inte en RISC-V assembler instruktion) för att ni skall se hur VSCode hjälper er att uptäcka enkla misstag. Låt misstaget vara kvar och försök nu kompilera och köra programmet:
+Vi har på mening skrivit en felaktig instruktion ("lii" är inte en RISC-V assembler instruktion) för att ni skall se hur VSCode hjälper er att upptäcka enkla misstag. Låt misstaget vara kvar och försök nu kompilera och köra programmet:
 
 <p align="center">
   <img src="../images/Picture4.png" alt="My image" width="80%"/>

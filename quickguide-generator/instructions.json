@@ -58,6 +58,9 @@
 
     { "instruction": "beqz", "is_pseudo": true,  "implementation": "beq rs, x0, offset",   "description": "Branch if equal to zero",              "shortdesc": "PC ← PC+offset if rs = 0",             "operands": ["rs", "offset"],         "restrictions": [null, "12-bit signed offset"] },
     { "instruction": "bnez", "is_pseudo": true,  "implementation": "bne rs, x0, offset",   "description": "Branch if not equal to zero",          "shortdesc": "PC ← PC+offset if rs ≠ 0",             "operands": ["rs", "offset"],         "restrictions": [null, "12-bit signed offset"] },
+    { "instruction": "bgtz", "is_pseudo": true, "implementation": "blt x0, rs, offset", "description": "Branch if greater than zero", "shortdesc": "PC ← PC+offset if rs > 0", "operands": ["rs", "offset"], "restrictions": [null, "12-bit signed offset"] },
+    { "instruction": "bltz", "is_pseudo": true, "implementation": "blt rs, x0, offset", "description": "Branch if less than zero", "shortdesc": "PC ← PC+offset if rs < 0", "operands": ["rs", "offset"], "restrictions": [null, "12-bit signed offset"] },
+
     { "instruction": "bgt",  "is_pseudo": true,  "implementation": "blt rs2, rs1, offset", "description": "Branch if greater than (signed)",      "shortdesc": "PC ← PC+offset if rs1 > rs2",          "operands": ["rs1", "rs2", "offset"], "restrictions": [null, null, "12-bit signed offset"] },
     { "instruction": "ble",  "is_pseudo": true,  "implementation": "bge rs2, rs1, offset", "description": "Branch if less or equal (signed)",     "shortdesc": "PC ← PC+offset if rs1 ≤ rs2",          "operands": ["rs1", "rs2", "offset"], "restrictions": [null, null, "12-bit signed offset"] },
     { "instruction": "bgtu", "is_pseudo": true,  "implementation": "bltu rs2, rs1, offset","description": "Branch if greater than (unsigned)",    "shortdesc": "PC ← PC+offset if rs1 > rs2 (u)",      "operands": ["rs1", "rs2", "offset"], "restrictions": [null, null, "12-bit signed offset"] },

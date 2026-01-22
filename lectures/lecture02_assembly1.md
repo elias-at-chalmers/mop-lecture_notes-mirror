@@ -228,32 +228,6 @@ There are a few important things to note about this simple read operation:
 * The processor core and compiler have no idea whether you are trying to read from SRAM, FLASH, or anything else. It will put an address on the bus and let the memory system figure out the routing. 
 * The *name of the instruction* decides how many bytes you want to read, starting at the address. You can read 8 bits, 16 bits, or 32 bits with `lb` (Load Byte), `lh` (Load Halfword), or `lw` (Load Word) respectively. 
 
-### Sign extension
-An important point to note is that, irrespective of whether an 8-, 16-, or 32-bit integer is loaded into a register, the value is represented internally as a 32-bit integer. For unsigned integers, this simply means that the value is placed in the least significant bits of the register, while the remaining higher-order bits are filled with zeros. The situation is more subtle for signed integers.
-
-Consider the following example:
-```c
-unsigned char a = 251;  // 0xFB in memory
-signed char b = -5;     // 0xFB in memory
-int c = a + b;
-```
-
-Since 251−5=246, we expect `c` to hold the value 246 after these statements. However, when stored in memory as single bytes, both `a` and `b` have the bit pattern `0xFB`. Consequently, whenever a value smaller than 32 bits is loaded from memory, the processor must be told whether the value should be interpreted as signed or unsigned.
-
-If the value is signed, it must be sign-extended before being placed into a register. Sign extension is straightforward: the most significant bit of the original value (bit 7 in the case of a `char`) is replicated into all higher-order bits of the destination register. 
-
-In assembly, the code above might be written as follows: 
-```s
-la t0, a          # Load address of `a` to t0
-lbu t0, 0(t0)     # Load `a` as an unsigned byte into t0. t0 = 0x000000FB
-la t1, b          # Load address of `b` into t1
-lb t1, 0(t1)      # Load `b` as a signed byte into t1. t1 = 0xFFFFFFFB
-add t2, t0, t1    # Add values into t2.
-la   t3, c        # Load address of `c` into t3
-sw   t2, 0(t3)    # Store the 32-bit result to memory
-```
-
-
 ### Storing data to memory
 
 Storing data works in very much the same way. We first load a base address into a register using `la` and then write a register's value to that address using the `sb` (Store Byte, 8 bits), `sh` (Store Halfword, 16 bits), or `sw` (Store Word, 32 bits) instruction.
@@ -309,6 +283,32 @@ At the end of the code, we "allocate" space for the variables:
    var_a: .byte 10
 ```
 Here, `var_a:` is a label that marks a memory location, and `.byte 10` reserves one byte at that location and initializes it to 10. The same applies to `var_b`.
+
+### Sign extension
+An important point to note is that, irrespective of whether an 8-, 16-, or 32-bit integer is loaded into a register, the value is represented internally as a 32-bit integer. For unsigned integers, this simply means that the value is placed in the least significant bits of the register, while the remaining higher-order bits are filled with zeros. The situation is more subtle for signed integers.
+
+Consider the following example:
+```c
+unsigned char a = 251;  // 0xFB in memory
+signed char b = -5;     // 0xFB in memory
+int c = a + b;
+```
+
+Since 251−5=246, we expect `c` to hold the value 246 after these statements. However, when stored in memory as single bytes, both `a` and `b` have the bit pattern `0xFB`. Consequently, whenever a value smaller than 32 bits is loaded from memory, the processor must be told whether the value should be interpreted as signed or unsigned.
+
+If the value is signed, it must be sign-extended before being placed into a register. Sign extension is straightforward: the most significant bit of the original value (bit 7 in the case of a `char`) is replicated into all higher-order bits of the destination register. 
+
+In assembly, the code above might be written as follows: 
+```s
+la t0, a          # Load address of `a` to t0
+lbu t0, 0(t0)     # Load `a` as an unsigned byte into t0. t0 = 0x000000FB
+la t1, b          # Load address of `b` into t1
+lb t1, 0(t1)      # Load `b` as a signed byte into t1. t1 = 0xFFFFFFFB
+add t2, t0, t1    # Add values into t2.
+la   t3, c        # Load address of `c` into t3
+sw   t2, 0(t3)    # Store the 32-bit result to memory
+```
+
 
 ### Load and Store Global
 Since loading variables to registers from memory and storing variables from register to memory are very common operations, there are very useful pseudo instructions available that simplify this in the assembly language. 

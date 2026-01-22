@@ -20,7 +20,7 @@
 #define GPIO_D_BASE 0x40011400
 #define GPIO_D_CFGLR ((volatile uint32_t *)(GPIO_D_BASE + 0x00))
 #define GPIO_D_CFGHR ((volatile uint32_t *)(GPIO_D_BASE + 0x04))
-#define GPIO_D_INDR  ((volatile uint16_t *)(GPIO_D_BASE + 0x08))
+#define GPIO_D_INDR  ((volatile uint32_t *)(GPIO_D_BASE + 0x08))
 #define GPIO_D_OUTDR ((volatile uint16_t *)(GPIO_D_BASE + 0x0C))
 #define GPIO_D_BSHR  ((volatile uint32_t *)(GPIO_D_BASE + 0x10))
 #define GPIO_D_BCR   ((volatile uint16_t *)(GPIO_D_BASE + 0x14))
@@ -82,8 +82,10 @@ void gpio_d_set_pin_input(
         *GPIO_D_CFGHR |= (cnfmode << (idx * 4));
     }
     // Set pull-up/pull-down in OUTDR
+
     if(mode == 0) *GPIO_D_OUTDR &= ~(1 << pin); // pull-down
     else if(mode == 1) *GPIO_D_OUTDR |= (1 << pin);  // pull-up
+
 #else 
     // Your code here
 #endif

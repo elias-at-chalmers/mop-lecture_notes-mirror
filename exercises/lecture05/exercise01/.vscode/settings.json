@@ -12,5 +12,6 @@
     ],
     "C_Cpp.default.compilerPath": "${config:mdx07-templates.riscvToolchainPath}/riscv32-unknown-elf-gcc",
     "mcu-debug.peripheral-viewer.svdAddrGapThreshold": -1,
-    "peripheral-inspector.svdAddrGapThreshold": -1
+    "peripheral-inspector.svdAddrGapThreshold": -1,
+    "cortex-debug.variableUseNaturalFormat": false
 }

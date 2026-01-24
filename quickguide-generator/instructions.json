@@ -46,7 +46,7 @@
   ],
 
   "Control Flow Instructions": [
-    { "instruction": "jal",  "is_pseudo": false, "implementation": null, "description": "Jump and link",           "shortdesc": "rd ← PC+4; PC ← PC+offset",   "operands": ["rd", "offset"],        "addressing_mode": "offset(pc)",  "restrictions": ["rd ≠ x0", "signed 20-bit immediate" ] },
+    { "instruction": "jal",  "is_pseudo": false, "implementation": null, "description": "Jump and link",           "shortdesc": "rd ← PC+4; PC ← PC+offset",   "operands": ["rd", "offset"],        "addressing_mode": null,  "restrictions": ["rd ≠ x0", "signed 20-bit immediate" ] },
     { "instruction": "jalr", "is_pseudo": false, "implementation": null, "description": "Jump and link register",  "shortdesc": "rd ← PC+4; PC ← rs1+offset",  "operands": ["rd", "rs1", "offset"], "addressing_mode": "offset(rs1)", "restrictions": ["rd ≠ x0", null, "signed 12-bit immediate" ] },
 
     { "instruction": "beq",  "is_pseudo": false, "implementation": null, "description": "Branch if equal",                      "shortdesc": "PC ← PC+offset if rs1 = rs2",          "operands": ["rs1", "rs2", "offset"], "restrictions": [null, null, "12-bit signed offset"] },

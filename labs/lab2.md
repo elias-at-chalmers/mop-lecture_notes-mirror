@@ -1,5 +1,8 @@
 # Laboration 2
 
+In this lab assignment, you will get to run and debug a C program on real
+hardware.
+
 ## Preparations
 
 ## Lab environment

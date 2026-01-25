@@ -82,7 +82,6 @@ On the first line, we create a global integer variable called `b` and initialize
 <p align="center">
   <img src="../images/pointer_memory.png" alt="My image" width="50%" />
 </p>
-<-- nitpicking: to reduce cognitive load by maybe 1% i would dim the "uninteresting" areas of memory and give a special color to the two occurences of "0x2100" and/or add a coloured arrow between them -->
 
 On the next, we create another variable called `ptr_to_b`. The type of this variable is `int *`. The asterisk here means that `ptr_to_b` is of the type "pointer to integer". This variable resides in the next available memory in the initialized data area, address `0x2104`. 
 
@@ -104,9 +103,7 @@ they allow us to express reading and writing from arbitrary memory addresses.
 When we do not have an operating system and drivers, the only way for the processor to communicate with peripheral hardware is through memory load and store
 operations. One reason that pointers are important in machine oriented programming is that they allow us to express reading and writing, not only from variables, but from any arbitrary memory addresses
 
-You have already seen examples of this when writing to GPIO ports. Let us consider another toy example:  
-
-<-- We haven't seen examples of using pointers for GPIO ports yet, or have I missed something? -->
+Let us consider another toy example:  
 
 Our program is loaded into a 32kb SRAM chip that is mapped to addresses `0x20000000` - `0x20007FFF`. Let's say there is also a second 128kb SRAM chip mapped to addresses `0x30000000`- `0x3001FFFF`. Our program needs to read some data into memory for future processing. Since there is a lot of data to read, this data will not fit together with our program on the smaller SRAM, so we will put it on the larger SRAM: 
 

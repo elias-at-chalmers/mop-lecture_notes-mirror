@@ -9,6 +9,7 @@
 
 </tiny>
 
+
 {{python quickguide-generator/instructions.py -short True}}
 
 <h1> Long descriptions </h1>

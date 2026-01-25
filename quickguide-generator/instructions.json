@@ -17,7 +17,17 @@
     { "instruction": "sub", "is_pseudo": false, "implementation": null, "description": "Subtract", "shortdesc": "rd ← rs1 − rs2", "operands": ["rd", "rs1", "rs2"], "restrictions": ["rd ≠ x0", null, null] },
     { "instruction": "xor", "is_pseudo": false, "implementation": null, "description": "XOR", "shortdesc": "rd ← rs1 ^ rs2", "operands": ["rd", "rs1", "rs2"], "restrictions": ["rd ≠ x0", null, null] },
     { "instruction": "or", "is_pseudo": false, "implementation": null, "description": "OR", "shortdesc": "rd ← rs1 | rs2", "operands": ["rd", "rs1", "rs2"], "restrictions": ["rd ≠ x0", null, null] },
-    { "instruction": "and", "is_pseudo": false, "implementation": null, "description": "AND", "shortdesc": "rd ← rs1 & rs2", "operands": ["rd", "rs1", "rs2"], "restrictions": ["rd ≠ x0", null, null] }
+    { "instruction": "and", "is_pseudo": false, "implementation": null, "description": "AND", "shortdesc": "rd ← rs1 & rs2", "operands": ["rd", "rs1", "rs2"], "restrictions": ["rd ≠ x0", null, null] },
+
+    { "instruction": "mul", "is_pseudo": false, "implementation": null, "description": "Multiply (lower 32 bits)", "shortdesc": "rd ← (rs1 × rs2)[31:0]", "operands": ["rd", "rs1", "rs2"], "restrictions": ["rd ≠ x0", null, null] },
+    { "instruction": "mulh", "is_pseudo": false, "implementation": null, "description": "Multiply high (signed × signed)", "shortdesc": "rd ← (rs1 × rs2)[63:32] (signed)", "operands": ["rd", "rs1", "rs2"], "restrictions": ["rd ≠ x0", null, null] },
+    { "instruction": "mulhu", "is_pseudo": false, "implementation": null, "description": "Multiply high (unsigned × unsigned)", "shortdesc": "rd ← (rs1 × rs2)[63:32] (unsigned)", "operands": ["rd", "rs1", "rs2"], "restrictions": ["rd ≠ x0", null, null] },
+    { "instruction": "mulhsu", "is_pseudo": false, "implementation": null, "description": "Multiply high (signed × unsigned)", "shortdesc": "rd ← (rs1 × rs2)[63:32] (signed × unsigned)", "operands": ["rd", "rs1", "rs2"], "restrictions": ["rd ≠ x0", null, null] },
+    { "instruction": "div", "is_pseudo": false, "implementation": null, "description": "Divide (signed)", "shortdesc": "rd ← rs1 ÷ rs2 (signed)", "operands": ["rd", "rs1", "rs2"], "restrictions": ["rd ≠ x0", null, null] },
+    { "instruction": "divu", "is_pseudo": false, "implementation": null, "description": "Divide (unsigned)", "shortdesc": "rd ← rs1 ÷ rs2 (unsigned)", "operands": ["rd", "rs1", "rs2"], "restrictions": ["rd ≠ x0", null, null] },
+    { "instruction": "rem", "is_pseudo": false, "implementation": null, "description": "Remainder (signed)", "shortdesc": "rd ← rs1 % rs2 (signed)", "operands": ["rd", "rs1", "rs2"], "restrictions": ["rd ≠ x0", null, null] },
+    { "instruction": "remu", "is_pseudo": false, "implementation": null, "description": "Remainder (unsigned)", "shortdesc": "rd ← rs1 % rs2 (unsigned)", "operands": ["rd", "rs1", "rs2"], "restrictions": ["rd ≠ x0", null, null] }    
+    
   ],
 
   "Shifts & Bit Manipulation": [

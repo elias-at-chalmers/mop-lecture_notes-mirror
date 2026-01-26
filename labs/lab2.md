@@ -66,6 +66,32 @@ Luckily, you *love* fixing broken software.
 
 ## Task 1: Fixing the Program
 
+The program is riddled with bugs. Given your familiarity with similar code from
+the preparatory assignment, it *might* be possible to simply read the code from
+beginning to end and fix all the bugs without ever running it, but don't do
+that. The point is for you to learn how to debug a program in a *structured*
+way. As you may have already noticed, debugging (fixing bugs) is usually a much
+more time-consuming part of software development than actually writing the code.
+This problem should *not* be approached by trying to learn how to write perfect
+code from the outset - that is unattainable. Instead, one should learn how to
+find errors efficiently - once the error is pinpointed, the solution is usually
+obvious.
+
+**Warning**: *When debugging code (especially code written by someone other than
+yourself), correcting inconsequential things (like the way the code is
+formatted) can be tempting, but* ***refrain*** *from doing so! When debugging,
+it is useful to check* ***exactly*** *what changes have been made to the source
+code (the TAs may want to do so if you run into problems), and having a bunch of
+irrelevant changes makes it more difficult.*
+
+Let's look at the program from a top-down perspective starting from `main()`,
+just one level deep into the calling hierarchy:
+
+<!-- TODO: call graph from main, one level down -->
+
+We start off by initialising the GPIO ports. If the pins are configured
+incorrectly, testing the program is going to be difficult. So let's start there.
+
 ### Task 1.1: Checking the GPIO Ports
 
 ### Task 1.2: Checking the Delay Functions

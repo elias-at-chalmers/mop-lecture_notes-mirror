@@ -127,6 +127,49 @@ next.
 
 ### Task 1.2: Checking the Delay Functions
 
+Have a look in the file `systick.c`. It appears `delay_milli()`,
+`delay_micro()` and `delay_nano()` are all essentially carbon copies of one
+another, where the only difference is the initial calculation of the `count`
+variable.
+
+If the delay functions were defined in terms of one another in some reasonable
+way, testing one of them would have been enough to verify the correctness of all
+of them. However, that is not the case, so we are forced to test all of them
+separately. Let's not bother with the mathematics of the initial calculation;
+instead, we'll just devise a simple test (we would have to do that anyway) and
+deal with the headache if the test fails.
+
+We can use the debugger to step over a delay function and measure the time it
+takes to complete. Add the code below to the beginning of `main()`.
+
+```c
+#define MS 0 // Change the number to something reasonable!
+  delay_milli(MS);
+  delay_micro(1000 * MS);
+  delay_nano(1000 * 1000 * MS);
+```
+
+Try to think of a reasonable target for the test, and change the definition of
+`MS` accordingly. Keep in mind you will have to measure it manually, using a
+stopwatch on your phone or something similar. If the target is too short, your
+reaction time (noticing the debugger stopped and actually stopping the
+stopwatch) will be too significant and render the test useless. If the target is
+too long, you might get too bored to actually finish the test.
+
+For each of the delay functions, use the debugger to *Step Over* (F10) and
+record the time it takes to complete the step.
+
+Were the delays reasonably accurate? If any of the delays deviated too much, fix
+the calculation and test it again to verify correctness.
+
+Make a note of your corrections, if any. Remove the test code and check if the
+program works now.
+
+*Gah! Still broken.*
+
+The code of the *ASCII display* is fairly complex, and depends on the input from
+the *keypad*. If we're lucky, we only need to fix the *keypad* code. Onward!
+
 ### Task 1.3: Checking the Keypad
 
 ### Task 1.4: Checking the ASCII Display

@@ -94,6 +94,37 @@ incorrectly, testing the program is going to be difficult. So let's start there.
 
 ### Task 1.1: Checking the GPIO Ports
 
+**NB**: *You may assume the* `.h` *header files, which include the port macros,
+are correct. You do not need to check those.*
+
+Starting with the keypad (connected to *Port D 15..8*), recall that the upper
+four pins (*15..12*) should be configured as *digital output (open drain, 2
+MHz)*, and the lower four pins (*11..8*) as *digital input (pull up).*
+
+Consult the QuickGuide and carefully derive what values should be written to
+what registers for this configuration to work.
+
+Look at the code in `init_keypad()` and see if you can spot the errors. If so,
+modify the code and make a note of your corrections. If not, consult a TA.
+
+After making a change, it is usually a good idea to devise a test and verify
+correctness. We might (incorrectly) assume it would be a good idea to connect
+the port to the *bargraph* and add some code to test the output pins, and then
+connect the port to the *DIL switch* and add some code to test the input pins.
+Unfortunately, that wouldn't work because the *bargraph* requires push/pull (not
+open drain) and the *DIL switch* requires pull down (not pull up).
+
+So for this task, you need to be *really* confident in your ocular inspection.
+You may ask a TA to check it for you, if you wish.
+
+To save time, you needn't bother checking `init_ascii()` - it is correctly
+implemented.
+
+*What's that? The program still doesn't work? How unfortunate!*
+
+The delay functions are used in most parts of the program, so let's check those
+next.
+
 ### Task 1.2: Checking the Delay Functions
 
 ### Task 1.3: Checking the Keypad

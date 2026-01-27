@@ -172,6 +172,45 @@ the *keypad*. If we're lucky, we only need to fix the *keypad* code. Onward!
 
 ### Task 1.3: Checking the Keypad
 
+Looking again at the calling hierarchy from before, we notice that the only
+*keypad*-related call made in `main()` is to `keyb()`.
+
+Put a breakpoint at the call to `keyb()`, start the program and *Continue* (F5)
+to get to the breakpoint. Press and hold one of the buttons on the *keypad*, and
+*Continue* (F5). Check the return value. Is it what you expected? Keep trying
+different inputs until you have found an input that yields an incorrect return
+value.
+
+To get a better picture of the situation, let's look at the calling hierarchy
+below, starting from `keyb()`.
+
+<!-- TODO: call graph from keyb -->
+
+Luckily it's not very complex. You can ignore the call to `delay_nano()` - it
+needs to be there to give enough time for the row activation to take effect.
+That leaves us with `kbd_activate()` and `kbd_getcol()`.
+
+Use the debugger to *Step Into* (F11) `keyb()`. Put breakpoints on the return
+statements. Press and hold a button that earlier yielded an incorrect return
+value, and *Continue* (F5). Do the values of the *row* and *col* variables meet
+your expectations? The answer should give you a clue whether the error lies
+within `kbd_activate()` or `kbd_getcol()`.
+
+Dig deeper into the calling hierarchy based on your findings. Carefully step
+through the function and correct any errors you come across. If you get stuck,
+ask a TA for help.
+
+After any corrections, go back to testing `keyb()` and verify that it returns
+the values you expect.
+
+Make a note of your corrections, cross your fingers, and check if the program
+works.
+
+*No... no, no, no!*
+
+Yes. You know what that means. We finally get the pleasure of debugging the
+*ASCII display* code.
+
 ### Task 1.4: Checking the ASCII Display
 
 ### Task 2: Getting Approved

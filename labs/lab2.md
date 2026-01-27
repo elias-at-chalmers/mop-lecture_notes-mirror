@@ -251,3 +251,10 @@ systematically debug the next layer.
 two bugs, there are no more bugs to be found.*
 
 ### Task 2: Getting Approved
+
+After thoroughly testing and verifying that your program works as expected,
+demonstrate your solution to a TA. Show them that the program works. Explain the
+bugs you found and how you fixed them. Answer any questions they may have.
+
+***If you are approved by the TA, it is YOUR responsibility to verify that it
+has been documented in Canvas under 'Grades'. Do so before leaving!***

@@ -213,4 +213,41 @@ Yes. You know what that means. We finally get the pleasure of debugging the
 
 ### Task 1.4: Checking the ASCII Display
 
+Yet again looking at the calling hierarchy from `main()`, we see two calls
+related to the *ASCII display*, namely `ascii_gotoxy()` and
+`ascii_write_char()`. Let's have a look at their calling hierarchies (excluding
+delay functions, since you've already fixed those) below.
+
+<!-- TODO: call graph from ascii_gotoxy and ascii_write_char -->
+
+This one is a bit more complex, but still manageable. There are many incoming
+arrows in the bottom layer, i.e. many calls made to `ascii_ctrl_bit_set()` and
+`ascii_ctrl_bit_clear()`. If they don't work, nor will the ones that depend on
+them.
+
+So let's work our way up from the bottom, checking the layers one by one and
+testing the program after each bug fix, until the program works.
+
+Since the functions of the bottom layer (defined as macros in `ascii.h`) should
+have opposite effects, we can easily test them with the code below.
+
+```c
+  *GPIO_OUTDR(GPIO_E) = 0;
+  ascii_ctrl_bit_set(1 << 7);
+  unsigned char ctrl = *GPIO_OUTDR(GPIO_E);
+  // Check here that bit 7 of ctrl is set
+  ascii_ctrl_bit_clear(1 << 7);
+  ctrl = *GPIO_OUTDR(GPIO_E);
+  // Check here that bit 7 of ctrl is cleared
+```
+
+Step through the code with the debugger, check for unexpected behaviour, and fix
+and document any bugs you come across.
+
+Moving forward, you are on your own. Use what you've learned so far to
+systematically debug the next layer.
+
+*Hint: There is one bug per layer on the bottom two layers. Apart from these
+two bugs, there are no more bugs to be found.*
+
 ### Task 2: Getting Approved

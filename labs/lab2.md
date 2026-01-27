@@ -57,7 +57,7 @@ Time to run the program. Go to the *Run and Debug* view (Ctrl+Shift+D), select
 *Build and debug (hardware)* in the drop-down list, and press *Start Debugging*
 (F5).
 
-When the debugger has automatically stopped in the beginning of `main()`, press
+When the debugger has automatically stopped in the beginning of `main`, press
 *Continue* (F5) and test if the program behaves as expected.
 
 *Rats! It doesn't work!*
@@ -84,13 +84,13 @@ it is useful to check* ***exactly*** *what changes have been made to the source
 code (the TAs may want to do so if you run into problems), and having a bunch of
 irrelevant changes makes it more difficult.*
 
-Let's look at the program from a top-down perspective starting from `main()`,
-just one level deep into the calling hierarchy:
+Let's look at the program from a top-down perspective starting from `main`, just
+one level deep into the calling hierarchy:
 
 <!-- TODO: call graph from main, one level down -->
 
-We start off by initialising the GPIO ports. If the pins are configured
-incorrectly, testing the program is going to be difficult. So let's start there.
+We start off with initializations. If the GPIO ports are configured incorrectly,
+testing the program is going to be difficult. So let's start there.
 
 ### Task 1.1: Checking the GPIO Ports
 
@@ -104,7 +104,7 @@ MHz)*, and the lower four pins (*11..8*) as *digital input (pull up).*
 Consult the QuickGuide and carefully derive what values should be written to
 what registers for this configuration to work.
 
-Look at the code in `init_keypad()` and see if you can spot the bugs. If so,
+Look at the code in `init_keypad` and see if you can spot the bugs. If so,
 modify the code and make a note of your corrections. If not, consult a TA.
 
 After making a change, it is usually a good idea to devise a test and verify
@@ -117,7 +117,7 @@ open drain) and the *DIL switch* requires pull down (not pull up).
 So for this task, you need to be *really* confident in your ocular inspection.
 You may ask a TA to check it for you, if you wish.
 
-To save time, you needn't bother checking `init_ascii()` - it is correctly
+To save time, you needn't bother checking `init_ascii` - it is correctly
 implemented.
 
 *What's that? The program still doesn't work? How unfortunate!*
@@ -127,9 +127,9 @@ next.
 
 ### Task 1.2: Checking the Delay Functions
 
-Have a look in the file `systick.c`. It appears `delay_milli()`, `delay_micro()`
-and `delay_nano()` are all essentially carbon copies of one another, where the
-only difference is the initial calculation of the `count` variable.
+Have a look in the file `systick.c`. It appears `delay_milli`, `delay_micro` and
+`delay_nano` are all essentially carbon copies of one another, where the only
+difference is the initial calculation of the `count` variable.
 
 If the delay functions were defined in terms of one another in some reasonable
 way, testing one of them would have been enough to verify the correctness of all
@@ -139,7 +139,7 @@ instead, we'll just devise a simple test (we would have to do that anyway) and
 deal with the headache if the test fails.
 
 We can use the debugger to step over a delay function and measure the time it
-takes to complete. Add the code below to the beginning of `main()`.
+takes to complete. Add the code below to the beginning of `main`.
 
 ```c
 #define MS 0 // Change the number to something reasonable!
@@ -172,35 +172,35 @@ the *keypad*. If we're lucky, we only need to fix the *keypad* code. Onward!
 ### Task 1.3: Checking the Keypad
 
 Looking again at the calling hierarchy from before, we notice that the only
-*keypad*-related call made in `main()` is to `keyb()`.
+*keypad*-related call made in `main` is to `keyb`.
 
-Put a breakpoint at the call to `keyb()`, start the program and *Continue* (F5)
-to get to the breakpoint. Press and hold one of the buttons on the *keypad*, and
+Put a breakpoint at the call to `keyb`, start the program and *Continue* (F5) to
+get to the breakpoint. Press and hold one of the buttons on the *keypad*, and
 *Continue* (F5). Check the return value. Is it what you expected? Keep trying
 different inputs until you have found an input that yields an incorrect return
 value.
 
 To get a better picture of the situation, let's look at the calling hierarchy
-below, starting from `keyb()`.
+below, starting from `keyb`.
 
 <!-- TODO: call graph from keyb -->
 
-Luckily it's not very complex. You can ignore the call to `delay_nano()` - it
+Luckily it's not very complex. You can ignore the call to `delay_nano` - it
 needs to be there to give enough time for the row activation to take effect.
-That leaves us with `kbd_activate()` and `kbd_getcol()`.
+That leaves us with `kbd_activate` and `kbd_getcol`.
 
-Use the debugger to *Step Into* (F11) `keyb()`. Put breakpoints on the return
+Use the debugger to *Step Into* (F11) `keyb`. Put breakpoints on the return
 statements. Press and hold a button that earlier yielded an incorrect return
 value, and *Continue* (F5). Do the values of the *row* and *col* variables meet
 your expectations? The answer should give you a clue whether the bug lies within
-`kbd_activate()` or `kbd_getcol()`.
+`kbd_activate` or `kbd_getcol`.
 
 Dig deeper into the calling hierarchy based on your findings. Carefully step
 through the function and correct any bugs you come across. If you get stuck, ask
 a TA for help.
 
-After any corrections, go back to testing `keyb()` and verify that it returns
-the values you expect.
+After any corrections, go back to testing `keyb` and verify that it returns the
+values you expect.
 
 Make a note of your corrections, cross your fingers, and check if the program
 works.
@@ -212,16 +212,16 @@ Yes. You know what that means. We finally get the pleasure of debugging the
 
 ### Task 1.4: Checking the ASCII Display
 
-Yet again looking at the calling hierarchy from `main()`, we see two calls
-related to the *ASCII display*, namely `ascii_gotoxy()` and
-`ascii_write_char()`. Let's have a look at their calling hierarchies (excluding
-delay functions, since you've already fixed those) below.
+Yet again looking at the calling hierarchy from `main`, we see two calls related
+to the *ASCII display*, namely `ascii_gotoxy` and `ascii_write_char`. Let's have
+a look at their calling hierarchies (excluding delay functions, since you've
+already fixed those) below.
 
 <!-- TODO: call graph from ascii_gotoxy and ascii_write_char -->
 
 This one is a bit more complex, but still manageable. There are many incoming
-arrows in the bottom layer, i.e. many calls made to `ascii_ctrl_bit_set()` and
-`ascii_ctrl_bit_clear()`. If they don't work, nor will the ones that depend on
+arrows in the bottom layer, i.e. many calls made to `ascii_ctrl_bit_set` and
+`ascii_ctrl_bit_clear`. If they don't work, nor will the ones that depend on
 them.
 
 So let's work our way up from the bottom, checking the layers one by one and

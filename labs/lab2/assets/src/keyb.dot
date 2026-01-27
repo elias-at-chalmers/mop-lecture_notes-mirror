@@ -1,0 +1,7 @@
+digraph {
+  keyb -> {
+    kbd_activate
+    delay_nano
+    kbd_getcol
+  }
+}

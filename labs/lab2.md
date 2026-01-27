@@ -22,7 +22,7 @@ The DIL switch will be used for debugging purposes.
 
 ## Task 0: Getting Started
 
-Create a new project folder and initialise a project with the *Lab2* template
+Create a new project folder and initialize a project with the *Lab2* template
 (*Ctrl+Shift+P -> MDx07: Initialize project -> Lab Assignments -> Lab2*).
 
 Connect the *keypad* to *Port D 15..8*. Connect the *PTB-111* to the *MD307* via
@@ -74,7 +74,7 @@ way. As you may have already noticed, debugging (fixing bugs) is usually a much
 more time-consuming part of software development than actually writing the code.
 This problem should *not* be approached by trying to learn how to write perfect
 code from the outset - that is unattainable. Instead, one should learn how to
-find errors efficiently - once the error is pinpointed, the solution is usually
+find bugs efficiently - once the bug is pinpointed, the solution is usually
 obvious.
 
 **Warning**: *When debugging code (especially code written by someone other than
@@ -104,7 +104,7 @@ MHz)*, and the lower four pins (*11..8*) as *digital input (pull up).*
 Consult the QuickGuide and carefully derive what values should be written to
 what registers for this configuration to work.
 
-Look at the code in `init_keypad()` and see if you can spot the errors. If so,
+Look at the code in `init_keypad()` and see if you can spot the bugs. If so,
 modify the code and make a note of your corrections. If not, consult a TA.
 
 After making a change, it is usually a good idea to devise a test and verify
@@ -193,12 +193,12 @@ That leaves us with `kbd_activate()` and `kbd_getcol()`.
 Use the debugger to *Step Into* (F11) `keyb()`. Put breakpoints on the return
 statements. Press and hold a button that earlier yielded an incorrect return
 value, and *Continue* (F5). Do the values of the *row* and *col* variables meet
-your expectations? The answer should give you a clue whether the error lies
-within `kbd_activate()` or `kbd_getcol()`.
+your expectations? The answer should give you a clue whether the bug lies within
+`kbd_activate()` or `kbd_getcol()`.
 
 Dig deeper into the calling hierarchy based on your findings. Carefully step
-through the function and correct any errors you come across. If you get stuck,
-ask a TA for help.
+through the function and correct any bugs you come across. If you get stuck, ask
+a TA for help.
 
 After any corrections, go back to testing `keyb()` and verify that it returns
 the values you expect.
@@ -247,8 +247,8 @@ and document any bugs you come across.
 Moving forward, you are on your own. Use what you've learned so far to
 systematically debug the next layer.
 
-*Hint: There is one bug per layer on the bottom two layers. Apart from these
-two bugs, there are no more bugs to be found.*
+*Hint: There is one bug per layer on the bottom two layers. Apart from these two
+bugs, there are no more bugs to be found.*
 
 ### Task 2: Getting Approved
 

@@ -94,8 +94,8 @@ incorrectly, testing the program is going to be difficult. So let's start there.
 
 ### Task 1.1: Checking the GPIO Ports
 
-**NB**: *You may assume the* `.h` *header files, which include the port macros,
-are correct. You do not need to check those.*
+**NB**: *You may assume the definitions in the GPIO header file `gpio.h`, which
+includes the port macros, are correct. You do not need to check those.*
 
 Starting with the keypad (connected to *Port D 15..8*), recall that the upper
 four pins (*15..12*) should be configured as *digital output (open drain, 2

@@ -127,10 +127,9 @@ next.
 
 ### Task 1.2: Checking the Delay Functions
 
-Have a look in the file `systick.c`. It appears `delay_milli()`,
-`delay_micro()` and `delay_nano()` are all essentially carbon copies of one
-another, where the only difference is the initial calculation of the `count`
-variable.
+Have a look in the file `systick.c`. It appears `delay_milli()`, `delay_micro()`
+and `delay_nano()` are all essentially carbon copies of one another, where the
+only difference is the initial calculation of the `count` variable.
 
 If the delay functions were defined in terms of one another in some reasonable
 way, testing one of them would have been enough to verify the correctness of all

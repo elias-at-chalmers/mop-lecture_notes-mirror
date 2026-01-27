@@ -87,7 +87,7 @@ irrelevant changes makes it more difficult.*
 Let's look at the program from a top-down perspective starting from `main`, just
 one level deep into the calling hierarchy:
 
-<!-- TODO: call graph from main, one level down -->
+![](lab2/assets/graphs/main.svg)
 
 We start off with initializations. If the GPIO ports are configured incorrectly,
 testing the program is going to be difficult. So let's start there.
@@ -183,7 +183,7 @@ value.
 To get a better picture of the situation, let's look at the calling hierarchy
 below, starting from `keyb`.
 
-<!-- TODO: call graph from keyb -->
+![](lab2/assets/graphs/keyb.svg)
 
 Luckily it's not very complex. You can ignore the call to `delay_nano` - it
 needs to be there to give enough time for the row activation to take effect.
@@ -217,7 +217,7 @@ to the *ASCII display*, namely `ascii_gotoxy` and `ascii_write_char`. Let's have
 a look at their calling hierarchies (excluding delay functions, since you've
 already fixed those) below.
 
-<!-- TODO: call graph from ascii_gotoxy and ascii_write_char -->
+![](lab2/assets/graphs/ascii.svg)
 
 This one is a bit more complex, but still manageable. There are many incoming
 arrows in the bottom layer, i.e. many calls made to `ascii_ctrl_bit_set` and

@@ -122,10 +122,10 @@ int main(void)
 
 void decrypt_message()
 {
-    for(unsigned int i=0; i < sizeof(message); i++) {
+    for(unsigned int i=0; i < sizeof(message) - 1; i++) {
         message[i] = 'A' - (message[i] - 'Z');
     }     
-    for(unsigned int i=0; i < sizeof(password); i++) {
+    for(unsigned int i=0; i < sizeof(password) - 1; i++) {
         password[i] = 'A' - (password[i] - 'Z');
     }     
 }

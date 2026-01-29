@@ -126,3 +126,12 @@ loop:
 If you have made it this far, great work! If you have time to complete this task as well, **wow!** Go find the TA and ask for an RGB LED, if you don't have one already. Then connect it and make it pulsate with all the colors of the rainbow. Then record it and show your lecturer for a gold star sticker[^1].
 
 [^1]: The gold star has no monetary value and does not affect your grade. It might also be a virtual gold star sticker if I cannot find a real one. 
+
+### Task 5: Getting Approved
+
+After thoroughly testing and verifying that your program works as expected,
+demonstrate your solution to a TA. Show them that the program works. Explain the
+bugs you found and how you fixed them. Answer any questions they may have.
+
+***If you are approved by the TA, it is YOUR responsibility to verify that it
+has been documented in Canvas under 'Grades'. Do so before leaving!***

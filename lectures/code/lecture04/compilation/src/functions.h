@@ -1,0 +1,1 @@
+float function(float a);

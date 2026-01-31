@@ -32,7 +32,7 @@ the PTB-1000 bus. Connect the *ASCII display* to *Port E* (*Data* to *15..8*,
 Finally, connect the *MD307* to your computer via USB. In the end it should look
 something like this:
 
-<!-- TODO: picture of hardware setup -->
+![](../images/lab2-hardware-setup.jpg)
 
 The expected behaviour of the program is for it to print characters from left to
 right on the top row of the ASCII display when you press keys on the keypad.

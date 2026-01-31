@@ -1,9 +1,9 @@
 .PHONY: all clean
 
 EXT = svg
-BUILD_DIR = graphs
+BUILD_DIR = ../../../images
 SRC_DIR = src
-OUT = $(addprefix $(BUILD_DIR)/, $(addsuffix .$(EXT), main keyb ascii))
+OUT = $(addprefix $(BUILD_DIR)/lab2-, $(addsuffix .$(EXT), main keyb ascii))
 
 all: $(OUT)
 

@@ -115,6 +115,9 @@ to verify that your new configuration is correct, if you wish.
 To save time, you needn't bother checking `init_ascii` - it is correctly
 implemented.
 
+Now that you've modified the code you should recompile the project, run the
+program and check whether it works as intended.
+
 *What's that? The program still doesn't work? How unfortunate!*
 
 The delay functions are used in most parts of the program, so let's check those

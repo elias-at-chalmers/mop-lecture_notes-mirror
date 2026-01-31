@@ -6,7 +6,7 @@ The LCD display has three control signals, and 8 data signals:
 |--------|-------------|-----|
 |**Register Select (RS)** | This signal is used to tell the display whether it’s a command or data that we are sending/receiving. | 0 |
 |**Read/Write (R/W)** | This signal is used to tell the display whether we want to send data to it, or receive data from it.| 1 |
-|**Enable (E)**| This signal is used to initiate communication with the display| 2 | 
+|**Enable (E)**| This signal is used to synchronize communication with the display| 2 |
 |**Data Lines (DB0-DB7)**| These 8 lines contain the command or data that we want to send (one byte).| 0-7 |
 
 On the PTB-111, the control signals are connected to the first three pins of an 8-bit port that is in turn connected to the upper or lower byte of on of the GPIO ports on the MD307 with a gray flat cable. The data lines are connected to another port. For instance, control signals might be connected to `PE[0..2]` and data lines to `PE[8..15]`.

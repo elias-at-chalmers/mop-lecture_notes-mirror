@@ -9,7 +9,7 @@ The LCD display has three control signals, and 8 data signals:
 |**Enable (E)**| This signal is used to synchronize communication with the display| 2 |
 |**Data Lines (DB0-DB7)**| These 8 lines contain the command or data that we want to send (one byte).| 8-15 |
 
-On the PTB-111, the control signals are connected to the first three pins of an 8-bit port that is in turn connected to the upper or lower byte of on of the GPIO ports on the MD307 with a gray flat cable. The data lines are connected to another port. For instance, control signals might be connected to `PE[0..2]` and data lines to `PE[8..15]`.
+On the PTB-111, the control signals are connected to the first three pins of an 8-bit port that is in turn connected to the upper or lower byte of one of the GPIO ports on the MD307 with a gray flat cable. The data lines are connected to another port. For instance, control signals might be connected to `PE[0..2]` and data lines to `PE[8..15]`.
 
 ## Writing a command or data to the display
 Before any command or data is written to the display, you must first ensure that the display is not busy with a previous command. This is done by reading the status bit, as explained in the next section. 

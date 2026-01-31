@@ -107,15 +107,10 @@ what registers for this configuration to work.
 Look at the code in `init_keypad` and see if you can spot the bugs. If so,
 modify the code and make a note of your corrections. If not, consult a TA.
 
-After making a change, it is usually a good idea to devise a test and verify
-correctness. We might (incorrectly) assume it would be a good idea to connect
-the port to the *bargraph* and add some code to test the output pins, and then
-connect the port to the *DIL switch* and add some code to test the input pins.
-Unfortunately, that wouldn't work because the *bargraph* requires push/pull (not
-open drain) and the *DIL switch* requires pull down (not pull up).
-
-So for this task, you need to be *really* confident in your ocular inspection.
-You may ask a TA to check it for you, if you wish.
+**Before moving on:** You need to be *really* confident in your ocular
+inspection. The upcoming tasks rely on correctly configured GPIO pins - if
+you've made a mistake, you might end up wasting precious time. You may ask a TA
+to verify that your new configuration is correct, if you wish.
 
 To save time, you needn't bother checking `init_ascii` - it is correctly
 implemented.

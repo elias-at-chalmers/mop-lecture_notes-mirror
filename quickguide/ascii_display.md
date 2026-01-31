@@ -38,6 +38,6 @@ When reading the display status (busy flag and current address), or data in disp
 
 ![](../images/ascii_display_read_cycle.png)
 
-When reading status (RS = 0, R/W = 1), `D8` is the Busy Flag. Remaining data bits are the current address. 
+When reading status (RS = 0, R/W = 1), `D7` is the Busy Flag. Remaining data bits are the current address.
 
 When reading data (RS = 1, R/W = 1), the data bits are the character read at the current address. 

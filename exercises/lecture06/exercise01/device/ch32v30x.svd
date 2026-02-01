@@ -17,6 +17,99 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
   <resetValue>0x0</resetValue>
   <resetMask>0xFFFFFFFF</resetMask>
   	<peripherals>
+
+
+
+
+
+    <peripheral>
+      <name>SysTick</name>
+      <description>System Tick Timer</description>
+      <baseAddress>0xE000F000</baseAddress>
+      <registers>
+        <register>
+          <name>CTLR</name>
+          <description>Control and Status Register</description>
+          <addressOffset>0x000</addressOffset>
+          <size>32</size>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>ENABLE</name>
+              <description>Enable SysTick Timer</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-write</access>
+            </field>
+            <field>
+              <name>TICKINT</name>
+              <description>Enable SysTick Interrupt</description>
+              <bitOffset>1</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-write</access>
+            </field>
+            <field>
+              <name>CLKSOURCE</name>
+              <description>Clock Source</description>
+              <bitOffset>2</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-write</access>
+            </field>
+            <field>
+              <name>COUNTFLAG</name>
+              <description>Indicates counter reached zero</description>
+              <bitOffset>16</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>LOAD</name>
+          <description>SysTick Reload Value Register</description>
+          <addressOffset>0x004</addressOffset>
+          <size>32</size>
+          <resetValue>0x00000000</resetValue>
+        </register>
+        <register>
+          <name>VAL</name>
+          <description>SysTick Current Value Register</description>
+          <addressOffset>0x008</addressOffset>
+          <size>32</size>
+          <resetValue>0x00000000</resetValue>
+        </register>
+        <register>
+          <name>CALIB</name>
+          <description>SysTick Calibration Value Register</description>
+          <addressOffset>0x00C</addressOffset>
+          <size>32</size>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>TICK</name>
+              <description>Number of ticks per second</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>24</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>RESERVED</name>
+              <description>Reserved bits</description>
+              <bitOffset>24</bitOffset>
+              <bitWidth>8</bitWidth>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+      </registers>
+    </peripheral>
+
+
+
+
+
+
+
 	<peripheral>
       <name>RNG</name>
       <description>Random number generator</description>
@@ -20034,51 +20127,8 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
         <register>
           <name>CFGLR</name>
           <displayName>CFGLR</displayName>
-<description><![CDATA[
-<b>Configuration of GPIO port, for lower 8 pins.</b>
-
-Configuration of the port is done using the CFGLR and CFGHR for the lower eight and upper eight pins, respectively. For each pin, there are two bits to set the MODE (Input or Output, and speed of output pins), and two bits to set the CoNFiguration (the meaning of these pins depend on whether the pin is an input pin or an output pin):
-
-<table style="width:100%; table-layout:auto">
-  <tr>
-    <th colspan="2">CNF</th>
-    <th colspan="2">MODE</th>
-  </tr>
-
-  <!-- Input mode rows -->
-  <tr>
-    <td>00</td><td>Analog</td>
-    <td rowspan="4">00</td><td rowspan="4">Input Mode</td>
-  </tr>
-  <tr>
-    <td>01</td><td>Floating</td>
-  </tr>
-  <tr>
-    <td>10</td><td>Pull-up/Pull-down</td>
-  </tr>
-  <tr>
-    <td>11</td><td>Reserved</td>
-  </tr>
-
-  <!-- Output mode rows -->
-  <tr>
-    <td>00</td><td>Push Pull</td>
-    <td rowspan="4" colspan="1">
-      01<br>
-      10<br>
-      11
-    </td>
-    <td rowspan="4" colspan="1">
-      Output Mode 10Mhz<br>
-      Output Mode 2Mhz<br>
-      Output Mode 50Mhz
-    </td>
-  </tr>
-  <tr><td>01</td><td>Open Drain</td></tr>
-  <tr><td>10</td><td>Alternate Function, Push Pull</td></tr>
-  <tr><td>11</td><td>Alternate Function, Open Drain</td></tr>
-</table>
-]]></description>          
+          <description>Port configuration register low
+          (GPIOn_CFGLR)</description>
           <addressOffset>0x0</addressOffset>
           <size>0x20</size>
           <access>read-write</access>
@@ -20086,13 +20136,14 @@ Configuration of the port is done using the CFGLR and CFGHR for the lower eight 
           <fields>
             <field>
               <name>MODE0</name>
-              <description>Set MODE for pin n</description>
+              <description>Port n.0 mode bits</description>
               <bitOffset>0</bitOffset>
               <bitWidth>2</bitWidth>
             </field>
             <field>
               <name>CNF0</name>
-              <description>Set CONF for pin n</description>
+              <description>Port n.0 configuration
+              bits</description>
               <bitOffset>2</bitOffset>
               <bitWidth>2</bitWidth>
             </field>
@@ -20192,7 +20243,8 @@ Configuration of the port is done using the CFGLR and CFGHR for the lower eight 
         <register>
           <name>CFGHR</name>
           <displayName>CFGHR</displayName>
-          <description>Configure port for the upper 8 pins. (See CFGLR for details)</description>
+          <description>Port configuration register high
+          (GPIOn_CFGHR)</description>
           <addressOffset>0x4</addressOffset>
           <size>0x20</size>
           <access>read-write</access>
@@ -20200,13 +20252,14 @@ Configuration of the port is done using the CFGLR and CFGHR for the lower eight 
           <fields>
             <field>
               <name>MODE8</name>
-              <description>Set MODE for pin n</description>
+              <description>Port n.8 mode bits</description>
               <bitOffset>0</bitOffset>
               <bitWidth>2</bitWidth>
             </field>
             <field>
               <name>CNF8</name>
-              <description>Set CONF for pin n</description>
+              <description>Port n.8 configuration
+              bits</description>
               <bitOffset>2</bitOffset>
               <bitWidth>2</bitWidth>
             </field>
@@ -20306,15 +20359,16 @@ Configuration of the port is done using the CFGLR and CFGHR for the lower eight 
         <register>
           <name>INDR</name>
           <displayName>INDR</displayName>
-          <description>Port input data register</description>
+          <description>Port input data register
+          (GPIOn_INDR)</description>
           <addressOffset>0x8</addressOffset>
-          <size>0x20</size>
+          <size>0x10</size>
           <access>read-only</access>
-          <resetValue>0x00000000</resetValue>
+          <resetValue>0x0000</resetValue>
           <fields>
             <field>
               <name>IDR0</name>
-              <description>Reflects the logic level of pin n, if the port is configured as an input port.</description>
+              <description>Port input data</description>
               <bitOffset>0</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
@@ -20413,24 +20467,16 @@ Configuration of the port is done using the CFGLR and CFGHR for the lower eight 
         <register>
           <name>OUTDR</name>
           <displayName>OUTDR</displayName>
-<description><![CDATA[
-Port output data register.
-]]></description>
+          <description>Port output data register
+          (GPIOn_OUTDR)</description>
           <addressOffset>0xC</addressOffset>
-          <size>0x20</size>
+          <size>0x10</size>
           <access>read-write</access>
-          <resetValue>0x00000000</resetValue>
+          <resetValue>0x0000</resetValue>
           <fields>
             <field>
               <name>ODR0</name>
-<description><![CDATA[
-<br/>
-<small>
-If pin is configured as <b>output</b>: Set logic value of GPIO Port pin n<br>
-If pin is configured as <b>input</b>: Configures pull-up (1) or pull-down (0), if enabled in CFGLR/CFGHR.<br>
-Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not the pin.
-</small>
-]]></description>
+              <description>Port output data</description>
               <bitOffset>0</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
@@ -20538,7 +20584,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
           <fields>
             <field>
               <name>BS0</name>
-              <description>Writing 1 to BSn sets bit n in OUTDR to 1</description>
+              <description>Set bit 0</description>
               <bitOffset>0</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
@@ -20634,7 +20680,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
             </field>
             <field>
               <name>BR0</name>
-              <description>Writing 1 to BRn resets bit n in OUTDR to 0</description>
+              <description>Reset bit 0</description>
               <bitOffset>16</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
@@ -20742,7 +20788,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
           <fields>
             <field>
               <name>BR0</name>
-              <description>Writing 1 to BRn resets bit n in OUTDR to 0</description>
+              <description>Reset bit 0</description>
               <bitOffset>0</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
@@ -21197,25 +21243,25 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
           <fields>
             <field>
               <name>EXTI0</name>
-              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
+              <description>EXTI0 configuration</description>
               <bitOffset>0</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
             <field>
               <name>EXTI1</name>
-              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
+              <description>EXTI1 configuration</description>
               <bitOffset>4</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
             <field>
               <name>EXTI2</name>
-              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
+              <description>EXTI2 configuration</description>
               <bitOffset>8</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
             <field>
               <name>EXTI3</name>
-              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
+              <description>EXTI3 configuration</description>
               <bitOffset>12</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
@@ -21233,25 +21279,25 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
           <fields>
             <field>
               <name>EXTI4</name>
-              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
+              <description>EXTI4 configuration</description>
               <bitOffset>0</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
             <field>
               <name>EXTI5</name>
-              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
+              <description>EXTI5 configuration</description>
               <bitOffset>4</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
             <field>
               <name>EXTI6</name>
-              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
+              <description>EXTI6 configuration</description>
               <bitOffset>8</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
             <field>
               <name>EXTI7</name>
-              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
+              <description>EXTI7 configuration</description>
               <bitOffset>12</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
@@ -21269,25 +21315,25 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
           <fields>
             <field>
               <name>EXTI8</name>
-              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
+              <description>EXTI8 configuration</description>
               <bitOffset>0</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
             <field>
               <name>EXTI9</name>
-              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
+              <description>EXTI9 configuration</description>
               <bitOffset>4</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
             <field>
               <name>EXTI10</name>
-              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
+              <description>EXTI10 configuration</description>
               <bitOffset>8</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
             <field>
               <name>EXTI11</name>
-              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
+              <description>EXTI11 configuration</description>
               <bitOffset>12</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
@@ -21305,25 +21351,25 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
           <fields>
             <field>
               <name>EXTI12</name>
-              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
+              <description>EXTI12 configuration</description>
               <bitOffset>0</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
             <field>
               <name>EXTI13</name>
-              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
+              <description>EXTI13 configuration</description>
               <bitOffset>4</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
             <field>
               <name>EXTI14</name>
-              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
+              <description>EXTI14 configuration</description>
               <bitOffset>8</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
             <field>
               <name>EXTI15</name>
-              <description>Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E </description>
+              <description>EXTI15 configuration</description>
               <bitOffset>12</bitOffset>
               <bitWidth>4</bitWidth>
             </field>
@@ -29449,7 +29495,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
     </peripheral>	
 	<peripheral>
 <name>TIM6</name>
-<description>Basic timer. Can be used to trigger interrupts, DMA transfers, and DAC/ADC events. When counter is enabled, it increases CNT by 1 every "Peripheral Bus 1" (PB1) clockcycle. (48Mhz on out system)</description>
+<description>Basic timer</description>
 <groupName>TIM</groupName>
 <baseAddress>0x40001000</baseAddress>
  <addressBlock>
@@ -29475,25 +29521,25 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
           <fields>
             <field>
               <name>ARPE</name>
-              <description>Auto-reload preload enable (double buffer preload register)</description>
+              <description>Auto-reload preload enable</description>
               <bitOffset>7</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
             <field>
               <name>OPM</name>
-              <description>One-pulse mode (0: Restart and reload, 1: Stop after first time.)</description>
+              <description>One-pulse mode</description>
               <bitOffset>3</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
             <field>
               <name>URS</name>
-              <description>Update request source (1: disallow software triggers)</description>
+              <description>Update request source</description>
               <bitOffset>2</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
             <field>
               <name>UDIS</name>
-              <description>Update disable (turn off any interrupts or events)</description>
+              <description>Update disable</description>
               <bitOffset>1</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
@@ -29616,7 +29662,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
         <register>
           <name>ATRLR</name>
           <displayName>ATRLR</displayName>
-          <description>When the counter reaches this value, it is reset to 0. Maximum 16 bits (65536).</description>
+          <description>auto-reload register</description>
           <addressOffset>0x2C</addressOffset>
           <size>0x20</size>
           <access>read-write</access>
@@ -37281,7 +37327,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
         <register>
           <name>IENR1</name>
           <displayName>IENR1</displayName>
-          <description>Interrupt Enable Set Register</description>
+          <description>Interrupt Setting Register</description>
           <addressOffset>0x100</addressOffset>
           <size>0x20</size>
           <access>write-only</access>
@@ -37289,7 +37335,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
           <fields>
             <field>
               <name>INTEN</name>
-              <description>Bit number x in IENRn corresponds to interrupt 32 * n + x. Writing 1 enables interrupt.</description>
+              <description>INTEN</description>
               <bitOffset>12</bitOffset>
               <bitWidth>20</bitWidth>
             </field>
@@ -37298,7 +37344,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
 		 <register>
           <name>IENR2</name>
           <displayName>IENR2</displayName>
-          <description>Interrupt Enable Set Register</description>
+          <description>Interrupt Setting Register</description>
           <addressOffset>0x104</addressOffset>
           <size>0x20</size>
           <access>write-only</access>
@@ -37306,7 +37352,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
           <fields>
             <field>
               <name>INTEN</name>
-              <description>Bit number x in IENRn corresponds to interrupt 32 * n + x. Writing 1 enables interrupt.</description>
+              <description>INTEN</description>
               <bitOffset>0</bitOffset>
               <bitWidth>32</bitWidth>
             </field>
@@ -37315,7 +37361,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
         <register>
           <name>IENR3</name>
           <displayName>IENR3</displayName>
-          <description>Interrupt Enable Set Register</description>
+          <description>Interrupt Setting Register</description>
           <addressOffset>0x108</addressOffset>
           <size>0x20</size>
           <access>write-only</access>
@@ -37323,7 +37369,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
           <fields>
             <field>
               <name>INTEN</name>
-              <description>Bit number x in IENRn corresponds to interrupt 32 * n + x. Writing 1 enables interrupt.</description>
+              <description>INTEN</description>
               <bitOffset>0</bitOffset>
               <bitWidth>32</bitWidth>
             </field>
@@ -37332,7 +37378,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
         <register>
           <name>IENR4</name>
           <displayName>IENR4</displayName>
-          <description>Interrupt Enable Set Register</description>
+          <description>Interrupt Setting Register</description>
           <addressOffset>0x10C</addressOffset>
           <size>0x20</size>
           <access>write-only</access>
@@ -37340,7 +37386,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
           <fields>
             <field>
               <name>INTEN</name>
-              <description>Bit number x in IENRn corresponds to interrupt 32 * n + x. Writing 1 enables interrupt.</description>
+              <description>INTEN</description>
               <bitOffset>0</bitOffset>
               <bitWidth>8</bitWidth>
             </field>
@@ -40012,69 +40058,59 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
             </field>
           </fields>
         </register>
-        </registers>
-		</peripheral>
-
-
-
-    <peripheral>
-      <name>SysTick</name>
-      <description>System Tick Timer</description>
-      <baseAddress>0xE000F000</baseAddress>
-      <registers>
 		<register>
           <name>STK_CTLR</name>
           <displayName>STK_CTLR</displayName>
           <description>System counter control register</description>
-          <addressOffset>0x0</addressOffset>
+          <addressOffset>0x1000</addressOffset>
           <size>0x20</size>
           <resetValue>0x00000000</resetValue>
           <fields>
             <field>
               <name>STE</name>
-              <description>Turns the SysTick timer on when set; clearing it stops the counter.</description>
+              <description>System counter  enable</description>
 			  <access>read-write</access>
               <bitOffset>0</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
 			<field>
               <name>STIE</name>
-              <description>Enables SysTick interrupt generation when the counter reaches zero; if cleared, no interrupt is triggered.</description>
+              <description>System counter interrupt enable</description>
 			  <access>read-write</access>
               <bitOffset>1</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
 			 <field>
               <name>STCLK</name>
-              <description>Selects the clock source: the processor clock (HCLK) when set, or HCLK/8 if not set.</description>
+              <description>System selects the clock source</description>
 			  <access>read-write</access>
               <bitOffset>2</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
 			<field>
               <name>STRE</name>
-              <description>If set, restarts from 0 when Compare Value reached (upcounting) or from the Compare Value when zero is reached (downcounting). Otherwise it keeps counting beyond the ccompare value (or zero).</description>
+              <description>System reload register</description>
 			  <access>read-write</access>
               <bitOffset>3</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
 			<field>
               <name>MODE</name>
-              <description>If set, count down, otherwise count up.</description>
+              <description>System Mode</description>
 			  <access>read-write</access>
               <bitOffset>4</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
 			<field>
               <name>INIT</name>
-              <description>If set, loads CNT with 0 (upcounting) or Compare Value (downcounting) when timer is enabled. Otherwise does not modify CNT.</description>
+              <description>System Initialization update</description>
 			  <access>read-write</access>
               <bitOffset>5</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
 			<field>
               <name>SWIE</name>
-              <description>If set, immediately triggers a SysTick Interrupt.</description>
+              <description>System software triggered interrupts enable</description>
 			  <access>read-write</access>
               <bitOffset>31</bitOffset>
               <bitWidth>1</bitWidth>
@@ -40083,15 +40119,15 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
         </register> 
 	<register>
           <name>STK_SR</name>
-          <description>Status Register</description>
-          <addressOffset>0x4</addressOffset>
+          <description>System START</description>
+          <addressOffset>0x1004</addressOffset>
           <size>0x20</size>
           <access>read-write</access>
           <resetValue>0x00000000</resetValue>
           <fields>
             <field>
               <name>CNTIF</name>
-              <description>Is set to 1 when CNT reaches CMP (if upcounting) or when CNT reaches 0 (if downcounting). Must be reset by software for interrupts to occur again.</description>
+              <description>CNTIF</description>
               <bitOffset>0</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
@@ -40100,7 +40136,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
     <register>
           <name>STK_CNTL</name>
           <description>System counter low register</description>
-          <addressOffset>0x8</addressOffset>
+          <addressOffset>0x1008</addressOffset>
           <size>0x20</size>
           <access>read-write</access>
           <resetValue>0x00000000</resetValue>
@@ -40116,7 +40152,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
     <register>
           <name>STK_CNTH</name>
           <description>System counter high register</description>
-          <addressOffset>0xC</addressOffset>
+          <addressOffset>0x100C</addressOffset>
           <size>0x20</size>
           <access>read-write</access>
           <resetValue>0x00000000</resetValue>
@@ -40132,7 +40168,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
     <register>
           <name>STK_CMPLR</name>
           <description>System compare low register</description>
-          <addressOffset>0x10</addressOffset>
+          <addressOffset>0x1010</addressOffset>
           <size>0x20</size>
           <access>read-write</access>
           <resetValue>0x00000000</resetValue>
@@ -40148,7 +40184,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
         <register>
           <name>STK_CMPHR</name>
           <description>System compare high register</description>
-          <addressOffset>0x14</addressOffset>
+          <addressOffset>0x1014</addressOffset>
           <size>0x20</size>
           <access>read-write</access>
           <resetValue>0x00000000</resetValue>
@@ -40162,8 +40198,6 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
           </fields>
         </register>        
 		</registers>
-    </peripheral>
-
-
+		</peripheral>
 	</peripherals>
  </device>

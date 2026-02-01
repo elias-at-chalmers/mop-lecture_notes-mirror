@@ -125,6 +125,9 @@ void decrypt_message()
     for(unsigned int i=0; i < sizeof(message) - 1; i++) {
         message[i] = 'A' - (message[i] - 'Z');
     }     
+
+    // TODO: Don't decrupt this until the end when all tests pass
+
     for(unsigned int i=0; i < sizeof(password) - 1; i++) {
         password[i] = 'A' - (password[i] - 'Z');
     }     

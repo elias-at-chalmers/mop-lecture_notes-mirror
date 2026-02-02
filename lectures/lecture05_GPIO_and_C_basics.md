@@ -18,8 +18,6 @@ We saw in the previous lecture that the physical pins on the connector are conne
 </p>
 
 
-
-
 ### Pull Up and Pull Down
 
 The simplest input device we could connect is arguably a single button, so let's start there. How does a button work? How can we connect it to our computer? This image suggests a pretty good start:
@@ -122,7 +120,6 @@ Now, consider what happens if we connect the LED as in the image above and confi
 
 *But if one pin outputs 1 and the other outputs 0*, we create a direct short: one pin is actively driving 3.3 V while the other is actively pulling to ground. This causes a large current to flow directly between the two pins instead of through the LED. This is very bad and might damage the transistors inside the microcontroller.
 
-The solution to this problem is to configure the pins as "Open Drain" instead of "Push Pull". In an Open Drain configuration, writing `0` to the corresponding bit drives the pin to 0V, but writing `1` sets it in *floating* mode (it is as if it wasn't connected at all). Now:
 
 The solution to this problem is to configure the pins as **Open Drain** instead of **Push Pull**. In an Open Drain configuration, writing `0` to the corresponding bit drives the pin to 0 V, but writing `1` places the pin in a **high-impedance (Hi-Z)** state. In this Hi-Z (or "floating") state, the pin behaves as if it isn’t connected at all.
 

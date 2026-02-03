@@ -24,7 +24,7 @@ uint32_t simplerand() {
 }
 
 int main(void)
-{
+{   
     ///////////////////////////////////////////////////////////////////////////
     // Test assignment 1
     ///////////////////////////////////////////////////////////////////////////
@@ -96,7 +96,7 @@ int main(void)
         uint32_t masked_orig_cfglr = orig_cfglr & ~(0xF << (idx * 4));
         uint32_t masked_orig_cfghr = orig_cfghr & ~(0xF << (idx * 4));
         if(masked_reg != (pin < 8 ? masked_orig_cfglr : masked_orig_cfghr)) {
-            printf("FAILED (pin %d modified other pins!)\n", pin);
+            printf("FAILED (configuring pin %d, but other pins are also modified!)\n", pin);
             return 1;
         }
 
@@ -151,7 +151,7 @@ int main(void)
         uint32_t masked_orig_cfglr = orig_cfglr & ~(0xF << (idx * 4));
         uint32_t masked_orig_cfghr = orig_cfghr & ~(0xF << (idx * 4));
         if(masked_reg != (pin < 8 ? masked_orig_cfglr : masked_orig_cfghr)) {
-            printf("FAILED (pin %d modified other pins!)\n", pin);
+            printf("FAILED (configuring pin %d, but other pins are also modified!)\n", pin);
             return 1;
         }
 
@@ -219,7 +219,9 @@ int main(void)
 
     printf("I will print the button number when you press a button.\n");
 
-    printf("Make sure they correspond to the correct keys on your keyboard.\n");
+    printf("Verify that they correspond to the correct keys on your keyboard.\n");
+
+    printf("If you see phantom buttons being pressed, try to add a dely after you activate a row in get_keyboard_button().\n");
 
     while(1) {
         int button = get_keyboard_button();

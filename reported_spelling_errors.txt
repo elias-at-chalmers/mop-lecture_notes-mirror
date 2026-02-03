@@ -1,0 +1,16 @@
+Lecture 01
+Under "Exercises" används fel to, i "force you too look".
+
+Lecture 02
+Under "How to do it", är ordet "divisible" felstavat till "dividible".
+Under "Instruction Cycle > 4. Store/Writeback", är "on the bus" felstavat till "un the bus".
+Över "How to do it" står det "situation would be the same is above" men det borde stå "same as above".
+
+Lab 1
+Under titeln(första meningen) står det "rome real hardware" istället för "some real hardware".
+Innan bilden som beksriver kooplingen mellan dator och MD307 är "commands" felstavat till "commandd".
+Under bilden som beskriver kopplingen mellan dator och MD307 är "protocol" felstavat till "protocoll".
+Under "Task 3: Making it pulsate..." är "perceive" felstavat till "percieve".
+
+Lecture 03
+Meningen innan "Arrays as function parameters" så står det "we will se later" men det borde vara "see later".

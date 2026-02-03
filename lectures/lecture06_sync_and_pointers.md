@@ -356,7 +356,6 @@ __asm__("nop");
 ```
 
 ### More about pointers
-> TODO: This lecture is getting very long. I should probably move the things below to a later lecture. 
 
 #### Pointer Arithmetic
 There are some peculiarities about what happens when we perform mathematical operations on pointers. We will illustrate why with a little example: Let's pretend that we know that there is a big chunk of free memory at address `0x30000000` and we want to read a second of music samples from somewhere (maybe from an ADC connected to our MD307) and put them there: 

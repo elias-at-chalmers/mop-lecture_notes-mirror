@@ -6,7 +6,7 @@ In this lab, you will finally get to run some code on, and connect rome real har
 You MUST have done the preparation task for this lab, and have submitted your answers to Canvas. If you have not, this will take too much time so talk to a TA and see if there is room on a later Lab session. 
 
 ## Lab environment
-**When connecting your MD307, make sure to connect the USB cable to the little usb hub behind the screen, *not* the screen itself.**
+**This whole lab should be done by connecting the MD307 to the stationary computer in the lab. You cannot use your own laptops. When connecting your MD307, make sure to connect the USB cable to the little usb hub behind the screen, *not* the screen itself.**
 
 In all program development, but *especially* when you are programming close to the metal (machine oriented), it is essential to be able to run your program through a *debugger*. 
 
@@ -59,7 +59,7 @@ After that (assuming that OpenOCD and necessary drivers are installed), you can 
 ## Lab Exercise 1 - Debug somebody else's code
 
 
-> **Important:** You should spend a maximum of one hour on this exercise. If you get stuck at some point for more than 15 minutes, grab a TA --- they will guide you to the next step. It is important that you proceed to the second exercise within an hour.
+> **Important:** You should spend a maximum of one hour on this exercise. If you get stuck at some point for more than 15 minutes, grab a TA --- they will guide you to the next step. *It is important that you proceed to the second exercise within an hour, whether you found all bugs or not*.
 
 Time to try it. Open an empty folder and do: `CTRL+SHIFT+P->MDx07: Initialize Project...->Lab Assignments->Lab 1->Assignment 1`. This code is an attempt at solving the same task as you solved for the preparation, but unfortunately whoever wrote this was not as bright as you and it is riddled with bugs!
 

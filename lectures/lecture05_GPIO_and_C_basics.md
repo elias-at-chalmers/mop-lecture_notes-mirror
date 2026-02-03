@@ -75,7 +75,7 @@ We want to plug in a button as in the image above, so we want to configure pin2 
 To activate the pull up/down resistor, we set `CNF` to `10`. The possible configurations for an input pin are: 
 
 * *Analog* (00) -- Used when the input voltage varies anywhere between 0 and 3.3V and we want to read its value. You might want to try this out towards the end of the course, but we leave it for now. 
-* *Floating* (10) -- When we don't want any pull up/down resistor connected.
+* *Floating* (01) -- When we don't want any pull up/down resistor connected.
 * *Pull-up/Pull-down* (10) -- Activates the resistor based on the value in `OUTDR`.
 * *Reserved* (11) -- Not used.
 

@@ -62,10 +62,35 @@ extern const int data_port_address;
 #if SOLUTION
 #define PORT (volatile char*) (data_port_address + 1)
 #else
-    // Your code here
+    #define PORT 0x20000000 // Change this definition
 #endif
 
 char read_second_byte()
 {
     return *PORT;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Assignment 4: pointer ´a´ points to a string of chracters ended by '\0'.
+//               Your task is to compute a DJB2 hash of the string
+//               not including the terminating '\0'.
+//
+//               The hash is initialized to 5381. For each character in the string,
+//               multiply the current hash value by 33 and then XOR it with
+//               the character’s byte value.
+
+///////////////////////////////////////////////////////////////////////////////
+unsigned long djb2hash(char *a)
+{
+    unsigned long hash = 5381;
+#if SOLUTION
+    while (*a != '\0') {
+        hash *= 33;
+        hash ^= *a;
+        a++;
+    }
+#else
+    // Your code here
+#endif
+    return hash;
 }

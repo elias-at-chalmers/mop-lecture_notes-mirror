@@ -7,10 +7,6 @@
 // ===========================================================================
 // Write a function that configures pin 11 of GPIO port D as input with 
 // pull-down resistor enabled.
-// 
-// ERIK: The test harness should set ODATA to 0xFFFF so it is pull up unless
-//       they configure it. And give the hint, of course. 
-//       It should also check that no other bits were changed. 
 ///////////////////////////////////////////////////////////////////////////////
 
 
@@ -38,9 +34,9 @@ void assignment_1(void)
 {
 #if SOLUTION
     // Clear the 4 bits for pin 11
-    *GPIO_D_CFGHR &= ~(0xF << (5 * 4));
+    *GPIO_D_CFGHR &= ~(0xF << (3 * 4));
     // Set the bits for pin 11 to input with pull-up/down
-    *GPIO_D_CFGHR |= (0x8 << (5 * 4));
+    *GPIO_D_CFGHR |= (0x8 << (3 * 4));
     // Set GPIO_D_OUTDR bit 11 to 0 for pull-down
     *GPIO_D_OUTDR &= ~(1 << 11);
 #else
@@ -53,11 +49,7 @@ void assignment_1(void)
 // ===========================================================================
 // Write a more general function that configures a pin of GPIO port D as
 // input with pull up or down or floating.
-// 
-// ERIK: Test harness will make sure they only modified the relevant bits
-//       and set them correctly. Need to check OUTDR as well for pull-up/down.
-//       
-//       Oh... for the keyboard, they really only need 8 pins... 
+// The function should be able to modify CFGLR and CFGHR if needed. 
 ///////////////////////////////////////////////////////////////////////////////
 
 void gpio_d_set_pin_input( 
@@ -126,7 +118,7 @@ void gpio_d_set_pin_output(
 // Assignment 4
 // ===========================================================================
 // Write a function that sets one pin of GPIO port D high.
-// The function should use the read-modify-write registers (BSHR or BCR)
+// The function should use bit set/reset register (BSHR)
 ///////////////////////////////////////////////////////////////////////////////
 void gpio_d_set_pin_high(int pin)
 {
@@ -141,7 +133,7 @@ void gpio_d_set_pin_high(int pin)
 // Assignment 5
 // ===========================================================================
 // Write a function that sets one pin of GPIO port D low.
-// The function should use the read-modify-write registers (BSHR or BCR)
+// The function should use the bit set/reset registers (BSHR or BCR)
 void gpio_d_set_pin_low(int pin)
 {   
 #if SOLUTION
@@ -168,7 +160,7 @@ void gpio_d_set_pin_low(int pin)
 // \-------------------/
 // 
 // Follow the instructions in comments
-// You can the functions you have written above
+// You can use the functions you have written above
 ///////////////////////////////////////////////////////////////////////////////
 int get_keyboard_button(void)
 {
@@ -179,7 +171,7 @@ int get_keyboard_button(void)
     // Configure the row-read pins (pins 0-3) as input with pull-up resistors
     for(int pin = 0; pin <= 3; pin++) gpio_d_set_pin_input(pin, 1); // pull-up
 
-    // Deactivate all rows by setting pins the row selection pins  4-7 high
+    // Deactivate all rows by setting the row selection pins 4-7 high
     // (remember that they are active low, so 0 selects a row)
     for(int pin = 4; pin <= 7; pin++) gpio_d_set_pin_high(pin);
 
@@ -187,6 +179,12 @@ int get_keyboard_button(void)
         // Activate the current row by setting the corresponding pin low
         gpio_d_set_pin_low(4 + row);
         // Read the row (buttons 0-3, 4-7, 8-11, or 12-15) as the lower 4 bits of INDR
+
+        // a delay to let output circuitry update voltage on an activated pin before we read 
+        // input pins.
+        for (volatile int i = 0; i < 10000;){
+            i++;
+        }
 
         // Check if any button in this row is pressed (low)
         uint8_t row_data = *GPIO_D_INDR & 0x0F;
@@ -225,6 +223,3 @@ int get_keyboard_button(void)
     return -1; // No button pressed    return -1;  
 #endif
 }
-
-
-

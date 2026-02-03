@@ -1,6 +1,12 @@
 #include <stdio.h>
 #include <stdint.h>
 
+void assignment_1(void);
+void gpio_d_set_pin_input( int pin, int mode);
+void gpio_d_set_pin_output(int pin, int mode);
+void gpio_d_set_pin_high(int pin);
+void gpio_d_set_pin_low(int pin);
+
 int get_keyboard_button(void);
 
 #define GPIO_D_BASE 0x40011400
@@ -39,11 +45,11 @@ int main(void)
         printf("FAILED (Why are you changing in CFGLR?)\n");
         return 1;
     }   
-    if((*GPIO_D_CFGHR & ~(0xF << (5 * 4))) != (0x9ABCDEF0 & ~(0xF << (5 * 4)))) {
+    if((*GPIO_D_CFGHR & ~(0xF << (3 * 4))) != (0x9ABCDEF0 & ~(0xF << (3 * 4)))) {
         printf("FAILED (You have modified pins that are not for pin 11!)\n");
         return 1;
     }
-    if((*GPIO_D_CFGHR & (0xF << (5 * 4))) != (0x8 << (5 * 4))) {
+    if((*GPIO_D_CFGHR & (0xF << (3 * 4))) != (0x8 << (3 * 4))) {
         printf("FAILED (pin 11 not configured correctly)\n");
         return 1;
     }
@@ -71,8 +77,6 @@ int main(void)
         *GPIO_D_OUTDR = orig_outdr;
         *GPIO_D_CFGLR = orig_cfglr;
         *GPIO_D_CFGHR = orig_cfghr;
-
-        int a = *GPIO_D_OUTDR;
 
         gpio_d_set_pin_input(pin, mode);
 
@@ -111,12 +115,13 @@ int main(void)
         printf(".");
         fflush(stdout);
     }
+    printf("PASSED\n");
 
 
     ///////////////////////////////////////////////////////////////////////////
     // Test assignment 3
     ///////////////////////////////////////////////////////////////////////////
-    printf("\nTesting assignment 3...");
+    printf("Testing assignment 3...");
     fflush(stdout);
     for(int i=0; i<10; i++) {
         int pin = simplerand() % 16;
@@ -224,4 +229,3 @@ int main(void)
     }
     return 0;
 }
-

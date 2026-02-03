@@ -1,6 +1,12 @@
 #include <stdio.h>
 #include <stdint.h>
 
+void assignment_1(void);
+void gpio_d_set_pin_input( int pin, int mode);
+void gpio_d_set_pin_output(int pin, int mode);
+void gpio_d_set_pin_high(int pin);
+void gpio_d_set_pin_low(int pin);
+
 int get_keyboard_button(void);
 
 #define GPIO_D_BASE 0x40011400
@@ -18,7 +24,7 @@ uint32_t simplerand() {
 }
 
 int main(void)
-{
+{   
     ///////////////////////////////////////////////////////////////////////////
     // Test assignment 1
     ///////////////////////////////////////////////////////////////////////////
@@ -39,11 +45,11 @@ int main(void)
         printf("FAILED (Why are you changing in CFGLR?)\n");
         return 1;
     }   
-    if((*GPIO_D_CFGHR & ~(0xF << (5 * 4))) != (0x9ABCDEF0 & ~(0xF << (5 * 4)))) {
+    if((*GPIO_D_CFGHR & ~(0xF << (3 * 4))) != (0x9ABCDEF0 & ~(0xF << (3 * 4)))) {
         printf("FAILED (You have modified pins that are not for pin 11!)\n");
         return 1;
     }
-    if((*GPIO_D_CFGHR & (0xF << (5 * 4))) != (0x8 << (5 * 4))) {
+    if((*GPIO_D_CFGHR & (0xF << (3 * 4))) != (0x8 << (3 * 4))) {
         printf("FAILED (pin 11 not configured correctly)\n");
         return 1;
     }
@@ -72,8 +78,6 @@ int main(void)
         *GPIO_D_CFGLR = orig_cfglr;
         *GPIO_D_CFGHR = orig_cfghr;
 
-        int a = *GPIO_D_OUTDR;
-
         gpio_d_set_pin_input(pin, mode);
 
         // Check that only the relevant bits were changed
@@ -92,7 +96,7 @@ int main(void)
         uint32_t masked_orig_cfglr = orig_cfglr & ~(0xF << (idx * 4));
         uint32_t masked_orig_cfghr = orig_cfghr & ~(0xF << (idx * 4));
         if(masked_reg != (pin < 8 ? masked_orig_cfglr : masked_orig_cfghr)) {
-            printf("FAILED (pin %d modified other pins!)\n", pin);
+            printf("FAILED (configuring pin %d, but other pins are also modified!)\n", pin);
             return 1;
         }
 
@@ -111,12 +115,13 @@ int main(void)
         printf(".");
         fflush(stdout);
     }
+    printf("PASSED\n");
 
 
     ///////////////////////////////////////////////////////////////////////////
     // Test assignment 3
     ///////////////////////////////////////////////////////////////////////////
-    printf("\nTesting assignment 3...");
+    printf("Testing assignment 3...");
     fflush(stdout);
     for(int i=0; i<10; i++) {
         int pin = simplerand() % 16;
@@ -146,7 +151,7 @@ int main(void)
         uint32_t masked_orig_cfglr = orig_cfglr & ~(0xF << (idx * 4));
         uint32_t masked_orig_cfghr = orig_cfghr & ~(0xF << (idx * 4));
         if(masked_reg != (pin < 8 ? masked_orig_cfglr : masked_orig_cfghr)) {
-            printf("FAILED (pin %d modified other pins!)\n", pin);
+            printf("FAILED (configuring pin %d, but other pins are also modified!)\n", pin);
             return 1;
         }
 
@@ -214,7 +219,9 @@ int main(void)
 
     printf("I will print the button number when you press a button.\n");
 
-    printf("Make sure they correspond to the correct keys on your keyboard.\n");
+    printf("Verify that they correspond to the correct keys on your keyboard.\n");
+
+    printf("If you see phantom buttons being pressed, try to add a dely after you activate a row in get_keyboard_button().\n");
 
     while(1) {
         int button = get_keyboard_button();
@@ -224,4 +231,3 @@ int main(void)
     }
     return 0;
 }
-

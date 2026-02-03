@@ -6,11 +6,15 @@ In this lab, you will finally get to run some code on, and connect rome real har
 You MUST have done the preparation task for this lab, and have submitted your answers to Canvas. If you have not, this will take too much time so talk to a TA and see if there is room on a later Lab session. 
 
 ## Lab environment
+**When connecting your MD307, make sure to connect the USB cable to the little usb hub behind the screen, *not* the screen itself.**
+
 In all program development, but *especially* when you are programming close to the metal (machine oriented), it is essential to be able to run your program through a *debugger*. 
 
 When you are ready to ship your program, you will compile it to an `.elf` file and use a tool to send it to your microcontrollers flash memory (so that it starts any time you turn the device on), but while developing the program, uploading, starting, and stopping is handled by the debugger. 
 
 In this course, we do all development is *Visual Studio Code* (VSCode), and so far you have been running your programs on a simulator. From VSCode's point of view, the process is exactly the same. When you press `F5` to run the program, VSCode will start a `*GDB Client`. 
+
+**Before you start, you have to install the mdx307 extension, and then CTRL+SHIFT+P -> "MDx07: Install Development Tools"**
 
 GDB (GNU DeBugger) is a command line tool, and a protocol. In the good old days, you would start GDB from the command line and write things like: 
 

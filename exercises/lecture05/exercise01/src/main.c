@@ -17,7 +17,7 @@ int get_keyboard_button(void);
 #define GPIO_D_BSHR  ((volatile uint32_t *)(GPIO_D_BASE + 0x10))
 #define GPIO_D_BCR   ((volatile uint16_t *)(GPIO_D_BASE + 0x14))
 
-uint32_t seed = 0x4756ABCD;
+volatile uint32_t seed = 0x4756ABCD;
 uint32_t simplerand() {
     seed = (seed * 1103515245 + 12345) & 0x7FFFFFFF;
     return seed;    
@@ -68,7 +68,8 @@ int main(void)
 
     for(int i=0; i<10; i++) {
         int pin = simplerand() % 16;
-        int mode = simplerand() % 3; // 0 = pull-down, 1 = pull-up, 2 = floating
+        int mode = simplerand();
+        mode = mode % 3; // 0 = pull-down, 1 = pull-up, 2 = floating
 
         // Reset registers to known values
         uint32_t orig_outdr = simplerand() & 0xFFFF;

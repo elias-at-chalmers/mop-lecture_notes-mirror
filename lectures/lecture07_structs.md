@@ -312,9 +312,13 @@ A first attempt at doing this could look as follows:
 typedef struct {
     uint32_t CTLR1;
     uint32_t CTLR2;
+    uint32_t reserved0; 
     uint32_t DMAINTENR; 
     uint32_t INTFR; 
     uint32_t SWEVGR; 
+    uint32_t reserved1; 
+    uint32_t reserved2; 
+    uint32_t reserved3; 
     uint32_t CNT; 
     uint32_t PSC; 
     uint32_t ATRLR; 
@@ -340,11 +344,11 @@ void main()
 }
 ```
 
-This (slightly pointless) program would be compiled such that an empty variable, `t`, of type `TIMER` was placed somewhere in SRAM. Let's say that it ended up on address `0x20001000`. The order of struct members is strictly defined by the C standard, and their alignment and padding are defined by the ABI for the target architecture, so if we knew that the address to the struct `t` was `0x20001000`, we also know that its first member (`CTLR1`) begins at that address. Since `CTLR1` is exactly 4 bytes, the address of the second member (`CTLR2`) will have to be `0x20001004`, the third member `DMAINTENR` would have to be on address `0x20001008`, and so on. 
+This (slightly pointless) program would be compiled such that an empty variable, `t`, of type `TIMER` was placed somewhere in SRAM. Let's say that it ended up on address `0x20001000`. The order of struct members is strictly defined by the C standard, and their alignment and padding are defined by the ABI for the target architecture, so if we knew that the address to the struct `t` was `0x20001000`, we also know that its first member (`CTLR1`) begins at that address. Since `CTLR1` is exactly 4 bytes, the address of the second member (`CTLR2`) will have to be `0x20001004`, and so on. 
 
 When we write: 
 ```C
-TIMER * timer6 = (TIMER *)0x40001000;
+volatile TIMER * timer6 = (TIMER *)0x40001000;
 ```
 we say that we want a *pointer* to a struct of type timer that begins at address `0x40001000`. We have not put any struct there (we can't, it is not in SRAM) but the compiler doesn't know that. When we write: 
 
@@ -362,13 +366,15 @@ sw t1, 0(t0)
 
 which is exactly what *we* would write to write the value zero to the `TIM6_CNT` register. We are using the compiler’s knowledge of struct layout to perform the address calculations for us.
 
+For this to work, we have to be careful when looking at the offsets of each register. It is easy to miss, for instance, that `DMAINTENR` begins at offset `0xC` which is *not* directly after `CTLR2`. When there is empty space between registers, we have to insert as many bytes of "reserved" variables, so that the address calculation for the next register becomes correct. 
+
 ### Padding
 
 In our first attempt at writing a struct that describes a Basic Timer, we carelessly forgot that all the registers are actually 16 bits wide. In this case, writing to, e.g., `CNT` with a 32-bit store operation works. The upper 16 bits are simply ignored. In many cases, however, this can be a very bad idea: 
 
 * Bits that are specified as "reserved" in the data-sheet might actually be used in future variants of the chip. If your code overwrites those bits, it will not work on future hardware. 
-* In some cases, a register that is defined to be 16 bits *cannot* be read or written with a 32 bit load or store; the program will crash. 
-* If the value in a 16 bit peripheral register is signed, and you read it with a 16 bit operation, a negative number will be read as a large positive number. 
+* In some cases, a register that is defined to be 16 bits *cannot* be read or written with a 32 bit load or store; the program might crash. 
+* If the value in a 16 bit peripheral register is signed, and you read it with a 32 bit operation, a negative number will be read as a large positive number. 
 
 <div class = boxed>
 A first attempt att fixing this might look like: 
@@ -385,7 +391,7 @@ typedef struct {
     uint16_t ATRLR; 
 } TIMER; 
 
-TIMER * timer6 = (TIMER *)0x40001000;
+volatile TIMER * timer6 = (TIMER *)0x40001000;
 ```
 
 But this would fail disastroualy. Why? 
@@ -402,9 +408,13 @@ To solve this, we will explicitly put padding bytes into the structure:
 typedef struct {
     uint16_t CTLR1;     uint16_t _pad0; 
     uint16_t CTLR2;     uint16_t _pad1;
+    uint32_t reserved0; 
     uint16_t DMAINTENR; uint16_t _pad2;
     uint16_t INTFR;     uint16_t _pad3;
     uint16_t SWEVGR;    uint16_t _pad4;
+    uint32_t reserved1; 
+    uint32_t reserved2; 
+    uint32_t reserved3; 
     uint16_t CNT;       uint16_t _pad5; 
     uint16_t PSC;       uint16_t _pad6;
     uint16_t ATRLR;     uint16_t _pad7;
@@ -413,4 +423,173 @@ typedef struct {
 
 This way, the compiler knows to access all members as halfwords, and the address of each member will still be correct. 
 
+### Bitfields for easy flag access
+To give us an even nicer interface, let's look closer at the `CTLR1` register: 
 
+<div class = boxed>
+{{python quickguide-generator/main.py register-details TIM6 -no-folding CTLR1}}
+</div>
+
+Let's say we just want to start the timer. We could write: 
+```C
+#define TIM6_CTLR1_CEN_BIT 0x1
+...
+timer6->CTLR1 |= TIM6_CTLR1_CEN_BIT;
+```
+
+But we can get much simpler code by using bitfields. The register itself could be described in a struct as: 
+```C
+typedef struct {
+    uint16_t cen:1;
+    uint16_t udis:1;
+    uint16_t urs:1; 
+    uint16_t opm:1; 
+    uint16_t :3; // Three reserved bits
+    uint16_t arpe:1; 
+    uint16_t :8; // Eight reserved bits
+} CTLR1_t;
+```
+
+And we can put this into our full struct as: 
+
+```C
+typedef struct {
+    CTLR1_t ctlr1;      uint16_t _pad0; 
+    uint16_t CTLR2;     uint16_t _pad1;
+    uint16_t reserved0; 
+    uint16_t DMAINTENR; uint16_t _pad2;
+    uint16_t INTFR;     uint16_t _pad3;
+    uint16_t SWEVGR;    uint16_t _pad4;
+    uint32_t reserved1; 
+    uint32_t reserved2; 
+    uint32_t reserved3;     
+    uint16_t CNT;       uint16_t _pad5; 
+    uint16_t PSC;       uint16_t _pad6;
+    uint16_t ATRLR;     uint16_t _pad7;
+} TIMER; 
+
+volatile TIMER * timer6 = (TIMER *)0x40001000;
+```
+
+Now, we can enable the timer by simply writing: 
+
+```C
+void main()
+{
+    timer6->ctlr1.cen = 1; 
+}
+```
+
+### Unions for flexibility
+While bitfields can give us much nicer looking code, it might not always be the fastest possible code. Let's say we want to start the timer in one-pulse mode, with interrupts disabled (all other bits set to zero): 
+
+```C
+    timer6->ctlr1.udis = 1; // Disable interrupts 
+    timer6->ctlr1.opm = 1;  // One-pulse mode
+    timer6->ctlr1.cen = 1;  // Enable
+```
+This could turn into *three* read-modify-write operations. When we had `CTLR1` as a uint16_t, we could have done all of this in one write operation: 
+```C
+    timer6->CTLR1 = 0b1011;
+```
+Sometimes, speed matters more than elegance, and vice versa. Luckily, we can allow either way of accessing the register using unions: 
+
+```C
+typedef struct {
+    union { uint16_t CTLR1; CTLR1_t ctlr1; }; uint16_t _pad0; 
+    uint16_t CTLR2;     uint16_t _pad1;
+    uint32_t reserved0; 
+    uint16_t DMAINTENR; uint16_t _pad2;
+    uint16_t INTFR;     uint16_t _pad3;
+    uint16_t SWEVGR;    uint16_t _pad4;
+    uint32_t reserved1; 
+    uint32_t reserved2; 
+    uint32_t reserved3;     
+    uint16_t CNT;       uint16_t _pad5; 
+    uint16_t PSC;       uint16_t _pad6;
+    uint16_t ATRLR;     uint16_t _pad7;
+} TIMER; 
+```
+
+`CTLR1` and `ctlr1` now occupy the same 16 bits in memory, so reading or writing through either name accesses the same hardware register.
+
+```C
+timer6->CTLR1 = 0b1011;      // fast, single write
+timer6->ctlr1.arpe = 1;     // readable, fine-grained access
+```
+
+# Final example
+Below is a complete example where we have defined every bit of the basic timer carefully, with bitmasks and unions, along with a function that uses the struct to delay for one second. 
+
+```C
+#include <stdio.h>
+#include <stdint.h>
+
+typedef struct {
+    uint16_t CEN  :1;  // bit 0
+    uint16_t UDIS :1;  // bit 1
+    uint16_t URS  :1;  // bit 2
+    uint16_t OPM  :1;  // bit 3
+    uint16_t      :3;  // bits 4–6 reserved
+    uint16_t ARPE :1;  // bit 7
+    uint16_t      :8;  // bits 8–15 reserved
+} CTLR1_t;
+
+typedef struct {
+    uint16_t      :4;  // bits 0–3 reserved
+    uint16_t MMS  :3;  // bits 4–6
+    uint16_t      :9;  // bits 7–15 reserved
+} CTLR2_t;
+
+typedef struct {
+    uint16_t UIE  :1;  // bit 0
+    uint16_t      :7;  // bits 1–7 reserved
+    uint16_t UDE  :1;  // bit 8
+    uint16_t      :7;  // bits 9–15 reserved
+} DMAINTENR_t;
+
+typedef struct {
+    union { uint16_t CTLR1;     
+            CTLR1_t  ctlr1; }; 
+    uint16_t _pad0;  // 0x00
+    union { uint16_t CTLR2;     
+            CTLR2_t  ctlr2; }; 
+    uint16_t _pad1;  // 0x04
+    uint16_t _reserved0; uint16_t _pad2;  // 0x08
+    union { uint16_t DMAINTENR; 
+            DMAINTENR_t dmaintenr; }; 
+    uint16_t _pad3; // 0x0C
+    uint16_t INTFR; uint16_t _pad4;  // 0x10
+    uint16_t SWEVGR; uint16_t _pad5;  // 0x14
+    uint16_t _reserved1; uint16_t _pad6;  // 0x18
+    uint16_t _reserved2; uint16_t _pad7;  // 0x1C
+    uint16_t _reserved3; uint16_t _pad8;  // 0x20
+    uint16_t CNT;       uint16_t _pad9;  // 0x24
+    uint16_t PSC;       uint16_t _pad10; // 0x28
+    uint16_t ATRLR;     uint16_t _pad11; // 0x2C
+} TIMER_t;
+
+TIMER_t * timer6 = (TIMER_t *)0x40001000;
+
+void delay_1s(void)
+{
+    
+    timer6->ctlr1.CEN = 0;      /* 1. Stop timer */
+    timer6->PSC = 14399;        /* 2. Prescaler: 144 MHz / (14399 + 1) = 10 kHz */
+    timer6->ATRLR = 9999;       /* 3. Auto-reload: 10000 ticks = 1 second */
+    timer6->SWEVGR = 1;         /* 4. Load PSC and ATRLR */
+    timer6->INTFR = 0;          /* 5. Clear update flag */
+    timer6->ctlr1.CEN = 1;      /* 6. Enable timer */
+    while (timer6->INTFR == 0); /* 7. Wait for overflow */
+    timer6->ctlr1.CEN = 0;      /* 8. Stop timer (optional) */
+    timer6->INTFR = 0;          /* 9. Clear flag */
+}
+
+int main(void)
+{
+    while(1) {
+        printf("Hello every second!\n");
+        delay_1s();
+    }
+}
+```

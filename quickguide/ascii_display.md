@@ -20,16 +20,76 @@ Whether you are writing a command or a character to the display, you must follow
 
 The possible commands (RS = 0, R/W = 0) are given in this table: 
 
-| Command       | D7 | D6 | D5 | D4 | D3 | D2 | D1 | D0 | Description | Execution time |
-|---------------|----|----|----|----|----|----|----|----|-------------|----------------|
-| Clear display | 0  | 0  | 0  | 0  | 0  | 0  | 0  | 1  | Clears the display | 1.53 ms |
-| Return Home   | 0  | 0  | 0  | 0  | 0  | 0  | 1  | -  | Reset cursor | 1.53 ms |
-| Entry mode set | 0  | 0  | 0  | 0  | 0  | 1  | ID  | SH | ID: Cursor dir <br >(0 left, 1 right) | 39 µs |
-|                |    |    |    |    |    |    |     |    | SH: Shift (0 off, 1 on) ||
-| Display control | 0  | 0  | 0  | 0  | 1  | D  | C  | B  | Display(D), Cursor(C), Blink(B)<br>(0 off, 1 on) | 39 µs |
-| Function set | 0  | 0  | 1  | 1  | N  | F  | -  | -  | N = number of rows - 1 | 39 µs |
-|                |    |    |    |    |    |    |     |    | F: Character Size <br>(0: 5x8, 1: 5x11) ||
-| Set address  | 1  | A6 | A5 | A4 | A3 | A2 | A1 | A0 | Set address for next character | 39 µs |
+<table style="font-size: 0.85em;">
+  <thead>
+    <tr>
+      <th>Command</th>
+      <th>D7</th>
+      <th>D6</th>
+      <th>D5</th>
+      <th>D4</th>
+      <th>D3</th>
+      <th>D2</th>
+      <th>D1</th>
+      <th>D0</th>
+      <th>Description</th>
+      <th>Execution time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Clear display</td>
+      <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td>
+      <td>Clears the display</td>
+      <td>1.53 ms</td>
+    </tr>
+    <tr>
+      <td>Return Home</td>
+      <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td><td>-</td>
+      <td>Reset cursor</td>
+      <td>1.53 ms</td>
+    </tr>
+    <tr>
+      <td>Entry mode set</td>
+      <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td><td>ID</td><td>SH</td>
+      <td>ID: Cursor direction<br>(0 left, 1 right)</td>
+      <td>39 µs</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+      <td>SH: Shift (0 off, 1 on)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Display control</td>
+      <td>0</td><td>0</td><td>0</td><td>0</td><td>1</td><td>D</td><td>C</td><td>B</td>
+      <td>
+        Display (D), Cursor (C), Blink (B)<br>
+        (0 off, 1 on)
+      </td>
+      <td>39 µs</td>
+    </tr>
+    <tr>
+      <td>Function set</td>
+      <td>0</td><td>0</td><td>1</td><td>1</td><td>N</td><td>F</td><td>-</td><td>-</td>
+      <td>N = number of rows − 1</td>
+      <td>39 µs</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+      <td>F: Character size<br>(0: 5×8, 1: 5×11)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Set address</td>
+      <td>1</td><td>A6</td><td>A5</td><td>A4</td><td>A3</td><td>A2</td><td>A1</td><td>A0</td>
+      <td>Set address for next character</td>
+      <td>39 µs</td>
+    </tr>
+  </tbody>
+</table>
 
 When writing data (a character) to the device (RS = 1, R/W = 0), the data bits contain the character to write in ASCII code. Writing data has an execution time of 43 µs.
 

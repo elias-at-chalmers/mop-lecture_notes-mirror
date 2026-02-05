@@ -73,7 +73,7 @@ The possible commands (RS = 0, R/W = 0) are given in this table:
     <tr>
       <td>Function set</td>
       <td>0</td><td>0</td><td>1</td><td>1</td><td>N</td><td>F</td><td>-</td><td>-</td>
-      <td>N = number of rows − 1</td>
+      <td>N: number of active rows on display (1: 2 rows, 0: 1 row)</td>
       <td>39 µs</td>
     </tr>
     <tr>

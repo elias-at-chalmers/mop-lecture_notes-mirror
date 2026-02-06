@@ -57,7 +57,7 @@ void check_assignment_2_1(uint8_t command_or_data) {
 }
 
 int assignment_2_2_checked = 0;
-void check_assignment_2_2(uint8_t command_or_data) {
+void check_assignment_2_2() {
     if(assignment_2_2_checked) return; // Only check once
     assignment_2_2_checked = 1; 
     printf("Checking assignment 2.2...");
@@ -82,64 +82,64 @@ void check_assignment_3() {
     }
 }
 
-int assignment_5_1_checked = 0;
-void check_assignment_5_1() {
-    if(assignment_5_1_checked) return; // Only check once
-    assignment_5_1_checked = 1;
-    printf("Checking assignment 5.1...");
+int assignment_4_1_checked = 0;
+void check_assignment_4_1() {
+    if(assignment_4_1_checked) return; // Only check once
+    assignment_4_1_checked = 1;
+    printf("Checking assignment 4.1...");
     if (*GPIOE_CFGHR != 0x44444444) {
-        printf("\nAssignment 5.1 is not correct CFGHR=0x%08X.\n", *GPIOE_CFGHR);
+        printf("\nAssignment 4.1 is not correct CFGHR=0x%08X.\n", *GPIOE_CFGHR);
     } else {
         printf("PASSED!\n");
     }
 }
 
-int assignment_5_2_checked = 0;
-void check_assignment_5_2() {
-    if(assignment_5_2_checked) return; // Only check once
-    assignment_5_2_checked = 1;
-    printf("Checking assignment 5.2...");
+int assignment_4_2_checked = 0;
+void check_assignment_4_2() {
+    if(assignment_4_2_checked) return; // Only check once
+    assignment_4_2_checked = 1;
+    printf("Checking assignment 4.2...");
     if((*GPIOE_OUTDR & EN) != 0 || (*GPIOE_OUTDR & RW) == 0) {
-        printf("\nAssignment 5.2 is not correct, RS or RW not set correctly.\n");
+        printf("\nAssignment 4.2 is not correct, RS or RW not set correctly.\n");
     } 
     else {
         printf("PASSED!\n");
     }
 }
 
-int assignment_5_3_checked = 0;
-void check_assignment_5_3() {
-    if(assignment_5_3_checked) return; // Only check once
-    assignment_5_3_checked = 1;
-    printf("Checking assignment 5.3...");
+int assignment_4_3_checked = 0;
+void check_assignment_4_3() {
+    if(assignment_4_3_checked) return; // Only check once
+    assignment_4_3_checked = 1;
+    printf("Checking assignment 4.3...");
     if((*GPIOE_OUTDR & EN) == 0) {
-        printf("\nAssignment 5.3 is not correct, Enable not set.\n");
+        printf("\nAssignment 4.3 is not correct, Enable not set.\n");
     } 
     else {
         printf("PASSED!\n");
     }
 }
 
-int assignment_5_4_checked = 0;
-void check_assignment_5_4() {
-    if(assignment_5_4_checked) return; // Only check once
-    assignment_5_4_checked = 1;
-    printf("Checking assignment 5.4...");
+int assignment_4_4_checked = 0;
+void check_assignment_4_4() {
+    if(assignment_4_4_checked) return; // Only check once
+    assignment_4_4_checked = 1;
+    printf("Checking assignment 4.4...");
     if((*GPIOE_OUTDR & EN) != 0) {
-        printf("\nAssignment 5.4 is not correct, Enable is still set.\n");
+        printf("\nAssignment 4.4 is not correct, Enable is still set.\n");
     } 
     else {
         printf("PASSED!\n");
     }
 }
 
-int assignment_5_5_checked = 0;
-void check_assignment_5_5() {
-    if(assignment_5_5_checked) return; // Only check once
-    assignment_5_5_checked = 1;
-    printf("Checking assignment 5.5...");
+int assignment_4_5_checked = 0;
+void check_assignment_4_5() {
+    if(assignment_4_5_checked) return; // Only check once
+    assignment_4_5_checked = 1;
+    printf("Checking assignment 4.5...");
     if (*GPIOE_CFGHR != 0x22222222) {
-        printf("\nAssignment 5.5 is not correct CFGHR=0x%08X.\n", *GPIOE_CFGHR);
+        printf("\nAssignment 4.5 is not correct CFGHR=0x%08X.\n", *GPIOE_CFGHR);
     } else {
         printf("PASSED!\n");
     }
@@ -148,52 +148,16 @@ void check_assignment_5_5() {
 void await_status()
 {
     while(ascii_read_status() != 0) {
-        int a = 0; 
     }
-    //delay_ms(8);
 }
 
-int main(void)
+int _main(void)
 {
-
-    *GPIOE_CFGLR = 0x22222222; // Push Pull Output
-    *GPIOE_CFGHR = 0x22222222; // Push Pull Output
-
-    ascii_write_command(0x1); // Clear display
-    await_status();
-    ascii_write_command(0b1111); // Display on
-    await_status();
-    ascii_write_command(0b1000); // Display off
-    await_status();
-    ascii_write_command(0b1111); // Display on
-    await_status();
-
-    const char * msg = "Hello           "; 
-    int ctr = 0; 
-    while(1) {
-        ascii_write_command(0x1); // Clear display
-        await_status();
-        ascii_write_command(0x2); // Return home
-        await_status();
-        for(int i=0; i<16; i++) {
-            ascii_write_data(msg[(ctr + i) % 16]);
-            await_status();
-
-        }
-        ctr += 1; 
-
-        delay_ms(500);
-    }
-    printf("Hello");
-
-
-
     init_gpio_port_e(); 
     check_assignment_1();
     ascii_write_controller(0xAB);
     ascii_write_command(0x38);
     check_assignment_3(); 
-    ascii_initialize_display();
     ascii_read_status(); 
 
     printf("Polling status until display is ready...");
@@ -202,15 +166,10 @@ int main(void)
         printf(".");
     }
     printf("\nDisplay is ready!\n");
+    printf("If everything actually works, you should see the password on your display.\n");
 
     ascii_write_command(0b1000); // Display off
     while(ascii_read_status() != 0) {}
-    ascii_write_command(0b1111); // Display on
-    while(ascii_read_status() != 0) {}
-    ascii_write_command(0b1111); // Display on
-    while(ascii_read_status() != 0) {}
-
-
     ascii_write_command(0b00111000); // Function set: 8-bit, 2 lines, 5x8 dots
     while(ascii_read_status() != 0) {}
     ascii_write_command(0b00001110); // Display on, cursor off, blink
@@ -220,9 +179,9 @@ int main(void)
     ascii_write_command(0b00000001); // Clear display
     while(ascii_read_status() != 0) {}
 
-
-    while(1) {
-        ascii_write_data('A'); // Write character 'A' to display
+    char *m = "LNMJDX";
+    while(*m != '\0') {
+        ascii_write_data((*m++) + 1);
         while(ascii_read_status() != 0) {}
     }
     return 0;

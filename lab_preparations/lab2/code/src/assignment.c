@@ -26,11 +26,11 @@
 void check_assignment_1(); 
 void check_assignment_2_1(uint8_t command_or_data);
 void check_assignment_2_2();
-void check_assignment_5_1();
-void check_assignment_5_2();
-void check_assignment_5_3();
-void check_assignment_5_4();
-void check_assignment_5_5();
+void check_assignment_4_1();
+void check_assignment_4_2();
+void check_assignment_4_3();
+void check_assignment_4_4();
+void check_assignment_4_5();
 
 ///////////////////////////////////////////////////////////////////////////////
 // Register macros. 
@@ -99,6 +99,7 @@ void delay_us(uint32_t us)
 #endif    
 }
 
+
 void delay_ms(uint32_t ms)
 {
     // TODO: delay for ms milliseconds, using delay(ns)
@@ -159,16 +160,13 @@ void ascii_write_controller(uint8_t command_or_data)
     check_assignment_2_1(command_or_data);
 
     ///////////////////////////////////////////////////////////////////////////
-    // Assignment 2.2: Wait for at least tsu2 = 80ns, then set E = 0 to end 
-    //                 the write cycle.
-    // TODO: Fix this, needs to be 230 b.c. tw.
+    // Assignment 2.2: Wait for at least  max(tsu2, tw) = 230ns, then set 
+    //                 E = 0 to end the write cycle.
     ///////////////////////////////////////////////////////////////////////////
     // Your code here
 #if SOLUTION
-    delay(230); // Wait for tsu2 = 80ns
+    delay(230); // Wait for max(tsu2, tw) = 230ns
     *GPIOE_OUTDR &= ~EN; // Set E = 0 to end write cycle
-
-    delay(500); // Wait for tsu2 = 80ns
 
 #endif
     check_assignment_2_2();
@@ -196,34 +194,7 @@ void ascii_write_command(uint8_t command)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Assignment 4: Just read this
-// 
-// Now that you have implemented a way for us to write commands to the display
-// we need to run some magic code to initialize it. This is done by sending a 
-// specific sequence of commands to the display, according to the datasheet.
-// 
-// For the simulator, this is not required at all (and, in fact, takes too long
-// time), but if you want to run this on real hardware later, you will need 
-// this initialization sequence.
-///////////////////////////////////////////////////////////////////////////////
-
-void ascii_initialize_display()
-{
-    //return; // Not needed for the simulator.
-    // According to the datasheet, we need to wait for more than 15ms after
-    // VCC rises to 4.5V before sending the first command.
-    delay_ms(20);
-    // Send Function Set command (0x38) three times, with specific delays
-    ascii_write_command(0x38);
-    delay_ms(5); // Wait for more than 4.1ms
-    ascii_write_command(0x38);
-    delay_us(200); // Wait for more than 100µs
-    ascii_write_command(0x38);
-    // Now the display is initialized.
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Assignment 5: Implement a function that reads the status byte from the 
+// Assignment 4: Implement a function that reads the status byte from the 
 //               display, to see if it is busy or ready for the next command.
 //
 //               Look at the "Reading status or data from the display" timing 
@@ -234,16 +205,16 @@ void ascii_initialize_display()
 uint8_t ascii_read_status()
 {
     ///////////////////////////////////////////////////////////////////////////
-    // Assignment 5.1: Temporarily configure GPIO Port E pins [8:15] as 
+    // Assignment 4.1: Temporarily configure GPIO Port E pins [8:15] as 
     //                 input, floating.
     ///////////////////////////////////////////////////////////////////////////
     // Your code here
 #if SOLUTION
     *GPIOE_CFGHR = 0x44444444; // Clear higher config register
 #endif
-    check_assignment_5_1(); 
+    check_assignment_4_1(); 
     ///////////////////////////////////////////////////////////////////////////
-    // Assignment 5.2: Set RS = 0 (command) and RW = 1 (read) to indicate 
+    // Assignment 4.2: Set RS = 0 (command) and RW = 1 (read) to indicate 
     //                 a status read.
     ///////////////////////////////////////////////////////////////////////////
     // Your code here
@@ -251,9 +222,9 @@ uint8_t ascii_read_status()
     *GPIOE_OUTDR &= ~RS; // Clear RS
     *GPIOE_OUTDR |= RW; // Set RW
 #endif    
-    check_assignment_5_2(); 
+    check_assignment_4_2(); 
     ///////////////////////////////////////////////////////////////////////////
-    // Assignment 5.3: Set E = 1 to start the read cycle,
+    // Assignment 4.3: Set E = 1 to start the read cycle,
     //                 wait for tD = 360ns
     //                 then read the status byte from GPIO Port E pins [8:15]
     ///////////////////////////////////////////////////////////////////////////
@@ -268,31 +239,29 @@ uint8_t ascii_read_status()
     delay(360); // Wait for tD = 360ns
     uint8_t status = (*GPIOE_INDR >> 8) & 0xFF; // Read status byte
 
-    // ERIK
-    delay(1000);
 #endif    
-    check_assignment_5_3(); 
+    check_assignment_4_3(); 
     ///////////////////////////////////////////////////////////////////////////
-    // Assignment 5.4: Set E = 0 to end the read cycle.
+    // Assignment 4.4: Set E = 0 to end the read cycle.
     ///////////////////////////////////////////////////////////////////////////
     // Your code here
 #if SOLUTION
     *GPIOE_OUTDR &= ~EN; // Clear E = 0 to end read cycle
 #endif    
-    check_assignment_5_4(); 
+    check_assignment_4_4(); 
 
     ///////////////////////////////////////////////////////////////////////////
-    // Assignment 5.5: Configure GPIO Port E pins [8:15] back to output,
+    // Assignment 4.5: Configure GPIO Port E pins [8:15] back to output,
     //                 50MHz, push-pull.
     ///////////////////////////////////////////////////////////////////////////
     // Your code here
 #if SOLUTION
     *GPIOE_CFGHR = 0x22222222; // Set higher config register back to output
 #endif
-    check_assignment_5_5(); 
+    check_assignment_4_5(); 
 
     ///////////////////////////////////////////////////////////////////////////
-    // Assignment 5.6: Return the busy flag (bit 7 of the status byte)
+    // Assignment 4.6: Return the busy flag (bit 7 of the status byte)
     ///////////////////////////////////////////////////////////////////////////
     // Replace this
 #if SOLUTION
@@ -303,7 +272,7 @@ uint8_t ascii_read_status()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// Assignment 6: Implement code for writing a chareacter (data) to the display.
+// Assignment 5: Implement code for writing a chareacter (data) to the display.
 ///////////////////////////////////////////////////////////////////////////////
 void ascii_write_data(uint8_t data)
 {
@@ -314,6 +283,64 @@ void ascii_write_data(uint8_t data)
     *GPIOE_OUTDR &= ~RW; // Clear RW
     *GPIOE_OUTDR |= RS; // Set RS
     ascii_write_controller(data);
+#endif
+}
 
+
+///////////////////////////////////////////////////////////////////////////////
+// Assignment 6: Remove the training wheels!
+// ============================================================================
+// If you have passed all the previous assignments, and can see the password
+// on the display when you run the program, then it is time to write your own
+// main function that uses your functions to write to the display. 
+// 
+// Assignment 6.1: In the main.c file, rename "int main(void)" to 
+// "int main_old(void)". 
+// 
+// Then uncomment the main function below and implement the missing code.
+// You will need to consult the list of commands in the quickguide for this. 
+///////////////////////////////////////////////////////////////////////////////
+
+int main()
+{
+    // Initialize GPIO Port E (just call your function from Assignment 1
+
+    // Read status until display is not busy.
+    // Write a "Display Control" command that turns the display off
+
+    // Read status until display is not busy.
+    // Write a "Function Set" command that sets the function to 2 lines, 5x8 dots.
+
+    // Read status until display is not busy.
+    // Write a "Display Control" command that turns the dusplay on, cursor on, blink
+
+    // Read status until display is not busy.
+    // Write a "Entry Mode Set" command that says cursor should move right and 
+    // display should not shift.
+
+    // Read status until display is not busy.
+    // Write a "Clear Display" command to clear the display.
+
+    // Write the name of your group to the display
+
+#if SOLUTION
+    init_gpio_port_e();
+    while(ascii_read_status() != 0);
+    ascii_write_command(0b1000); // Display off
+    while(ascii_read_status() != 0);
+    ascii_write_command(0b00111000); // Function set: 8-bit, 2 lines, 5x8 dots
+    while(ascii_read_status() != 0);
+    ascii_write_command(0b00001110); // Display on, cursor off, blink
+    while(ascii_read_status() != 0);
+    ascii_write_command(0b00000110); // Cursor right, no display shift
+    while(ascii_read_status() != 0);
+    ascii_write_command(0b00000001); // Clear display
+    while(ascii_read_status() != 0);
+
+    char * group = "Funky Fellows";
+    while(*group != '\0') {
+        ascii_write_data(*group++);
+        while(ascii_read_status() != 0);
+    }
 #endif
 }

@@ -58,6 +58,11 @@ void check_assignment_5_5();
 #define GPIOE_CFGHR ((volatile uint32_t *)0x40011804)
 #define GPIOE_INDR ((volatile uint32_t *)0x40011808)
 #define GPIOE_OUTDR ((volatile uint32_t *)0x4001180C)
+
+#define EN 4 // Bit 2
+#define RW 2 // Bit 1
+#define RS 1 // Bit 0
+
 #endif
 
 
@@ -72,12 +77,12 @@ void delay(uint64_t ns)
     // TODO: delay for ns nanoseconds, using the systick timer. 
 #if SOLUTION
     // Convert ns to ticks (144MHz = 144 ticks per microsecond = 0.144 ticks per ns)
-    uint64_t ticks = ns / 6.9444444;
+    uint64_t ticks = (ns * 144000000ULL) / 1000000000ULL;    
     *STK_CTLR = 0; // Disable SysTick
     *STK_CMP = ticks; // Set compare value
     *STK_CNT = 0; // Reset counter
     *STK_SR = 0; // Clear status register
-    *STK_CTLR = STK_CTLR_STE | STK_CTLR_STCLK; // Enable, use HCLK
+    *STK_CTLR = STK_CTLR_INIT | STK_CTLR_STE | STK_CTLR_STCLK; // Enable, use HCLK
     // Wait for count flag (bit 0 in STK_SR)
     while ((*STK_SR & 1) == 0) {
             // busy wait
@@ -90,7 +95,7 @@ void delay_us(uint32_t us)
 {
     // TODO: delay for us microseconds, using delay(ns)
 #if SOLUTION
-    delay(us * 1000);
+    delay(us * 1000ULL);
 #endif    
 }
 
@@ -98,7 +103,7 @@ void delay_ms(uint32_t ms)
 {
     // TODO: delay for ms milliseconds, using delay(ns)
 #if SOLUTION
-    delay(ms * 1000000);
+    delay(ms * 1000000ULL);
 #endif    
 }
 
@@ -149,18 +154,22 @@ void ascii_write_controller(uint8_t command_or_data)
 #if SOLUTION
     *GPIOE_OUTDR &= 0x00FF; 
     *GPIOE_OUTDR |= command_or_data << 8; // Set data on output lines
-    *GPIOE_OUTDR |= 1; // Set E = 1 to start write cycle
+    *GPIOE_OUTDR |= EN; // Set E = 1 to start write cycle
 #endif
     check_assignment_2_1(command_or_data);
 
     ///////////////////////////////////////////////////////////////////////////
     // Assignment 2.2: Wait for at least tsu2 = 80ns, then set E = 0 to end 
     //                 the write cycle.
+    // TODO: Fix this, needs to be 230 b.c. tw.
     ///////////////////////////////////////////////////////////////////////////
     // Your code here
 #if SOLUTION
-    delay(80); // Wait for tsu2 = 80ns
-    *GPIOE_OUTDR &= ~1; // Set E = 0 to end write cycle
+    delay(230); // Wait for tsu2 = 80ns
+    *GPIOE_OUTDR &= ~EN; // Set E = 0 to end write cycle
+
+    delay(500); // Wait for tsu2 = 80ns
+
 #endif
     check_assignment_2_2();
 
@@ -180,8 +189,8 @@ void ascii_write_command(uint8_t command)
     // TODO: Set RS = 0 and RW = 0 to indicate a command write, then call
     //       ascii_write_controller to write the command to the display.
 #if SOLUTION
-    *GPIOE_OUTDR &= ~2; // Clear RW
-    *GPIOE_OUTDR &= ~4; // Clear RS
+    *GPIOE_OUTDR &= ~RW; // Clear RW
+    *GPIOE_OUTDR &= ~RS; // Clear RS
     ascii_write_controller(command);
 #endif
 }
@@ -239,8 +248,8 @@ uint8_t ascii_read_status()
     ///////////////////////////////////////////////////////////////////////////
     // Your code here
 #if SOLUTION
-    *GPIOE_OUTDR &= ~4; // Clear RS
-    *GPIOE_OUTDR |= 2; // Set RW
+    *GPIOE_OUTDR &= ~RS; // Clear RS
+    *GPIOE_OUTDR |= RW; // Set RW
 #endif    
     check_assignment_5_2(); 
     ///////////////////////////////////////////////////////////////////////////
@@ -250,9 +259,17 @@ uint8_t ascii_read_status()
     ///////////////////////////////////////////////////////////////////////////
     // Your code here
 #if SOLUTION
-    *GPIOE_OUTDR |= 1; // Set E = 1 to start read cycle
+
+    // ERIK
+    __asm__("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n"); // 144MHz means each cycle approximately 7ns. 60ns delay is ~9 cycles
+
+
+    *GPIOE_OUTDR |= EN; // Set E = 1 to start read cycle
     delay(360); // Wait for tD = 360ns
-    uint8_t status = (*GPIOE_OUTDR >> 8) & 0xFF; // Read status byte
+    uint8_t status = (*GPIOE_INDR >> 8) & 0xFF; // Read status byte
+
+    // ERIK
+    delay(1000);
 #endif    
     check_assignment_5_3(); 
     ///////////////////////////////////////////////////////////////////////////
@@ -260,7 +277,7 @@ uint8_t ascii_read_status()
     ///////////////////////////////////////////////////////////////////////////
     // Your code here
 #if SOLUTION
-    *GPIOE_OUTDR &= ~1; // Clear E = 0 to end read cycle
+    *GPIOE_OUTDR &= ~EN; // Clear E = 0 to end read cycle
 #endif    
     check_assignment_5_4(); 
 
@@ -294,8 +311,8 @@ void ascii_write_data(uint8_t data)
     //       then call ascii_write_controller to write the character to the 
     //       display.
 #if SOLUTION
-    *GPIOE_OUTDR &= ~2; // Clear RW
-    *GPIOE_OUTDR |= 4; // Set RS
+    *GPIOE_OUTDR &= ~RW; // Clear RW
+    *GPIOE_OUTDR |= RS; // Set RS
     ascii_write_controller(data);
 
 #endif

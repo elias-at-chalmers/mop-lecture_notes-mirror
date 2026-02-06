@@ -8,7 +8,9 @@
 // how the keyboard input works. 
 //
 // IMPORTANT: Before you do this lab, go through Lecture06, Excercise 02, where
-// you learn how to create short delays using systick.
+// you learn how to create short delays using systick. This exercise will not
+// test that your delay functions work correctly, and if they don't work
+// it might still work on the simulator but not on hardware. 
 //
 // In this assignment there are test_functions already in place where we try
 // to check that you have solved each assignment correctly. Once you have 
@@ -16,7 +18,9 @@
 // 
 // Please see the quickguide for a summary of the ASCII Display.
 // 
-// In the simulator, connect the LC display to GPIO Port E
+// In the simulator IO Setup, connect 
+// GPIO E(0-15)/SPI Display -> 18 LC/TFT Display   AND
+// Serial Communications Interface 1 -> 06 Console
 ///////////////////////////////////////////////////////////////////////////////
 
 #define SOLUTION 1
@@ -230,11 +234,6 @@ uint8_t ascii_read_status()
     ///////////////////////////////////////////////////////////////////////////
     // Your code here
 #if SOLUTION
-
-    // ERIK
-    __asm__("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n"); // 144MHz means each cycle approximately 7ns. 60ns delay is ~9 cycles
-
-
     *GPIOE_OUTDR |= EN; // Set E = 1 to start read cycle
     delay(360); // Wait for tD = 360ns
     uint8_t status = (*GPIOE_INDR >> 8) & 0xFF; // Read status byte
@@ -301,6 +300,7 @@ void ascii_write_data(uint8_t data)
 // You will need to consult the list of commands in the quickguide for this. 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*  
 int main()
 {
     // Initialize GPIO Port E (just call your function from Assignment 1
@@ -344,3 +344,4 @@ int main()
     }
 #endif
 }
+*/

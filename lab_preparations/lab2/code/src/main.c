@@ -151,7 +151,7 @@ void await_status()
     }
 }
 
-int _main(void)
+int main(void)
 {
     init_gpio_port_e(); 
     check_assignment_1();

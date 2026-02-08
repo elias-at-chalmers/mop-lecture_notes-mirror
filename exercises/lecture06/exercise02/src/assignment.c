@@ -20,6 +20,10 @@
 
 #define SOLUTION 1
 
+// Ignore this, it is just a declaration of a function you can use to test your
+// code later. 
+void check_assignment_3();
+
 ///////////////////////////////////////////////////////////////////////////////
 // Assignment 1: 
 // Open the quickguide and create definitions for the SysTick registers.
@@ -58,9 +62,7 @@
 uint64_t ns_to_ticks(uint64_t ns)
 {
 #if SOLUTION
-	// 1 tick = 1 / 144,000,000 seconds = 6.9444444 ns
-	// ticks = ns / 6.9444444
-	return ns / 6.9444444; // approximately ns * (144 / 1000)
+	return (ns * 144ULL) / 1000ULL; 
 #else
 	// Your code here
 	return 0; 
@@ -82,24 +84,46 @@ void delay(uint64_t ns)
 	*STK_CMP = ticks; // Set compare value
 	*STK_CNT = 0; // Reset counter
 	*STK_SR = 0; // Clear status register
-	*STK_CTLR = STK_CTLR_STE | STK_CTLR_STCLK; // Enable, use HCLK
+	*STK_CTLR = STK_CTLR_STCLK | STK_CTLR_INIT; // Enable, use HCLK
+
+	check_assignment_3();
+
+	*STK_CTLR |= STK_CTLR_STE; // Start timer
+
 	// Wait for count flag (bit 0 in STK_SR)
 	while ((*STK_SR & 1) == 0) {
 		// busy wait
 	}
 	*STK_CTLR = 0; // Disable SysTick
+	*STK_SR = 0; // Clear status register
 #else
-	// Your code here
+	// Initialize systick so that it counts DOWN from STK_CMP.
+	// STK_CMP should be set to the number of ticks corresponding to the requested delay.
+
+	// You can uncomment this call to get some hints about your configuration.
+	// But try to solve it yourself first!
+	//check_assignment_3();
+
+	// Now start the timer and then read the status register until the count flag is set. 
+
+	// Finally, disable the timer again, and clear the status register.
 #endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Assignment 4:
-// Write a delay_us() function that uses your delay(ns) function.
+// Write a delay_us(), and a delay_ms() function that uses your delay(ns) function.
 ///////////////////////////////////////////////////////////////////////////////
 void delay_us(uint32_t us)
 {
 #if SOLUTION
 	delay(us * 1000); // 1 microsecond = 1000 nanoseconds
+#endif
+}
+
+void delay_ms(uint32_t ms)
+{
+#if SOLUTION
+	delay(ms * 1000000); // 1 millisecond = 1000000 nanoseconds
 #endif
 }

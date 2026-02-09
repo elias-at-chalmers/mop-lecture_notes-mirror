@@ -12,9 +12,9 @@
 // test that your delay functions work correctly, and if they don't work
 // it might still work on the simulator but not on hardware. 
 //
-// In this assignment there are test_functions already in place where we try
-// to check that you have solved each assignment correctly. Once you have 
-// passed an assignment, you can comment these out.
+// In this assignment there are check_assignment_x() functions  already in place
+// where we try to check that you have solved each assignment correctly. Once you 
+// have passed an assignment, you can comment these out.
 // 
 // Please see the quickguide for a summary of the ASCII Display.
 // 
@@ -35,6 +35,7 @@ void check_assignment_4_2();
 void check_assignment_4_3();
 void check_assignment_4_4();
 void check_assignment_4_5();
+void check_assignment_5();
 
 ///////////////////////////////////////////////////////////////////////////////
 // Register macros. 
@@ -76,7 +77,7 @@ void check_assignment_4_5();
 //               They are not tested in this assignment, so make sure they
 //               work using the Lecture06 Exercise02.
 ///////////////////////////////////////////////////////////////////////////////
-void delay(uint64_t ns)
+void delay_ns(uint64_t ns)
 {
     // TODO: delay for ns nanoseconds, using the systick timer. 
 #if SOLUTION
@@ -97,25 +98,25 @@ void delay(uint64_t ns)
 
 void delay_us(uint32_t us)
 {
-    // TODO: delay for us microseconds, using delay(ns)
+    // TODO: delay for us microseconds, using delay_ns(ns)
 #if SOLUTION
-    delay(us * 1000ULL);
+    delay_ns(us * 1000ULL);
 #endif    
 }
 
 
 void delay_ms(uint32_t ms)
 {
-    // TODO: delay for ms milliseconds, using delay(ns)
+    // TODO: delay for ms milliseconds, using delay_us(ns)
 #if SOLUTION
-    delay(ms * 1000000ULL);
+    delay_us(ms * 1000ULL);
 #endif    
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
 // Assignment 1: Configure GPIO Port E so that all pins [0:15] are set as 
-//               output, 50MHz, push-pull.
+//               output, 2MHz, push-pull.
 ///////////////////////////////////////////////////////////////////////////////
 void init_gpio_port_e()
 {
@@ -169,7 +170,7 @@ void ascii_write_controller(uint8_t command_or_data)
     ///////////////////////////////////////////////////////////////////////////
     // Your code here
 #if SOLUTION
-    delay(230); // Wait for max(tsu2, tw) = 230ns
+    delay_ns(230); // Wait for max(tsu2, tw) = 230ns
     *GPIOE_OUTDR &= ~EN; // Set E = 0 to end write cycle
 
 #endif
@@ -230,12 +231,13 @@ uint8_t ascii_read_status()
     ///////////////////////////////////////////////////////////////////////////
     // Assignment 4.3: Set E = 1 to start the read cycle,
     //                 wait for tD = 360ns
-    //                 then read the status byte from GPIO Port E pins [8:15]
+    //                 then read the status byte from GPIO Port E INDR register
+    //                 pins [8:15]
     ///////////////////////////////////////////////////////////////////////////
     // Your code here
 #if SOLUTION
     *GPIOE_OUTDR |= EN; // Set E = 1 to start read cycle
-    delay(360); // Wait for tD = 360ns
+    delay_ns(360); // Wait for tD = 360ns
     uint8_t status = (*GPIOE_INDR >> 8) & 0xFF; // Read status byte
 
 #endif    
@@ -251,7 +253,7 @@ uint8_t ascii_read_status()
 
     ///////////////////////////////////////////////////////////////////////////
     // Assignment 4.5: Configure GPIO Port E pins [8:15] back to output,
-    //                 50MHz, push-pull.
+    //                 2MHz, push-pull.
     ///////////////////////////////////////////////////////////////////////////
     // Your code here
 #if SOLUTION
@@ -281,6 +283,7 @@ void ascii_write_data(uint8_t data)
 #if SOLUTION
     *GPIOE_OUTDR &= ~RW; // Clear RW
     *GPIOE_OUTDR |= RS; // Set RS
+    check_assignment_5(); 
     ascii_write_controller(data);
 #endif
 }

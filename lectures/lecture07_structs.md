@@ -39,7 +39,7 @@ struct Player {
 };
 
 int main() {
-    struct Player player_one; 
+    struct Player player_one;
     player_one.score = 0;
     player_one.health = 100;
 }
@@ -268,6 +268,45 @@ typedef struct {
     union { ... };
 } Vehicle;
 ```
+# Structs in memory and alignment
+
+Before we move on to describe how structs can be helpful for modelling peripheral register blocks, let us first discuss where the members of a struct are actually placed in memory.
+
+Consider a struct `S`, and ask where in memory the members `a`, `b`, `c`, and `d` will reside:
+
+```c
+typedef struct {
+    char a; 
+    short b;
+    short c;  
+    int d; 
+} S; 
+
+S s; // Define a struct `s` of type S
+```
+
+When the variable `s` is defined, the compiler and linker allocate memory for it somewhere in SRAM. Suppose that `s` starts at address `0x20001000`. Memory for the members of the struct is allocated in the same order in which they are declared.
+
+<p align="center">
+  <img src="../images/struct_s.png" alt="Layout of struct S in memory" width="50%"/>
+</p>
+
+The member `s.a` therefore resides at address `0x20001000` and occupies one byte. The next member, `s.b`, ends up at address **`0x20001002`**, leaving one byte of unused space between the two members.
+
+The reason for this is that the member `short b` occupies two bytes and must be located at a memory address divisible by two (see the previous lecture on *alignment*). The following member, `short c`, is also two bytes wide. Since the next available address after `b` is already divisible by two, `c` is placed at address `0x20001004`.
+
+The final member, `int d`, is four bytes wide and therefore cannot be placed immediately after `c`. The compiler must leave two bytes of unused space and place `d` at address `0x20001008`, which is divisible by four.
+
+At this point, it is worth asking how the starting address of the struct itself is chosen. If the struct were placed, for example, at address `0x20001001`, then the members `b`, `c`, and `d` would all be misaligned. For this reason, the compiler ensures that the starting address of a struct is aligned to the alignment requirement of its largest member.
+
+Because of alignment rules, structs may occupy more memory than the sum of the sizes of their individual members, which may prompt the question of whether the compiler should attempt to minimise space usage by rearranging members. In practice, it does not. The placement of the members of a structure in memory must be directly inferable from its definition. If the rules governing layout were not simple and well defined, different compilers could produce incompatible memory layouts, making correct linking and interoperability unreliable.
+
+<div class = "boxed">
+**Note:** That said, there are compiler-specific attributes you can add to adjust how members are aligned in a struct, but that is not necessary for this course. 
+</div>
+
+
+
 
 # Basic Timers
 The typical task for a microcontroller usually involves doing things at precise times (start an alarm when a door has been open for exactly 10 seconds), often at periodic intervals (blink the orange led every second), and often very short intervals (flip a GPIO pin every ms to create a 1MHz clocksignal). We have already seen how SysTick can be used for this purpose, but a single timer is often not enough. Most microcontrollers therefore have a number of extra timers of varying types. 
@@ -288,7 +327,7 @@ Our microcontroller is equipped with 10 timers in total, and in this section we 
 
 We will configure and start the timer using the `CTLR1` register. The `CNT` register holds the current counter value. When the counter value reaches the value in the `ATRLR` register, the first bit in the `INTFR` register is set. 
 
-Note that all the registers are only 16 bits wide, so the CNT register will overflow when it reaches 65536. Since the timer updates at 144MHz, that will happen after 455us (!). Since we often have to have longer delays than that, there is also a *prescaler* register, `PSC`. If PSC is non-zero, the counter increments once every PSC + 1 input clock ticks.. If, for instance, we set `PSC` to 9, `CNT` will not reach its maximum value until after 4550us.
+Note that all the registers are only 16 bits wide, so the CNT register will overflow when it reaches 65536. Since the timer updates at 144MHz, that will happen after 455us (!). Since we often have to have longer delays than that, there is also a *prescaler* register, `PSC`. If PSC is non-zero, the counter increments once every PSC + 1 input clock ticks. If, for instance, we set `PSC` to 9, `CNT` will not reach its maximum value until after 4550us.
 
 We will return to using the timer later, but for now we are interested in how we can write elegant C code to interact with the registers. 
 
@@ -377,7 +416,7 @@ In our first attempt at writing a struct that describes a Basic Timer, we carele
 * If the value in a 16 bit peripheral register is signed, and you read it with a 32 bit operation, a negative number will be read as a large positive number. 
 
 <div class = boxed>
-A first attempt att fixing this might look like: 
+A first attempt at fixing this might look like: 
 
 ```C
 typedef struct {
@@ -394,7 +433,7 @@ typedef struct {
 volatile TIMER * timer6 = (TIMER *)0x40001000;
 ```
 
-But this would fail disastroualy. Why? 
+But this would fail disastrously. Why? 
 
 <details closed>
 <summary>Think about the answer the click to open</summary>
@@ -569,7 +608,7 @@ typedef struct {
     uint16_t ATRLR;     uint16_t _pad11; // 0x2C
 } TIMER_t;
 
-TIMER_t * timer6 = (TIMER_t *)0x40001000;
+volatile TIMER_t * timer6 = (TIMER_t *)0x40001000;
 
 void delay_1s(void)
 {

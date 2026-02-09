@@ -145,6 +145,19 @@ void check_assignment_4_5() {
     }
 }
 
+int assignement_5_checked = 0;
+void check_assignment_5() {
+    if(assignement_5_checked) return; // Only check once
+    assignement_5_checked = 1;
+    printf("Checking assignment 5...");
+    if((*GPIOE_OUTDR & RS) == 0 || (*GPIOE_OUTDR & RW) != 0) {
+        printf("\nAssignment 5 is not correct, RS or RW not set correctly.\n");
+    } 
+    else {
+        printf("PASSED!\n");
+    }
+}
+
 void await_status()
 {
     while(ascii_read_status() != 0) {

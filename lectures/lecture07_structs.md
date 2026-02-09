@@ -632,3 +632,11 @@ int main(void)
     }
 }
 ```
+
+<hr>
+
+**Related chapters in work-book:**
+
+Chapter 1.8 (pages 67-73)
+
+Chapter 3.4 (pages 107-108)

@@ -125,7 +125,7 @@ int main(void)
     fflush(stdout);
     for(int i=0; i<10; i++) {
         int pin = simplerand() % 16;
-        int mode = simplerand() % 3; // 0 = pushpull, 1 = open-drain
+        int mode = simplerand() % 2; // 0 = pushpull, 1 = open-drain
 
         // Reset registers to known values
         uint32_t orig_outdr = simplerand() & 0xFFFF;

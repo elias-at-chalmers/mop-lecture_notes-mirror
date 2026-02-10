@@ -101,7 +101,7 @@ If you're feeling lost right now, take a deep breath and try again. It is essent
 One reason that pointers are important in machine oriented programming is that
 they allow us to express reading and writing from arbitrary memory addresses.
 When we do not have an operating system and drivers, the only way for the processor to communicate with peripheral hardware is through memory load and store
-operations. One reason that pointers are important in machine oriented programming is that they allow us to express reading and writing, not only from variables, but from any arbitrary memory addresses
+operations.
 
 Let us consider another toy example:  
 

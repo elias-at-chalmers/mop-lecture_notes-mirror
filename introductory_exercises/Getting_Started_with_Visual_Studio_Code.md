@@ -1,5 +1,6 @@
 # Getting Started with Visual Studio Code <!-- omit in toc -->
 These are the instructions for setting up the programming environment you will use throughout the course.
+
 # Table of contents <!-- omit in toc -->
 - [Setting up VSCode](#setting-up-vscode)
 - [Creating a project](#creating-a-project)

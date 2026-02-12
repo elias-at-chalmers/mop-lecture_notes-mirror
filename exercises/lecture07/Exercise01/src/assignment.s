@@ -10,6 +10,8 @@
 .global give_double_points
 .global chaos
 
+.set SOLUTION, 0
+
 ###############################################################################
 ## Assignment 1:  Player_Stats structure is defined in C:
 ##
@@ -31,11 +33,11 @@
 increase_score:
     # a0 = pointer to struct Player_Stats
     # a1 = score to add
-
+.if SOLUTION == 1
     lw  t0, 4(a0)      # load current score
     add t0, t0, a1     # add score
     sw  t0, 4(a0)      # store updated score
-    
+.endif
     ret
 
 ###############################################################################
@@ -63,11 +65,11 @@ increase_score:
 
 give_double_points:
     # a0 = pointer to struct Player_Stats
-
+.if SOLUTION == 1
     lbu t0, 8(a0)
     or t0, t0, 0b100
     sb t0, 8(a0)
-
+.endif
     ret
 
 ###############################################################################
@@ -101,6 +103,7 @@ give_double_points:
 ###############################################################################
 
 chaos:
+.if SOLUTION == 1
     lbu   t0, 8(a0)          # t0 = status->powerups  (uint8_t)
     xori  t0, t0, 0x0F       # t0 = ~t0
     ori   t0, t0, 0b100      # set bit double_points
@@ -108,5 +111,5 @@ chaos:
 
     andi  t0, t0, 0xf
     mv    a0, t0
-
+.endif
     ret

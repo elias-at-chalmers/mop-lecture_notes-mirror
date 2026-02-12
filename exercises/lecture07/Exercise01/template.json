@@ -1,0 +1,6 @@
+{
+   "label": "Lecture 07 - Excercise 1",
+   "description" : "Structs Unions And Alignment",
+   "extends": "md307-master",
+   "openOnStartup": ["src/assignment.s"]
+}

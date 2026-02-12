@@ -133,6 +133,10 @@ void assignment3(){
 ///////////////////////////////////////////////////////////////////////////////
 
 uint16_t assignment4(){
+#ifdef SOLUTION
     struct Port *a = (struct Port *) 0x20005000;
     return a->XREG;
+#else
+    return 0; 
+#endif
 }

@@ -1,0 +1,6 @@
+{
+   "label": "Lecture 07 - Excercise 2",
+   "description" : "Structs",
+   "extends": "md307-master",
+   "openOnStartup": ["src/assignment.c"]
+}

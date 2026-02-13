@@ -40060,7 +40060,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
             </field>
 			<field>
               <name>MODE</name>
-              <description>If set, count down, otherwise count up.</description>
+              <description>If set, count up, otherwise count down.</description>
 			  <access>read-write</access>
               <bitOffset>4</bitOffset>
               <bitWidth>1</bitWidth>

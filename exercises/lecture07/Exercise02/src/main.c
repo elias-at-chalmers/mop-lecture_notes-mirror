@@ -4,7 +4,7 @@
 #include <string.h>
 
 extern uint32_t assignment1();
-extern void * assignment2(int address);
+extern struct BankAccount * assignment2(int address);
 extern void assignment3();
 extern uint16_t assignment4();
 
@@ -33,6 +33,60 @@ struct PortTest{
     };
     uint16_t _res4: 8;
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    ///////////////////////////////////////////////////////////////////////////////
+    //////////////////     Spoilers above             /////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////
 
 int main(void)
 {

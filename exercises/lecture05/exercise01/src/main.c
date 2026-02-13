@@ -68,7 +68,8 @@ int main(void)
 
     for(int i=0; i<10; i++) {
         int pin = simplerand() % 16;
-        int mode = simplerand() % 3; // 0 = pull-down, 1 = pull-up, 2 = floating
+        int mode = simplerand();
+        mode = mode % 3; // 0 = pull-down, 1 = pull-up, 2 = floating
 
         // Reset registers to known values
         uint32_t orig_outdr = simplerand() & 0xFFFF;

@@ -56,7 +56,10 @@ increase_score:
 ##                 uint8_t reserved_1 : 4;          // reserved
 ##             };
 ##
-## Implement a function that sets double points bit to a given Player_Stats2
+## Implement a function that sets the double_points bit = 1 
+## to a struct Player_Stats2 which is passed as a pointer in register a0
+##
+## Function declared as:
 ## void give_double_points(struct Player_Stats2 *status);               
 ##
 ## Note: do not modify any other bit in the structure!
@@ -93,7 +96,7 @@ give_double_points:
 ##                  };
 ##
 ## Implement a function `uint8_t chaos(struct Player_Stats3 *status)` which flips
-## all the powerups of the player (0 to 1, and 1 to 0), but sets double_points.
+## all the powerups of the player (0 to 1, and 1 to 0), but sets double_points bit.
 ##
 ## Reserved bits must remain unchanged.
 ## Function should returns `powerups` field without the reserved bits.

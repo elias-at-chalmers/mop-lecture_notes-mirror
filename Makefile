@@ -1,4 +1,4 @@
-SRC_DIRS = lectures quickguide labs introductory_exercises
+SRC_DIRS = lectures quickguide labs introductory_exercises practice_exams
 SRCS := $(foreach d,$(SRC_DIRS),$(wildcard $(d)/*.md))
 
 HTML_DIR = html

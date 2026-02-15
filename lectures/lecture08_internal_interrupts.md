@@ -230,10 +230,6 @@ But now our code is in a dangerous state! After this line has been executed, sys
 
 And that is all there is to it! We can now write a single main C file, that plays a tone using an interrupt, and *in parallel* reads and updates the thermometer value.
 
-> **TODO:** Point them to an exercise where they get to do exactly this. 
-
-### If this is too short, take some pointer stuff from lecture 06
-
 
 
 

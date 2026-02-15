@@ -64,6 +64,8 @@ When the debugger has automatically stopped in the beginning of `main`, press
 
 Luckily, you *love* fixing broken software.
 
+**In this lab, like the previous, you will first debug an existing program, and then try your own if you have time left. Only the first part is necessary to pass the lab.**
+
 ## Task 1: Fixing the Program
 
 The program is riddled with bugs. Given your familiarity with similar code from
@@ -247,11 +249,11 @@ systematically debug the next layer.
 *Hint: There is one bug per layer on the bottom two layers. Apart from these two
 bugs, there are no more bugs to be found.*
 
-### Task 2: Getting Approved
+### Task 2: Try your own program
+If you have time left, try your own program from the lab preparation. You might find that the hardware is less forgiving than the simulator, and you might have to do some more debugging to get it to work, but you are good at that now. 
 
-After thoroughly testing and verifying that your program works as expected,
-demonstrate your solution to a TA. Show them that the program works. Explain the
-bugs you found and how you fixed them. Answer any questions they may have.
+### Task 3: Getting Approved
+Show the TA the bugs you found, and demonstrate that the corrected program works as intended. If you got your own code to work as well, show that to the TA too. 
 
-***If you are approved by the TA, it is YOUR responsibility to verify that it
+***When you have been approved by the TA, it is YOUR responsibility to verify that it
 has been documented in Canvas under 'Grades'. Do so before leaving!***

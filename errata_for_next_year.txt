@@ -16,6 +16,8 @@ Lecture 03
 Meningen innan "Arrays as function parameters" så står det "we will se later" men det borde vara "see later".
 
 
+I Lecture notes till föreläsning 6 refereras det ofta till registret CNTLR som inte finns, bör vara CNTL?
+
 ------------------------------------------------------------------------------------------------------
 Det var en grupp på simulerings passet som misstolkade den här frågan i förberedelserna till labben. Dem trodde att a2 och a3 var specifika element och inte ett index så dem letat först efter indexen till arrayen
 # int copyelements(int src[], short dst[], int start, int end);

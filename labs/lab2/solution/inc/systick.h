@@ -19,8 +19,13 @@
 #define STK_B_EN   (1 <<  0)
 #define STK_B_CNT  (1 <<  0)
 
+// Delay given amount of microseconds
 void delay_micro(unsigned int us);
+
+// Delay given amount of milliseconds
 void delay_milli(unsigned int ms);
+
+// Delay given amount of nanoseconds
 void delay_nano(unsigned int ns);
 
 #endif

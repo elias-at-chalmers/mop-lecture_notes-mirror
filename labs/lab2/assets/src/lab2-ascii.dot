@@ -1,0 +1,36 @@
+digraph {
+  ascii_read_controller -> {
+    ascii_ctrl_bit_set
+    ascii_ctrl_bit_clear
+  }
+  ascii_read_data -> {
+    ascii_ctrl_bit_set
+    ascii_read_controller
+  }
+  ascii_read_status -> {
+    ascii_ctrl_bit_clear
+    ascii_ctrl_bit_set
+    ascii_read_controller
+  }
+  ascii_write_char -> {
+    ascii_read_status
+    ascii_write_data
+  }
+  ascii_write_cmd -> {
+    ascii_read_status
+    ascii_ctrl_bit_clear
+    ascii_write_controller
+  }
+  ascii_write_controller -> {
+    ascii_ctrl_bit_set
+    ascii_ctrl_bit_clear
+  }
+  ascii_write_data -> {
+    ascii_ctrl_bit_set
+    ascii_ctrl_bit_clear
+    ascii_write_controller
+  }
+  ascii_gotoxy -> {
+    ascii_write_cmd
+  }
+}

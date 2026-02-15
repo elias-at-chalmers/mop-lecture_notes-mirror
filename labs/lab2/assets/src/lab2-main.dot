@@ -1,0 +1,9 @@
+digraph {
+  main -> {
+    init_app
+    ascii_gotoxy
+    keyb
+    ascii_write_char
+    delay_milli
+  }
+}

@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include "helpers.h"
 
+#define INTERRUPTS_ENABLED 1
 
 ///////////////////////////////////////////////////////////////////////////////
 // 1. Declare a structure for the GPIO ports and define GPIO_D and GPIO_E
@@ -69,8 +70,28 @@ typedef struct {
 
 SysTick_t * systick = (SysTick_t*) 0xE000F000;
 
-int beep(void)
+#if INTERRUPTS_ENABLED
+__attribute__((interrupt("machine")))
+void SysTick_Handler(void) 
 {
+    GPIO_D->OUTDR ^= 0b1; // Toggle PD0
+    systick->SR = 0; // Clear the status
+}
+
+#define PFIC_BASE       0xE000E000
+#define PFIC_IENR1     ((volatile uint32_t *)(PFIC_BASE + 0x100))
+
+#endif
+
+void beep(void)
+{
+#if INTERRUPTS_ENABLED
+    __asm volatile("csrw mtvec, %0" : : "r" (SysTick_Handler));
+
+    // Enable Systick Interrupt in PFIC
+    *PFIC_IENR1 |= (1 << 12);
+#endif   
+
     ///////////////////////////////////////////////////////////////////////////
     // 3. Configure PD0 as an output pin, push-pull, 2 MHz
     ///////////////////////////////////////////////////////////////////////////
@@ -87,6 +108,13 @@ int beep(void)
     systick->stre = 1; // Enable reload of the timer when it reaches the CMP value
     systick->stclk = 1; // Use the processor clock as the source (144MHz)
     systick->stie = 0; // No interrupts (yet)
+
+#if INTERRUPTS_ENABLED
+    systick->stie = 1; // Enable interrupts
+    systick->ste = 1; // Enable the timer
+    return; 
+#else    
+
     systick->ste = 1; // Enable the timer
     
     ///////////////////////////////////////////////////////////////////////////
@@ -99,6 +127,7 @@ int beep(void)
             systick->SR = 0; // Clear the status
         }
     }
+#endif
 }
 
 
@@ -125,7 +154,7 @@ void show_temperature()
 
 int main()
 {
-    //beep();
+    beep();
     show_temperature();
     return 0;
 }   

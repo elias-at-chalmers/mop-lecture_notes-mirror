@@ -102,11 +102,13 @@ struct BankAccount * assignment2(int address){
 
 #ifdef SOLUTION
 struct Port{
-    uint8_t f0: 4;
-    uint8_t _res1: 2;
-    uint8_t f1: 3;
-    uint8_t _res2: 7;
-    uint16_t _res3: 16;
+    struct {
+        unsigned int f0: 4;
+        unsigned int _res1: 2;
+        unsigned int f1: 3;
+        unsigned int _res2: 7;
+        unsigned int _res3: 16;
+    };
 
     union{
         uint16_t XREG;
@@ -115,7 +117,8 @@ struct Port{
             uint8_t XHIGH;
         };
     };
-    uint16_t _res4: 8;
+    
+    unsigned short _res4;
 };
 #endif
 
@@ -141,7 +144,10 @@ void assignment3(){
 ///////////////////////////////////////////////////////////////////////////////
 
 uint16_t assignment4(){
+#ifdef SOLUTION
     struct Port *a = (struct Port *) 0x20005000;
-    // Uncomment the next line:
-    // return a->XREG;
+    return a->XREG;
+#elif
+    return 0;
+#endif
 }

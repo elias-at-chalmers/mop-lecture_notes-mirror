@@ -18,11 +18,13 @@ struct BankAccountTest {
 struct BankAccountTest account_test = {123456789, "Birta Eiriksdottir", 666.66, 2.56, 'd'}; 
 
 struct PortTest{
-    uint8_t f0: 4;
-    uint8_t _res1: 2;
-    uint8_t f1: 3;
-    uint8_t _res2: 7;
-    uint16_t _res3: 16;
+    struct {
+        unsigned int f0: 4;
+        unsigned int _res1: 2;
+        unsigned int f1: 3;
+        unsigned int _res2: 7;
+        unsigned int _res3: 16;
+    };
 
     union{
         uint16_t XREG;
@@ -31,7 +33,8 @@ struct PortTest{
             uint8_t XHIGH;
         };
     };
-    uint16_t _res4: 8;
+
+    unsigned short _res4;
 };
 
 
@@ -86,7 +89,6 @@ struct PortTest{
     //////////////////     Spoilers above             /////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////
 
->>>>>>> 57f16fe3f5dcb2d6b19efad0e282e4f6a0e688b9
 int main(void)
 {
     ///////////////////////////////////////////////////////////////////////////////
@@ -107,6 +109,7 @@ int main(void)
     ///////////////////////////////////////////////////////////////////////////////
     printf("Testing assignment 2...\n");
     void *student_struct = malloc(100);
+    memset(student_struct, 0, 100);
     void *student_return = assignment2((int)student_struct);
     if (memcmp(student_return, &account_test, sizeof(account_test)) == 0){
         printf("PASSED!\n\n");
@@ -126,9 +129,10 @@ int main(void)
     ///////////////////////////////////////////////////////////////////////////////
     printf("Testing assignment 3...\n");
     int address = 0x20005000;
+    memset((void *)address, (char)0x00, sizeof(struct PortTest)+4);
     memset((void *)address, (char)0xAA, sizeof(struct PortTest));
     struct PortTest* port_test = (struct PortTest *) address;
-    port_test->f1 = 0b000;
+    port_test->f1 = 0b0000;
     port_test->XHIGH = 0x0;
 
     assignment3();
@@ -138,8 +142,8 @@ int main(void)
         printf("Required fields are not set correctly\n");
         a3_flag = 0;
     }
-    if (port_test->XLOW != 0xAA || port_test->f0 != 0b1010 || port_test->_res1 != 0b10 ||
-        port_test->_res2 != 0x2a || port_test->_res3 != 0xAAAA){
+    if (port_test->XLOW != 0xAA || port_test->f0 != 0xA || port_test->_res1 != 0x2 ||
+        port_test->_res2 != 0x55 || port_test->_res3 != 0xAAAA){
         printf("Other fields rather than f1 or XHIGH are modified\n");
         a3_flag = 0;
     }

@@ -3,9 +3,15 @@
 // ============================================================================
 // 
 // Connect a console to the simulator as usual. 
+// Connect a keypad to GPIOD[0:7]
+// Connect a bargraph to GPIOE[0:7]
 ///////////////////////////////////////////////////////////////////////////////
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+void check_assignment2_1(); 
+void check_assignment2_3(); 
+void InitInterrupts();
 
 #define SOLUTION 1
 
@@ -68,13 +74,81 @@ void assignment1()
 }
 
 
-int moles[4] = {0, 1, 0, 1};
+///////////////////////////////////////////////////////////////////////////////
+// Assignment 2: Whack-a-mole
+// ============================================================================
+// In the code below, some lazy person has implemented half a game. The point
+// of the game is to whack the "moles" (represented by leds on the bargraph)
+// by pressing the corresponding buttons on the top row of the keypad. 
+//
+// Currently, if you run the program, two moles pop up, and you can whack them
+// with the buttons, but no new moles appear. Your task is to complete the game
+// by implementing the remaining assignments. 
+//
+// First, have a look at the code and make sure you understand how it works. 
+// 
+// You then find the first assignments in the assembly file, "assignment.s"
+///////////////////////////////////////////////////////////////////////////////
+
+
+// Note, this has to be volatile, since it is changed in the interrupt handler.
+volatile int moles[4] = {1, 0, 0, 0};
 
 #define GPIOD_CFGLR ((volatile uint32_t *)0x40011400)
 #define GPIOD_INDR  ((volatile uint32_t *)0x40011408)
 #define GPIOD_OUTDR ((volatile uint32_t *)0x4001140C)
 #define GPIOE_CFGLR ((volatile uint32_t *)0x40011800)
 #define GPIOE_OUTDR ((volatile uint32_t *)0x4001180C)
+
+///////////////////////////////////////////////////////////////////////////////
+// Assignment 2.3: Initialize the SysTick timer to generate an interrupt every
+//                 ??? ms. (On the hardware this would be way too fast,
+//                 but in the simulator, it will be okay.)
+//
+//                 The counter should count UP to the compare value, and then 
+//                 reset to 0 and continue counting. You should enable 
+//                 interrupts.
+// 
+//                 Do NOT start the timer yet. 
+///////////////////////////////////////////////////////////////////////////////
+void InitSystick()
+{
+    // Remember clock-frequency = clocks / time, so clocks = clock-frequency * time.
+    // Clock frequency is 144Mhz = 144000000Hz, time is 10ms = (1/100) seconds
+    // (we cannot check the value you set, so do it right! :) )
+    #if SOLUTION
+    systick->CMP = 144000000; // Set the compare value for a 10ms delay (assuming a 144 MHz clock)
+    systick->CNT = 0; // Clear the counter
+    systick->CTLR = 0; // Disable systick and clear configuration. 
+    systick->SR = 0; // Clear the status register
+    systick->ctlr.init = 1; // Initialize the timer when enabled
+    systick->ctlr.mode = 0; // Count UP to CMP value
+    systick->ctlr.stre = 1; // Enable reload of the timer when it reaches the CMP value
+    systick->ctlr.stclk = 1; // Use the processor clock as the source (144MHz)
+    systick->ctlr.stie = 1; // Enable interrupts
+    systick->ctlr.ste = 0; // Enable the timer
+    #endif
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Assignment 2.5: If your code ends up in here, you are almost done!
+//                 Some time has passed and you should activate another mole.
+//                 (by writing 1 to one of the elements in the "moles" array).
+//                 You can use the rand() function (from stdlib.h) to pick one
+//                 randomly.)                
+// 
+//                 Don't forget to reset the systick status register. Otherwise
+//                 you will not get another interrupt. 
+///////////////////////////////////////////////////////////////////////////////
+void SysTick_Handler(void) 
+{
+    #if SOLUTION
+    int random_mole = rand() % 4;
+    moles[random_mole] = 1; // Activate a random mole
+    if(systick->SR == 1) systick->SR = 0; // Clear the status
+    #endif
+}
 
 
 int whackamole()
@@ -92,6 +166,24 @@ int whackamole()
     // push-pull.
     ///////////////////////////////////////////////////////////////////////////
     *GPIOE_CFGLR = 0x22222222;        // Pin 0-7, Push-Pull Output
+
+    ///////////////////////////////////////////////////////////////////////////
+    // This function should initialize interrupts. 
+    // It needs to be implemented in the assembly file, "assignment.s".
+    ///////////////////////////////////////////////////////////////////////////
+    InitInterrupts();
+    check_assignment2_1(); 
+    InitSystick(); 
+    check_assignment2_3();
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Assignment 2.4: Now start the timer. Put a breakpoint in InterruptHandler
+    //                 (in the assembly file) and stepthrough to make sure the 
+    //                 SysTick Handler is called. 
+    ///////////////////////////////////////////////////////////////////////////
+#if SOLUTION
+    systick->ctlr.ste = 1; // Enable the timer
+#endif  
 
     int game_over = 0;
     int score = 0; 
@@ -125,4 +217,5 @@ int whackamole()
         if(moles[0] & moles[1] & moles[2] & moles[3]) game_over = 1;
     }
     printf("Game Over! Your score is %d\n", score);
+    return 0;
 }

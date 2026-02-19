@@ -116,16 +116,20 @@ void InitSystick()
     // Remember clock-frequency = clocks / time, so clocks = clock-frequency * time.
     // Clock frequency is 144Mhz = 144000000Hz, time is 10ms = (1/100) seconds
     // (we cannot check the value you set, so do it right! :) )
+    //
+    // Important! Do not forget to disable the timer by setting all of CTLR to 0
+    //            before writing to the other registers. Otherwise, the timer
+    //            the simulator gets confused. 
     #if SOLUTION
-    systick->CMP = 144000000; // Set the compare value for a 10ms delay (assuming a 144 MHz clock)
-    systick->CNT = 0; // Clear the counter
     systick->CTLR = 0; // Disable systick and clear configuration. 
+    systick->CMP = 1440000; // Set the compare value for a 10ms delay (assuming a 144 MHz clock)
+    systick->CNT = 0; // Clear the counter
     systick->SR = 0; // Clear the status register
     systick->ctlr.init = 1; // Initialize the timer when enabled
-    systick->ctlr.mode = 0; // Count UP to CMP value
-    systick->ctlr.stre = 1; // Enable reload of the timer when it reaches the CMP value
     systick->ctlr.stclk = 1; // Use the processor clock as the source (144MHz)
     systick->ctlr.stie = 1; // Enable interrupts
+    systick->ctlr.mode = 0; // Count UP to CMP value
+    systick->ctlr.stre = 1; // Enable reload of the timer when it reaches the CMP value
     systick->ctlr.ste = 0; // Enable the timer
     #endif
 }
@@ -185,6 +189,7 @@ int whackamole()
     systick->ctlr.ste = 1; // Enable the timer
 #endif  
 
+
     int game_over = 0;
     int score = 0; 
     while(!game_over) {
@@ -202,6 +207,9 @@ int whackamole()
                     moles[i] = 0; // Kill the mole
                     score++;
                 }
+                // Wait until the button is released, to avoid multiple counts 
+                // for one press.
+                while(((*GPIOD_INDR) & (1 << i)) == 0);
             }
         }
         ///////////////////////////////////////////////////////////////////////
@@ -214,8 +222,17 @@ int whackamole()
         ///////////////////////////////////////////////////////////////////////
         // If all moles are out, game over.
         ///////////////////////////////////////////////////////////////////////
-        if(moles[0] & moles[1] & moles[2] & moles[3]) game_over = 1;
+        if(moles[0] & moles[1] & moles[2] & moles[3]) 
+            game_over = 1;
     }
     printf("Game Over! Your score is %d\n", score);
+    ///////////////////////////////////////////////////////////////////////////
+    // Blink lights to show game over.
+    ///////////////////////////////////////////////////////////////////////////
+    *GPIOE_OUTDR = 0x0; 
+    while(1) {
+        *GPIOE_OUTDR ^= 0xFF; 
+        for(int i = 0; i < 1000; i++); // Delay
+    }
     return 0;
 }

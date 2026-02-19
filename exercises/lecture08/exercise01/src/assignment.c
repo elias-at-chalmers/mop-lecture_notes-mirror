@@ -1,16 +1,25 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Lecture08 - Exercise01
 // ============================================================================
-// 
+// In this exercies, you will learn about interrupts and systick by 
+// implementing the ancient traditional japaneese game of "Whack-a-mole".
+// (https://en.wikipedia.org/wiki/Whac-A-Mole)
+//
+// The exercise is not the easiest one, but when you finish you will be an 
+// expert on systick interrupts! Also, you will have developed your first video
+// game, if you hadn't done so already.
+//
 // Connect a console to the simulator as usual. 
 // Connect a keypad to GPIOD[0:7]
 // Connect a bargraph to GPIOE[0:7]
+//
+// The code will not compile and run until you have completed assignment 1.
 ///////////////////////////////////////////////////////////////////////////////
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 void check_assignment2_1(); 
-void check_assignment2_3(); 
+void check_assignment2_2(); 
 void InitInterrupts();
 
 #define SOLUTION 1
@@ -68,9 +77,21 @@ void assignment1()
     systick->CNTH = 2; 
     systick->CMPL = 3; 
     systick->CMPH = 4; 
-    // Bitfields
-
-    // CMP 64
+    ///////////////////////////////////////////////////////////////////////////
+    // If you want to practice your bitfields, make this code work as well
+    ///////////////////////////////////////////////////////////////////////////
+    // systick->ctlr.ste = 0;
+    // systick->ctlr.stie = 0;
+    // systick->ctlr.stclk = 1;
+    // systick->ctlr.stre = 0;
+    // systick->ctlr.mode = 1;
+    // systick->ctlr.init = 0;
+    // systick->ctlr.swie = 0;
+    ///////////////////////////////////////////////////////////////////////////
+    // If you want to be really snazzy, make this work as well.
+    ///////////////////////////////////////////////////////////////////////////
+    // systick->CNT = 0x0000000200000001; // Set CNTL to 1, CNTH to 2.
+    // systick->CMP = 0x0000000400000003; // Set CMPL to 3, CMPH to 4.
 }
 
 
@@ -78,16 +99,16 @@ void assignment1()
 // Assignment 2: Whack-a-mole
 // ============================================================================
 // In the code below, some lazy person has implemented half a game. The point
-// of the game is to whack the "moles" (represented by leds on the bargraph)
-// by pressing the corresponding buttons on the top row of the keypad. 
+// of the game is to whack the "moles" (each represented by 2 leds on the
+// bargraph) by pressing the corresponding buttons on the top row of the keypad. 
 //
-// Currently, if you run the program, two moles pop up, and you can whack them
+// Currently, if you run the program, one mole will pop up, and you can whack it
 // with the buttons, but no new moles appear. Your task is to complete the game
 // by implementing the remaining assignments. 
 //
 // First, have a look at the code and make sure you understand how it works. 
 // 
-// You then find the first assignments in the assembly file, "assignment.s"
+// You then find the first assignment in the assembly file, "assignment.s"
 ///////////////////////////////////////////////////////////////////////////////
 
 
@@ -101,11 +122,11 @@ volatile int moles[4] = {1, 0, 0, 0};
 #define GPIOE_OUTDR ((volatile uint32_t *)0x4001180C)
 
 ///////////////////////////////////////////////////////////////////////////////
-// Assignment 2.3: Initialize the SysTick timer to generate an interrupt every
-//                 ??? ms. (On the hardware this would be way too fast,
+// Assignment 2.2: Initialize the SysTick timer to generate an interrupt every
+//                 10 ms. (On the hardware this would be way too fast,
 //                 but in the simulator, it will be okay.)
 //
-//                 The counter should count UP to the compare value, and then 
+//                 The counter should count to the compare value, and then 
 //                 reset to 0 and continue counting. You should enable 
 //                 interrupts.
 // 
@@ -118,8 +139,8 @@ void InitSystick()
     // (we cannot check the value you set, so do it right! :) )
     //
     // Important! Do not forget to disable the timer by setting all of CTLR to 0
-    //            before writing to the other registers. Otherwise, the timer
-    //            the simulator gets confused. 
+    //            before writing to the other registers. Otherwise, the 
+    //            simulator gets confused. 
     #if SOLUTION
     systick->CTLR = 0; // Disable systick and clear configuration. 
     systick->CMP = 1440000; // Set the compare value for a 10ms delay (assuming a 144 MHz clock)
@@ -136,7 +157,7 @@ void InitSystick()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// Assignment 2.5: If your code ends up in here, you are almost done!
+// Assignment 2.4: If your code ends up in here, you are almost done!
 //                 Some time has passed and you should activate another mole.
 //                 (by writing 1 to one of the elements in the "moles" array).
 //                 You can use the rand() function (from stdlib.h) to pick one
@@ -145,7 +166,10 @@ void InitSystick()
 //                 Don't forget to reset the systick status register. Otherwise
 //                 you will not get another interrupt. 
 ///////////////////////////////////////////////////////////////////////////////
-__attribute__((interrupt("machine")))     
+__attribute__((interrupt("machine"))) // This attribute is required so the 
+                                      // compiler knows it should save any 
+                                      // registers it uses, and use "mret" to
+                                      // return. 
 void SysTick_Handler(void) 
 {
     #if SOLUTION
@@ -153,8 +177,27 @@ void SysTick_Handler(void)
     moles[random_mole] = 1; // Activate a random mole
     if(systick->SR == 1) systick->SR = 0; // Clear the status
     #endif
+    ///////////////////////////////////////////////////////////////////////////
+    // Assignment 4: You're done, really, but why not make the game more 
+    //               challenging by decreasing the time between moles for every
+    //               mole you whack? 
+    ///////////////////////////////////////////////////////////////////////////
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Assignment 3: If your game works, implement InitInterrupts() in C and you
+//               can get rid of the assembly file.
+///////////////////////////////////////////////////////////////////////////////
+#if SOLUTION
+// void InitInterrupts()
+// {
+//     // Write address of SysTick_Handler to mtvec
+//     __asm volatile("csrw mtvec, %0" : : "r"((uint32_t)&SysTick_Handler));
+    
+//     // Enable SysTick interrupts in PFIC
+//     *((volatile uint32_t *)0xE000E100) |= (1 << 12); // Set the bit corresponding to SysTick interrupt 
+// }
+#endif
 
 int whackamole()
 {
@@ -179,12 +222,11 @@ int whackamole()
     InitInterrupts();
     check_assignment2_1(); 
     InitSystick(); 
-    check_assignment2_3();
+    check_assignment2_2();
 
     ///////////////////////////////////////////////////////////////////////////
-    // Assignment 2.4: Now start the timer. Put a breakpoint in InterruptHandler
-    //                 (in the assembly file) and stepthrough to make sure the 
-    //                 SysTick Handler is called. 
+    // Assignment 2.3: Now start the timer. Put a breakpoint in SysTick_Handler
+    //                 and make sure it is called. 
     ///////////////////////////////////////////////////////////////////////////
 #if SOLUTION
     systick->ctlr.ste = 1; // Enable the timer
@@ -210,10 +252,7 @@ int whackamole()
                 }
                 // Wait until the button is released, to avoid multiple counts 
                 // for one press.
-                while(((*GPIOD_INDR) & (1 << i)) == 0){
-                    uint32_t buttons = *GPIOD_INDR & 0xF; // Read the state of the buttons
-                    uint32_t a = 1; 
-                };
+                while(((*GPIOD_INDR) & (1 << i)) == 0);
             }
         }
         ///////////////////////////////////////////////////////////////////////
@@ -231,7 +270,7 @@ int whackamole()
     }
     printf("Game Over! Your score is %d\n", score);
     ///////////////////////////////////////////////////////////////////////////
-    // Blink lights to show game over.
+    // Blink lights to indicate game over.
     ///////////////////////////////////////////////////////////////////////////
     *GPIOE_OUTDR = 0x0; 
     while(1) {

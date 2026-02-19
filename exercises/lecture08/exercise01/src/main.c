@@ -36,12 +36,13 @@ void check_assignment2_1()
     if(assignment_passed) printf("PASSED!\n");
 }
 
-void check_assignment2_3()
+void check_assignment2_2()
 {
     printf("Checking assignment 2.3...");
     int assignment_passed = 1; 
     if((*((volatile uint32_t *)0xE000F000) & 0b100000) == 0) FAILED("INIT is not set, so the timer might not start on 0.");
-    if((*((volatile uint32_t *)0xE000F000) & 0b010000) == 0) FAILED("MODE is not set, so the timer will count DOWN, not UP.");
+    // Does not matter if they count up or down. 
+    //if((*((volatile uint32_t *)0xE000F000) & 0b010000) == 0) FAILED("MODE is not set, so the timer will count DOWN, not UP.");
     if((*((volatile uint32_t *)0xE000F000) & 0b001000) == 0) FAILED("STRE is not set, so the timer will not reload.");
     if((*((volatile uint32_t *)0xE000F000) & 0b000100) == 0) FAILED("STCLK is not set, so the timer will use 148/8Mhz.");
     if((*((volatile uint32_t *)0xE000F000) & 0b000010) == 0) FAILED("STIE is not set, so interrupts will not be generated.");

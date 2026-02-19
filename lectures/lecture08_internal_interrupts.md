@@ -57,7 +57,7 @@ When the UI wants to update the screen or read a sensor, it triggers a special i
 </div>
 
 ## The Programmable Fast Interrupt Controller (PFIC)
-The module in the processor core on our microcontroller that collects all exceptions is called the *Programmable Fast Interrupt Controller* (PFIC). We will discuss this in more detail in the next lecture bit will quickly introduce it here. Anything that *can* interrupt the processor is connected to this module, and all the possible interrupt sources are ordered and listed in the [Vector Table](vector_table.html) in the QuickGuide. 
+The module in the processor core on our microcontroller that collects all exceptions is called the *Programmable Fast Interrupt Controller* (PFIC). We will discuss this in more detail in the next lecture bit will quickly introduce it here. Anything that *can* interrupt the processor is connected to this module, and all the possible interrupt sources are ordered and listed in the *Vector Table* in the [QuickGuide](https://www.cse.chalmers.se/edu/resources/mop/lecture_notes/quickguide.html). 
 
 Whenever something wants to interrupt the processor, it will tell the PFIC and the PFIC will check if that interrupt is enabled, if there is another interrupt running at the moment and whether that interrupt should be interrupted or if the current interrupt should be queued. 
 

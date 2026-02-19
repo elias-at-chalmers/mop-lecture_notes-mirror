@@ -3,7 +3,7 @@
 
 void assignment1(); 
 void whackamole(); 
-void InterruptHandler(); 
+void SysTick_Handler(); 
 
 #define FAILED(n)                       \
     do {                                \
@@ -32,7 +32,7 @@ void check_assignment2_1()
     if(*((volatile uint32_t *)0xE000E000) != (1 << 12)) FAILED("Systick interrupt is not enabled in PFIC.");
     uintptr_t value;
     __asm__ volatile ("csrr %0, mtvec" : "=r"(value));
-    if(value != (uintptr_t)InterruptHandler) FAILED("Systick_Handler is not properly set in mtvec.");
+    if(value != (uintptr_t)SysTick_Handler) FAILED("Systick_Handler is not properly set in mtvec.");
     if(assignment_passed) printf("PASSED!\n");
 }
 

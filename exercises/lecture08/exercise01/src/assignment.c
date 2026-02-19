@@ -145,6 +145,7 @@ void InitSystick()
 //                 Don't forget to reset the systick status register. Otherwise
 //                 you will not get another interrupt. 
 ///////////////////////////////////////////////////////////////////////////////
+__attribute__((interrupt("machine")))     
 void SysTick_Handler(void) 
 {
     #if SOLUTION
@@ -209,7 +210,10 @@ int whackamole()
                 }
                 // Wait until the button is released, to avoid multiple counts 
                 // for one press.
-                while(((*GPIOD_INDR) & (1 << i)) == 0);
+                while(((*GPIOD_INDR) & (1 << i)) == 0){
+                    uint32_t buttons = *GPIOD_INDR & 0xF; // Read the state of the buttons
+                    uint32_t a = 1; 
+                };
             }
         }
         ///////////////////////////////////////////////////////////////////////

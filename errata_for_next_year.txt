@@ -37,3 +37,10 @@ Det var en grupp på simulerings passet som misstolkade den här frågan i förb
 #   a0: The function shall return the number of elements copied
 --------------------------------------------------------------------------------------------------------
 
+Under "Basic Timers" står det "flip a GPIO pin every ms to create a 1MHz clocksignal". Denna uträkning stämmer inte. Att flippa en pinne varje millisekund skapar en signal på endast 500 Hz. För att skapa en klocksignal på 1 MHz måste pinnen flippas varje 0.5 mikrosekunder (0.5 µs).
+
+I rutan under rubriken "Padding" står det "Think about the answer the click to open". Det borde istället stå "then click to open".
+
+Litet fel men under "Basic Timers" skrivs ordet "led" med gemener i meningen "blink the orange led". Eftersom det är en akronym bör det stavas med versaler "LED".
+
+Under rubriken "Pointers to structs" stavas författarens namn fel i kodexemplet. Det står "George Elliot" med två L, men det bör vara "George Eliot"(författare av Middlemarch).

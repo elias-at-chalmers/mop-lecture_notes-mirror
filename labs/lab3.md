@@ -161,3 +161,11 @@ int current_period;
 *Tip: You need to add code to* `systick_handler()` *and* `main()`.
 
 Do you recognize the melody?
+
+## Task 5: Getting Approved
+
+Demonstrate your solution to a TA. Show them that the program works, and explain
+how you implemented it. Answer any questions they might have.
+
+***When you have been approved by a TA, it is YOUR responsibility to verify that
+it has been documented in Canvas under 'Grades'. Do so before leaving!***

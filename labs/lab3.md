@@ -126,3 +126,14 @@ Now you have a working synthesizer - take the time to pat yourself on the back
 and play some notes for fun before moving on!
 
 It would be nice with some visual feedback as well though, don't you think?
+
+## Task 3: Lights, Please!
+
+Recall that the bargraph is connected to **GPIOD [8:15]**. Make the bargraph
+indicate which key is being pressed. Each key should show a unique light
+pattern. Feel free to come up with something yourself, but if you're not in a
+creative mood, you could simply use the numbers 1 to 16 from top-left to
+bottom-right button (interpreting the lights as a natural binary number).
+
+Like the tone, the lights should only be on while while a key is pressed. Turn
+off the lights when a key is released.

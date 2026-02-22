@@ -99,3 +99,30 @@ sure you can read all the keys properly and know what values they return. Ensure
 the interrupt handler is called when a key is pressed as well as released.
 
 Time to turn the keypad into a synthesizer!
+
+### Task 2.2: Making Noise
+
+Now, everything is in place. You can control the tone (`inc/systick.h`) and read
+the keypad (`inc/keypad.h`). Use this to generate a tone when a key is pressed
+according to the keypad diagram below, where the numbers represent SysTick
+periods in microseconds.
+
+```
+|------|------|------|------|
+| 1516 | 1431 | 1351 | 1275 |
+|------|------|------|------|
+| 1203 | 1136 | 1072 | 1012 |
+|------|------|------|------|
+|  955 |  901 |  851 |  803 |
+|------|------|------|------|
+|  758 |  715 |  675 |  637 |
+|------|------|------|------|
+```
+
+A tone should only be generated while a key is pressed. Make the tone stop when
+a key is released.
+
+Now you have a working synthesizer - take the time to pat yourself on the back
+and play some notes for fun before moving on!
+
+It would be nice with some visual feedback as well though, don't you think?

@@ -90,3 +90,12 @@ The external interrupts have been configured such that any key on the keypad
 will invoke the interrupt handler `exti_handler()` in `src/main.c`. The
 interrupts are triggered on falling *and* rising edges, i.e. when a key is
 pressed *and* when a key is released.
+
+### Task 2.1: Reading the Keypad
+
+Within `exti_handler()`, start small by adding some code that simply reads the
+keypad (see the keypad interface in `inc/keypad.h`). Use the debugger to make
+sure you can read all the keys properly and know what values they return. Ensure
+the interrupt handler is called when a key is pressed as well as released.
+
+Time to turn the keypad into a synthesizer!

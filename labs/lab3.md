@@ -18,3 +18,39 @@ of a peripheral device you have used before:
 
 You will use the keypad to make the buzzer produce different tones, and the
 bargraph as an indicator of which key is being pressed.
+
+## Task 0: Getting Started
+
+Create a new project folder and initialize a project with the **Lab3** template
+(*Ctrl+Shift+P -> MDx07: Initialize project -> Lab Assignments -> Lab3*).
+
+Connect the bargraph to **Port D [0:7]**. Connect the keypad to **Port D
+[8:15]**. Connect the buzzer to **Port E [0]**. Finally, connect the MD307 to
+your computer via USB.
+
+To clarify the buzzer connection: Use a jumper cable directly from the MD307 to
+the buzzer. The ports and pin numbers are shown in the diagram below, where `+`
+means **VDD** and `g` means **GND**. The pin in square brackets `[.]` is where
+the jumber cable should go.
+
+```
+     PE15..8          PE7..0         PD15..8          PD7..0
+
+    0 2 4 6 +       0 2 4 6 +       0 2 4 6 +       0 2 4 6 +
+  |-----------|   |-----------|   |-----------|   |-----------|
+  | . . . . . |   |[.]. . . . |   | . . . . . |   | . . . . . |
+  | . . . . . |   | . . . . . |   | . . . . . |   | . . . . . |
+  |----   ----|   |----   ----|   |----   ----|   |----   ----|
+    g 1 3 5 7       g 1 3 5 7       g 1 3 5 7       g 1 3 5 7
+
+      UNUSED          BUZZER        BARGRAPH          KEYPAD
+```
+
+The template includes a library with various definitions and functions that you
+will use to implement a synthesizer. All the initialization needed for this lab
+assignment is already done (correctly this time - *no bug fixing!*).
+
+The only thing missing is the logic inside the interrupt handlers
+`systick_handler()` and `exti_handler()` in `src/main.c`.
+
+Let's start by making some noise.

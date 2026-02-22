@@ -54,3 +54,32 @@ The only thing missing is the logic inside the interrupt handlers
 `systick_handler()` and `exti_handler()` in `src/main.c`.
 
 Let's start by making some noise.
+
+## Task 1: Sound Check
+
+The SysTick interrupt handler `systick_handler()` in `src/main.c` is where we
+need to put the logic for creating a square wave, by writing alternating
+high/low (`1`/`0`) signals to the output pin connected to the buzzer (**GPIOE
+[0]**).
+
+Within `systick_handler()`, write some code that inverts the value of the buzzer
+output pin. This only requires *one* line of code if you choose the right
+bitwise operation! Use the GPIO interface in `inc/gpio.h` - you may use pointer
+macros or struct pointers, whichever you prefer.
+
+Also, the interrupt needs to be acknowledged to let the system know that the
+handler can be called again. Add some code that acknowledges the SysTick
+interrupt at the end of the handler (again, this only requires *one* line of
+code).
+
+The library includes functions for starting and stopping periodic SysTick
+interrupts. Test your SysTick interrupt handler by adding a line of code in
+`main()`, after the initialization calls (*not* within the infinite loop), that
+starts SysTick interrupts with a period of 500 µs (see the SysTick interface in
+`inc/systick.h`).
+
+If it works, you should hear a 1 KHz tone. If not, call a TA to get some
+guidance.
+
+Before moving on, remove the 1 KHz tone from the program! Next, we will use the
+keypad to control the tone generation.

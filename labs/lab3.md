@@ -83,3 +83,10 @@ guidance.
 
 Before moving on, remove the 1 KHz tone from the program! Next, we will use the
 keypad to control the tone generation.
+
+## Task 2: External Control
+
+The external interrupts have been configured such that any key on the keypad
+will invoke the interrupt handler `exti_handler()` in `src/main.c`. The
+interrupts are triggered on falling *and* rising edges, i.e. when a key is
+pressed *and* when a key is released.

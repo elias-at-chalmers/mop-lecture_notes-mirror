@@ -137,3 +137,27 @@ bottom-right button (interpreting the lights as a natural binary number).
 
 Like the tone, the lights should only be on while while a key is pressed. Turn
 off the lights when a key is released.
+
+## Task 4: Melody Player
+
+Playing a melody on the keypad is fun, but it's difficult to get the timing
+right and (with the current implementation) we only have access to a very
+limited set of notes.
+
+Let's make the program play a melody automatically.
+
+The library includes definitions for playing a particular melody. Have a look at
+the interface in `inc/music.h`, particularly the `Note` struct. Add the code
+below to `src/main.c` in global scope above `systick_handler()` and use it to
+play the melody.
+
+```c
+Note notes[] = NOTES;
+const int notes_length = sizeof(notes) / sizeof(Note);
+int remaining_duration;
+int current_period;
+```
+
+*Tip: You need to add code to* `systick_handler()` *and* `main()`.
+
+Do you recognize the melody?

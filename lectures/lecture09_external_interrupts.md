@@ -121,7 +121,6 @@ void Interrupt_Handler(void)
         else if(cause == TIMER7_IRQ_NUM){
             *GPIOD_OUTDR ^= 0x4;    // Toggle LED3
             timer7->INTFR = 0;      // Acknowledge the interrupt
-            return;
         }
     }
     else {

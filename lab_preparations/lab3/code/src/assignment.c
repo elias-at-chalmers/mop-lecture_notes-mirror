@@ -191,7 +191,7 @@ __attribute__((interrupt("machine"))) void exti_handler() {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// Assignment 2.2: Open the file "interrupts.s", go to lines 22-25, and write
+// Assignment 2.2: Open the file "vector_table.s", go to lines 22-25, and write
 //                 the missing assembly code to jump to the function
 //                 exti_handler
 //                 Note: since we have 4 pins for the keypad, we're dealing

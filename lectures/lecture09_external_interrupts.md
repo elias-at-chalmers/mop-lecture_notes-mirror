@@ -40,16 +40,16 @@ We can set up SysTick, TIMER6, and TIMER7 to generate interrupts at 1Hz, 3Hz, an
     systick->ctrl.enable = 1; // Start counting
 
     // Set up timer 6 at 3Hz
-    *timer6 = (TIMER_t){0}; // Clear everything to 0
-    timer6->PSC = 9600;    // Timer increases every 9600th clock -> 144Mhz / 9600 = 15kHz
-    timer6->ATRLR = 5000;  // Generate interrupt every 5000 ticks -> 15kHz / 5000 = 3Hz
+    *timer6 = (TIMER_t){0};   // Clear everything to 0
+    timer6->PSC = 9600 - 1;   // Timer increases every 9600th clock -> 144Mhz / 9600 = 15kHz
+    timer6->ATRLR = 5000 - 1; // Generate interrupt every 5000 ticks -> 15kHz / 5000 = 3Hz
     timer6->ctrl1.enable = 1; // Enable timer
-    timer6->DMAINTENR = 1; // Enable update interrupt
+    timer6->DMAINTENR = 1;    // Enable update interrupt
 
     // Set up timer 7 at 5Hz
-    *timer7 = (TIMER_t){0}; // Clear everything to 0
-    timer7->PSC = 9600;     // Timer increases every 9600th clock -> 144Mhz / 9600 = 15kHz
-    timer7->ATRLR = 3000;   // Generate interrupt every 3000 ticks -> 15kHz / 3000 = 5Hz
+    *timer7 = (TIMER_t){0};   // Clear everything to 0
+    timer7->PSC = 9600 - 1;   // Timer increases every 9600th clock -> 144Mhz / 9600 = 15kHz
+    timer7->ATRLR = 3000 - 1; // Generate interrupt every 3000 ticks -> 15kHz / 3000 = 5Hz
     timer7->ctrl1.enable = 1; // Enable timer
     timer7->DMAINTENR = 1; // Enable update interrupt
 ```

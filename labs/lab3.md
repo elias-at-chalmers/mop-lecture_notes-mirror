@@ -24,7 +24,7 @@ bargraph as an indicator of which key is being pressed.
 Create a new project folder and initialize a project with the **Lab3** template
 (*Ctrl+Shift+P -> MDx07: Initialize project -> Lab Assignments -> Lab3*).
 
-Connect the bargraph to **Port D [0:7]**. Connect the keypad to **Port D
+Connect the keypad to **Port D [0:7]**. Connect the bargraph to **Port D
 [8:15]**. Connect the buzzer to **Port E [0]**. Finally, connect the MD307 to
 your computer via USB.
 

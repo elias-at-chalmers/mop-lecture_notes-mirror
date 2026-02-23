@@ -54,6 +54,14 @@ We can set up SysTick, TIMER6, and TIMER7 to generate interrupts at 1Hz, 3Hz, an
     timer7->DMAINTENR = 1; // Enable update interrupt
 ```
 
+<div class='boxed'>
+**Prescaler** - The two basic timers (TIMER6 and 7) only have a 16-bit counter, allowing us to count 65536 clocks (~0.5ms) at full resolution. To be able to count longer times, it also has a *prescaler* register (`PSC`, also 16 bits). The value in this register says how many clocks should pass between incrementing the count value. If we set the prescaler value to 100, the count value would increase every 100th clock cycle, so the timer can run for 65536*100 clocks without overflow. 
+
+**Note 1:** - *I lied a little in that previous paragraph. Since the value `0` would have no real meaning in the `PSC` register, the number of clocks it will wait between increasing the counter is actually `PSC+1`. The same goes for the `ATRLR` (compare) value.*
+
+**Note 2:** - *The prescaler does not work properly in the simulator at the moment, so you will have to use the real hardware if you want to play around with this.*
+</div>
+
 Next, we have to tell the PFIC to allow interrupts for all three timers. So, we have to use the interrupt vector number (which we find in the QuickGuide) to calculate which of the PFIC_IENRx registers it resides in, and then set the correct bit in that register. We can do this quite elegantly as: 
 
 ```C
@@ -81,14 +89,13 @@ int main(void)
     ...
 ```
 
-But now what? With this code, all three timers will generate interrupts, and out interrupt handler will run whenever one of them fires, but how do we know *which* timer triggered the interrupt? 
+But now what? With this code, all three timers will generate interrupts, and our interrupt handler will run whenever one of them fires, but how do we know *which* timer triggered the interrupt? 
 
 When the processor interrupts the code to run an interrupt handler, it places the *source* of the interrupt (the interrupt vector number from the quickguide) in the CSR register `mcause`: 
 
 <center>
 <img src= "../images/mcause.png" width=100%>
 </center>
-> <b>TODO</b> Put CSRs in QuickGuide and include here
 
 To handle the correct timer, we have to first make sure that it really was an interrupt that occurred (and not another exception, like an unaligned memory access), and then do the proper thing depending on which interrupt it was: 
 
@@ -132,7 +139,7 @@ Meanwhile, all we really need to do when we get, e.g., a SysTick interrupt is to
 It would be much better if the CPU could immediately call a specific interrupt handler, based on the cause of the interrupt, and that is what we will cover next. 
 
 ## Vectored Interrupt Handling
-So far, we have simply put the address to the interrupt handler into the `mtvec` CSR and when an interrupt occurs the processor has jumped to that address. This is only one of three *modes* that the CH32V307 can operate in, however. We choose the mode using the two least significant bits of the `mtvec` register (see image below). Since all instructions (and therefore, all functions) on our system must begin at a four-byte aligned address, any valid interrupt-handler address will have zeroes as its two least significant bits, so, without thinking about it, we have always chosen **mode 0** so far. 
+So far, we have simply put the address to the interrupt handler into the `mtvec` CSR and when an interrupt occurs the processor has jumped to that address. This is only one of three *modes* that the CH32V307 can operate in. We choose the mode using the two least significant bits of the `mtvec` register (see image below). Since all instructions (and therefore, all functions) on our system must begin at a four-byte aligned address, any valid interrupt-handler address will have zeroes as its two least significant bits, so, without thinking about it, we have always chosen **mode 0** so far. 
 
 The possible configurations of the two least significant bits are: 
 
@@ -157,7 +164,7 @@ We will use *mode 1* to make our processor jump directly to the interrupt handle
 
 The remaining question is how to create that list of jump instructions, at some place in memory? The easiest, and most common, way to achieve this is to write the list in an assembly file, and compile it with the program: 
 
-```
+```s
 .section .text
 # Make the (C code) interrupt handlers addresses available to our assembly code
 .extern SysTick_Handler  
@@ -178,7 +185,7 @@ We do not really care where in memory our vector table is, so we just let the co
 
 Finally, we need to put the address of our vector table into `mtvec` and set the least significant bit so the processor knows that it should use mode 1. Since we already have an assembly file, this is easiest to do with a little assembly function: 
 
-```
+```s
 init_interrupts: 
     la t0, vector_table     # Address of vector table to t0
     ori t0, t0, 1           # Choose `mode 1` by setting the LSB
@@ -227,7 +234,7 @@ On the CH32V307, different interrupt sources can have different *priorities* (se
 
 **What if a fault occurs while a fault-handler is running?** - Infinite exception loop. Crash and Burn. Don't do this. 
 
-We will not delve much deeper into nested interrupts in this course, but it is worthwhile understanding that nested interrupts and priorities can be quite important. Let's say we have a program where SysTick is used to output signal (perhaps a clock signal, or a note to a speaker) with a specific frequency. Meanwhile, Timer6 is used to turn on the night-light every evening. If the interrupt handler for Timer6 run a few milliseconds little later than intended, that is usually acceptable. But if the SysTick interrupt handler is delayed by even a few nanoseconds, that might mean that the clock signal falls out-of-sync with other parts of the system or, even worse, the played note becomes slightly flat!
+We will not delve much deeper into nested interrupts in this course, but it is worthwhile understanding that nested interrupts and priorities can be quite important. Let's say we have a program where SysTick is used to output signal (perhaps a clock signal, or a note to a speaker) with a specific frequency. Meanwhile, Timer6 is used to turn on the night-light every evening. If the interrupt handler for Timer6 run a few milliseconds later than intended, that is usually acceptable. But if the SysTick interrupt handler is delayed by even a few nanoseconds, that might mean that the clock signal falls out-of-sync with other parts of the system or, even worse, the played note becomes slightly flat!
 
 The mechanism for nested interrupts does not have to be very complicated at all, on RISC-V. Since an interrupt handler is already handled differently than normal functions, and always saves all registers it might modify on the stack, interrupts can in principle interrupt each other arbitrarily, as long as there is sufficient stack space available.
 
@@ -305,8 +312,6 @@ That is all that is really new about GPIO interrupts, but for completeness, let'
 
 ### Configuring GPIO pins
 For any signal to make it through to the EXTI module, and then PFIC, we have to configure the pin as an *input* pin. If we use our DIP-switch as the input device, we need to configure it as pull-down: 
-
-> **TODO:** Double check that pull down is correct. 
 
 ```C
 GPIOE_CFGLR = 0x00000080; // Configure pin 1 as input and pull down

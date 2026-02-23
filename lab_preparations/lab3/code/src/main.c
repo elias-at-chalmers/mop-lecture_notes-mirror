@@ -29,7 +29,7 @@ static uint32_t _fnv1a_32(uint32_t value) {
 // Check function for Assignment 1.0, there's no assignment here, don't modify!
 // Tests that each register macro resolves to the correct address.
 ///////////////////////////////////////////////////////////////////////////////
-void check_assignment_1_0() {
+int check_assignment_1_0() {
     int pass = 1;
 
     struct { const char *name; volatile uint32_t *actual; uint32_t expected_hash; } checks[] = {
@@ -52,13 +52,14 @@ void check_assignment_1_0() {
         }
     }
     printf(pass ? "Assignment 1.0: PASS\n" : "Assignment 1.0: FAIL\n");
+    return pass;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Check function for Assignment 1.1, there's no assignment here, don't modify!
 // Calls init_gpio() and verifies the resulting register values.
 ///////////////////////////////////////////////////////////////////////////////
-void check_assignment_1_1() {
+int check_assignment_1_1() {
     init_gpio();
 
     struct {
@@ -84,13 +85,14 @@ void check_assignment_1_1() {
         }
     }
     printf(pass ? "Assignment 1.1: PASS\n" : "Assignment 1.1: FAIL\n");
+    return pass;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Check function for Assignment 1.2, there's no assignment here, don't modify!
 // Calls systick_periodic_micro(1000) and verifies the resulting register values.
 ///////////////////////////////////////////////////////////////////////////////
-void check_assignment_1_2() {
+int check_assignment_1_2() {
     systick_periodic_micro(1000);
 
     int pass = 1;
@@ -115,6 +117,7 @@ void check_assignment_1_2() {
 
     systick_stop();
     printf(pass ? "Assignment 1.2: PASS\n" : "Assignment 1.2: FAIL\n");
+    return pass;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -122,7 +125,7 @@ void check_assignment_1_2() {
 // Calls systick_handler() directly to verify it toggles GPIOE pin 0 and
 // clears STK_SR.
 ///////////////////////////////////////////////////////////////////////////////
-void check_assignment_1_3() {
+int check_assignment_1_3() {
     int pass = 1;
     uint32_t saved_mepc;
 
@@ -166,6 +169,7 @@ void check_assignment_1_3() {
     }
 
     printf(pass ? "Assignment 1.3: PASS\n" : "Assignment 1.3: FAIL\n");
+    return pass;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -173,7 +177,7 @@ void check_assignment_1_3() {
 // Reads the mtvec CSR to find the vector table, then decodes the instruction
 // at the SysTick slot (IRQ 12) to verify it jumps to systick_handler.
 ///////////////////////////////////////////////////////////////////////////////
-void check_assignment_1_4() {
+int check_assignment_1_4() {
     int pass = 1;
 
     uint32_t mtvec;
@@ -205,6 +209,7 @@ void check_assignment_1_4() {
     }
 
     printf(pass ? "Assignment 1.4: PASS\n" : "Assignment 1.4: FAIL\n");
+    return pass;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -212,7 +217,7 @@ void check_assignment_1_4() {
 // Starts the systick timer, then calls systick_stop() and verifies that
 // STK_CTLR is fully cleared.
 ///////////////////////////////////////////////////////////////////////////////
-void check_assignment_1_5() {
+int check_assignment_1_5() {
     int pass = 1;
 
     systick_periodic_micro(1000);
@@ -226,13 +231,14 @@ void check_assignment_1_5() {
         pass = 0;
     }
     printf(pass ? "Assignment 1.5: PASS\n" : "Assignment 1.5: FAIL\n");
+    return pass;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Check function for Assignment 2.0, there's no assignment here, don't modify!
 // Calls init_keypad() and verifies the resulting register values.
 ///////////////////////////////////////////////////////////////////////////////
-void check_assignment_2_0() {
+int check_assignment_2_0() {
     init_interrupts();
     int pass = 1;
 
@@ -257,6 +263,7 @@ void check_assignment_2_0() {
         }
     }
     printf(pass ? "Assignment 2.0: PASS\n" : "Assignment 2.0: FAIL\n");
+    return pass;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -265,7 +272,7 @@ void check_assignment_2_0() {
 //   - EXTI_INTENR bits[3:0] are re-enabled after the handler returns
 //   - GPIOD_OUTDR bits[7:4] (rows) are driven LOW
 ///////////////////////////////////////////////////////////////////////////////
-void check_assignment_2_1() {
+int check_assignment_2_1() {
     int pass = 1;
 
     *GPIOD_OUTDR |= 0x00F0U;
@@ -296,6 +303,7 @@ void check_assignment_2_1() {
         pass = 0;
     }
     printf(pass ? "Assignment 2.1: PASS\n" : "Assignment 2.1: FAIL\n");
+    return pass;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -304,7 +312,7 @@ void check_assignment_2_1() {
 // each of the four EXTI slots (IRQ 22-25) and verifies they all jump to
 // exti_handler.
 ///////////////////////////////////////////////////////////////////////////////
-void check_assignment_2_2() {
+int check_assignment_2_2() {
     int pass = 1;
 
     uint32_t mtvec;
@@ -345,6 +353,7 @@ void check_assignment_2_2() {
         }
     }
     printf(pass ? "Assignment 2.2: PASS\n" : "Assignment 2.2: FAIL\n");
+    return pass;
 }
 
 
@@ -365,11 +374,12 @@ void HardFault_Handler(void)
 
 int main(void)
 {
+    check_assignment_1_0();
+
     init_vector_table();
     init_gpio();
     init_interrupts();
-/*
-    check_assignment_1_0();
+
     check_assignment_1_1();
     check_assignment_1_2();
     check_assignment_1_3();
@@ -378,7 +388,7 @@ int main(void)
     check_assignment_2_0();
     check_assignment_2_1();
     check_assignment_2_2();
-*/
+
     systick_periodic_micro(500); 
     while(1);
 }

@@ -9,7 +9,6 @@ Every possible interrupt that can occur has an assigned *interrupt vector number
 <center>
 <img src= "../images/interrupts.png" width=100%>
 </center>
-> <b>TODO</b> Update quickguide snippet with corret numbers...
 
 We will start with an example where we want three LEDs to blink at different frequencies, `f1`, `f2`, and `f3`.
 

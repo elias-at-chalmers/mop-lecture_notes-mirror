@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Lab Preparation 2
+// Lab Preparation 3
 // ============================================================================
-// In Lab 2 you will need to understand how internal and external interrupts
+// In Lab 3 you will need to understand how internal and external interrupts
 // work.
 //
 // In this lab preparation, you will use (internal) interrupts from systick to

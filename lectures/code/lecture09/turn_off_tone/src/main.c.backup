@@ -1,0 +1,113 @@
+#include <stdio.h>
+#include <stdint.h>
+#include "helpers.h"
+
+///////////////////////////////////////////////////////////////////////////////
+// 1. Declare a structure for the GPIO ports and define GPIO_D and GPIO_E
+///////////////////////////////////////////////////////////////////////////////
+typedef struct {
+    uint32_t CFGLR; 
+    uint32_t CFGHR; 
+    uint16_t INDR; 
+    uint16_t reserved0; 
+    uint16_t OUTDR;     
+    uint16_t reserved1;  
+    uint32_t BSHR; 
+    uint16_t BCR; 
+    uint16_t reserved2; 
+    uint32_t LCKR;    
+} GPIO_t; 
+
+volatile GPIO_t * GPIO_D = (GPIO_t *)0x40011400;
+volatile GPIO_t * GPIO_E = (GPIO_t *)0x40011800;
+
+///////////////////////////////////////////////////////////////////////////////
+// 2. Write a function that configures a GPIO pin
+///////////////////////////////////////////////////////////////////////////////
+void configure_gpio_pin(volatile GPIO_t* gpio, uint8_t pin, uint8_t CNF, uint8_t MODE)
+{
+    uint32_t * cfg_reg = (pin < 8) ? &gpio->CFGLR : &gpio->CFGHR;
+    int8_t v = CNF << 2 | MODE; 
+    uint32_t shift = (pin % 8) * 4; 
+    *cfg_reg &= ~(0xF << shift);
+    *cfg_reg |= v << shift;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// 4. Declare a structure for the SysTick Timer
+///////////////////////////////////////////////////////////////////////////////
+typedef struct 
+{
+    union {
+        uint32_t CTLR; 
+        struct {
+            uint32_t STE : 1; 
+            uint32_t STIE : 1; 
+            uint32_t STCLK : 1; 
+            uint32_t STRE : 1; 
+            uint32_t MODE : 1; 
+            uint32_t INIT : 1; 
+            uint32_t :25; 
+            uint32_t SWIE : 1; 
+        };
+    };
+    uint32_t SR;         
+    uint64_t CNT; 
+    uint64_t CMP; 
+} SysTick_t;
+
+volatile SysTick_t * systick = (SysTick_t *)0xE000F000;
+
+
+void beep(void)
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // 3. Configure PD0 as an output pin, push-pull, 2 MHz
+    ///////////////////////////////////////////////////////////////////////////
+    configure_gpio_pin(GPIO_D, 0, 0b00, 0b10);
+
+    ///////////////////////////////////////////////////////////////////////////
+    // 5. Initialize the SysTick timer to continously count to 2ms
+    ///////////////////////////////////////////////////////////////////////////
+    systick->CTLR = 0; 
+    systick->CMP = 147000 * 2; 
+    systick->CNT = 0;
+    systick->SR = 0; 
+    systick->INIT = 1;
+    systick->MODE = 0;
+    systick->STRE = 1;
+    systick->STCLK = 1;
+    systick->STIE = 0;
+    systick->STE = 1;
+
+    ///////////////////////////////////////////////////////////////////////////
+    // 6. Flip PD0 every time the timer reaches the CMP value (every 2ms)
+    ///////////////////////////////////////////////////////////////////////////
+
+
+    while(1) {
+        while(systick->SR != 0);
+        GPIO_D->OUTDR ^= 0x1; 
+        systick->SR = 0; 
+    }
+}
+
+
+void show_temperature()
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // 7. Configure PE8-15 as output, push-pull, 2 MHz
+    ///////////////////////////////////////////////////////////////////////////
+
+    ///////////////////////////////////////////////////////////////////////////
+    // 8. Continously read the temperature from the sensor and display on the 
+    //    7-segment display connected to PE8-15.
+    ///////////////////////////////////////////////////////////////////////////
+}
+
+int main()
+{
+    beep();
+    //show_temperature();
+    return 0;
+}   

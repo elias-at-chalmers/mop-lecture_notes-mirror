@@ -93,9 +93,11 @@ pressed *and* when a key is released.
 ### Task 2.1: Reading the Keypad
 
 Within `exti_handler()`, start small by adding some code that simply reads the
-keypad (see the keypad interface in `inc/keypad.h`). Use the debugger to make
-sure you can read all the keys properly and know what values they return. Ensure
-the interrupt handler is called when a key is pressed as well as released.
+keypad (see the keypad interface in `inc/keypad.h`). Acknowledge the interrupt
+at the end of the handler (see *QuickGuide -> EXTI -> INTFR*). Use the debugger
+to make sure you can read all the keys properly and know what values they
+return. Ensure the interrupt handler is called when a key is pressed as well as
+released.
 
 Time to turn the keypad into a synthesizer!
 

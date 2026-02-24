@@ -31,7 +31,7 @@ your computer via USB.
 To clarify the buzzer connection: Use a jumper cable directly from the MD307 to
 the buzzer. The ports and pin numbers are shown in the diagram below, where `+`
 means **VDD** and `g` means **GND**. The pin in square brackets `[.]` is where
-the jumber cable should go.
+the jumper cable should go.
 
 ```
      PE15..8          PE7..0         PD15..8          PD7..0

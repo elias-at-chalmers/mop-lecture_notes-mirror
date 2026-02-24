@@ -1,7 +1,7 @@
-<p>Short text about PFIC</p>
+<p>The PFIC (Peripheral Function Interface Controller) is responsible for managing interrupts and events for the microcontroller. It provides a centralized interface for handling various peripheral interrupts.</p>
 
 <p>
-<details>
+<details open>
 <summary>Base addresses</summary>
 
 {{python quickguide-generator/main.py baseaddress PFIC*}}

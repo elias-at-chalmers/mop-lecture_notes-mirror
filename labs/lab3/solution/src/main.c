@@ -31,10 +31,10 @@
  *
  * Task 4: Melody Player
  * - add given global variables to main.c, above systick_handler()
- * - in systick_handler(), reduce remaining_duration by current_period
  * - in main(), iterate through list of notes, starting each note and
  *   wait while remaining_duration > 0
  *   (WARNING: do NOT use while(remaining_duration != 0) to wait!)
+ * - in systick_handler(), reduce remaining_duration by current_period
  */
 
 // Globals for Task 4

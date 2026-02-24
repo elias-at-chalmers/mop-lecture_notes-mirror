@@ -40091,7 +40091,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
           <fields>
             <field>
               <name>CNTIF</name>
-              <description>Is set to 1 when CNT reaches CMP (if upcounting) or when CNT reaches 0 (if downcounting). Must be reset by software for interrupts to occur again.</description>
+              <description>Is set to 1 when CNT reaches CMP (if upcounting) or when CNT reaches 0 (if downcounting). Must be reset by software for interrupts to occur again. Reset by writing 0.</description>
               <bitOffset>0</bitOffset>
               <bitWidth>1</bitWidth>
             </field>

@@ -9,7 +9,6 @@
 
 {{python quickguide-generator/main.py overview-table SysTick}}
 
-
 </p>
 
 <p>

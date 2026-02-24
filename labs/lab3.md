@@ -68,9 +68,8 @@ bitwise operation! Use the GPIO interface in `inc/gpio.h` - you may use pointer
 macros or struct pointers, whichever you prefer.
 
 Also, the interrupt needs to be acknowledged to let the system know that the
-handler can be called again. Add some code that acknowledges the SysTick
-interrupt at the end of the handler (again, this only requires *one* line of
-code).
+handler can be called again. Acknowledge the SysTick interrupt at the end of the
+handler (see *QuickGuide -> SysTick -> STK_SR -> CNTIF*).
 
 The library includes functions for starting and stopping periodic SysTick
 interrupts. Test your SysTick interrupt handler by adding a line of code in

@@ -148,8 +148,7 @@ Let's make the program play a melody automatically.
 
 The library includes definitions for playing a particular melody. Have a look at
 the interface in `inc/music.h`, particularly the `Note` struct. Add the code
-below to `src/main.c` in global scope above `systick_handler()` and use it to
-play the melody.
+below to `src/main.c` in global scope above `systick_handler()`.
 
 ```c
 Note notes[] = NOTES;
@@ -158,7 +157,18 @@ int remaining_duration;
 int current_period;
 ```
 
-*Tip: You need to add code to* `systick_handler()` *and* `main()`.
+Within `main()`, after the initialization calls (*not* within the infinite
+loop), add a loop that iterates through the array of notes. For each note, set
+the values of the global variables `remaining_duration` and `current_period`
+according to the fields of the note struct (see Lecture 7 on how to access
+struct fields). Generate a tone with a period of `current_period` and then wait
+(do nothing) until the note is finished.
+
+*How can the note finish while we're doing nothing?*
+
+I'm glad you asked. Interrupts, of course! You've set up SysTick to trigger an
+interrupt with a certain periodicity. Use this within `systick_handler()` to
+keep track of time!
 
 Do you recognize the melody?
 

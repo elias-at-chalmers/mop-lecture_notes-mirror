@@ -1,4 +1,4 @@
-<p>Short text about EXTI</p>
+<p>The EXTI module decides whether an interrupt should be generated and sent onto the PFIC</p>
 
 <p>
 <details>

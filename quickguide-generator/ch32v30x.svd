@@ -22185,7 +22185,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
         <register>
           <name>INTFR</name>
           <displayName>INTFR</displayName>
-          <description>Pending register (EXTI_INTFR)</description>
+          <description>Interrupt Flag Register (pending) (EXTI_INTFR)</description>
           <addressOffset>0x14</addressOffset>
           <size>0x20</size>
           <access>read-write</access>
@@ -22193,7 +22193,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
           <fields>
             <field>
               <name>PR0</name>
-              <description>Pending bit 0</description>
+              <description>Pending bit (write 1 to clear)</description>
               <bitOffset>0</bitOffset>
               <bitWidth>1</bitWidth>
             </field>

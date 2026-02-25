@@ -19,18 +19,15 @@ volatile SysTick_t * systick = (SysTick_t*) 0xE000F000;
 #define AFIO_EXTICR3 ((volatile uint32_t*) 0x40010010)
 #define AFIO_EXTICR4 ((volatile uint32_t*) 0x40010014)
 
+#define PFIC_IENR1 ((volatile uint32_t*) 0xE000E100)
+
 volatile int play_sound = 1;
 
-extern void init_interrupts(); 
-
 __attribute__((interrupt("machine")))
-void EXTI1_Handler(void) 
+void EXTI1_Handler(void)
 {
-    play_sound = !play_sound; // Toggle the sound on/off state
-
-    for(int i = 0; i < 100000; i++); // Simple debounce delay
-
-    *EXTI_INTFR |= 0b10;  // Acknowledge the interrupt (zeroes the corresponding bit in EXTI_INTFR)
+    play_sound = !play_sound; 
+    *EXTI_INTFR |= 0b10;
 }
 
 int main(void)
@@ -38,29 +35,24 @@ int main(void)
     ////////////////////////////////////////////////////////////////////////////
     // Assignment: Stop the annoying sound. 
     ////////////////////////////////////////////////////////////////////////////
-    init_interrupts();
 
-    // Configure PE1 as an input pin with pull-up resistor
-    GPIO_E->CFGLR = 0x22222222; // Set PE0-7 as output, push-pull, 2 MHz
-    GPIO_E->OUTDR = 0xFF; // Enable pull-up resistors on PE0-7
+    GPIO_E->CFGLR = 0x88888888; // Set PE0-7 as input, pull up/down
+    GPIO_E->OUTDR = 0xFFFF; // Pull up
+
+    // Välj att routa Port E vidare på pinne 1
+    *AFIO_EXTICR1 = 0x40;
+
+    *EXTI_RTENR = 0b10;
+    *EXTI_FTENR = 0b00;
+    *EXTI_INTENR = 0b10;
+
+    *PFIC_IENR1 |= (1<<23);
 
 
-    // We need pin 1 of the GPIOE port to be connected to EXTI
-    *AFIO_EXTICR1 &= ~(0xF << 4); // Clear the EXTI1 bits
-    *AFIO_EXTICR1 |= (0x4 << 4); // Set EXTI1 to be connected to GPIOE pin 1
-
-    // Configure EXTI1 to trigger on the falling edge (when the button is released)
-    *EXTI_FTENR |= 0b10; // Enable falling edge trigger for EXTI1
-    *EXTI_RTENR &= ~0b10; // Disable rising edge trigger for EXTI1
-
-    // Enable the EXTI1 interrupt
-    *EXTI_INTENR |= 0b10; // Enable EXTI1 interrupt
-
-    // Enable PFIC interrupt for EXTI1 (IRQ number 23)
-    *((volatile uint32_t*) 0xE000E100) |= (1 << 23);    
     
 
-    // Program below creates an annoying sound
+
+
 
     ///////////////////////////////////////////////////////////////////////////
     // Configure PD0 as an output pin, push-pull, 2 MHz

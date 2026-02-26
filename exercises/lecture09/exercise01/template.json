@@ -1,0 +1,6 @@
+{
+   "label": "Lecture 09 - Exercise 01",
+   "description" : "GPIO Interrupts",
+   "extends": "md307-master",
+   "openOnStartup": ["src/assignment.c"]
+}

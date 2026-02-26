@@ -24,14 +24,14 @@ bargraph as an indicator of which key is being pressed.
 Create a new project folder and initialize a project with the **Lab3** template
 (*Ctrl+Shift+P -> MDx07: Initialize project -> Lab Assignments -> Lab3*).
 
-Connect the bargraph to **Port D [0:7]**. Connect the keypad to **Port D
+Connect the keypad to **Port D [0:7]**. Connect the bargraph to **Port D
 [8:15]**. Connect the buzzer to **Port E [0]**. Finally, connect the MD307 to
 your computer via USB.
 
 To clarify the buzzer connection: Use a jumper cable directly from the MD307 to
 the buzzer. The ports and pin numbers are shown in the diagram below, where `+`
 means **VDD** and `g` means **GND**. The pin in square brackets `[.]` is where
-the jumber cable should go.
+one end of the jumper cable should go.
 
 ```
      PE15..8          PE7..0         PD15..8          PD7..0
@@ -68,9 +68,8 @@ bitwise operation! Use the GPIO interface in `inc/gpio.h` - you may use pointer
 macros or struct pointers, whichever you prefer.
 
 Also, the interrupt needs to be acknowledged to let the system know that the
-handler can be called again. Add some code that acknowledges the SysTick
-interrupt at the end of the handler (again, this only requires *one* line of
-code).
+handler can be called again. Acknowledge the SysTick interrupt at the end of the
+handler (see *QuickGuide -> SysTick -> STK_SR -> CNTIF*).
 
 The library includes functions for starting and stopping periodic SysTick
 interrupts. Test your SysTick interrupt handler by adding a line of code in
@@ -94,9 +93,11 @@ pressed *and* when a key is released.
 ### Task 2.1: Reading the Keypad
 
 Within `exti_handler()`, start small by adding some code that simply reads the
-keypad (see the keypad interface in `inc/keypad.h`). Use the debugger to make
-sure you can read all the keys properly and know what values they return. Ensure
-the interrupt handler is called when a key is pressed as well as released.
+keypad (see the keypad interface in `inc/keypad.h`). Acknowledge the interrupt
+at the end of the handler (see *QuickGuide -> EXTI -> INTFR*). Use the debugger
+to make sure you can read all the keys properly and know what values they
+return. Ensure the interrupt handler is called when a key is pressed as well as
+released.
 
 Time to turn the keypad into a synthesizer!
 
@@ -148,8 +149,7 @@ Let's make the program play a melody automatically.
 
 The library includes definitions for playing a particular melody. Have a look at
 the interface in `inc/music.h`, particularly the `Note` struct. Add the code
-below to `src/main.c` in global scope above `systick_handler()` and use it to
-play the melody.
+below to `src/main.c` in global scope above `systick_handler()`.
 
 ```c
 Note notes[] = NOTES;
@@ -158,7 +158,18 @@ int remaining_duration;
 int current_period;
 ```
 
-*Tip: You need to add code to* `systick_handler()` *and* `main()`.
+Within `main()`, after the initialization calls (*not* within the infinite
+loop), add a loop that iterates through the array of notes. For each note, set
+the values of the global variables `remaining_duration` and `current_period`
+according to the fields of the note struct (see Lecture 7 on how to access
+struct fields). Generate a tone with a period of `current_period` and then wait
+(do nothing) until the note is finished.
+
+*How can the note finish while we're doing nothing?*
+
+I'm glad you asked. Interrupts, of course! You've set up SysTick to trigger an
+interrupt with a certain periodicity. Use this within `systick_handler()` to
+keep track of time!
 
 Do you recognize the melody?
 

@@ -48,7 +48,7 @@ int tft_tp_getpos( int *x, int *y ){
 #include <string.h>
 
 // Do this for hardware. 
-//#define CUSTOM 1 
+#define CUSTOM 1 
 
 #define CMD_RDX 0XD0
 #define CMD_RDY 0X90
@@ -340,7 +340,7 @@ static int _pll_init_144(void)
   return 0;
 }
 /* Delay functions using TIMER7 */
-static void timer7_delay1ms(void )
+void timer7_delay1ms(void )
 {
 	/* System core clock: 144MHz */
 	 /* freq: PSC is # of microsecs-1 */
@@ -503,6 +503,24 @@ static uint8_t SPI_WriteByte(PSPI_WCH_DEVICE SPIx, uint8_t byte)
 	}
 	return (uint8_t) SPIx->dr;
 } 
+
+/* Write-only variant: waits for TXE then loads next byte immediately.
+ * Drains RXNE non-blocking to prevent overflow flag.
+ * Call SPI_WaitDone() after the last byte before raising CS. */
+static void SPI_WriteByteOnly(PSPI_WCH_DEVICE SPIx, uint8_t byte)
+{
+	while(!(SPIx->sr & 2));         /* Wait for TXE */
+	SPIx->dr = byte;
+	if(SPIx->sr & 1) (void)SPIx->dr; /* Drain RX if ready (non-blocking) */
+}
+
+/* Wait for the shift register to finish and drain the final RX byte.
+ * Must be called after the last SPI_WriteByteOnly before raising CS. */
+static void SPI_WaitDone(PSPI_WCH_DEVICE SPIx)
+{
+	while(SPIx->sr & (1<<7));       /* Wait for BSY = 0 */
+	if(SPIx->sr & 1) (void)SPIx->dr; /* Drain final RX byte */
+}
 
 
 /* Software implementation of SPI-protocol */ 	 			    					   
@@ -766,16 +784,29 @@ static void tft_fill_colour(uint16_t colour)
 {
 	unsigned int i,j;  
 	_tft_lcd_setwindow(0,0,lcddev.width-1,lcddev.height-1);   
-	 LCD_CS_CLR;
-	 LCD_RS_SET;
-	for(i=0;i<lcddev.height;i++)
+	LCD_CS_CLR;
+	LCD_RS_SET;
+	if( _option & TFT_INIT_ST7796S)
 	{
-		for(j=0;j<lcddev.width;j++)
-		{	
-			_lcd_write_16bit_data(colour);
-		}
+		uint8_t hi = colour >> 8, lo = colour;
+		for(i=0;i<lcddev.height;i++)
+			for(j=0;j<lcddev.width;j++){
+				SPI_WriteByteOnly(SPI1, hi);
+				SPI_WriteByteOnly(SPI1, lo);
+			}
 	}
-	 LCD_CS_SET;
+	else if( _option & TFT_INIT_ILI9488)
+	{
+		uint8_t r = (colour>>8)&0xF8, g = (colour>>3)&0xFC, b = colour<<3;
+		for(i=0;i<lcddev.height;i++)
+			for(j=0;j<lcddev.width;j++){
+				SPI_WriteByteOnly(SPI1, r);
+				SPI_WriteByteOnly(SPI1, g);
+				SPI_WriteByteOnly(SPI1, b);
+			}
+	}
+	SPI_WaitDone(SPI1);
+	LCD_CS_SET;
 } 
 
 
@@ -854,12 +885,26 @@ static void _tft_lcd_fill(uint16_t sx,uint16_t sy,uint16_t ex,uint16_t ey,uint16
 	_tft_lcd_setwindow(sx,sy,ex,ey);
 	LCD_CS_CLR;
 	LCD_RS_SET;
-	for(i=0;i<height;i++)
+	if( _option & TFT_INIT_ST7796S)
 	{
-		for(j=0;j<width;j++){
-			_lcd_write_16bit_data(color);
-		}
+		uint8_t hi = color >> 8, lo = color;
+		for(i=0;i<height;i++)
+			for(j=0;j<width;j++){
+				SPI_WriteByteOnly(SPI1, hi);
+				SPI_WriteByteOnly(SPI1, lo);
+			}
 	}
+	else if( _option & TFT_INIT_ILI9488)
+	{
+		uint8_t r = (color>>8)&0xF8, g = (color>>3)&0xFC, b = color<<3;
+		for(i=0;i<height;i++)
+			for(j=0;j<width;j++){
+				SPI_WriteByteOnly(SPI1, r);
+				SPI_WriteByteOnly(SPI1, g);
+				SPI_WriteByteOnly(SPI1, b);
+			}
+	}
+	SPI_WaitDone(SPI1);
 	LCD_CS_SET;
 }
 /**

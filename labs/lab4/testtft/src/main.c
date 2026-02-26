@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 // RGB565 color helpers
 #define RGB565(r, g, b) ((((r) & 0x1F) << 11) | (((g) & 0x3F) << 5) | ((b) & 0x1F))
 #define COLOR_BLACK  0x0000
@@ -17,31 +18,31 @@ extern void tft_lcd_rect(int x, int y, int w, int h, uint16_t color, int filled)
 extern void tft_lcd_ellipse(int x, int y, int rx, int ry, uint16_t color, int filled); // a0-a5
 extern void tft_crosshair(int x, int y, uint16_t color);                              // a0-a2
 
+void _delay_ms(unsigned int ms);	
+
 int main(void)
 {
     tft_init(1);
 
-    // Fill screen black
+    // Fill screen with random colors
+    //while(1) {
+    //    tft_lcd_rect(0, 0, 479, 319, RGB565(rand() % 32, rand() % 64, rand() % 32), 1);
+    //}
     tft_lcd_rect(0, 0, 479, 319, COLOR_BLACK, 1);
-
-    tft_lcd_ellipse(120, 160, 50, 80, COLOR_WHITE, 1);
-
+    //tft_lcd_ellipse(120, 160, 50, 80, COLOR_WHITE, 1);
     //tft_lcd_pixel(120, 160, COLOR_RED); // Center of the ellipse
-
     // Draw a red diagonal line from top-left to bottom-right
-    tft_lcd_line(0, 0, 239, 319, COLOR_RED);
-
+    //tft_lcd_line(0, 0, 239, 319, COLOR_RED);
     // Draw a green line across the middle horizontally
-    tft_lcd_line(0, 160, 239, 160, COLOR_GREEN);
-
+    //tft_lcd_line(0, 160, 239, 160, COLOR_GREEN);
     // Draw a blue line down the middle vertically
-    tft_lcd_line(120, 0, 120, 319, COLOR_BLUE);
-
-
+    //tft_lcd_line(120, 0, 120, 319, COLOR_BLUE);
     while(1){
-        for(int x = 0; x < 240; x++){
-            tft_lcd_rect(0, 0, 479, 319, COLOR_BLACK, 1);
+        for(int x = 0; x < 480; x++){
+            //tft_lcd_rect(0, 0, 479, 319, COLOR_BLACK, 1);
             tft_lcd_rect(x, 160, 16, 16, COLOR_WHITE, 1);
+            for(volatile unsigned int _d = 0; _d < 600000; _d++); /* ~16ms @ 144MHz */
+            tft_lcd_rect(x, 160, 16, 16, COLOR_BLACK, 1);
         }
     }
 }

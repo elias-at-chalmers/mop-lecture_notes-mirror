@@ -29,7 +29,7 @@ OBJDUMP = "$(GCC_PATH)riscv32-unknown-elf-objdump"
 
 
 # compiler and linker flags
-CFLAGS += -g -O3 -Wall -Wextra -std=c99 -MMD -march=rv32imf_zicsr  -mabi=ilp32f $(addprefix -I, $(INC_DIRS))
+CFLAGS += -g -Wall -Wextra -std=c99 -MMD -march=rv32imf_zicsr  -mabi=ilp32f $(addprefix -I, $(INC_DIRS))
 LDFLAGS += -T$(LINKER_SCRIPT) -Wl,--no-warn-rwx-segments -march=rv32imf_zicsr  -mabi=ilp32f  -nostdlib -nostartfiles --specs=nano.specs
 LDFLAGS += $(addprefix -L, $(LIB_DIRS))
 ASFLAGS += -g

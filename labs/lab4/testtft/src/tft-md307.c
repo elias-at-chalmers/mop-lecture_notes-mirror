@@ -48,7 +48,7 @@ int tft_tp_getpos( int *x, int *y ){
 #include <string.h>
 
 // Do this for hardware. 
-#define CUSTOM 1 
+//#define CUSTOM 1 
 
 #define CMD_RDX 0XD0
 #define CMD_RDY 0X90
@@ -73,6 +73,7 @@ static void _tft_lcd_fill(uint16_t sx,uint16_t sy,uint16_t ex,uint16_t ey,uint16
 /* Dispatch system call */
  __attribute__((interrupt("machine"))) void ecall()
 {
+#if 0
 	/* Since we have no idea about register usage in the called routines, we simply has to save/restore them all.
 	 * Also, this function has to end with an 'mret'.
 	 * The attribute will do all of this for us. */
@@ -108,6 +109,7 @@ static void _tft_lcd_fill(uint16_t sx,uint16_t sy,uint16_t ex,uint16_t ey,uint16
 	__asm__ volatile(" csrr t0,mepc\n"); /* Copy mepc... */		
 	__asm__ volatile(" addi t0,t0,4\n");		
 	__asm__ volatile(" csrw mepc,t0\n");
+#endif	
 }
 
 int tft_init(int option)

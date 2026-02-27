@@ -22,6 +22,9 @@ void _delay_ms(unsigned int ms);
 
 int main(void)
 {
+    unsigned int mtvec_val;
+    __asm__ volatile ("csrr %0, mtvec" : "=r"(mtvec_val));
+    
     tft_init(1);
 
     // Fill screen with random colors
@@ -41,7 +44,7 @@ int main(void)
         for(int x = 0; x < 480; x++){
             //tft_lcd_rect(0, 0, 479, 319, COLOR_BLACK, 1);
             tft_lcd_rect(x, 160, 16, 16, COLOR_WHITE, 1);
-            for(volatile unsigned int _d = 0; _d < 600000; _d++); /* ~16ms @ 144MHz */
+            //for(volatile unsigned int _d = 0; _d < 600000; _d++); /* ~16ms @ 144MHz */
             tft_lcd_rect(x, 160, 16, 16, COLOR_BLACK, 1);
         }
     }

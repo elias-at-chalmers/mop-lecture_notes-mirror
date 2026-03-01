@@ -89,46 +89,74 @@ The advantage of embedded clocking is that it allows far higher data rates becau
 We will not dive deeper into embedded clock signals in this course. 
 
 # Programming the UART
-Now you know about sending data asynchronously, and how frames work, you might be tempted to implement this over GPIO using interrupts. This is entirely possible with your knowledge of interrupts and SysTick timing, but you do not have to. Ever since this type of data transfer was implemented in hardware in the 1970s, microcontrollers have included dedicated UART peripherals that handle framing, timing, and buffering automatically, leaving the processor free to perform other tasks.
 
-In fact, the ch32v307 contains 3 USART controllers each of which can be used to transmit asynchronous data in a variety of different ways. The register block for each USART looks like this in the quickguide: 
+Now that you understand asynchronous transmission and framing, you might be tempted to implement this manually using GPIO, interrupts, and SysTick timing. That is entirely possible with your current knowledge — but fortunately unnecessary. Since the 1970s, microcontrollers have included dedicated UART peripherals that handle framing, timing, and buffering in hardware, allowing the processor to perform other tasks.
+
+The CH32V307 contains three USART controllers, each capable of transmitting asynchronous data in several different modes. The register block for each USART appears as follows in the quick guide:
 
 {{python quickguide-generator/main.py overview-table USART1 -no-grouping}}
 
-The USART can communicate using a lot of different protocols, and all of these registers will not be relevant to us. 
+The USART supports multiple operating modes, and not all registers are relevant for our purposes.
 
 ## Sending a byte of data
-Before we start any transmission, we need to configure the USART so that it knows what protocol to use and at what speed to transmit. We start by setting the UE, M, PCE, and TE bits in the `CTLR1` register. This turns the USART on (UE), sets up one parity bit (M, PCE), and enables the transmitter part of the USART (TE).
 
-<div class = "boxed">
+Before transmitting, the USART must be configured with the desired frame format and baud rate.
+
+We begin by setting the `UE`, `PCE`, `M`, and `TE` bits in the `CTLR1` register. `UE` enables the USART, `PCE` enables parity control, `M` selects the word length (8 or 9 bits), `TE` enables the transmitter part of the USART.
+
+<div class="boxed">
 {{python quickguide-generator/main.py register-details USART1 CTLR1 -no-folding}}
 </div>
 
-Then we need to set the speed of the transmission. Since the USART block itself does not know what the clock frequency of our microcontroller is, we have to do this by telling it what to divide the clock frequency with, to get the speed we want. We need to give it the value `USARTDIV` which is given by: 
+Next, we configure the baud rate. The USART divides the peripheral clock frequency (`f_PCLK`) to generate the desired symbol rate. The required divisor is:
 
 USARTDIV = f<sub>PCLK</sub> / (16 × baudrate)
 
-If we want a baudrate of 115200 bits/sec, and out clock frequency is 144MHz, USARTDIV = 78.125.
-We write the mantissa and fraction into two fields in the  Buad Rate Register (`BRR`): 
+For example, with a baud rate of 115200 bit/s and a peripheral clock of 144 MHz:
 
-<div class = "boxed">
+USARTDIV = 144,000,000 / (16 × 115200) = 78.125
+
+This value is written into the Baud Rate Register (`BRR`), which contains separate fields for the mantissa and fractional part:
+
+<div class="boxed">
 {{python quickguide-generator/main.py register-details USART1 BRR -no-folding}}
 </div>
 
-Now, when we want to send a byte of data, we simply write that byte into the Data Register (`DATAR`). The USART will immediately start shifting the bits out, one-by-one, on the GPIOA[9] pin (which pin to use is also configurable, but we will not go into that here).
+To transmit a byte, we simply write it to the Data Register (`DATAR`). The USART immediately begins shifting the bits out sequentially on pin PA9 (the default USART1 TX pin).
 
-Our code should then wait until the `TXE` bit in the Status Register (`STATR`) is set. This means that the USART har shifted out all of the bits, and can accept a new byte of data. 
+The program should then wait until the `TXE` bit in the Status Register (`STATR`) is set. `TXE` indicates that the data register is empty and ready to accept a new byte. (If one needs to know when transmission has fully completed on the wire, the `TC` flag must be checked instead.)
 
+<div class="boxed">
 {{python quickguide-generator/main.py register-details USART1 STATR -no-folding}}
+</div>
 
+## Receiving a byte of data
 
-## Recieving a byte of data
-On the reciever end, our program will look similar. We need to configure the USAR in the same way, but enabling the reciever part of the circuit intead, in the `CTLR1` register. When the byte arrives (on the GPIOA[10] pin), the USART will automatically shift the bits into the Data Register (`DATAR`). We can read the `RXNE` bit to see when the whole byte has arrived, and can then read the data register. 
+On the receiving side, configuration is similar, except that the receiver is enabled instead of (or in addition to) the transmitter by setting the `RE` bit in `CTLR1`.
 
-To send several bytes from one MD307 to another, the transmitting MD307 could lie in a loop and feed a new byte into the data register every time the `TXE` byte is set. The recieving MD307 would also lie in a loop and read the Data register every time the `RXNE` bit was set. 
+When a byte arrives on PA10 (USART1 RX), the USART hardware automatically shifts the bits into the data register. When a full frame has been received, the `RXNE` (Receive Not Empty) flag is set. The program can then read the `DATAR` register to obtain the received byte.
 
-Since this would occupy both machines completely, this is usually implemented using interrupts instead. The transmitting MD307 would have a buffer of data that it wanted to send, and (by setting the `TXIE` bit in the `CTLR1` register) would recieve an interrupt every-time the USART was ready to transmit another byte. Similarly, the recieving MD307 program would do whatever it was doing and when a new byte was ready to be recieved, an interupt handler would put that into a buffer. 
+To send multiple bytes from one CH32V307 to another, the transmitting device could remain in a loop, writing a new byte each time `TXE` is set. Similarly, the receiving device could poll the `RXNE` flag and read incoming bytes as they arrive.
+
+However, constant polling would occupy the processor entirely. In practice, transmission and reception are usually interrupt-driven. By enabling the transmit interrupt (`TXEIE`) in `CTLR1`, the USART generates an interrupt whenever it is ready to accept another byte. The transmitter interrupt handler then feeds the next byte from a software buffer.
+
+Likewise, by enabling the receive interrupt (`RXNEIE`), the processor is interrupted whenever a new byte arrives. The interrupt handler reads the data register and stores the byte in a buffer, allowing the main program to continue executing independently of the serial communication. 
 
 # Other transmission protocols on the MD307
-Write a paragraph each about SPI, I2C and CAN.
+In addition to the USART peripherals, the MD307 also supports several other widely used communication protocols.
+
+**SPI (Serial Peripheral Interface)** is a synchronous, full-duplex protocol typically used for short-distance communication between a microcontroller and peripheral devices such as displays, ADCs, DACs, and external memory. It uses separate lines for clock (SCK), master-out–slave-in (MOSI), master-in–slave-out (MISO), and a chip-select (CS) signal for each slave device. Because data are shifted in and out simultaneously under control of a shared clock, SPI can achieve very high data rates over short distances. The protocol itself is simple and has minimal overhead, but it does not provide built-in addressing or error detection; these must be implemented at a higher level if required.
+
+The TFT screen that you will use in Lab 4 (if you choose to do that) is controlled via SPI. The SPI communication is handled by another hardware block, similar to the USART, but you will not need to program that directly for the lab.  
+
+**I<sup>2</sup>C (Inter-Integrated Circuit)** is a synchronous, half-duplex bus designed for communication between integrated circuits on the same board. It uses only two wires: a serial clock (SCL) and a bidirectional data line (SDA), both operating with open-drain signalling and pull-up resistors. Devices share the same bus and are selected through unique addresses, allowing many peripherals to coexist on just two lines. I<sup>2</sup>C is slower than SPI but reduces pin usage and wiring complexity. It includes acknowledgement bits and defined bus arbitration mechanisms, which improve reliability in multi-device systems.
+
+**I<sup>2</sup>S (Inter-IC Sound)** is a synchronous serial protocol designed specifically for digital audio transmission between integrated circuits. Unlike SPI or UART, which are general-purpose data links, I<sup>2</sup>S is optimised for continuous streaming of audio samples.
+
+An I<sup>2</sup>S connection typically uses three signals: a serial clock (SCK), a word-select or left/right clock (WS or LRCK), and a serial data line (SD). The clock defines the bit rate, while the word-select signal indicates whether the transmitted sample belongs to the left or right audio channel. Data are shifted synchronously with the clock, most significant bit first. Because audio data must be delivered at a constant rate, I<sup>2</sup>S operates as a continuous stream rather than as discrete frames with start and stop bits.
+
+On the MD307, I<sup>2</sup>S functionality is implemented as a special operating mode of certain SPI peripherals. It is commonly used to interface with audio DACs, ADCs, codecs, and digital microphones in applications requiring high-quality digital sound reproduction.
+
+**CAN (Controller Area Network)** is a robust, message-based protocol originally developed for automotive systems. It uses differential signalling over a two-wire bus and is designed for high noise immunity and fault tolerance. Unlike UART, SPI, or I<sup>2</sup>C, CAN is multi-master and uses identifier-based arbitration to determine message priority. It includes strong error detection, automatic retransmission, and fault confinement mechanisms. Although more complex than the other protocols discussed, CAN is well suited for distributed embedded systems where reliability and resilience are critical.
+
 

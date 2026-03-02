@@ -17,8 +17,9 @@ So far in this course, only examples of *parallel* communication have been consi
 * Over longer distances, providing a large number of parallel conductors becomes costly.
 * On a printed circuit board (PCB) or within a cable assembly, additional conductors require more routing space or result in thicker, bulkier cables.
 * The microprocessor has a finite number of general-purpose input/output (GPIO) pins.
+* At very high data rates, even small differences in conductor length or load cause timing misalignment (skew) between parallel lines
 
-During the 1980s and 1990s, consumer electronics frequently employed parallel interfaces[^footnote_printer_cable]. For the reasons outlined above, however, and for additional considerations related to scalability and signal integrity, most communication at nearly all scales is now implemented using *serial* protocols. In serial communication, data are transmitted sequentially over a single channel, one bit at a time. Although this approach demands more sophisticated timing control and higher signalling rates at both ends of the link, it is generally more economical, more scalable, and more robust in practice.
+During the 1980s and 1990s, consumer electronics frequently employed parallel interfaces[^footnote_printer_cable]. For the reasons outlined above, however, and for additional considerations related to scalability and signal integrity, most communication at nearly all scales is now implemented using *serial* protocols. In serial communication, data is transmitted sequentially over a single channel, one bit at a time. Although this approach demands more sophisticated timing control and higher signalling rates at both ends of the link, it is generally more economical, more scalable, and more robust in practice.
 
 Parallel interfaces remain relevant in applications requiring extremely high data throughput over very short distances, such as modern synchronous dynamic random-access memory (e.g. DDR5).
 

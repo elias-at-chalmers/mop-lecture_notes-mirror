@@ -14,7 +14,7 @@
 // - tft_ellipse(xc, yc, rx, ry, color, filled) to draw an ellipse (filled or not)
 //     - xc, yc are the center coordinates of the ellipse
 //     - rx, ry are the radius along the x and y axes, respectively
-// - tft_rect(x1, y1, x2, y2, color, filled) to draw a rectangle (filled or not)
+// - tft_rect(x1, y1, w, h, color, filled) to draw a rectangle (filled or not)
 // - tft_line(x1, y1, x2, y2, color) to draw a line
 // - tft_pixel(x, y, color) to draw a single pixel
 // - tft_sprite(x, y, data, w, h) to draw a sprite (a small bitmap) at the 
@@ -25,7 +25,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include "../tftlib/tft.h"
-#include "sprites.h"
+#include "sprites/sprite_17_2.h"
 // RGB565 color helpers
 #define RGB565(r, g, b) ((((r) & 0x1F) << 11) | (((g) & 0x3F) << 5) | ((b) & 0x1F))
 #define COLOR_BLACK  0x0000
@@ -44,9 +44,8 @@ int main(void)
     // Once tft_init() has completed, the screen should be all yellow. Fill it 
     // with a black background color (use COLOR_BLACK as the color argument) 
     // using tft_rect().
-    // Note that the coordinates of the rectangle MUST NOT BE outside the 
-    // screen boundaries (0 <= x < 480, 0 <= y < 320), otherwise it will not 
-    // draw. 
+    // Note: On the simulator, w has to be given as 479, and h as 319, to fill
+    //       the whole screen. 
     ///////////////////////////////////////////////////////////////////////////
 #if SOLUTION     
     tft_init();
@@ -104,7 +103,7 @@ int main(void)
 #endif
         center_x += speed_x;
     }
-#elif 1
+#elif 0
     ///////////////////////////////////////////////////////////////////////////
     // Assignment 3: Make it bounce in 2D!
     // =======================================================================
@@ -127,6 +126,39 @@ int main(void)
         center_x += speed_x;
         center_y += speed_y;
     }
+#elif 1
+    ///////////////////////////////////////////////////////////////////////////
+    // Assignment 4: Use a sprite!
+    // =======================================================================
+    // Just for fun, let's use a sprite instead of an ellipse. A sprite is a 
+    // small image, and we have included a bunch of them in the sprites/ 
+    // folder that you can include if you want. 
+    // 
+    // You can find that "sprite_17_2.h" has been included above. Look at that
+    // file and you will see that it is a 16x16 pixel image in the right format.
+    //
+    // Note that this will be very slow on the simulator, but quite fast on 
+    // hardware, so if you want to use sprites in your game, you might want to
+    // use rectangles as placeholders while developing. 
+    ///////////////////////////////////////////////////////////////////////////
+    int center_x = 240;
+    int center_y = 160;
+    int speed_x = 1;
+    int speed_y = 1; 
+    while(1) {
+        if (center_x <= 8 || center_x >= 472) { // Bounce on the edges
+            speed_x = -speed_x;
+        }   
+        if (center_y <= 8 || center_y >= 312) { // Bounce on the edges
+            speed_y = -speed_y;
+        }
+        tft_sprite(center_x - 8, center_y - 8, sprite_17_2, 16, 16);
+        for(volatile unsigned int _d = 0; _d < 6; _d++); // Simple delay
+        tft_rect(center_x - 8, center_y - 8, 16, 16, COLOR_BLACK, 1);
+        center_x += speed_x;
+        center_y += speed_y;
+    }
+
 #endif
 
     ///////////////////////////////////////////////////////////////////////////

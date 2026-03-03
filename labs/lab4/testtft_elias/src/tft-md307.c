@@ -1,3 +1,34 @@
+#if 0
+#include <stdint.h>
+
+void sim_tft_init(int option);
+void sim_tft_ellipse(int xc, int yc, int rx, int ry, int colour, int fill);
+void sim_tft_rect(int xc, int yc, int xr, int yr, int colour, int fill);
+void sim_tft_line(int  x1, int y1, int x2, int y2, int colour);
+void sim_tft_crosshair(int x,int y,int colour);
+void sim_tft_pixel(int x,int y, int colour);
+void sim_tft_sprite(int x, int y, uint16_t *data, int w, int h);
+
+void tft_init(int option){
+	sim_tft_init(option); 
+}
+void tft_ellipse(int xc, int yc, int rx, int ry, int colour, int fill){
+	sim_tft_ellipse(xc,  yc,  rx,  ry, colour, fill);
+}
+void tft_rect(int xc, int yc, int xr, int yr, int colour, int fill){
+	sim_tft_rect( xc,  yc,  xr,  yr,  colour, fill);				
+}			
+void tft_line(int  x1, int y1, int x2, int y2, int colour){
+	sim_tft_line( x1, y1, x2, y2, colour);				
+}	
+void tft_pixel(int x,int y, int colour){
+	sim_tft_pixel( x, y, colour);				
+}
+void tft_sprite(int x, int y, uint16_t *data, int w, int h){
+	sim_tft_sprite(x, y, data, w, h);
+}	
+#else
+
 /*
  * tft-md307.c
  * tft library for md307
@@ -1459,3 +1490,4 @@ int _tft_init(int option)
 
 #endif /* TARGET_HW or TARGET_SIM */
 
+#endif

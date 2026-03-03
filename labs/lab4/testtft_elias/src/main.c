@@ -12,17 +12,12 @@
 // Signatures reverse-engineered from libtftmd307-sim.a disassembly:
 // Each public wrapper saves its argument registers (a0..aN) then issues an ecall.
 extern int  tft_init(int type);
-extern void tft_lcd_pixel(int x, int y, uint16_t color);                              // a0-a2
-extern void tft_lcd_line(int x1, int y1, int x2, int y2, uint16_t color);            // a0-a4
-extern void tft_lcd_rect(int x, int y, int w, int h, uint16_t color, int filled);    // a0-a5
-extern void tft_lcd_ellipse(int x, int y, int rx, int ry, uint16_t color, int filled); // a0-a5
-extern void tft_crosshair(int x, int y, uint16_t color);         
-static void tft_lcd_sprite(int x, int y, uint16_t *data, int w, int h);                     // a0-a2
+extern void tft_pixel(int x, int y, uint16_t color);                              // a0-a2
+extern void tft_line(int x1, int y1, int x2, int y2, uint16_t color);            // a0-a4
+extern void tft_rect(int x, int y, int w, int h, uint16_t color, int filled);    // a0-a5
+extern void tft_ellipse(int x, int y, int rx, int ry, uint16_t color, int filled); // a0-a5
+extern void tft_sprite(int x, int y, uint16_t *data, int w, int h);                     // a0-a2
 
-void _delay_ms(unsigned int ms);	
-
-void tft_pixel(int x, int y, uint16_t color);
-void tft_sprite(int x, int y, const uint16_t *data, int w, int h);
 
 
 uint16_t ball_sprite[16*16] = {
@@ -60,7 +55,7 @@ int main(void)
     //while(1) {
     //    tft_lcd_rect(0, 0, 479, 319, RGB565(rand() % 32, rand() % 64, rand() % 32), 1);
     //}
-    tft_lcd_rect(0, 0, 479, 319, COLOR_BLACK, 1);
+    tft_rect(0, 0, 479, 319, COLOR_BLACK, 1);
     //tft_lcd_ellipse(120, 160, 50, 80, COLOR_WHITE, 1);
     //tft_lcd_pixel(120, 160, COLOR_RED); // Center of the ellipse
     // Draw a red diagonal line from top-left to bottom-right
@@ -89,10 +84,10 @@ int main(void)
             asm_pixel(x, 160, COLOR_BLACK);
             #else 
             //tft_lcd_ellipse(x, 160, 7, 7, 0xFFFF, 1); // a0-a5
-            tft_lcd_sprite(x, 160, ball_sprite, 16, 16);
+            tft_sprite(x, 160, ball_sprite, 16, 16);
             //tft_sprite(x, 160, ball_sprite, 16, 16);
-            for(volatile unsigned int _d = 0; _d < 60000; _d++);
-            tft_lcd_rect(x, 160, 16, 16, COLOR_BLACK, 1);
+            for(volatile unsigned int _d = 0; _d < 600; _d++);
+            tft_rect(x, 160, 16, 16, COLOR_BLACK, 1);
             #endif
         }
     }

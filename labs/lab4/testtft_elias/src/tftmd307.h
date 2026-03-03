@@ -52,49 +52,19 @@
 void	delay_ms(unsigned int ms);
 void	delay_us(unsigned int us);
 
-/* tft library functions */
-int 	tft_tp_scan(int tp);
-int 	tft_tp_getpos( int *x, int *y );
-int		tft_init(int);
-void 	tft_lcd_pixel(int x,int y, int colour);
-void 	tft_lcd_crosshair(int x,int y,int colour);
-void 	tft_lcd_ellipse(int xc, int yc, int rx, int ry, int colour, int fill);
-void 	tft_lcd_rect(int x1, int y1, int x2, int y2, int colour, int fill);
-void 	tft_lcd_line(int  x1, int y1, int x2, int y2, int colour);
-void 	tft_printf (int font, uint16_t x, uint16_t y, uint16_t bg, uint16_t fg, char * formatstr, ...);
 
-#ifndef DBGCALL
-/* rest is when building from code ... */
-static int 	_tft_tp_scan(int tp);
-static int 	_tft_tp_getpos( int *x, int *y );
-static int		_tft_init(int);
-static void 	_tft_lcd_pixel(int x,int y, int colour);
-static void 	_tft_lcd_crosshair(int x,int y,int colour);
-static void 	_tft_lcd_ellipse(int xc, int yc, int rx, int ry, int colour, int fill);
-static void 	_tft_lcd_rect(int x1, int y1, int x2, int y2, uint16_t colour, int fill);
-static void 	_tft_lcd_line(int  x1, int y1, int x2, int y2, int colour);
-static void	_delay_ms(unsigned int ms);
-
-#ifndef CUSTOM
-/* Trap call interface */
-typedef struct tft_call{
-	int	function;
-	unsigned int *caller_frame;
-} TFT_CALL, *PTFT_CALL;
-#endif
+// #ifndef CUSTOM
+// /* Trap call interface */
+// typedef struct tft_call{
+// 	int	function;
+// 	unsigned int *caller_frame;
+// } TFT_CALL, *PTFT_CALL;
+// #endif
 
 #define USE_HORIZONTAL  	 1
 #define LCD_W 320
 #define LCD_H 480
 
-typedef struct
-{
-	uint16_t x0;
-	uint16_t y0;
-	uint16_t x;
-	uint16_t y;						   	    
-	uint8_t  sta;
-}_m_tp_dev;
 
 typedef struct  
 {										    
@@ -156,6 +126,4 @@ extern const tFont font_arial_narrow_bold_24;
 static void _tft_lcd_direction(int direction);
 //int		tft_clock_init_144(void);
 
-#endif	/* not DBGCALL */
-
-#endif	/* _TFT_MD307_H_ */
+#endif

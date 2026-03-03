@@ -43,43 +43,6 @@ void tft_sprite(int x, int y, uint16_t *data, int w, int h){
 #define TARGET_HW   1
 #define TARGET_DBG  2
 
-#if !defined(TARGET)
-#  error "TARGET must be defined to TARGET_SIM, TARGET_HW, or TARGET_DBG"
-#endif
-
-#if TARGET == TARGET_DBG
-/* dbg307 builtin functions */
-#include <dbg307.h>
-int tft_init(int option){
-	return dbg_tft_init(option);
-}
-void tft_lcd_ellipse(int xc, int yc, int rx, int ry, int colour, int fill){
-	dbg_tft_lcd_ellipse(xc,  yc,  rx,  ry, colour, fill);
-}
-void tft_lcd_rect(int xc, int yc, int xr, int yr, int colour, int fill){
-	dbg_tft_lcd_rect( xc,  yc,  xr,  yr,  colour, fill);				
-}			
-void tft_lcd_line(int  x1, int y1, int x2, int y2, int colour){
-	dbg_tft_lcd_line( x1, y1, x2, y2, colour);				
-}	
-void tft_lcd_crosshair(int x,int y,int colour){
-	dbg_tft_lcd_crosshair( x, y, colour);				
-}
-void tft_lcd_pixel(int x,int y, int colour){
-	dbg_tft_lcd_pixel( x, y, colour);				
-}	
-	
-void delay_ms(unsigned int ms){
-	dbg_delay_ms(ms);				
-}
-int tft_tp_scan(int tp){
-	return (dbg_tft_tp_scan(tp));				
-}	
-int tft_tp_getpos( int *x, int *y ){
-	return (dbg_tft_tp_getpos( x, y ));				
-}	
-
-#else /* TARGET_HW or TARGET_SIM */
 #include "md307.h"
 #include "tftmd307.h"
 #include <stdarg.h>
@@ -91,273 +54,18 @@ int tft_tp_getpos( int *x, int *y ){
 #define CMD_RDY 0X90
 
 static _lcd_dev lcddev;
-static _m_tp_dev tp_dev;
 static	int _option;					
 
-static uint8_t 	_tp_read_xy2(uint16_t *x,uint16_t *y);
-static uint16_t _tp_read_xoy(uint8_t xy);
-static uint8_t 	_tp_read_xy(uint16_t *x,uint16_t *y);
-static void 	_tp_write_byte(uint8_t num);
-static uint16_t _tp_read_ad(uint8_t CMD);
 
 static void _lcd_write_16bit_data(uint16_t Data);
 static void _tft_lcd_setwindow(uint16_t xStar, uint16_t yStar,uint16_t xEnd,uint16_t yEnd);
 static void _tft_lcd_direction(int direction);
 static void _tft_lcd_fill(uint16_t sx,uint16_t sy,uint16_t ex,uint16_t ey,uint16_t color);
-static void _tft_lcd_sprite(int x, int y, uint16_t *data, int w, int h);
-
-
-
-#if TARGET == TARGET_SIM
-/* Dispatch system call */
- __attribute__((interrupt("machine"))) void ecall()
-{
-	/* Since we have no idea about register usage in the called routines, we simply has to save/restore them all.
-	 * Also, this function has to end with an 'mret'.
-	 * The attribute will do all of this for us. */
-	volatile unsigned int * frame;
-	volatile PTFT_CALL tft_frame;
-	__asm__ volatile (" mv %0,a7 \t"	: "=r" (tft_frame) );  /* a7 into 'caller_frame' */	
-	frame = tft_frame->caller_frame;	
-	switch( tft_frame->function )
-	{
-		case 0: frame[0] = _tft_init(frame[0]);
-				break;
-		case 1: _tft_lcd_ellipse(frame[0], frame[1], frame[2], frame[3], frame[4], frame[5]); 
-				break;				
-		case 2: _tft_lcd_rect(frame[0], frame[1], frame[2], frame[3], frame[4], frame[5]); 
-				break;
-		case 3: _tft_lcd_line(frame[0], frame[1], frame[2], frame[3], frame[4]); 
-				break;				
-		case 4: _tft_lcd_crosshair(frame[0], frame[1], frame[2]); 
-				break;
-		case 5: _tft_lcd_pixel(frame[0], frame[1], frame[2]); 
-				break;
-				
-		case 50: _delay_ms(frame[0]); 
-				break;
-				
-		case 70: frame[0] = _tft_tp_scan(frame[0]); 
-				break;
-		case 71: frame[0] = _tft_tp_getpos((int *) frame[0], (int *) frame[1]); 
-				break;
-
-	}
-	/* Update PC otherwise the trap will be taken forever... */
-	__asm__ volatile(" csrr t0,mepc\n"); /* Copy mepc... */		
-	__asm__ volatile(" addi t0,t0,4\n");		
-	__asm__ volatile(" csrw mepc,t0\n");
-}
-
-int tft_init(int option)
-{
-	volatile TFT_CALL frame;
-	unsigned int caller_frame[1];
-	volatile PTFT_CALL frameptr = &frame;
-	__asm__ volatile (" mv a7,%0 \t" : : "r" (frameptr) );  /* 'frame' into a7 */
-	frame.function = 0;
-	caller_frame[0]=option;
-	frame.caller_frame = caller_frame;
-	*((void (**)(void) ) (0x2001C014) ) = ecall;	/* Ecall exception vector (m-mode) */
-	__asm__ volatile(" ecall\n");
-	return caller_frame[0];
-}
-
-void tft_lcd_ellipse(int xc, int yc, int xw, int yw, int colour, int fill)
-{
-	volatile TFT_CALL frame;
-	unsigned int caller_frame[6];
-	volatile PTFT_CALL frameptr = &frame;
-	// was "=r" before, but that causes the compiler to use a0 for the frame pointer
-	__asm__ volatile (" mv a7,%0 \t" : : "r" (frameptr) );  /* 'frame' into a7 */
-	frame.function = 1;
-	caller_frame[0]=xc;
-	caller_frame[1]=yc;
-	caller_frame[2]=xw;
-	caller_frame[3]=yw;
-	caller_frame[4]=colour;
-	caller_frame[5]=fill;
-	frame.caller_frame = caller_frame;	
-	__asm__ volatile(" ecall\n");
-}
-
-void tft_lcd_rect(int x1, int y1, int x2, int y2, int colour, int fill)
-{
-	volatile TFT_CALL frame;
-	unsigned int caller_frame[6];
-	volatile PTFT_CALL frameptr = &frame;
-	__asm__ volatile (" mv a7,%0 \t" : : "r" (frameptr) );  /* 'frame' into a7 */
-	frame.function = 2;
-	caller_frame[0]=x1;
-	caller_frame[1]=y1;
-	caller_frame[2]=x2;
-	caller_frame[3]=y2;
-	caller_frame[4]=colour;
-	caller_frame[5]=fill;
-	frame.caller_frame = caller_frame;
-	__asm__ volatile(" ecall\n");
-}
-
-void tft_lcd_line(int x1, int y1, int x2, int y2, int colour)
-{
-	volatile TFT_CALL frame;
-	unsigned int caller_frame[6];
-	volatile PTFT_CALL frameptr = &frame;
-	__asm__ volatile (" mv a7,%0 \t" : : "r" (frameptr) );  /* 'frame' into a7 */
-	frame.function = 3;
-	caller_frame[0]=x1;
-	caller_frame[1]=y1;
-	caller_frame[2]=x2;
-	caller_frame[3]=y2;
-	caller_frame[4]=colour;
-	frame.caller_frame = caller_frame;
-	__asm__ volatile(" ecall\n");
-}
-
-
-void tft_crosshair(int x,int y,int colour)
-{
-	volatile TFT_CALL frame;
-	unsigned int caller_frame[6];
-	volatile PTFT_CALL frameptr = &frame;
-	__asm__ volatile (" mv a7,%0 \t" : : "r" (frameptr) );  /* 'frame' into a7 */
-	frame.function = 4;
-	caller_frame[0]=x;
-	caller_frame[1]=y;
-	caller_frame[2]=colour;
-	frame.caller_frame = caller_frame;
-	__asm__ volatile(" ecall\n");
-}
-
-
-void tft_lcd_pixel(int x,int y,int colour)
-{
-#if 0 
-	// setpixel causes an illegal instruction for some reason.
-      // Using setline instead. Desperate times...
-	volatile TFT_CALL frame;
-	unsigned int caller_frame[6];
-	volatile PTFT_CALL frameptr = &frame;
-	__asm__ volatile (" mv a7,%0 \t" : : "r" (frameptr) );  /* 'frame' into a7 */
-	frame.function = 5;
-	caller_frame[0]=x;
-	caller_frame[1]=y;
-	caller_frame[2]=colour;
-	frame.caller_frame = caller_frame;
-	__asm__ volatile(" ecall\n");
-#else
-	volatile TFT_CALL frame;
-	unsigned int caller_frame[6];
-	volatile PTFT_CALL frameptr = &frame;
-	__asm__ volatile (" mv a7,%0 \t" : : "r" (frameptr) );  /* 'frame' into a7 */
-	frame.function = 3;
-	caller_frame[0]=x;
-	caller_frame[1]=y;
-	caller_frame[2]=x;
-	caller_frame[3]=y+1;
-	caller_frame[4]=colour;
-	frame.caller_frame = caller_frame;
-	__asm__ volatile(" ecall\n");	
-#endif
-}
 
 
 
 
-int tft_tp_scan(int param)
-{
-	volatile TFT_CALL frame;
-	unsigned int caller_frame[1];
-	volatile PTFT_CALL frameptr = &frame;
-	__asm__ volatile (" mv a7,%0 \t" : : "r" (frameptr) );  /* 'frame' into a7 */
-	frame.function = 70;
-	caller_frame[0]=param;
-	frame.caller_frame = caller_frame;
-	__asm__ volatile(" ecall\n");
-	return caller_frame[0];
-}
 
-int tft_tp_getpos(int *x, int *y)
-{
-	volatile TFT_CALL frame;
-	unsigned int caller_frame[2];
-	volatile PTFT_CALL frameptr = &frame;
-	__asm__ volatile (" mv a7,%0 \t" : : "r" (frameptr) );  /* 'frame' into a7 */
-	frame.function = 71;
-	caller_frame[0]= (int) x;
-	caller_frame[1]= (int) y;
-	frame.caller_frame = caller_frame;
-	__asm__ volatile(" ecall\n");
-	return caller_frame[0];
-}
-
-void delay_ms(unsigned int ms)
-{
-	volatile TFT_CALL frame;
-	unsigned int caller_frame[1];
-	volatile PTFT_CALL frameptr = &frame;
-	__asm__ volatile (" mv a7,%0 \t" : : "r" (frameptr) );  /* 'frame' into a7 */
-	frame.function = 50;
-	caller_frame[0]=ms;
-	frame.caller_frame = caller_frame;
-	__asm__ volatile(" ecall\n");
-}
-
-#elif TARGET == TARGET_HW
-/* Direct calls */
-int 	_tft_tp_scan(int tp);
-int 	_tft_tp_getpos( int *x, int *y );
-int		_tft_init(int);
-void 	_tft_lcd_pixel(int x,int y, int colour);
-void 	_tft_lcd_crosshair(int x,int y,int colour);
-void 	_tft_lcd_ellipse(int xc, int yc, int rx, int ry, int colour, int fill);
-void 	_tft_lcd_rect(int x1, int y1, int x2, int y2, uint16_t colour, int fill);
-void 	_tft_lcd_line(int  x1, int y1, int x2, int y2, int colour);
-/* direct calls */
-void	_delay_ms(unsigned int ms);
-void 	delay_us(unsigned int  us);
-
-
-int tft_init(int option){
-	return _tft_init(option);
-}
-void tft_lcd_ellipse(int xc, int yc, int rx, int ry, int colour, int fill){
-	_tft_lcd_ellipse(xc,  yc,  rx,  ry, colour, fill);
-}
-void tft_lcd_rect(int xc, int yc, int xr, int yr, int colour, int fill){
-	_tft_lcd_rect( xc,  yc,  xr,  yr,  colour, fill);				
-}			
-
-
-void tft_lcd_sprite(int x, int y, uint16_t *data, int w, int h){
-	_tft_lcd_sprite(x, y, data, w, h);
-}
-
-
-void tft_lcd_line(int  x1, int y1, int x2, int y2, int colour){
-	_tft_lcd_line( x1, y1, x2, y2, colour);				
-}	
-void tft_lcd_crosshair(int x,int y,int colour){
-	_tft_lcd_crosshair( x, y, colour);				
-}
-void tft_lcd_pixel(int x,int y, int colour){
-	_tft_lcd_pixel( x, y, colour);				
-}	
-	
-int tft_tp_scan(int tp){
-	return (_tft_tp_scan(tp));				
-}	
-int tft_tp_getpos( int *x, int *y ){
-	return (_tft_tp_getpos( x, y ));				
-}
-
-void delay_ms(unsigned int ms){
-	_delay_ms(ms);	
-}
-
-#else
-#  error "Unknown TARGET value"
-#endif
 
 /* Setup PLL-clock */
 static int _pll_init_144(void)
@@ -404,12 +112,12 @@ static int _pll_init_144(void)
   while ((*RCC_CFGR0 & (uint32_t)RCC_SWS) != (uint32_t)0x08){} /* Wait till PLL is used as system clock source */
   return 0;
 }
+
 /* Delay functions using TIMER7 */
 void timer7_delay1ms(void )
 {
 	/* System core clock: 144MHz */
 	 /* freq: PSC is # of microsecs-1 */
-	 unsigned int i;
 	*TIM7_CTLR1 = 0;
 	*TIM7_CTLR2 = 0;
 	*TIM7_DMAINTENR = 0;
@@ -450,7 +158,6 @@ static void timer7_delay250ns(void )
 {
 	/* System core clock: 144MHz */
 	 /* freq: PSC is # of microsecs-1 */
-	 int i;
 	*TIM7_CTLR1 = 0;
 	*TIM7_INTFR = 0;
 	*TIM7_PSC= 0; /* 1 us */
@@ -465,32 +172,6 @@ void delay_250ns( void )
 {
 	timer7_delay250ns();
 }
-
-
-#if 0
-void	_delay_ms(unsigned int ms)
-{
-	unsigned long long count = 144000*(unsigned long long) ms;
-	*STK_CTLR = 0;
-	*STK_SR = 0;	
-	*STK_CMP = count;	
-	*STK_CTLR = STK_B_CLK | STK_B_INIT | STK_B_EN ;  
-	while( (*STK_SR & 1 )==0);
-	*STK_CTLR = 0; 
-}
-
-void delay_us(unsigned int us)
-{
-	unsigned long long count = 144*(unsigned long long) us;
-	*STK_CTLR = 0;
-	*STK_SR = 0;	
-	*STK_CMPHR = 0;
-	*STK_CMPLR = count;	
-	*STK_CTLR = STK_B_INIT|STK_B_CLK|STK_B_CM| STK_B_EN ;  
-	while( (*STK_SR & 1 )==0);
-	*STK_CTLR = 0; 
-}
-#endif
 
 /* Initialize the tft display interface */ 
 static void tft_display_init(void)	
@@ -588,193 +269,6 @@ static void SPI_WaitDone(PSPI_WCH_DEVICE SPIx)
 }
 
 
-/* Software implementation of SPI-protocol */ 	 			    					   
-static void _tp_write_byte(uint8_t num)    
-{  	
-	uint8_t count=0;   
-	for(count=0;count<8;count++)  
-	{ 	  
-		if(num&0x80) TDIN_SET;  
-		else TDIN_CLR;   
-		num<<=1;    
-		TCLK_CLR;
-		delay_us(1);
-		TCLK_SET;	        
-	}		 			    
-}
-
-/* Read adc values from touch screen IC (SPI bus)
-	Read command,0xD0 for x,	0x90 for y */
-static uint16_t _tp_read_ad(uint8_t CMD)	  
-{ 	 
-	uint8_t count=0; 	  
-	uint16_t Num=0; 
-	uint16_t test=0; 
-	TCLK_CLR;
-	TDIN_CLR;
-	TCS_CLR;
-	_tp_write_byte(CMD);
-	delay_us(6);
-	TCLK_CLR;
-	delay_us(1);    	   
-	TCLK_SET;
-	delay_us(1);    
-	TCLK_CLR;
-	for(count=0;count<16;count++) 
-	{ 				  
-		Num<<=1; 	 
-		TCLK_CLR;
-		delay_us(1);    
-		TCLK_SET;
-		test = *GPIO_INDR(GPIO_C);
-		if(DOUT)Num++; 		 
-	}  	
-	Num>>=4;  
-	TCS_SET;
-	return(Num);  
-}
-
-#define READ_TIMES 5 
-#define LOST_VAL 1
-
-/* Read the touch screen coordinates (x or y),
-	Read the READ_TIMES secondary data in succession 
-	and sort the data in ascending order,
-	Then remove the lowest and highest number of LOST_VAL 
-	and take the average
-   parameter:xy:Read command(CMD_RDX/CMD_RDY) */  
-static uint16_t _tp_read_xoy(uint8_t xy)
-{
-	uint16_t i, j;
-	uint16_t buf[READ_TIMES];
-	uint16_t sum=0;
-	uint16_t temp;
-	for(i=0;i<READ_TIMES;i++)buf[i]=_tp_read_ad(xy);		 		    
-	for(i=0;i<READ_TIMES-1; i++)//ÅÅÐò
-	{
-		for(j=i+1;j<READ_TIMES;j++)
-		{
-			if(buf[i]>buf[j])//ÉýÐòÅÅÁÐ
-			{
-				temp=buf[i];
-				buf[i]=buf[j];
-				buf[j]=temp;
-			}
-		}
-	}	  
-	sum=0;
-	for(i=LOST_VAL;i<READ_TIMES-LOST_VAL;i++)sum+=buf[i];
-	temp=sum/(READ_TIMES-2*LOST_VAL);
-	return temp;   
-} 
-
-/*
- Read touch screen x and y coordinates,
-The minimum value can not be less than 100
-parameters 	x:Read x coordinate of the touch screen
-			y:Read y coordinate of the touch screen
-retvalue   :0-fail,1-success
-*/ 
-static  uint8_t _tp_read_xy(uint16_t *x,uint16_t *y)
-{
-	uint16_t xtemp,ytemp;			 	 		  
-	xtemp=_tp_read_xoy(CMD_RDX);
-	ytemp=_tp_read_xoy(CMD_RDY);	  												   
-	//if(xtemp<100||ytemp<100)return 0;//¶ÁÊýÊ§°Ü
-	*x=xtemp;
-	*y=ytemp;
-	return 1;
-}
-
-#define ERR_RANGE 50 
-
-/* Read the touch screen coordinates twice in a row, 
-	and the deviation of these two times can not exceed ERR_RANGE, 
-	satisfy the condition, then think the reading is correct, 
-	otherwise the reading is wrong.
-	This function can greatly improve the accuracy.
- * @parameters :x:Read x coordinate of the touch screen
-								y:Read y coordinate of the touch screen
- * @retvalue   :0-fail,1-success
-*/ 
-static uint8_t _tp_read_xy2(uint16_t *x,uint16_t *y) 
-{
-	uint16_t x1,y1;
- 	uint16_t x2,y2;
- 	uint8_t flag;    
-    flag=_tp_read_xy(&x1,&y1);   
-    if(flag==0)return(0);
-    flag=_tp_read_xy(&x2,&y2);	   
-    if(flag==0)return(0);   
-    if(((x2<=x1&&x1<x2+ERR_RANGE)||(x1<=x2&&x2<x1+ERR_RANGE))//Ç°ºóÁ½´Î²ÉÑùÔÚ+-50ÄÚ
-    &&((y2<=y1&&y1<y2+ERR_RANGE)||(y1<=y2&&y2<y1+ERR_RANGE)))
-    {
-        *x=(x1+x2)/2;
-        *y=(y1+y2)/2;
-        return 1;
-    }else return 0;	  
-} 
-
-
-int _tft_tp_getpos( int *x, int *y )
-{
-	if(tp_dev.sta&TP_PRES_DOWN){
-		*x = tp_dev.x;
-		*y = tp_dev.y;
-		return 1;
-	}
-	return 0;
-}
-				  
-/* Scan touch event				
-   param tp: 	0-screen coordinate 
-				1-Physical coordinates(For special occasions such as calibration)
-	return value:Current touch screen status,
-				0-no touch
-				1-touch
-*/  	
-int _tft_tp_scan(int tp)
-{		
-	int32_t xx,yy;	
-	if(PEN==0) /* Touch is active */
-	{
-		if(tp)_tp_read_xy2(&tp_dev.x,&tp_dev.y);
-		else if(_tp_read_xy2(&tp_dev.x,&tp_dev.y))
-		{
-			/* Is there a mixup between x and y when reading the ADC ??? */
-			xx = 320-(( (uint32_t) tp_dev.x*320)/4092) ;
-			yy = 480-(( (uint32_t) tp_dev.y*480)/4092) ;
-	 		tp_dev.x=(uint16_t) yy;
-			tp_dev.y=(uint16_t) xx;  
-	 	} 
-		if((tp_dev.sta&TP_PRES_DOWN)==0)
-		{		 
-			tp_dev.sta=TP_PRES_DOWN|TP_CATH_PRES;
-			tp_dev.x0=tp_dev.x;
-			tp_dev.y0=tp_dev.y;  	   			 
-		}			   
-	}else
-	{	/* Touch has been released */
-		if(tp_dev.sta&TP_PRES_DOWN)
-		{
-			tp_dev.sta&=~(1<<7);	
-		}else
-		{
-			tp_dev.x0=0;
-			tp_dev.y0=0;
-			tp_dev.x=0xffff;
-			tp_dev.y=0xffff;
-		}	    
-	}
-	return tp_dev.sta&TP_PRES_DOWN;
-}
-	  
-	  
-
-
-/*****************************************************************************
-/* lcd graphics 
- */
 
 
 
@@ -876,18 +370,7 @@ static void tft_fill_colour(uint16_t colour)
 
 
 
-/*****************************************************************************
- * @name       :void LCD_SetCursor(uint16_t Xpos, uint16_t Ypos)
- * @date       :2018-08-09 
- * @function   :Set coordinate value
- * @parameters :Xpos:the  x coordinate of the pixel
-								Ypos:the  y coordinate of the pixel
- * @retvalue   :None
-******************************************************************************/ 
-static void LCD_SetCursor(uint16_t Xpos, uint16_t Ypos)
-{	  	    			
-	_tft_lcd_setwindow(Xpos,Ypos,Xpos,Ypos);	
-} 
+
 
 /* Set the display direction of LCD screen
  * direction:0-0 degree
@@ -985,31 +468,31 @@ static void _tft_lcd_fill(uint16_t sx,uint16_t sy,uint16_t ex,uint16_t ey,uint16
  * @param {Color} c The color to use.
  * @param {boolean} filled Should the interior of the circle be filled in?
  */
-
-static void _draw_quadrants(int x, int y, int xc, int yc, int colour, int fill) 
-{
-    if (fill) {
-      for (int xx = xc - x; xx <= xc + x; xx++) {
-        _tft_lcd_pixel(xx, yc + y, colour);
-        _tft_lcd_pixel(xx, yc - y, colour);
-     }
-    } else {
-      _tft_lcd_pixel(x + xc, y + yc, colour);
-      _tft_lcd_pixel(-x + xc, y + yc, colour);
-      
-      _tft_lcd_pixel(x + xc, -y + yc, colour);
-      _tft_lcd_pixel(-x + xc, -y + yc, colour);
-    }    
-}
-
 /* Public direct calls */
-void _tft_lcd_pixel(int x,int y, int colour)
+void tft_pixel(int x,int y, int colour)
 {
 	_tft_lcd_setwindow(x,y,x,y);
 	_lcd_write_16bit_data(colour); 
 }
 
-void _tft_lcd_sprite(int x, int y, uint16_t *data, int w, int h)
+
+static void _draw_quadrants(int x, int y, int xc, int yc, int colour, int fill) 
+{
+    if (fill) {
+      for (int xx = xc - x; xx <= xc + x; xx++) {
+        tft_pixel(xx, yc + y, colour);
+        tft_pixel(xx, yc - y, colour);
+     }
+    } else {
+    	tft_pixel(x + xc, y + yc, colour);
+      	tft_pixel(-x + xc, y + yc, colour);      
+      	tft_pixel(x + xc, -y + yc, colour);
+      	tft_pixel(-x + xc, -y + yc, colour);
+    }    
+}
+
+
+void tft_sprite(int x, int y, uint16_t *data, int w, int h)
 {
 	/* Set window once and stream all pixels — same approach as _tft_lcd_fill */
 	_tft_lcd_setwindow(x, y, x + w - 1, y + h - 1);
@@ -1037,7 +520,7 @@ void _tft_lcd_sprite(int x, int y, uint16_t *data, int w, int h)
 	LCD_CS_SET;
 }
 
-void _tft_lcd_line(int  x1, int y1, int x2, int y2, int colour)
+void tft_line(int  x1, int y1, int x2, int y2, int colour)
 {
 	uint16_t t; 
 	int xerr=0,yerr=0,delta_x,delta_y,distance; 
@@ -1057,7 +540,7 @@ void _tft_lcd_line(int  x1, int y1, int x2, int y2, int colour)
 	else distance=delta_y; 
 	for(t=0;t<=distance+1;t++ ) 
 	{  
-		_tft_lcd_pixel(uRow,uCol,colour); 
+		tft_pixel(uRow,uCol,colour); 
 		xerr+=delta_x ; 
 		yerr+=delta_y ; 
 		if(xerr>distance) 
@@ -1073,20 +556,20 @@ void _tft_lcd_line(int  x1, int y1, int x2, int y2, int colour)
 	}  
 } 
 
-void _tft_lcd_rect(int x1, int y1, int x2, int y2, uint16_t colour, int fill)
+void tft_rect(int x1, int y1, int x2, int y2, uint16_t colour, int fill)
 {
 	if( fill )
 	{
 		_tft_lcd_fill((unsigned short)x1,(unsigned short)y1,(unsigned short)(x1+x2),(unsigned short)(y1+y2),(unsigned short)colour);
 	}else{
-		_tft_lcd_line(x1,y1,x1+x2,y1,colour);
-		_tft_lcd_line(x1,y1,x1,y1+y2,colour);
-		_tft_lcd_line(x1+x2,y1,x1+x2,y1+y2,colour);
-		_tft_lcd_line(x1,y1+y2,x1+x2,y1+y2,colour);		
+		tft_line(x1,y1,x1+x2,y1,colour);
+		tft_line(x1,y1,x1,y1+y2,colour);
+		tft_line(x1+x2,y1,x1+x2,y1+y2,colour);
+		tft_line(x1,y1+y2,x1+x2,y1+y2,colour);		
 	}
 }  
 
-void _tft_lcd_ellipse (int xc, int yc, int rx, int ry, int colour, int fill) 
+void tft_ellipse (int xc, int yc, int rx, int ry, int colour, int fill) 
 {
   // Draw points based on 4-way symmetry.
   float d1,dx,dy;
@@ -1140,21 +623,7 @@ void _tft_lcd_ellipse (int xc, int yc, int rx, int ry, int colour, int fill)
   }
 }
 
-
-
-void _tft_lcd_crosshair(int x,int y,int colour)
-{
-	_tft_lcd_line(x-12,y,x+13,y,colour);
-	_tft_lcd_line(x,y-12,x,y+13,colour);
-	_tft_lcd_pixel(x+1,y+1,colour);
-	_tft_lcd_pixel(x-1,y+1,colour);
-	_tft_lcd_pixel(x+1,y-1,colour);
-	_tft_lcd_pixel(x-1,y-1,colour);
-	_tft_lcd_ellipse(x,y,6,6,colour,0);
-}	
-
-
-int _tft_init(int option)
+int tft_init(int option)
 {  
 	switch( option & 7 )
 	{
@@ -1164,24 +633,6 @@ int _tft_init(int option)
 	}
 	_option = option;
 	
-	if( option & TFT_INIT_TOUCH)
-	{
-		*RCC_APB2PCENR |= IOPCEN;	
-		*RCC_APB2PRSTR |= IOPCEN;	/* Assert RESET */
-		*RCC_APB2PRSTR &= ~IOPCEN;	/* Release RESET */
-			
-		/* TOUCH PAD: Setup PC0, PC1 as input pull-up, PC2,PC3,PC4  as output, push/pull */
-		*GPIO_CFGLR(GPIO_C) &= 0xFFF00000;	
-		*GPIO_CFGLR(GPIO_C) |= 0x00033344;	
-		*GPIO_OUTDR(GPIO_C)   = 0x0003;		/* PC0,1 pull-up */	
-		tp_dev.x0 = 0;
-		tp_dev.y0 = 0;
-		tp_dev.x = 0;
-		tp_dev.y = 0;						   	    
-		tp_dev.sta = 0;
-		
-		_tp_read_xy(&tp_dev.x,&tp_dev.y); 		
-	}
 
 	while(_pll_init_144() );	/* Setup PLL 144MHz */
 
@@ -1488,6 +939,5 @@ int _tft_init(int option)
 }
 
 
-#endif /* TARGET_HW or TARGET_SIM */
 
 #endif

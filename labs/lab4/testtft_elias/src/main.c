@@ -86,7 +86,7 @@ int main(void)
             //tft_lcd_ellipse(x, 160, 7, 7, 0xFFFF, 1); // a0-a5
             tft_sprite(x, 160, ball_sprite, 16, 16);
             //tft_sprite(x, 160, ball_sprite, 16, 16);
-            for(volatile unsigned int _d = 0; _d < 600; _d++);
+            for(volatile unsigned int _d = 0; _d < 60000; _d++);
             tft_rect(x, 160, 16, 16, COLOR_BLACK, 1);
             #endif
         }

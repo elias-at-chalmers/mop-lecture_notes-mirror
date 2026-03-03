@@ -54,7 +54,6 @@ uint16_t ball_sprite[16*16] = {
 
 int main(void)
 {
-
     tft_init(1);
 
     // Fill screen with random colors

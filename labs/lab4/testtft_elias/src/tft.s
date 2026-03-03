@@ -19,9 +19,9 @@ tft_ellipse_call:
 # int tft_init(int option)
 #   a0 = option; returns int in a0
 #   Also installs the ecall exception vector at 0x2001C014.
-.global tft_init
-tft_init:
-    la  t1, ecall           # address of the C ecall ISR
+.global sim_tft_init
+sim_tft_init:
+    la  t1, tft_init_call           # address of the C ecall ISR
     li  t2, 0x2001C014      # exception vector slot
     sw  t1, 0(t2)           # install handler
     la  a7, tft_init_call
@@ -31,9 +31,8 @@ tft_init:
     lw  a0, 0(t0)           # return value from _tft_init (t0 survives ecall)
     ret
 
-.global tft_pixel
-
-tft_pixel:
+.global sim_tft_pixel
+sim_tft_pixel:
     la a7, tft_line_call
     la t0, frame
     sw a0, 0(t0) # x
@@ -48,8 +47,8 @@ tft_pixel:
 
 # void tft_line(int x1, int y1, int x2, int y2, int colour)
 #   a0=x1, a1=y1, a2=x2, a3=y2, a4=colour
-.global tft_line
-tft_line:
+.global sim_tft_line
+sim_tft_line:
     la  a7, tft_line_call
     la  t0, frame
     sw  a0,  0(t0)  # x1
@@ -63,8 +62,8 @@ tft_line:
 
 # void tft_rect(int x1, int y1, int x2, int y2, int colour, int fill)
 #   a0=x1, a1=y1, a2=x2, a3=y2, a4=colour, a5=fill
-.global tft_rect
-tft_rect:
+.global sim_tft_rect
+sim_tft_rect:
     la  a7, tft_rect_call
     la  t0, frame
     sw  a0,  0(t0)  # x1
@@ -79,8 +78,8 @@ tft_rect:
 
 # void tft_ellipse(int xc, int yc, int xw, int yw, int colour, int fill)
 #   a0=xc, a1=yc, a2=xw, a3=yw, a4=colour, a5=fill
-.global tft_ellipse
-tft_ellipse:
+.global sim_tft_ellipse
+sim_tft_ellipse:
     la  a7, tft_ellipse_call
     la  t0, frame
     sw  a0,  0(t0)  # xc
@@ -99,13 +98,8 @@ tft_ellipse:
 #   a2 = data pointer (row-major uint16_t pixels)
 #   a3 = w
 #   a4 = h
-#
-# No stack needed: the ecall trap handler has __attribute__((interrupt("machine"))),
-# so it saves and restores the full register file.  Every register — including ra
-# and a0-a4 — survives each ecall unchanged.  We increment counters *after* ecall
-# returns, so those new values are what the next ecall saves and restores.
-.global tft_sprite
-tft_sprite:
+.global sim_tft_sprite
+sim_tft_sprite:
     la  a7, tft_line_call
     la  t3, frame
     li  t0, 0               # row = 0

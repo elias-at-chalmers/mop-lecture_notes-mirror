@@ -1,47 +1,3 @@
-#if 0
-#include <stdint.h>
-
-void sim_tft_init(int option);
-void sim_tft_ellipse(int xc, int yc, int rx, int ry, int colour, int fill);
-void sim_tft_rect(int xc, int yc, int xr, int yr, int colour, int fill);
-void sim_tft_line(int  x1, int y1, int x2, int y2, int colour);
-void sim_tft_crosshair(int x,int y,int colour);
-void sim_tft_pixel(int x,int y, int colour);
-void sim_tft_sprite(int x, int y, uint16_t *data, int w, int h);
-
-void tft_init(int option){
-	sim_tft_init(option); 
-}
-void tft_ellipse(int xc, int yc, int rx, int ry, int colour, int fill){
-	sim_tft_ellipse(xc,  yc,  rx,  ry, colour, fill);
-}
-void tft_rect(int xc, int yc, int xr, int yr, int colour, int fill){
-	sim_tft_rect( xc,  yc,  xr,  yr,  colour, fill);				
-}			
-void tft_line(int  x1, int y1, int x2, int y2, int colour){
-	sim_tft_line( x1, y1, x2, y2, colour);				
-}	
-void tft_pixel(int x,int y, int colour){
-	sim_tft_pixel( x, y, colour);				
-}
-void tft_sprite(int x, int y, uint16_t *data, int w, int h){
-	sim_tft_sprite(x, y, data, w, h);
-}	
-#else
-
-/*
- * tft-md307.c
- * tft library for md307
- * Build target selection — set TARGET to one of:
- *   TARGET_SIM: Simulator  - TFT calls go via ecall trap
- *   TARGET_HW:  Hardware   - TFT calls go direct (OpenOCD)
- *   TARGET_DBG: Debugger   - TFT calls forwarded to DBG307
- *
- * TARGET is defined by the build system via -DTARGET=<value>
- */
-#define TARGET_SIM  0
-#define TARGET_HW   1
-#define TARGET_DBG  2
 
 #include "md307.h"
 #include "tftmd307.h"
@@ -49,6 +5,40 @@ void tft_sprite(int x, int y, uint16_t *data, int w, int h){
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+
+void sim_tft_init(int option);
+void sim_tft_ellipse(int xc, int yc, int rx, int ry, uint16_t colour, int fill);
+void sim_tft_rect(int xc, int yc, int xr, int yr, uint16_t colour, int fill);
+void sim_tft_line(int  x1, int y1, int x2, int y2, uint16_t colour);
+void sim_tft_crosshair(int x,int y, uint16_t colour);
+void sim_tft_pixel(int x,int y,  uint16_t colour);
+void sim_tft_sprite(int x, int y, uint16_t *data, int w, int h);
+
+void (*tft_ellipse)(int xc, int yc, int rx, int ry, uint16_t colour, int fill);
+void (*tft_rect)(int x1, int y1, int x2, int y2, uint16_t colour, int fill);
+void (*tft_line)(int  x1, int y1, int x2, int y2, uint16_t colour);
+void (*tft_pixel)(int, int, uint16_t colour);
+void (*tft_sprite)(int x, int y, uint16_t *data, int w, int h);
+
+void tft_init()
+{
+	#if BUILD_TARGET == 0
+		tft_ellipse = sim_tft_ellipse;
+		tft_rect = sim_tft_rect;
+		tft_line = sim_tft_line;
+		tft_pixel = sim_tft_pixel;
+		tft_sprite = sim_tft_sprite;
+		sim_tft_init(1);
+	#else
+		tft_ellipse = hw_tft_ellipse;
+		tft_rect = hw_tft_rect;
+		tft_line = hw_tft_line;
+		tft_pixel = hw_tft_pixel;
+		tft_sprite = hw_tft_sprite;
+		hw_tft_init(1);
+	#endif
+}
+
 
 #define CMD_RDX 0XD0
 #define CMD_RDY 0X90
@@ -61,57 +51,6 @@ static void _lcd_write_16bit_data(uint16_t Data);
 static void _tft_lcd_setwindow(uint16_t xStar, uint16_t yStar,uint16_t xEnd,uint16_t yEnd);
 static void _tft_lcd_direction(int direction);
 static void _tft_lcd_fill(uint16_t sx,uint16_t sy,uint16_t ex,uint16_t ey,uint16_t color);
-
-
-
-
-
-
-/* Setup PLL-clock */
-static int _pll_init_144(void)
-{
-  /* Sets System clock frequency to 144MHz and configure HCLK, PCLK2 and PCLK1 prescalers. */
-  volatile unsigned int StartUpCounter = 0;
-  volatile unsigned int HSEStatus = 0;
-  
-  /* Reset pending iniz... */
-  *RCC_CTLR |= (uint32_t)0x00000001;
-  *RCC_CFGR0 &= (uint32_t)0xF8FF0000; 
-  *RCC_CTLR &= (uint32_t)0xFEF6FFFF; /* Turn off PLL:s ? */
-  *RCC_CTLR &= (uint32_t)0xFFFBFFFF;
-  *RCC_CFGR0 &= (uint32_t)0xFF80FFFF;
-  *RCC_CTLR &= (uint32_t)0xEBFFFFFF;
-  *RCC_INTR = 0x00FF0000; /* Clear all interrupt flags */
-  *RCC_CFGR2 = 0x00000000;
-	
-  *RCC_CTLR |= ((uint32_t)RCC_HSEON);
-  /* Wait till HSE is ready or time out. */
-  do {
-    HSEStatus = *RCC_CTLR & RCC_HSERDY;
-    StartUpCounter++;
-  } while((HSEStatus == 0) && (StartUpCounter != HSE_STARTUP_TIMEOUT));
-
-  if ( (*RCC_CTLR & RCC_HSERDY) == 0 )
-  {
-     /* If HSE fails to start-up, 
-	  * the application will have a bad clock configuration. 
-	  * Notify caller */
-		return 1;
-  }
-    
-  *RCC_CFGR0 |= (uint32_t)RCC_HPRE_DIV1;  /* HCLK = SYSCLK */
-  *RCC_CFGR0 |= (uint32_t)RCC_PPRE2_DIV1;  /* PCLK2 = HCLK */
-  *RCC_CFGR2 |= (uint32_t)RCC_PPRE1_DIV2;  /* PCLK1 = HCLK/2 */
-  /*  PLL configuration: PLLCLK = HSE * 18 = 144 MHz */
-  *RCC_CFGR0 &= (uint32_t)((uint32_t)~(RCC_PLLSRC | RCC_PLLXTPRE | RCC_PLLMULL));
-  *RCC_CFGR0 |= (uint32_t)(RCC_PLLSRC_HSE | RCC_PLLXTPRE_HSE | RCC_PLLMULL18_EXTEN); // D8C
-  *RCC_CTLR |= RCC_PLLON;  /* Enable PLL */
-  while((*RCC_CTLR & RCC_PLLRDY) == 0) {}  /* Wait till PLL is ready */
-  *RCC_CFGR0 &= (uint32_t)((uint32_t)~(RCC_SW)); /* Select PLL as system clock source */
-  *RCC_CFGR0 |= 2; // PLL used as system clock (uint32_t)RCC_SW_PLL;
-  while ((*RCC_CFGR0 & (uint32_t)RCC_SWS) != (uint32_t)0x08){} /* Wait till PLL is used as system clock source */
-  return 0;
-}
 
 /* Delay functions using TIMER7 */
 void timer7_delay1ms(void )
@@ -469,7 +408,7 @@ static void _tft_lcd_fill(uint16_t sx,uint16_t sy,uint16_t ex,uint16_t ey,uint16
  * @param {boolean} filled Should the interior of the circle be filled in?
  */
 /* Public direct calls */
-void tft_pixel(int x,int y, int colour)
+void hw_tft_pixel(int x,int y, int colour)
 {
 	_tft_lcd_setwindow(x,y,x,y);
 	_lcd_write_16bit_data(colour); 
@@ -480,19 +419,19 @@ static void _draw_quadrants(int x, int y, int xc, int yc, int colour, int fill)
 {
     if (fill) {
       for (int xx = xc - x; xx <= xc + x; xx++) {
-        tft_pixel(xx, yc + y, colour);
-        tft_pixel(xx, yc - y, colour);
+        hw_tft_pixel(xx, yc + y, colour);
+        hw_tft_pixel(xx, yc - y, colour);
      }
     } else {
-    	tft_pixel(x + xc, y + yc, colour);
-      	tft_pixel(-x + xc, y + yc, colour);      
-      	tft_pixel(x + xc, -y + yc, colour);
-      	tft_pixel(-x + xc, -y + yc, colour);
+    	hw_tft_pixel(x + xc, y + yc, colour);
+      	hw_tft_pixel(-x + xc, y + yc, colour);      
+      	hw_tft_pixel(x + xc, -y + yc, colour);
+      	hw_tft_pixel(-x + xc, -y + yc, colour);
     }    
 }
 
 
-void tft_sprite(int x, int y, uint16_t *data, int w, int h)
+void hw_tft_sprite(int x, int y, uint16_t *data, int w, int h)
 {
 	/* Set window once and stream all pixels — same approach as _tft_lcd_fill */
 	_tft_lcd_setwindow(x, y, x + w - 1, y + h - 1);
@@ -520,7 +459,7 @@ void tft_sprite(int x, int y, uint16_t *data, int w, int h)
 	LCD_CS_SET;
 }
 
-void tft_line(int  x1, int y1, int x2, int y2, int colour)
+void hw_tft_line(int  x1, int y1, int x2, int y2, int colour)
 {
 	uint16_t t; 
 	int xerr=0,yerr=0,delta_x,delta_y,distance; 
@@ -540,7 +479,7 @@ void tft_line(int  x1, int y1, int x2, int y2, int colour)
 	else distance=delta_y; 
 	for(t=0;t<=distance+1;t++ ) 
 	{  
-		tft_pixel(uRow,uCol,colour); 
+		hw_tft_pixel(uRow,uCol,colour); 
 		xerr+=delta_x ; 
 		yerr+=delta_y ; 
 		if(xerr>distance) 
@@ -556,20 +495,20 @@ void tft_line(int  x1, int y1, int x2, int y2, int colour)
 	}  
 } 
 
-void tft_rect(int x1, int y1, int x2, int y2, uint16_t colour, int fill)
+void hw_tft_rect(int x1, int y1, int x2, int y2, uint16_t colour, int fill)
 {
 	if( fill )
 	{
 		_tft_lcd_fill((unsigned short)x1,(unsigned short)y1,(unsigned short)(x1+x2),(unsigned short)(y1+y2),(unsigned short)colour);
 	}else{
-		tft_line(x1,y1,x1+x2,y1,colour);
-		tft_line(x1,y1,x1,y1+y2,colour);
-		tft_line(x1+x2,y1,x1+x2,y1+y2,colour);
-		tft_line(x1,y1+y2,x1+x2,y1+y2,colour);		
+		hw_tft_line(x1,y1,x1+x2,y1,colour);
+		hw_tft_line(x1,y1,x1,y1+y2,colour);
+		hw_tft_line(x1+x2,y1,x1+x2,y1+y2,colour);
+		hw_tft_line(x1,y1+y2,x1+x2,y1+y2,colour);		
 	}
 }  
 
-void tft_ellipse (int xc, int yc, int rx, int ry, int colour, int fill) 
+void hw_tft_ellipse (int xc, int yc, int rx, int ry, int colour, int fill) 
 {
   // Draw points based on 4-way symmetry.
   float d1,dx,dy;
@@ -623,7 +562,7 @@ void tft_ellipse (int xc, int yc, int rx, int ry, int colour, int fill)
   }
 }
 
-int tft_init(int option)
+int hw_tft_init(int option)
 {  
 	switch( option & 7 )
 	{
@@ -634,7 +573,6 @@ int tft_init(int option)
 	_option = option;
 	
 
-	while(_pll_init_144() );	/* Setup PLL 144MHz */
 
   * RCC_APB1PCENR |= TIM7EN;	/* Enable and calm timer 7 (used for delays... */
   * RCC_APB1PRSTR |= TIM7EN;
@@ -937,7 +875,3 @@ int tft_init(int option)
 	LCD_LED_SET;	
 	return 1; 
 }
-
-
-
-#endif

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include "tft.h"
 // RGB565 color helpers
 #define RGB565(r, g, b) ((((r) & 0x1F) << 11) | (((g) & 0x3F) << 5) | ((b) & 0x1F))
 #define COLOR_BLACK  0x0000
@@ -8,17 +9,6 @@
 #define COLOR_RED    0xF800
 #define COLOR_GREEN  0x07E0
 #define COLOR_BLUE   0x001F
-
-// Signatures reverse-engineered from libtftmd307-sim.a disassembly:
-// Each public wrapper saves its argument registers (a0..aN) then issues an ecall.
-extern int  tft_init(int type);
-extern void tft_pixel(int x, int y, uint16_t color);                              // a0-a2
-extern void tft_line(int x1, int y1, int x2, int y2, uint16_t color);            // a0-a4
-extern void tft_rect(int x, int y, int w, int h, uint16_t color, int filled);    // a0-a5
-extern void tft_ellipse(int x, int y, int rx, int ry, uint16_t color, int filled); // a0-a5
-extern void tft_sprite(int x, int y, uint16_t *data, int w, int h);                     // a0-a2
-
-
 
 uint16_t ball_sprite[16*16] = {
     #define BK 0x0000   /* transparent/black         */
@@ -49,7 +39,7 @@ uint16_t ball_sprite[16*16] = {
 
 int main(void)
 {
-    tft_init(1);
+    tft_init();
 
     // Fill screen with random colors
     //while(1) {

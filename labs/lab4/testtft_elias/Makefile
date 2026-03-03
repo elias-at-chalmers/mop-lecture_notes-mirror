@@ -54,12 +54,12 @@ endif
 
 
 # Auto-clean when BUILD_TARGET changes (stamp file tracks last-built target)
-TARGET_STAMP = $(BUILD_DIR)/.last_target
-$(shell $(MKDIR) $(BUILD_DIR) 2>/dev/null)
-ifneq ($(shell cat $(TARGET_STAMP) 2>/dev/null),$(BUILD_TARGET))
-  $(shell $(RM) -r $(OBJ_DIR) 2>/dev/null)
-  $(shell echo $(BUILD_TARGET) > $(TARGET_STAMP))
-endif
+#TARGET_STAMP = $(BUILD_DIR)/.last_target
+#$(shell $(MKDIR) $(BUILD_DIR) 2>/dev/null)
+#ifneq ($(shell cat $(TARGET_STAMP) 2>/dev/null),$(BUILD_TARGET))
+#  $(shell $(RM) -r $(OBJ_DIR) 2>/dev/null)
+#  $(shell echo $(BUILD_TARGET) > $(TARGET_STAMP))
+#endif
 
 all: $(TARGET_EXEC)
 

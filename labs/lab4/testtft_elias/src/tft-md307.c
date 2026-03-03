@@ -73,6 +73,8 @@ static void _lcd_write_16bit_data(uint16_t Data);
 static void _tft_lcd_setwindow(uint16_t xStar, uint16_t yStar,uint16_t xEnd,uint16_t yEnd);
 static void _tft_lcd_direction(int direction);
 static void _tft_lcd_fill(uint16_t sx,uint16_t sy,uint16_t ex,uint16_t ey,uint16_t color);
+static void _tft_lcd_sprite(int x, int y, uint16_t *data, int w, int h);
+
 
 
 #if TARGET == TARGET_SIM
@@ -199,6 +201,9 @@ void tft_crosshair(int x,int y,int colour)
 
 void tft_lcd_pixel(int x,int y,int colour)
 {
+#if 0 
+	// setpixel causes an illegal instruction for some reason.
+      // Using setline instead. Desperate times...
 	volatile TFT_CALL frame;
 	unsigned int caller_frame[6];
 	volatile PTFT_CALL frameptr = &frame;
@@ -209,6 +214,20 @@ void tft_lcd_pixel(int x,int y,int colour)
 	caller_frame[2]=colour;
 	frame.caller_frame = caller_frame;
 	__asm__ volatile(" ecall\n");
+#else
+	volatile TFT_CALL frame;
+	unsigned int caller_frame[6];
+	volatile PTFT_CALL frameptr = &frame;
+	__asm__ volatile (" mv a7,%0 \t" : : "r" (frameptr) );  /* 'frame' into a7 */
+	frame.function = 3;
+	caller_frame[0]=x;
+	caller_frame[1]=y;
+	caller_frame[2]=x;
+	caller_frame[3]=y+1;
+	caller_frame[4]=colour;
+	frame.caller_frame = caller_frame;
+	__asm__ volatile(" ecall\n");	
+#endif
 }
 
 
@@ -277,6 +296,13 @@ void tft_lcd_ellipse(int xc, int yc, int rx, int ry, int colour, int fill){
 void tft_lcd_rect(int xc, int yc, int xr, int yr, int colour, int fill){
 	_tft_lcd_rect( xc,  yc,  xr,  yr,  colour, fill);				
 }			
+
+
+void tft_lcd_sprite(int x, int y, uint16_t *data, int w, int h){
+	_tft_lcd_sprite(x, y, data, w, h);
+}
+
+
 void tft_lcd_line(int  x1, int y1, int x2, int y2, int colour){
 	_tft_lcd_line( x1, y1, x2, y2, colour);				
 }	
@@ -915,6 +941,11 @@ static void _tft_lcd_fill(uint16_t sx,uint16_t sy,uint16_t ex,uint16_t ey,uint16
 	SPI_WaitDone(SPI1);
 	LCD_CS_SET;
 }
+
+
+
+
+
 /**
  * @param {number} rx Radius along the x-axis.
  * @param {number} ry Radius along the y-axis.
@@ -945,6 +976,34 @@ void _tft_lcd_pixel(int x,int y, int colour)
 {
 	_tft_lcd_setwindow(x,y,x,y);
 	_lcd_write_16bit_data(colour); 
+}
+
+void _tft_lcd_sprite(int x, int y, uint16_t *data, int w, int h)
+{
+	/* Set window once and stream all pixels — same approach as _tft_lcd_fill */
+	_tft_lcd_setwindow(x, y, x + w - 1, y + h - 1);
+	LCD_CS_CLR;
+	LCD_RS_SET;
+	int n = w * h;
+	if( _option & TFT_INIT_ST7796S )
+	{
+		for(int i = 0; i < n; i++){
+			uint16_t c = data[i];
+			SPI_WriteByteOnly(SPI1, c >> 8);
+			SPI_WriteByteOnly(SPI1, c);
+		}
+	}
+	else if( _option & TFT_INIT_ILI9488 )
+	{
+		for(int i = 0; i < n; i++){
+			uint16_t c = data[i];
+			SPI_WriteByteOnly(SPI1, (c >> 8) & 0xF8);   /* R */
+			SPI_WriteByteOnly(SPI1, (c >> 3) & 0xFC);   /* G */
+			SPI_WriteByteOnly(SPI1, (c << 3) & 0xF8);   /* B */
+		}
+	}
+	SPI_WaitDone(SPI1);
+	LCD_CS_SET;
 }
 
 void _tft_lcd_line(int  x1, int y1, int x2, int y2, int colour)
@@ -1049,6 +1108,8 @@ void _tft_lcd_ellipse (int xc, int yc, int rx, int ry, int colour, int fill)
     }
   }
 }
+
+
 
 void _tft_lcd_crosshair(int x,int y,int colour)
 {

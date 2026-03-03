@@ -150,7 +150,7 @@ void blink()
     //               We must now configure the PFIC so that it enables that 
     //               interrupt and sends it on to the CPU. 
     // 
-    //               You will need to configure PFIC_IENR1 for this, and you
+    //               You will need to configure PFIC_IENR2 for this, and you
     //               will have to check the vector table in the quickguide
     //               to see which interrupt number corresponds to EXTI7.
     ///////////////////////////////////////////////////////////////////////////

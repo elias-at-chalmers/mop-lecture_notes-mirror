@@ -22,7 +22,7 @@ Exceptions are categorized in a number of different ways, and you will see that 
 * **TRAP** - Sometimes, the code itself might ask to be interrupted. This might sound strange, but in reality there are many cases where this is useful - for example when invoking system services or entering a debugger. We will return to this later.
 
 > **Note:**
-> This is the terminology we will use in this course, and what is used in many textbooks. Some textbooks and articles (and even the RISC-V specification) use slightly different, and sometimes contradictory, defenitions of these terms.
+> This is the terminology we will use in this course, and what is used in many textbooks. Some textbooks and articles (and even the RISC-V specification) use slightly different, and sometimes contradictory, definitions of these terms.
 
 ## A quick aside: Control and Status Registers
 

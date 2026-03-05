@@ -216,7 +216,7 @@ int main()
 }
 ```
 
-### Nested Interupts
+### Nested Interrupts
 It would be reasonable at this point to ask ourselves: "What happens if an interrupt occurs while an interrupt hadler is running?". The answer is that "it depends" on a lot of things. A RISC-V processor has the capability for *nested* exceptions, i.e., one exception interrupts another exception handler. 
 
 **Can an interrupt from one source (e.g. SysTick) interrupt itself?** - No. When the processor starts handling a specific interrupt, it sets the corresponding *active* bit in the *Interrupt Active* register (`PFIC_IACTR`) register. If the same interrupt should fire again, the processor will detect that it is active and will not start the handler again immediately. Instead, it will set the corresponding bit in the *Interrupt Pending* register (`PFIC_IPR`). 
@@ -320,7 +320,7 @@ GPIOE_CFGLR = 0x00000080; // Configure pin 1 as input and pull down
 Just as when we set up interrupt handlers for our timers, we need to enable the interrupt in the PFIC. We can see in the vector table in the QuickGuide that `EXTI1` has interrupt vetor number 22, so we write: 
 
 ```C
-#define EXTI1_IRQ_NUM 22
+#define EXTI1_IRQ_NUM 23
 ...
 PFIC_IENR[EXTI1_IRQ_NUM / 32] |= (1 << (EXTI1_IRQ_NUM % 32));
 ```
@@ -343,7 +343,7 @@ One thing that may surprise you is that the interrupt is acknowledged by writing
 
 [^why_one_to_clear]: Interrupt flags are cleared by writing 1 so that software can acknowledge an event atomically, without risking the loss of new events occurring at the same time.
 
-### Put the interupt handler address into the vector table
+### Put the interrupt handler address into the vector table
 Finally, we add a single jump instruction at the right place in our vector table: 
 
 ```

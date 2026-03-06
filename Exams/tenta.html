@@ -823,6 +823,31 @@ position next instruction to a specific address in memory. (4p)</p>
 value is larger than a global int <code>threshold</code>. (0.5p)</p>
 <h1 id="uppgift-12-7p-exti-afio_exticr-exti-isr">Uppgift 12 (7p) (EXTI,
 AFIO_EXTICR, EXTI ISR)</h1>
+<p>We are developing a home alarm system. To secure doors, we decided to
+use a magnetic sensor that operates like a switch: when a door is closed
+the switch is closed as well, when a door is open the switch is open.
+Additionally, a vibration sensor is placed on the door to prevent
+robbers from cutting a hole in the door undetected. Electrically,
+vibration sensor also behaves like a switch: when movement happens the
+switch closes. (Imagine a wire suspended with unconductive springs in a
+conductive cover.)</p>
+<p><img src="larm.png" /></p>
+<p>As shown on the illustration above, the output of magnetic sensor is
+connected to pin 14 in GPIO port E, and output of vibration sensor is
+connected to pin 15.</p>
+<p>Your task is to write a <strong>complete</strong> configuration code
+for MD307 board to work with the specified peripherals using external
+interrupts. When sensors detect an intrusion, a function
+<code>sound_alarm(int source)</code> should be called, where
+<code>source</code> is either <code>1</code> for magnetic sensor, or
+<code>2</code> for vibration sensor.</p>
+<p>Assume that the board is used for other security components as well,
+so your configuration code should not affect any other components of the
+system. Also assume that define statements or struct declarations for
+GPIO, EXTI, or PFIC registers are given. No need to declare all of
+them.</p>
+<p>Tip: even if you cannot write the complete code or ran out of exam
+time, write down the plan of actions.</p>
 <h1 id="uppgift-13-p-assorted-theory-questions">Uppgift 13 (?p)
 (Assorted theory questions)</h1>
 <p><strong>a)</strong> When GPIO pin is configured as output, what is

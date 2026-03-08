@@ -37289,7 +37289,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
           <fields>
             <field>
               <name>INTEN</name>
-              <description>Bit number x in IENRn corresponds to interrupt 32 * n + x. Writing 1 enables interrupt.</description>
+              <description>Bit number x in IENRn corresponds to interrupt 32 * (n-1) + x. Writing 1 enables interrupt.</description>
               <bitOffset>12</bitOffset>
               <bitWidth>20</bitWidth>
             </field>
@@ -37306,7 +37306,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
           <fields>
             <field>
               <name>INTEN</name>
-              <description>Bit number x in IENRn corresponds to interrupt 32 * n + x. Writing 1 enables interrupt.</description>
+              <description>Bit number x in IENRn corresponds to interrupt 32 * (n-1) + x. Writing 1 enables interrupt.</description>
               <bitOffset>0</bitOffset>
               <bitWidth>32</bitWidth>
             </field>
@@ -37323,7 +37323,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
           <fields>
             <field>
               <name>INTEN</name>
-              <description>Bit number x in IENRn corresponds to interrupt 32 * n + x. Writing 1 enables interrupt.</description>
+              <description>Bit number x in IENRn corresponds to interrupt 32 * (n-1) + x. Writing 1 enables interrupt.</description>
               <bitOffset>0</bitOffset>
               <bitWidth>32</bitWidth>
             </field>
@@ -37340,7 +37340,7 @@ Reading is allowed, but reflects the status of the OUTDR <it>register</it>, not 
           <fields>
             <field>
               <name>INTEN</name>
-              <description>Bit number x in IENRn corresponds to interrupt 32 * n + x. Writing 1 enables interrupt.</description>
+              <description>Bit number x in IENRn corresponds to interrupt 32 * (n-1) + x. Writing 1 enables interrupt.</description>
               <bitOffset>0</bitOffset>
               <bitWidth>8</bitWidth>
             </field>

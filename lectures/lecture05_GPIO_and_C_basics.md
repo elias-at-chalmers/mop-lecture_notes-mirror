@@ -110,7 +110,7 @@ The interesting question is why we would ever do something else? You will see la
 
 **Example:** *We have a system where pins 3 and 5 will be set to zero if some error has occurred. We want to connect a red LED that warns us if either of these error-pins are zero:*
 <p align="center">
-  <img src="../images/two_pins_one_led.PNG" alt="My image" width="75%" />
+  <img src="../images/two_pins_one_led.png" alt="My image" width="75%" />
 </p>
 
 Now, consider what happens if we connect the LED as in the image above and configure pins 3 and 5 as push-pull outputs:

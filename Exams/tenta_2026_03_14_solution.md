@@ -24,12 +24,19 @@ td:has(pre) {
 }
 </style>
 
+# Uppgift 1a (-0.5 ... 3p)
+Rätt deklarationer är:
+> ```
+> char a;
+> short b[5];
+> int c;
+> ```
 
-# Uppgift 1 (-0.5 ... 2.5p) 
+Rätt svar: **A**
 
 <table>
 <tr>
-<td>A</td><td>B</td><td>C</td><td>D</td><td>E</td><td>F</td>
+<td>A ✓</td><td>B</td><td>C</td><td>D</td><td>E</td><td>F</td>
 </tr>
 <tr>
 <td>
@@ -49,9 +56,10 @@ c: .space 4
 a: .space 1
 .align 1
 b: .space 10
-.align 1    #WRONG: need .align2
+.align 1   @ WRONG: need .align 2
 c: .space 4
 ```
+
 </td>
 <td>
 
@@ -59,7 +67,7 @@ c: .space 4
 a: .space 1
 .align 2
 b: .space 10
-.align 1 <!--  WRONG: need .align 2-->
+.align 1   @ WRONG: need .align 2
 c: .space 4
 ```
 
@@ -69,7 +77,7 @@ c: .space 4
 ```
 .align 2
 a: .space 1
-b: .space 10 <!--  WRONG: need .align 1 before-->
+b: .space 10   @ WRONG: need .align 1 before
 .align 2
 c: .space 4
 ```
@@ -79,8 +87,8 @@ c: .space 4
 
 ```
 a: .space 1
-b: .space 10 <!--  WRONG: need .align 1 before-->
-.align 1 <!--  WRONG: need .align 2-->
+b: .space 10   @ WRONG: need .align 1 before
+.align 1       @ WRONG: need .align 2
 c: .space 4
 ```
 
@@ -92,7 +100,7 @@ c: .space 4
 a: .space 1
 .align 2
 b: .space 10
-.align 1 <!--  WRONG: need .align 2-->
+.align 1   @ WRONG: need .align 2
 c: .space 4
 ```
 
@@ -100,11 +108,23 @@ c: .space 4
 </tr>
 </table>
 
+# Uppgift 1b (-0.5 ... 3p)
+Rätt deklarationer:
+> ```c
+> int i;
+> short arr[255];
+> ```
 
-# Uppgift 2 (-0.5 ... 2.5p)
+Rätt tilldelning: `arr[i+1] = 0;`
+
+`short` är 2 byte stort, så byte-offseten för `arr[i+1]` är `(i+1) * 2`.
+Korrekt sekvens: ladda `i`, addera 1, skifta vänster 1 steg (×2), addera basadressen, spara med `sh`.
+
+Rätt svar: **D**
+
 <table>
 <tr>
-<td>A</td><td>B</td><td>C</td><td>D</td><td>E</td><td>F</td>
+<td>A</td><td>B</td><td>C</td><td>D ✓</td><td>E</td><td>F</td>
 </tr>
 <tr>
 <td>
@@ -112,8 +132,8 @@ c: .space 4
 ```
 lw   t0, i
 la   t1, arr
-slli t0, t0, 1      
-addi t0, t0, 1      <!--  WRONG: adds 1 byte, not 1 element-->
+slli t0, t0, 1      @ WRONG: shifts before +1
+addi t0, t0, 1      @ → offset = i*2+1 (misaligned)
 add  t0, t0, t1
 sh   zero, 0(t0)
 ```
@@ -124,9 +144,9 @@ sh   zero, 0(t0)
 ```
 lw   t0, i
 la   t1, arr
-addi t0, t0, 1   
-slli t0, t0, 2       <!--  WRONG: multiplies by 4-->
-add  t0, t0, t1     
+addi t0, t0, 1
+slli t0, t0, 2      @ WRONG: ×4 instead of ×2
+add  t0, t0, t1     @ treats short as int
 sh   zero, 0(t0)
 ```
 
@@ -136,32 +156,8 @@ sh   zero, 0(t0)
 ```
 lw   t0, i
 la   t1, arr
-addi t0, t0, 2
-slli t1, t1, 1       <!--  WRONG: shifts &d-->
-add  t0, t0, t1      
-sh   zero, 0(t0) 
-```
-
-</td>
-<td>
-
-```
-lw   t0, i
-la   t1, arr
-addi t0, t0, 1       
-slli t0, t0, 1       
-add  t0, t0, t1      
-sh   zero, 0(t0) 
-```
-
-</td>
-<td>
-
-```
-lw   t0, i
-la   t1, arr
-slli t0, t0, 1      <!--  WRONG: multiplies by 4-->
-addi t0, t0, 1      <!--  WRONG: adds 1 byte, not 1 element-->
+addi t0, t0, 2      @ WRONG: +2 instead of +1
+slli t1, t1, 1      @ WRONG: shifts base address
 add  t0, t0, t1
 sh   zero, 0(t0)
 ```
@@ -172,27 +168,68 @@ sh   zero, 0(t0)
 ```
 lw   t0, i
 la   t1, arr
-addi t0, t0, 2       <!--  WRONG: increments by 2 elements-->
-slli t0, t0, 1       
-add  t0, t0, t1      
-sh   zero, 0(t0) 
+addi t0, t0, 1      @ i+1
+slli t0, t0, 1      @ (i+1)*2
+add  t0, t0, t1     @ arr + (i+1)*2
+sh   zero, 0(t0)    @ arr[i+1] = 0
+```
+
+</td>
+<td>
+
+```
+lw   t0, i
+la   t1, arr
+slli t0, t0, 2      @ WRONG: shifts before +1
+addi t0, t0, 1      @ → offset = i*4+1 (misaligned)
+add  t0, t0, t1
+sh   zero, 0(t0)
+```
+
+</td>
+<td>
+
+```
+lw   t0, i
+la   t1, arr
+addi t0, t0, 2      @ WRONG: +2 instead of +1
+slli t0, t0, 1      @ → arr[i+2], not arr[i+1]
+add  t0, t0, t1
+sh   zero, 0(t0)
 ```
 
 </td>
 </tr>
 </table>
 
-# Uppgift 3 (-0.5 ... 2.5p) 
+
+# Uppgift 1c (-0.5 ... 3p)
+Rätt deklarationer:
+> ```c
+> unsigned int k;
+> signed char a[5];
+> unsigned short s;
+> ```
+
+Rätt tilldelning: `a[0] = k - s;`
+
+- `k` är `unsigned int` (4 byte) → ladda med `lw`
+- `s` är `unsigned short` → ladda med `lhu` (ej `lh` — `lh` sign-extendar och ger fel resultat för värden ≥ 32768)
+- operation är `k - s` → `sub t2, t0, t1` (ej omvänt)
+- `a[0]` är `signed char` (1 byte) → spara med `sb`
+
+Rätt svar: **E**
+
 <table>
 <tr>
-<td>A</td><td>B</td><td>C</td><td>D</td><td>E</td><td>F</td>
+<td>A</td><td>B</td><td>C</td><td>D</td><td>E ✓</td><td>F</td>
 </tr>
-<tr>
+<tr style="vertical-align: top;">
 <td>
 
 ```
 lw   t0, k
-lh   t1, s  <!-- WRONG: s is unsigned-->
+lh   t1, s      @ WRONG: lh sign-extendar
 sub  t2, t0, t1
 la   t3, a
 sb   t2, 0(t3)
@@ -203,10 +240,10 @@ sb   t2, 0(t3)
 
 ```
 lw   t0, k
-lh   t1, s  <!-- WRONG: s is unsigned-->
-sub  t2, t0, t1
+lh   t1, s      @ WRONG: lh sign-extendar
+sub  t2, t1, t0 @ WRONG: s-k, ej k-s
 la   t3, a
-sh   t2, 0(t3) <!-- WRONG: a is char-->
+sh   t2, 0(t3)  @ WRONG: sh lagrar 2 byte
 ```
 
 </td>
@@ -214,21 +251,32 @@ sh   t2, 0(t3) <!-- WRONG: a is char-->
 
 ```
 lw   t0, k
-lwu   t1, s  <!-- WRONG: s is short-->
+lw   t1, s      @ WRONG: lw laddar 4 byte, s är 2 byte
 sub  t2, t0, t1
 la   t3, a
-sw   t2, 0(t3)  <!-- WRONG: a is char-->
+sw   t2, 0(t3)  @ WRONG: sw lagrar 4 byte
 ```
 
 </td>
 <td>
 
 ```
-lb   t0, k  <!-- WRONG: k is word-->
+lb   t0, k      @ WRONG: k är unsigned int (4 byte)
 lhu  t1, s
 sub  t2, t0, t1
 la   t3, a
-sw   t2, 0(t3) <!-- WRONG: a is char-->
+sw   t2, 0(t3)  @ WRONG: sw lagrar 4 byte
+```
+
+</td>
+<td>
+
+```
+lw   t0, k      @ unsigned int → lw
+lhu  t1, s      @ unsigned short → lhu
+sub  t2, t0, t1 @ k - s
+la   t3, a
+sb   t2, 0(t3)  @ signed char → sb
 ```
 
 </td>
@@ -236,187 +284,58 @@ sw   t2, 0(t3) <!-- WRONG: a is char-->
 
 ```
 lw   t0, k
-lhu  t1, s
+lh   t1, s      @ WRONG: lh sign-extendar
 sub  t2, t0, t1
 la   t3, a
-sb   t2, 0(t3)
-```
-
-</td>
-<td>
-
-```
-lw   t0, k
-lh   t1, s  <!-- WRONG: s is unsigned-->
-sub  t2, t0, t1
-la   t3, a
-sh   t2, 0(t3) <!-- WRONG: a is char-->
+sh   t2, 0(t3)  @ WRONG: sh lagrar 2 byte
 ```
 
 </td>
 </tr>
 </table>
 
-# Uppgift 4 (-0.5 ... 2.5p) 
+# Uppgift 2a (-1 ... 3p)
+C-kod:
+> ```c
+> int compute_power_output(void) {
+>     int base_power_mW = estimate_power_mW(current_mA);
+>     int adjusted_power_mW = calculate_factor(load_mode, base_power_mW);
+>     return adjusted_power_mW * base_power_mW;
+> }
+> ```
+
+Krav: `ra` måste sparas (funktionen gör call-instruktioner). `base_power_mW` måste sparas över det andra anropet.  
+`calculate_factor(load_mode, base_power)` → `a0 = load_mode`, `a1 = base_power_mW`.
+
+
+Rätt svar: **D**
 
 <table>
 <tr>
-<td>A</td><td>B</td>
+<td>A</td><td>B</td><td>C</td><td>D ✓</td>
 </tr>
-<tr>
-<td>
-
-```
-loop:
-    blt  t1, t2, body  
-    j end              
-    
-body:
-    lh   t6, 0(t4)       # t6 = a[i]
-    bge  t6, t3, skip    
-    add  t0, t0, t6      # sum += a[i]
-skip:
-    addi t4, t4, 2       # a++
-    addi t1, t1, 1       # i++
-    j loop
-end:
-```
-
-</td>
-<td>
-
-```
-loop:
-    blt  t1, t2, body  
-    j end              
-
-body:
-    lh   t6, 0(t4)       # t6 = a[i]
-    blt  t6, t3, skip    <!-- WRONG: if (a[i] >= b) {sum +=} -->
-    add  t0, t0, t6      # sum += a[i]
-skip:
-    addi t4, t4, 2       # a++
-    addi t1, t1, 1       # i++
-    j loop
-end:
-
-```
-
-</td>
-</tr>
-
-<tr>
-<td>C</td><td>D</td>
-</tr>
-
-<tr>
-<td>
-
-```
-loop:
-    bge  t1, t2, end    
-    lh   t6, 0(t4)       # t6 = a[i]
-    bge  t6, t3, add     <!-- WRONG: if (a[i] >= b) {sum +=} -->
-    j continue    
-add:
-    add  t0, t0, t6      # sum += a[i]
-continue:
-    addi t4, t4, 2       # a++
-    addi t1, t1, 1       # i++
-    j loop            
-end:
-```
-
-</td>
-<td>
-
-```
-loop:
-    blt  t1, t2, end     <!-- WRONG: for (int i = 0; i >= size; i++) -->
-    lh   t6, 0(t4)       # t6 = a[i]
-    bge  t6, t3, skip 
-    add  t0, t0, t6      # sum += a[i]
-skip:
-    addi t4, t4, 2       # a++
-    addi t1, t1, 1       # i++
-    j loop 
-end:
-```
-
-</tr>
-</table>
-
-# Uppgift 5 (-0.5 ... 2.5p) 
-<table>
-<tr>
-<td>A</td><td>B</td>
-</tr>
-<tr>
+<tr style="vertical-align: top;">
 <td>
 
 ```
 compute_power_output:
-    addi sp, sp, -8
-    sw   ra, 0(sp)
+addi sp, sp, -8
+sw   ra, 0(sp)
 
-    lw   a0, current_mA
-    call estimate_power_mW
-    sw   a0, 4(sp)
+lw   a0, current_mA
+call estimate_power_mW
+sw   a0, 4(sp)
 
-    lw   a1, load_mode #WRONG: reverses the order of parameters
-    lw   a0, 4(sp)
-    call calculate_factor
+lw   a1, load_mode   @ WRONG: a1=load_mode, a0=base_power
+lw   a0, 4(sp)       @ calculate_factor arg order swapped
+call calculate_factor
 
-    lw   a1, 4(sp)
-    mul  a0, a0, a1
+lw   a1, 4(sp)
+mul  a0, a0, a1
 
-    lw   ra, 0(sp)
-    addi sp, sp, 8
-    ret
-```
-
-</td>
-<td>
-
-```
-compute_power_output:   #WRONG: does not save ra
-    lw   a0, current_mA
-    call estimate_power_mW
-    sw   a0, 0(sp)      #WRONG: rewrites last value in stack
-
-    lw   a0, load_mode
-    lw   a1, 0(sp)
-    call calculate_factor
-
-    lw   a1, 0(sp)
-    mul  a0, a0, a1
-
-    ret
-```
-
-</td>
-</tr>
-
-<tr>
-<td>C</td><td>D</td>
-</tr>
-
-<tr>
-<td>
-
-```
-compute_power_output:   #WRONG: does not save ra
-    lw   a0, current_mA
-    call estimate_power_mW
-
-    mv   s0, a0         #WRONG: does not save s0 before use
-    lw   a0, load_mode
-    mv   a1, s0
-    call calculate_factor
-
-    mul  a0, a0, s0
-    ret
-
+lw   ra, 0(sp)
+addi sp, sp, 8
+ret
 ```
 
 </td>
@@ -424,115 +343,145 @@ compute_power_output:   #WRONG: does not save ra
 
 ```
 compute_power_output:
-    addi    sp, sp, -8
-    sw      ra, 0(sp)
+lw   a0, current_mA
+call estimate_power_mW  @ WRONG: ra not saved,
+sw   a0, 0(sp)          @ clobbered by call;
+                        @ no stack frame allocated
+lw   a0, load_mode
+lw   a1, 0(sp)
+call calculate_factor
 
-    lw      a0, current_mA
-    call    estimate_power_mW 
-    sw      a0, 4(sp) 
+lw   a1, 0(sp)
+mul  a0, a0, a1
 
-    lw      a0, load_mode
-    lw      a1, 4(sp)
-    call    calculate_factor
-
-    lw      a1, 4(sp)
-    mul     a0, a0, a1
-
-    lw      ra, 0(sp)
-    addi    sp, sp, 8
-    ret
+ret  @ returns to wrong place
 ```
-</td>
 
+</td>
+<td>
+
+```
+compute_power_output:
+lw   a0, current_mA
+call estimate_power_mW  @ WRONG: ra not saved
+
+mv   s0, a0             @ WRONG: s0 is callee-saved,
+lw   a0, load_mode      @ must save/restore s0
+mv   a1, s0             @ corrupts caller's s0
+call calculate_factor
+
+mul  a0, a0, s0
+
+ret  @ returns to wrong place (ra clobbered)
+```
+
+</td>
+<td>
+
+```
+compute_power_output:
+addi sp, sp, -8
+sw   ra, 0(sp)      @ save return address
+
+lw   a0, current_mA
+call estimate_power_mW
+sw   a0, 4(sp)      @ save base_power_mW
+
+lw   a0, load_mode  @ a0 = load_mode (arg 1)
+lw   a1, 4(sp)      @ a1 = base_power_mW (arg 2)
+call calculate_factor
+
+lw   a1, 4(sp)      @ reload base_power_mW
+mul  a0, a0, a1     @ adjusted * base
+
+lw   ra, 0(sp)
+addi sp, sp, 8
+ret
+```
+
+</td>
 </tr>
 </table>
 
-**Svar: D**
+# Uppgift 2b (-1 ... 3p)
+Funktionen `apply_mask(int *array, int size, char mask)` ska applicera `mask` (bitvis AND) på den **fjärde byten (byte index 3, MSB)** av varje element. ch32v307/RISC-V är little-endian → MSB ligger på offset +3 från elementets startadress.
 
-- `lw a0, current_mA` — loads `current_mA` into argument register `a0` as the first parameter ✓
-- `sw a0, 4(sp) ` — stores `base_power_mW` into stack to reuse ✓
-- `lw a0, load_mode` — loads `current_mA` as the first parameter for `calculate_factor` ✓
-- `lw a1, 4(sp)` — loads `base_power_mW` as the second parameter for `calculate_factor` ✓
-- after the function call, `lw a1, 4(sp)` — reloads `base_power_mW` from stack as it may have been corrupted in the function ✓
-- `mul a0, a0, a1` — the return value is computed and stored int `s0` ✓
+Rätt svar: **B**
 
-Alternativ A reverses parameters for `calculate_factor(load_mode, base_power_mW)`: it actually calls `calculate_factor(base_power_mW, load_mode)`.
-Alternativ B does not save `ra` into stack, and rewrites last value in the stack
-Alternativ C 
-
-# Uppgift 6 (-0.5 ... 2.5p) 
 <table>
 <tr>
-<td>A</td><td>B</td>
+<td>A</td><td>B ✓</td><td>C</td><td>D</td>
 </tr>
-<tr>
+<tr style="vertical-align: top;">
 <td>
 
-```C
-void apply_mask(int *array, int size, char mask) {
-    for (int i = 0; i < size; i++, array++) {
-        char *byte_ptr = (char *)(array + 3); //WRONG: array+3 jumps 3 elements forward
-        *byte_ptr &= mask;
-    }
+```c
+for (int i = 0; i < size; i++, array++) {
+    char *byte_ptr = (char *)(array + 3);
+    *byte_ptr &= mask;
 }
+// WRONG: array är int*, så array+3
+// avancerar 3*4=12 byte, inte 3 byte.
+// Pekar på array[3], inte byte 3 av array[0].
 ```
 
 </td>
 <td>
 
-```C
-void apply_mask(int *array, int size, char mask) {
-    for (int i = 0; i < size; i++) {
-        char *byte_ptr = (char *)(array + i);
-        byte_ptr[3] &= mask;
-    }
+```c
+for (int i = 0; i < size; i++) {
+    char *byte_ptr = (char *)(array + i);
+    byte_ptr[3] &= mask;
 }
-```
-
-</td>
-</tr>
-
-<tr>
-<td>C</td><td>D</td>
-</tr>
-
-<tr>
-<td>
-
-```C
-void apply_mask(int *array, int size, char mask) {
-    for (int i = 0; i < size; i++) {
-        char *byte_ptr = (char *)(array + i * sizeof(int)); //WRONG: pointer arithmetics jumps 4 bytes as it is int*
-        byte_ptr[3] &= mask;
-    }
-}
+// array+i → pekar på array[i] (int*)
+// cast till char* → byte_ptr[3] är
+// den 4:e byten av array[i]. Korrekt.
 ```
 
 </td>
 <td>
 
-```C
-void apply_mask(int *array, int size, char mask) {
-    char *byte_ptr = (char *)array;
-    for (int i = 0; i < size; i++, byte_ptr++) { //WRONG: stepping through and modifying every byte
-        byte_ptr[3] &= mask;
-    }
+```c
+for (int i = 0; i < size; i++) {
+    char *byte_ptr = (char *)(array + i * sizeof(int));
+    byte_ptr[3] &= mask;
 }
+// WRONG: array är int*, dubbel skalning:
+// array + i*4 → i*4*4 = 16 byte per steg
+// istället för 4. Hoppar över element.
 ```
-</td>
 
+</td>
+<td>
+
+```c
+char *byte_ptr = (char *)array;
+for (int i = 0; i < size; i++, byte_ptr++) {
+    byte_ptr[3] &= mask;
+}
+// WRONG: byte_ptr++ avancerar 1 byte/iteration.
+// i=1: byte_ptr pekar på byte 1 av array[0],
+// inte på array[1].
+```
+
+</td>
 </tr>
 </table>
 
+# Uppgift 2c (-0.5 ... 2p)
+Spårning av `foo(a, &b)` där `a = 5`, `b = 5`:
 
-**Svar: B**
+```
+x = x + 2;   → lokal kopia x = 7  (a i main påverkas ej, pass by value)
+*y = *y + 3; → b = 5 + 3 = 8
+y = &x;      → y pekar nu på lokal x (7), ej på b
+*y = 100;    → lokal x = 100 (ingen effekt utanför foo)
+```
 
-# Uppgift 7 (-0.5 ... 2p) (C pointers and parameters)
+Efter anropet: `a = 5`, `b = 8`
 
-**Svar: E**
+Rätt svar: **E**
 
-<!-- 
-*******************************************************************
-************* Open questions **************************************
-*******************************************************************
--->
+| A | B | C | D | E ✓ | F |
+|---|---|---|---|-----|---|
+| `5 5` | `7 8` | `100 8` | `5 100` | `5 8` | `100 5` |

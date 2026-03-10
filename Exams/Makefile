@@ -1,4 +1,4 @@
-SOURCES := tenta_2026_03_14.md tenta_2026_03_14_solution.md
+SOURCES := tenta_2026_03_14.md tenta_2026_03_14_solution.md tenta_2026_03_14_ARM.md
 PDFS    := $(SOURCES:.md=.pdf)
 
 .PHONY: all clean

@@ -485,3 +485,134 @@ Rätt svar: **E**
 | A | B | C | D | E ✓ | F |
 |---|---|---|---|-----|---|
 | `5 5` | `7 8` | `100 8` | `5 100` | `5 8` | `100 5` |
+
+# Uppgift 3 (6p)
+
+> **OBS:** Bilden (knapp.png) visar en kontakt märkt "Pb7.0" (Port B) men frågetexten anger Port D — bilden är missvisande.
+
+Knappen är kopplad mellan 3.3V och pin 5 i port D (PD5).
+CH32V307: GPIOD basadress = `0x40011400`, registeroffset: CFGLR=`+0x00`, INDR=`+0x08`, OUTDR=`+0x0C`.
+
+## 3a) Makrodefinitioner (2p)
+
+```c
+#define GPIOD_CFGLR     ((volatile uint32_t *)0x40011400)
+#define GPIOD_INDR      ((volatile uint32_t *)0x40011408)
+#define GPIOD_OUTDR     ((volatile uint32_t *)0x4001140C)
+#define GPIOD_OUTDR_LOW ((volatile uint8_t  *)0x4001140C)
+```
+
+## 3b) GPIO-läge (2p)
+
+Knappen kopplar pin 5 till 3.3V när den trycks in; när den är öppen är pinnen svävande.
+För ett tillförlitligt avläsning krävs **input med pull-down** (CNF=`10`, MODE=`00`, OUTDR bit 5 = 0).
+Pull-down håller pinnen på ett definitivt lågt värde när knappen är öppen, och 3.3V driver den högt när knappen trycks in.
+
+## 3c) Konfiguration av pin 5 (2p)
+
+Pin 5 ligger i CFGLR, bits [23:20]. Värde för input med pull-down: CNF=`10`, MODE=`00` → `0b1000` = `0x8`.
+OUTDR bit 5 = 0 väljer pull-down (istället för pull-up).
+
+```c
+// Konfigurera CFGLR: sätt bits [23:20] = 0b1000
+*GPIOD_CFGLR = (*GPIOD_CFGLR & ~(0xF << 20)) | (0x8 << 20);
+
+// Sätt OUTDR bit 5 = 0 → pull-down
+*GPIOD_OUTDR &= ~(1 << 5);
+```
+
+# Uppgift 4 (7p)
+
+Systemklocka: 144 MHz. STCLK=1 → HCLK = 144 MHz → 144 klockcykler per µs.
+
+## 4a) `config_delay` (3p)
+
+```c
+void config_delay(int us) {
+    uint64_t cycles = (uint64_t)us * 144;
+    *SYSTICK_CMPLR = (uint32_t)(cycles & 0xFFFFFFFF);
+    *SYSTICK_CMPHR = (uint32_t)(cycles >> 32);
+
+    // Rensa flagga, välj HCLK (STCLK=1), starta EJ (STE=0)
+    *SYSTICK_SR = 0;
+    *SYSTICK_CTLR = (1 << 2);    // STCLK=1, STE=0
+}
+```
+
+## 4b) `delay` (3p)
+
+```c
+void delay() {
+    // Nollställ räknaren och flaggan inför varje anrop
+    *SYSTICK_CTLR |= (1 << 5);   // INIT: nollställ CNT
+    *SYSTICK_CTLR &= ~(1 << 5);
+    *SYSTICK_SR = 0;
+
+    *SYSTICK_CTLR |= 1;           // STE=1: starta
+
+    while (!(*SYSTICK_SR & 1));   // vänta på CNTIF
+
+    *SYSTICK_CTLR &= ~1;          // STE=0: stoppa
+}
+```
+
+## 4c) Maximal tid med STCLK=0 och 16-bitars CNT (1p)
+
+STCLK=0 → klockfrekvens = HCLK/8 = 144 MHz / 8 = **18 MHz** → 1 tick = 1/18 000 000 s.
+
+16-bitars CNT: maxvärde = 2¹⁶ − 1 = 65 535 ticks.
+
+$$t_{max} = \frac{65535}{18\,000\,000} \approx 3.64 \text{ ms}$$
+
+# Uppgift 5 (5p)
+
+Peripheral basadress: `0xE0008000`. Registerlayout:
+
+| Offset | Register | Storlek |
+|--------|----------|---------|
+| 0x00 | CTRL | 8 bitar (resten grå) |
+| 0x04 | STATUS | 16 bitar (resten grå) |
+| 0x08 | *(reserverat)* | helt grå |
+| 0x0C | DATA | 32 bitar (LOW=bits[15:0], HIGH=bits[31:16]) |
+
+## 5a) Struct-definition och användning (3p)
+
+Det reserverade ordet vid offset `0x08` måste paddas i structen, annars hamnar DATA på fel offset.
+
+```c
+typedef struct {
+    volatile uint8_t  CTRL;        // offset 0x00
+    uint8_t           _pad0[3];    // offset 0x01-0x03 (grå, ej volatile)
+    volatile uint16_t STATUS;      // offset 0x04
+    uint16_t          _pad1;       // offset 0x06-0x07 (grå)
+    uint32_t          _reserved;   // offset 0x08-0x0B (helt grå)
+    volatile uint32_t DATA;        // offset 0x0C
+} MyPeriph_t;
+
+#define MY_PERIPH ((MyPeriph_t *)0xE0008000)
+
+// Skriv till DATA-registret:
+MY_PERIPH->DATA = 0x12345678;
+```
+
+## 5b) Bitfält för CTRL (1p)
+
+```c
+typedef struct {
+    uint8_t EN    : 1;  // bit 0
+    uint8_t MODE  : 4;  // bits 1-4
+    uint8_t SPEED : 3;  // bits 5-7
+} CTRL_t;
+```
+
+## 5c) Union för DATA (1p)
+
+```c
+typedef union {
+    uint32_t DATA;
+    struct {
+        uint16_t DATA_LOW;   // bits [15:0]
+        uint16_t DATA_HIGH;  // bits [31:16]
+    };
+} DATA_t;
+```

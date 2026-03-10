@@ -90,6 +90,7 @@ int main(void) {
   // Test buzzer with 1 KHz tone (remove after testing)
   systick_periodic_micro(500);
   #endif
+  /*
   // Play melody once
   for(int i = 0; i < notes_length; i++) {
     remaining_duration = notes[i].duration_micro;
@@ -97,7 +98,7 @@ int main(void) {
     systick_periodic_micro(current_period);
     while(remaining_duration > 0) {
     }
-  }
+  }*/
   systick_stop();
   // Wait for interrupts
   while (1) {

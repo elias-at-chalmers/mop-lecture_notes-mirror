@@ -480,3 +480,143 @@ Rätt svar: **E**
 |---|---|---|---|-----|---|
 | `5 5` | `7 8` | `100 8` | `5 100` | `5 8` | `100 5` |
 
+# Uppgift 3 (6p)
+
+Knappen är kopplad mellan 3.3V och pin 5 i port D (PD5).  
+STM32F407: GPIOD basadress = `0x40020C00`, registeroffset: MODER=`+0x00`, PUPDR=`+0x0C`, IDR=`+0x10`, ODR=`+0x14`.
+
+## 3a) Makrodefinitioner (2p)
+
+```c
+#define GPIOD_MODER    ((volatile uint32_t *)0x40020C00)
+#define GPIOD_PUPDR    ((volatile uint32_t *)0x40020C0C)
+#define GPIOD_IDR      ((volatile uint32_t *)0x40020C10)
+#define GPIOD_ODR      ((volatile uint32_t *)0x40020C14)
+#define GPIOD_ODR_LOW  ((volatile uint8_t  *)0x40020C14)
+```
+
+## 3b) GPIO-läge (2p)
+
+Knappen kopplar pin 5 till 3.3V när den trycks in; när den är öppen är pinnen svävande.  
+För ett tillförlitligt avläsning krävs **input med pull-down** (MODER=`00`, PUPDR=`10`).  
+Pull-down håller pinnen på ett definitivt lågt värde när knappen är öppen, och 3.3V driver den högt när knappen trycks in.
+
+## 3c) Konfiguration av pin 5 (2p)
+
+Pin 5 i MODER: bits [11:10] = `00` (input). Pin 5 i PUPDR: bits [11:10] = `10` (pull-down) = `0x2`.
+
+```c
+// Konfigurera MODER: sätt bits [11:10] = 0b00 (input)
+*GPIOD_MODER &= ~(0x3 << 10);
+
+// Konfigurera PUPDR: sätt bits [11:10] = 0b10 (pull-down)
+*GPIOD_PUPDR = (*GPIOD_PUPDR & ~(0x3 << 10)) | (0x2 << 10);
+```
+
+# Uppgift 4 (7p)
+
+Systemklocka: 144 MHz. CLKSOURCE=1 → AHB = 144 MHz → 144 klockcykler per µs.
+
+## 4a) `config_delay` (3p)
+
+```c
+void config_delay(int us) {
+    *STK_LOAD = (uint32_t)us * 144 - 1;  // reload value (24-bit)
+    *STK_VAL  = 0;                        // clear counter och COUNTFLAG
+    *STK_CTRL = (1 << 2);                 // CLKSOURCE=AHB, TICKINT=0, ENABLE=0
+}
+```
+
+## 4b) `delay` (3p)
+
+```c
+void delay() {
+    *STK_VAL   = 0;                       // clear counter och COUNTFLAG
+    *STK_CTRL |= 1;                       // ENABLE=1: starta
+
+    while (!(*STK_CTRL & (1 << 16)));     // vänta på COUNTFLAG (bit 16)
+
+    *STK_CTRL &= ~1;                      // ENABLE=0: stoppa
+}
+```
+
+## 4c) Maximal tid med CLKSOURCE=0 och 16-bitars STK_VAL (1p)
+
+CLKSOURCE=0 → klockfrekvens = AHB/8 = 144 MHz / 8 = **18 MHz** → 1 tick = 1/18 000 000 s.
+
+16-bitars STK_VAL: maxvärde = 2¹⁶ − 1 = 65 535 ticks.
+
+$$t_{max} = \frac{65535}{18\,000\,000} \approx 3.64 \text{ ms}$$
+
+# Uppgift 6 (7p)
+
+USART1 är IRQ 37 på STM32F407. ARM Cortex-M har 16 systemundantag före de peripherala avbrotten i vektortabellen, så USART1 ligger på index 37 + 16 = **53** i tabellen.
+
+## 6a) NVIC-konfiguration (2p)
+
+NVIC_ISER är uppdelat i 32-bit register där varje bit aktiverar ett IRQ. IRQ 37 ligger i `NVIC_ISER[1]` (register index 37/32 = 1), bit 37%32 = 5.
+
+```c
+*NVIC_ISER1 = (1 << 5);   // aktivera IRQ 37 (USART1)
+```
+
+## 6b) Vektortabell-relokeringen (2p)
+
+```c
+*SCB_VTOR = 0x2001C000;
+```
+
+## 6c) Sätt in funktionspekaren (3p)
+
+Vektortabellen är en array av `uint32_t`-funktionspekare. USART1 ligger på index 53.
+
+```c
+void (*usart_isr)(void);   // deklaration av den givna hanteraren
+
+uint32_t *vtor = (uint32_t *)0x2001C000;
+vtor[53] = (uint32_t)usart_isr;
+```
+
+# Uppgift 7 (7p)
+
+Pin 14 och 15 ligger i SYSCFG_EXTICR4 (täcker pins 12–15).  
+Port E-värdet i SYSCFG_EXTICR är `0x4`.  
+På STM32F407 delar EXTI14 och EXTI15 en gemensam vector (EXTI15_10).
+
+## 7a) EXTI och SYSCFG_EXTICR (3p)
+
+Från kretsbilden: magnetisk sensor (PE14) ger fallande flank vid intrång (dörr öppnas, strömbrytare öppnas); vibrationssensor (PE15) ger stigande flank (rörelse stänger strömbrytaren).
+
+```c
+// Koppla EXTI14 och EXTI15 till port E
+*SYSCFG_EXTICR4 = (*SYSCFG_EXTICR4 & ~((0xF << 4) | (0xF << 8)))
+                | (0x4 << 4)   // EXTI14 = port E
+                | (0x4 << 8);  // EXTI15 = port E
+
+// Aktivera interrupt mask för linje 14 och 15
+*EXTI_IMR |= (1 << 14) | (1 << 15);
+
+// Magnetisk sensor: fallande flank (dörr öppnas)
+*EXTI_FTSR |= (1 << 14);
+
+// Vibrationssensor: stigande flank (rörelse detekteras)
+*EXTI_RTSR |= (1 << 15);
+```
+
+## 7b) Interrupt handler (4p)
+
+På ARM Cortex-M är en interrupt handler en vanlig C-funktion — ingen special-attribut behövs. Pending-biten i `EXTI_PR` måste rensas manuellt (skriv 1 för att rensa).
+
+```c
+void interrupt_handler(void) {
+    if (*EXTI_PR & (1 << 14)) {
+        *EXTI_PR = (1 << 14);  // rensa pending
+        sound_alarm(1);         // magnetisk sensor
+    }
+    if (*EXTI_PR & (1 << 15)) {
+        *EXTI_PR = (1 << 15);  // rensa pending
+        sound_alarm(2);         // vibrationssensor
+    }
+}
+```
+

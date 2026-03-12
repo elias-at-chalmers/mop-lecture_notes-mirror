@@ -15,6 +15,7 @@ Under "Task 3: Making it pulsate..." är "perceive" felstavat till "percieve".
 Lecture 03
 Meningen innan "Arrays as function parameters" så står det "we will se later" men det borde vara "see later".
 
+Instruktionerna sll, srl och sra saknas från Quickguide. Finns bara immediate-motsvarigheterna.
 
 I Lecture notes till föreläsning 6 refereras det ofta till registret CNTLR som inte finns, bör vara CNTL?
 

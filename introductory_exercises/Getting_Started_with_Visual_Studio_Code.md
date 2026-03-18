@@ -53,8 +53,8 @@ If you have any non-ascii-character like 'åäö' in your username, your "Docume
 
 * **Start the MD307 simulator**: In the command palette, select "MDx07: Launch Simserver". The Simserver window will now open. 
   * The first time you start simserver, choose "Server → Set Target..." from the menu, and select MD307
-  * In the Simserver window, select "Server → IO Setup". 
-    * Under "IO-Ports", select "Serial Communication Interface 1" and then select "06 Console" under "IO-Devices".
+* In the Simserver window, select "Server → IO Setup". 
+* Under "IO-Ports", select "Serial Communication Interface 1" and then select "06 Console" under "IO-Devices".
 <p align="center">
   <img src="../images/getting_started_with_vs_code/image3.png" alt="My image" width="80%"/>
 </p>
@@ -65,10 +65,10 @@ If you have any non-ascii-character like 'åäö' in your username, your "Docume
   <img src="../images/getting_started_with_vs_code/image4.png" alt="My image" width="70%"/>
 </p>
 
-* **Run a little program to make sure everything works**: 
+**Run a little program to make sure everything works**: 
 
-   * Go back to Visual Studio Code and press <kbd>F5</kbd> ("Start Debugging") and wait until the little yellow arrow appears at the first instruction.
-   * Then, step through the instructions with <kbd>F10</kbd> ("Step Over") until a greeting on the console window.
+ * Go back to Visual Studio Code and press <kbd>F5</kbd> ("Start Debugging") and wait until the little yellow arrow appears at the first instruction.
+ * Then, step through the instructions with <kbd>F10</kbd> ("Step Over") until a greeting on the console window.
 
 If you have any problems, go to one of the exercise sessions and ask a TA to help you. Otherwise, you are done and can start the course!
 

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ascii_display</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+<h1 id="ascii-display">ASCII Display</h1>
+<p>The PTB-111 development board is equipped with a 2-row LCD display.
+This page is a summary of how to communicate with it. The LCD display
+has three control signals, and 8 data signals:</p>
+<table>
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 50%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th>Signal</th>
+<th>Description</th>
+<th>Pin</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Register Select (RS)</strong></td>
+<td>This signal is used to tell the display whether it&#x2019;s a command or
+data that we are sending/receiving.</td>
+<td>0</td>
+</tr>
+<tr>
+<td><strong>Read/Write (R/W)</strong></td>
+<td>This signal is used to tell the display whether we want to send data
+to it, or receive data from it.</td>
+<td>1</td>
+</tr>
+<tr>
+<td><strong>Enable (E)</strong></td>
+<td>This signal is used to synchronize communication with the
+display</td>
+<td>2</td>
+</tr>
+<tr>
+<td><strong>Data Lines (DB0-DB7)</strong></td>
+<td>These 8 lines contain the command or data that we want to send (one
+byte).</td>
+<td>8-15</td>
+</tr>
+</tbody>
+</table>
+<p>On the PTB-111, the control signals are connected to the first three
+pins of an 8-bit port that is in turn connected to the upper or lower
+byte of one of the GPIO ports on the MD307 with a gray flat cable. The
+data lines are connected to another port. For instance, control signals
+might be connected to <code>PE[0..2]</code> and data lines to
+<code>PE[8..15]</code>.</p>
+<h2 id="writing-a-command-or-data-to-the-display">Writing a command or
+data to the display</h2>
+<p>Before any command or data is written to the display, you must first
+ensure that the display is not busy with a previous command. This is
+done by reading the status bit, as explained in the next section.</p>
+<p>Whether you are writing a command or a character to the display, you
+must follow the procedure and timings specified in the diagram for a
+write cycle, below:</p>
+<p><img src="../images/ascii_display_write_cycle.png" /></p>
+<p>The possible commands (RS = 0, R/W = 0) are given in this table:</p>
+<table style="font-size: 0.85em;">
+<thead>
+<tr>
+<th>
+Command
+</th>
+<th>
+D7
+</th>
+<th>
+D6
+</th>
+<th>
+D5
+</th>
+<th>
+D4
+</th>
+<th>
+D3
+</th>
+<th>
+D2
+</th>
+<th>
+D1
+</th>
+<th>
+D0
+</th>
+<th>
+Description
+</th>
+<th>
+Execution time
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Clear display
+</td>
+<td>
+0
+</td>
+<td>
+0
+</td>
+<td>
+0
+</td>
+<td>
+0
+</td>
+<td>
+0
+</td>
+<td>
+0
+</td>
+<td>
+0
+</td>
+<td>
+1
+</td>
+<td>
+Clears the display
+</td>
+<td>
+1.53 ms
+</td>
+</tr>
+<tr>
+<td>
+Return Home
+</td>
+<td>
+0
+</td>
+<td>
+0
+</td>
+<td>
+0
+</td>
+<td>
+0
+</td>
+<td>
+0
+</td>
+<td>
+0
+</td>
+<td>
+1
+</td>
+<td>
+-
+</td>
+<td>
+Reset cursor
+</td>
+<td>
+1.53 ms
+</td>
+</tr>
+<tr>
+<td>
+Entry mode set
+</td>
+<td>
+0
+</td>
+<td>
+0
+</td>
+<td>
+0
+</td>
+<td>
+0
+</td>
+<td>
+0
+</td>
+<td>
+1
+</td>
+<td>
+ID
+</td>
+<td>
+SH
+</td>
+<td>
+ID: Cursor direction<br>(0 left, 1 right)
+</td>
+<td>
+39 &#xB5;s
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+SH: Shift (0 off, 1 on)
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+Display control
+</td>
+<td>
+0
+</td>
+<td>
+0
+</td>
+<td>
+0
+</td>
+<td>
+0
+</td>
+<td>
+1
+</td>
+<td>
+D
+</td>
+<td>
+C
+</td>
+<td>
+B
+</td>
+<td>
+Display (D), Cursor (C), Blink (B)<br> (0 off, 1 on)
+</td>
+<td>
+39 &#xB5;s
+</td>
+</tr>
+<tr>
+<td>
+Function set
+</td>
+<td>
+0
+</td>
+<td>
+0
+</td>
+<td>
+1
+</td>
+<td>
+1
+</td>
+<td>
+N
+</td>
+<td>
+F
+</td>
+<td>
+-
+</td>
+<td>
+-
+</td>
+<td>
+N: number of active rows on display (1: 2 rows, 0: 1 row)
+</td>
+<td>
+39 &#xB5;s
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+F: Character size<br>(0: 5&#xD7;8, 1: 5&#xD7;11)
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+Set address
+</td>
+<td>
+1
+</td>
+<td>
+A6
+</td>
+<td>
+A5
+</td>
+<td>
+A4
+</td>
+<td>
+A3
+</td>
+<td>
+A2
+</td>
+<td>
+A1
+</td>
+<td>
+A0
+</td>
+<td>
+Set address for next character
+</td>
+<td>
+39 &#xB5;s
+</td>
+</tr>
+</tbody>
+</table>
+<p>When writing data (a character) to the device (RS = 1, R/W = 0), the
+data bits contain the character to write in ASCII code. Writing data has
+an execution time of 43 &#xB5;s.</p>
+<p><em>Execution time</em> represents the time it takes after issuing
+the command until the action is guaranteed to be finished.</p>
+<h2 id="reading-status-or-data-from-the-display">Reading status or data
+from the display</h2>
+<p>When reading the display status (busy flag and current address), or
+data in display memory, you must follow the procedure and timings
+specified in the diagram for a read cycle, below:</p>
+<p><img src="../images/ascii_display_read_cycle.png" /></p>
+<p>When reading status (RS = 0, R/W = 1), <code>D7</code> is the Busy
+Flag. Remaining data bits are the current address. Reading status has an
+execution time of 0 &#xB5;s.</p>
+<p>When reading data (RS = 1, R/W = 1), the data bits are the character
+read at the current address. Reading data has an execution time of 43
+&#xB5;s.</p>
+</body>
+</html>

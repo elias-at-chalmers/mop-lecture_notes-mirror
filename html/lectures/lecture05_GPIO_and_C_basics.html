@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>lecture05_GPIO_and_C_basics</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+<h1 id="basics-of-gpio-and-c">Basics of GPIO and C</h1>
+<p>In the previous lecture, we learned how to control the voltage on a
+GPIO pin to switch an LED on or off. We also saw how to configure a pin
+as either an output or an input, but we glossed over a few important
+details.</p>
+<p>When we write software for regular computers, we can usually live in
+blissful ignorance of the fact that all those ones and zeros flying
+around are really electrical signals. But when we start connecting real
+devices to microcontrollers, that abstraction breaks down. To make our
+circuits work properly (and preferably not burn) we need to understand a
+few fundamental electrical concepts, which require us to think a bit
+when configuring our input and output ports.</p>
+<p>In the second half of the lecture, we will continue with some basic C
+programming concepts.</p>
+<h2 id="digital-input">Digital Input</h2>
+<p>We saw in the previous lecture that the physical pins on the
+connector are connected to a register <code>OUTDR</code> and that, if
+properly configured, each pin will get a voltage of 0 or 3.3V depending
+on whether the corresponding bit in the <code>OUTDR</code> register is 0
+or 1. By setting the bits differently in the <code>CFGLR/HR</code>
+register, we can instead connect each pin with the <code>INDR</code>
+register <a href="#fn1" class="footnote-ref" id="fnref1"
+role="doc-noteref"><sup>1</sup></a>. In this mode, the function is
+reversed. The bits in the <code>INDR</code> register will be loaded with
+<code>1</code> if the physical pin has a voltage of 3.3V connected, and
+<code>0</code> if the pin is at 0V.</p>
+<p align="center">
+<img src="../images/in_out_switch.png" alt="My image" width="75%" />
+</p>
+<h3 id="pull-up-and-pull-down">Pull Up and Pull Down</h3>
+<p>The simplest input device we could connect is arguably a single
+button, so let&#x2019;s start there. How does a button work? How can we connect
+it to our computer? This image suggests a pretty good start:</p>
+<p align="center">
+<img src="../images/simple_button.png" alt="My image" width="75%" />
+</p>
+<p>On the right side, we illustrate a simple push button, of the kind
+you can buy from any <a
+href="https://www.electrokit.com/tryckknapp-12.2mm-1-pol-off-onrod">electronics
+outlet</a>. The button has cables connected to two terminals and when
+you push the button down, these come into contact and a current can run
+through the circuit.</p>
+<p>We have connected one of these cables to the V<sub>dd</sub> (3.3V)
+pin, and the other to pin 5 (which is configured as an input pin). Thus,
+when the button is pushed down, we have 3.3V at the pin, and we can read
+<code>1</code> in the corresponding bit in the <code>INDR</code>
+register. But what happens when the button is released (and we are back
+to the situation in the image)?</p>
+<p>We would like be certain that if we read the bit when the button is
+released, the answer should be <code>0</code>. But the pin is not
+connected to <em>anything</em> now, so the actual voltage at the pin is
+unknown. The pin is said to be <em>floating</em>, and if we read it we
+might get a 0, or a 1.</p>
+<p>The standard way to solve this problem is to add a small &#x201C;Pull-Down
+Resistor&#x201D;, as in the image below:</p>
+<p align="center">
+<img src="../images/simple_pull_down.png" alt="My image" width="75%" />
+</p>
+<p>Now, if the button is released (as in the image), pin 5 is still
+connected to ground through the resistor. Any tiny charge that may have
+built up on the pin quickly flows through the resistor to ground, so the
+pin&#x2019;s voltage settles at 0 V. If we read the bit, it will be
+<code>0</code>. We say that this connection &#x201C;<em>pulls</em>&#x201D; the
+previously floating signal <em>down</em> to ground.</p>
+<p>If the button is pushed, pin 5 is directly connected to 3.3 V again,
+so current flows from the supply into the pin until it rises to 3.3 V.
+Reading the bit now gives <code>1</code>. A small <em>leakage
+current</em> will run through this connection, and some energy will be
+lost. If we use a resistor with a high resistance, the current will be
+very small, however, and the energy loss will be negligible.</p>
+<p>Whether we need this pull down resistor or not depends entirely on
+what we have connected. We could, for instance, connect the same button
+but connect one of the terminals (the blue cable) to <code>GND</code>
+instead of V<sub>dd</sub>. In that case, we know that we will get a 0
+when the button is pressed, but to avoid a floating value when the
+button is released, we need to connect a &#x201C;Pull-Up Resistor&#x201D;, to 3.3V.
+This is illustrated in the left image below. We say that &#x201C;the floating
+signal is <em>pulled</em> <em>up</em> to 3.3V&#x201D;.</p>
+<p align="center">
+<img src="../images/pull-up.png" alt="My image" width="45%" />
+<img src="../images/no-pull.png" alt="My image" width="45%" />
+</p>
+<p>A push button is a <em>Passive Component</em>. In the right image
+above, we have connected an <em>Active Component</em> (Perhaps an OR
+gate, or a DAC). This chip will put <em>either</em> 0 or 3.3V on its
+output pin (it is never floating), and then we don&#x2019;t need any pull-up or
+pull-down resistors.</p>
+<p>Since it is so common to connect passive components of various kinds
+to the GPIO pins, most MCUs have pull-up and -down resistors <em>built
+into</em> the chip. On the CH32V307, this is implemented as in the image
+below. When the pin is configured as an input pin, we can activate a
+pull-up/down resistor. This resistor is connected to the corresponding
+<em>output</em> bit, of the <code>OUTDR</code> register.</p>
+<p>This might seem confusing at first. We have seen that the
+<code>OUTDR</code> register is used when the pin is configured as an
+<em>output</em> pin, and that the value of the bit sets the voltage of
+the pin. This is cleverly reused here. When the pin is configured as an
+input pin, the <code>OUTDR</code> register is instead used as a selector
+that decides whether the resistor should pull up or down. This is
+equivalent to physically connecting a resistor to either GND or
+V<sub>dd</sub>, as we did before.</p>
+<p>So, if we need a pull-down resistor for the button connected to pin 2
+(as in the image) we activate pull up/down, and we set bit 2 of the
+<code>OUTDR</code> register to 0 (GND). This will, exactly as before,
+ensure that a floating input is &#x201C;pulled down&#x201D; to 0V. If we instead set
+bit 2 of the <code>OUTDR</code> register to 1(3.3V) we have a &#x201C;pull up&#x201D;
+resistor.</p>
+<p align="center">
+<img src="../images/built-in-pull.png" alt="My image" width="75%" />
+</p>
+<p>Now, let&#x2019;s revisit relevant parts from the <a
+href="LINK">Quickguide</a> to see how we configure our pin:</p>
+<div class="boxed">
+<details open>
+<summary>
+CFGLR</summary>
+<b>Configuration of GPIO port, for lower 8 pins.</b>
+
+Configuration of the port is done using the CFGLR and CFGHR for the lower eight and upper eight pins, respectively. For each pin, there are two bits to set the MODE (Input or Output, and speed of output pins), and two bits to set the CoNFiguration (the meaning of these pins depend on whether the pin is an input pin or an output pin):
+
+<table style="width:100%; table-layout:auto">
+  <tr>
+    <th colspan="2">CNF</th>
+    <th colspan="2">MODE</th>
+  </tr>
+
+  <!-- Input mode rows -->
+  <tr>
+    <td>00</td><td>Analog</td>
+    <td rowspan="4">00</td><td rowspan="4">Input Mode</td>
+  </tr>
+  <tr>
+    <td>01</td><td>Floating</td>
+  </tr>
+  <tr>
+    <td>10</td><td>Pull-up/Pull-down</td>
+  </tr>
+  <tr>
+    <td>11</td><td>Reserved</td>
+  </tr>
+
+  <!-- Output mode rows -->
+  <tr>
+    <td>00</td><td>Push Pull</td>
+    <td rowspan="4" colspan="1">
+      01<br>
+      10<br>
+      11
+    </td>
+    <td rowspan="4" colspan="1">
+      Output Mode 10Mhz<br>
+      Output Mode 2Mhz<br>
+      Output Mode 50Mhz
+    </td>
+  </tr>
+  <tr><td>01</td><td>Open Drain</td></tr>
+  <tr><td>10</td><td>Alternate Function, Push Pull</td></tr>
+  <tr><td>11</td><td>Alternate Function, Open Drain</td></tr>
+</table>
+<br>
+<small>Access: read-write  Reset Value: 0x44444444  </small>
+<table style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'>
+<tr><colgroup><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'></colgroup><tr><th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>31</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>30</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>29</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>28</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>27</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>26</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>25</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>24</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>23</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>22</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>21</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>20</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>19</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>18</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>17</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>16</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>15</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>14</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>13</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>12</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>11</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>10</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>9</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>8</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>7</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>6</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>5</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>4</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>3</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>2</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>1</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0</th>
+</tr><td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF7</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE7</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF6</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE6</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF5</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE5</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF4</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE4</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF3</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE3</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF2</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE2</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF1</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE1</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF0</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE0</small></td>
+</tr></table><b>CNF</b>n (n = 0..7): Set CONF for pin n<br>
+<b>MODE</b>n (n = 0..7): Set MODE for pin n<br>
+</details>
+<details open>
+<summary>
+CFGHR</summary>
+<p>
+Configure port for the upper 8 pins. (See CFGLR for details)<br>
+</p>
+<small>Access: read-write  Reset Value: 0x44444444  </small>
+<table style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'>
+<tr><colgroup><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'></colgroup><tr><th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>31</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>30</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>29</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>28</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>27</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>26</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>25</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>24</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>23</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>22</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>21</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>20</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>19</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>18</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>17</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>16</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>15</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>14</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>13</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>12</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>11</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>10</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>9</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>8</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>7</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>6</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>5</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>4</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>3</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>2</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>1</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0</th>
+</tr><td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF15</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE15</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF14</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE14</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF13</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE13</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF12</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE12</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF11</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE11</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF10</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE10</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF9</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE9</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF8</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE8</small></td>
+</tr></table><b>CNF</b>n (n = 8..15): Set CONF for pin n<br>
+<b>MODE</b>n (n = 8..15): Set MODE for pin n<br>
+</details>
+
+
+</div>
+<p>We want to plug in a button as in the image above, so we want to
+configure pin2 as an input pin and activate a <em>pull-down</em>
+resistor on this pin. To configure the pin as input, we only need to set
+<code>MODE</code> to <code>00</code>.</p>
+<p>To activate the pull up/down resistor, we set <code>CNF</code> to
+<code>10</code>. The possible configurations for an input pin are:</p>
+<ul>
+<li><em>Analog</em> (00) &#x2013; Used when the input voltage varies anywhere
+between 0 and 3.3V and we want to read its value. You might want to try
+this out towards the end of the course, but we leave it for now.</li>
+<li><em>Floating</em> (01) &#x2013; When we don&#x2019;t want any pull up/down
+resistor connected.</li>
+<li><em>Pull-up/Pull-down</em> (10) &#x2013; Activates the resistor based on
+the value in <code>OUTDR</code>.</li>
+<li><em>Reserved</em> (11) &#x2013; Not used.</li>
+</ul>
+<p>To choose pull <em>down</em>, rather than pull up, resistor, we set
+bit 2 in <code>OUTDR</code> to 0. Once the GPIO port is configured, we
+can read the current status of the input pin by reading the
+corresponding bit (bit 2 in this case) of the <code>INDR</code>
+register.</p>
+<p>In assembly, a program that loops until the button has been pushed
+could look like:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">la</span> <span class="kw">t0</span><span class="op">,</span> GPIO_D_CFGLR      <span class="co"># Configure pin 2 as input with pull up/down active</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">li</span> <span class="kw">t1</span><span class="op">,</span> <span class="bn">0x00000800</span>        <span class="co"># Binary: ... 0000 1000 0000 0000</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>                         <span class="co"># Pin:    ...   3    2    1    0</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">sw</span> <span class="kw">t1</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">t0</span><span class="op">)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">la</span> <span class="kw">t0</span><span class="op">,</span> GPIO_D_OUTDR      <span class="co"># Make it pull UP</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">li</span> <span class="kw">t1</span><span class="op">,</span> <span class="bn">0x4</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">sh</span> <span class="kw">t1</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">t0</span><span class="op">)</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">await_button:</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">la</span> <span class="kw">t0</span><span class="op">,</span> GPIO_D_INDR</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">lh</span> <span class="kw">t1</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">t0</span><span class="op">)</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">bnez</span> <span class="kw">t1</span><span class="op">,</span> await_button</span></code></pre></div>
+<h2 id="digital-output">Digital Output</h2>
+<p>In the last lecture, we turned on an LED light by writing to the
+<code>OUTDR</code> register, and to configure the output pin, we set
+<code>CFG</code> to 00, without going into why. We can see in the table
+above that the possible configurations an output pin can have are:
+<em>Push-Pull</em> (00), <em>Open Drain</em> (01), <em>Alternate
+Function, Push Pull</em> (10), or <em>Alternate Function, Open
+Drain</em>. The <em>alternate function</em> setting is used when we want
+the pin to work with something <em>other</em> than the GPIO module (for
+example, the USB module) and we will leave that for much later. But we
+still have to clarify what <em>Push-Pull</em> and <em>Open-Drain</em>
+means.</p>
+<p>The name &#x201C;push-pull&#x201D; originally comes from amplifier design, where
+two active devices alternately &#x201C;push&#x201D; and &#x201C;pull&#x201D; current. In digital
+electronics, a push-pull output stage means the pin is actively driven
+both high (e.g.&#xA0;3.3 V when outputting 1) and low (0 V when outputting
+0). This is the standard behavior, and probably what you would have
+expected it to do. With this configuration we can for example make the
+LED glow, as we have seen.</p>
+<p>The interesting question is why we would ever do something else? You
+will see later that there are many cases where this configuration could
+cause problems, but let us start with a simple example that illustrates
+the main problem:</p>
+<strong>Example:</strong> <em>We have a system where pins 3 and 5 will
+be set to zero if some error has occurred. We want to connect a red LED
+that warns us if either of these error-pins are zero:</em>
+<p align="center">
+<img src="../images/two_pins_one_led.png" alt="My image" width="75%" />
+</p>
+<p>Now, consider what happens if we connect the LED as in the image
+above and configure pins 3 and 5 as push-pull outputs:</p>
+<ul>
+<li>If both bits are set to 1, no current flows through the LED (the
+anode and cathode are both at 3.3V), and it stays off.</li>
+<li>If both bits are set to 0, current flows from V<sub>DD</sub> through
+the LED to the pins, and the LED lights up.</li>
+</ul>
+<p><em>But if one pin outputs 1 and the other outputs 0</em>, we create
+a direct short: one pin is actively driving 3.3 V while the other is
+actively pulling to ground. This causes a large current to flow directly
+between the two pins instead of through the LED. This is very bad and
+might damage the transistors inside the microcontroller.</p>
+<p>The solution to this problem is to configure the pins as <strong>Open
+Drain</strong> instead of <strong>Push Pull</strong>. In an Open Drain
+configuration, writing <code>0</code> to the corresponding bit drives
+the pin to 0 V, but writing <code>1</code> places the pin in a
+<strong>high-impedance (Hi-Z)</strong> state. In this Hi-Z (or
+&#x201C;floating&#x201D;) state, the pin behaves as if it isn&#x2019;t connected at all.</p>
+<p>Now:</p>
+<ul>
+<li>If both bits are set to 1, it is as if we had removed the two green
+lines in the image. No current can flow, and the LED is off.</li>
+<li>If both bits are set to 0, the pins are both set to 0V, and current
+flows from V<sub>DD</sub> through the LED to the pins, and the LED
+lights up.</li>
+<li>If one bit is set to 0 (pin is 0V) and the other is set to 1 (pin is
+floating) current still flows from V<sub>DD</sub> to the pin at 0V, and
+the LED lights up.</li>
+</ul>
+<h3 id="read-modify-write-and-bshrbcr">Read-Modify-Write and
+BSHR/BCR</h3>
+<p>Especially when programming &#x201C;close to the metal&#x201D;, as in this course,
+you will often find yourself wanting to change just a few bits in a
+word, and leave the rest as they are. Say, for instance, that your task
+is to turn a single led-light &#x2013; connected to pin 2 of GPIO_D &#x2013; on and
+off. We have previously configured the pin as output by writing a value
+to the <em>whole</em> <code>CFGLR</code> register. But other pins on
+that port might be used for something else, and might already have been
+configured, and you do not want to overwrite that configuration.</p>
+<p>The standard way of handling this is to break the operation into two
+operations, where you first <em>clear</em> all the bits you want to want
+to change with an AND operation, and then <em>set</em> the desired bits
+with an OR operation:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">la</span> <span class="kw">t0</span><span class="op">,</span> <span class="bn">0x40011400</span>    <span class="co"># GPIO_D_CFGLR</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">lh</span> <span class="kw">t1</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">t0</span><span class="op">)</span>         <span class="co"># Load the current value of CFGLR into t1</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">li</span> <span class="kw">t2</span><span class="op">,</span> <span class="bn">0xFFFFF0FF</span>    <span class="co"># Load a mask into t2</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">and</span> <span class="kw">t1</span><span class="op">,</span> <span class="kw">t1</span><span class="op">,</span> <span class="kw">t2</span>       <span class="co"># Clear the four bits you want to change</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">li</span> <span class="kw">t2</span><span class="op">,</span> <span class="bn">0x00000800</span>    <span class="co"># Set the bits you want to set in t2</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="kw">or</span> <span class="kw">t1</span><span class="op">,</span> <span class="kw">t1</span><span class="op">,</span> <span class="kw">t2</span>        <span class="co"># And set these bits in t1 </span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>                     <span class="co"># (without changing what was there before)</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="kw">sw</span> <span class="kw">t1</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">t0</span><span class="op">)</span>         <span class="co"># Write back to CFGLR</span></span></code></pre></div>
+<p>This works fine, but is a bit cumbersome and not very fast.
+Therefore, some peripherals have specific registers for setting or
+clearing bits in a single operation:</p>
+<div class="boxed">
+<details open>
+<summary>
+BSHR</summary>
+<p>
+Port bit set/reset register
+          (GPIOn_BSHR)<br>
+</p>
+<small>Access: write-only  Reset Value: 0x00000000  </small>
+<table style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'>
+<tr><colgroup><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'></colgroup><tr><th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>31</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>30</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>29</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>28</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>27</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>26</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>25</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>24</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>23</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>22</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>21</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>20</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>19</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>18</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>17</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>16</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>15</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>14</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>13</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>12</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>11</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>10</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>9</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>8</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>7</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>6</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>5</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>4</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>3</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>2</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>1</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0</th>
+</tr><td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR15</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR14</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR13</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR12</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR11</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR10</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR9</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR8</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR7</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR6</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR5</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR4</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR3</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR2</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR1</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR0</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BS15</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BS14</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BS13</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BS12</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BS11</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BS10</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BS9</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BS8</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BS7</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BS6</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BS5</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BS4</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BS3</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BS2</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BS1</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BS0</small></td>
+</tr></table><b>BR</b>n (n = 0..15): Writing 1 to BRn resets bit n in OUTDR to 0<br>
+<b>BS</b>n (n = 0..15): Writing 1 to BSn sets bit n in OUTDR to 1<br>
+</details>
+
+
+<details open>
+<summary>
+BCR</summary>
+<p>
+Port bit reset register
+          (GPIOn_BCR)<br>
+</p>
+<small>Access: write-only  Reset Value: 0x00000000  </small>
+<table style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'>
+<tr><colgroup><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'></colgroup><tr><th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>31</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>30</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>29</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>28</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>27</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>26</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>25</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>24</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>23</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>22</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>21</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>20</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>19</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>18</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>17</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>16</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>15</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>14</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>13</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>12</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>11</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>10</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>9</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>8</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>7</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>6</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>5</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>4</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>3</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>2</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>1</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0</th>
+</tr><td colspan=16 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+</td><td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR15</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR14</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR13</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR12</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR11</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR10</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR9</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR8</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR7</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR6</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR5</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR4</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR3</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR2</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR1</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>BR0</small></td>
+</tr></table><b>BR</b>n (n = 0..15): Writing 1 to BRn resets bit n in OUTDR to 0<br>
+</details>
+
+
+</div>
+<p>The <code>BSHR</code> register allows you to set some bits and clear
+some bits in a single 32-bit write operation, which can be useful in
+some cases. Normally, though, we will use the lower 16 bits in the
+<code>BSHR</code> register to set bits, and the lower 16 bits in the
+<code>BCR</code> register to clear bits.</p>
+<p>So, if we wanted to just blink an LED connected to pin 2 on and off
+as fast as we could, without changing the values of the other bits,
+write:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">la</span> <span class="kw">t0</span><span class="op">,</span> <span class="bn">0x40011410</span>    <span class="co"># GPIO_D_BSHR</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">la</span> <span class="kw">t1</span><span class="op">,</span> <span class="bn">0x40011414</span>    <span class="co"># GPIO_D_BCR</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">li</span> <span class="kw">t2</span><span class="op">,</span> <span class="bn">0b100</span>         <span class="co"># Only bit 2 </span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">blink:</span> </span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">sh</span> <span class="kw">t2</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">t0</span><span class="op">)</span>       <span class="co"># Set only bit 2 (leave the others as they are)</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">sh</span> <span class="kw">t2</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">t1</span><span class="op">)</span>       <span class="co"># Clear only bit 2 (leave the others as they are)</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">j</span> blink</span></code></pre></div>
+<p>Note that you <em>set</em> the bit in <code>BCR</code> to
+<em>clear</em> the value in <code>OUTDR</code>.</p>
+<blockquote>
+<p><strong>Quiz:</strong> If you actually run this program on hardware,
+you would find that the LED just shines dimly and doesn&#x2019;t blink at all.
+Why?</p>
+</blockquote>
+<h2 id="keypad">Keypad</h2>
+<p>Now that you know everything worth knowing about the GPIO ports let
+us take a look at a more interesting device. In the simulator and on the
+lab equipment, there is a <em>keypad</em> with 16 keys. An image of the
+keypad, along with an illustration of how it is connected is given in
+the image below:</p>
+<p align="center">
+<img src="../images/keypad.png" alt="My image" width="75%" />
+</p>
+<p>It would, of course, be possible to build a simple keyboard where
+each key was connected to its own GPIO pin, but that would require very
+many pins (and thick cables) for large keyboards. Instead, the keys in
+your computer keyboard, or your digital piano, for that matter, are
+usually connected similarly to this one.</p>
+<p>The idea is that each pin is connected to one <em>row</em> or one
+<em>column</em> of keys. By pressing a button, you will connect one row
+pin with one column pin. So, if you wanted to know if, e.g., the button
+labeled <code>10</code> in the image was pressed, you could configure
+pin 2 (the pink column in the image) to be an input pin, with pull-up
+enabled, and you could output <code>0</code> on pin 6.</p>
+<ul>
+<li>If no button is pressed, there is no connection, and you will read
+<code>1</code> from pin 2 (because of the pull-up)</li>
+<li>If button number 10 is pressed, pin 6 and pin 2 are connected, and
+we will read <code>0</code> on pin 2.</li>
+</ul>
+<p>By following the assignments in the workbook, you will construct an
+algorithm that activates one row at a time and reads all four columns
+for that row. By sweeping over all four rows you can find out exactly
+which buttons are pressed.</p>
+<p>One important thing to note is that you have to use
+<code>Open Drain</code> (not <code>Push-Pull</code>) on the output pins.
+Otherwise, if you press both key 0 and key 12 (for instance) at <em>the
+same time</em> there is a direct connection between output pins 7 and 4
+and, as we saw earlier, this can lead to a shorted circuit and broken
+transistors.</p>
+<h2 id="c-programming-basics">C Programming Basics</h2>
+<p>We will now switch topic for a bit and go through some more basic C
+programming</p>
+<h3 id="calling-declaring-and-defining-a-function">Calling, Declaring
+and Defining a function</h3>
+<p>All code in a C program resides in a <em>function</em>. To call a
+function, it must have been <em>declared</em> earlier in the C file
+being compiled. A function declaration looks like:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span><span class="cf">return</span> type<span class="op">&gt;</span> function_name<span class="op">(&lt;</span>parameter <span class="dv">1</span> type<span class="op">&gt;</span> parameter_1_name<span class="op">,</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>                            <span class="op">&lt;</span>parameter <span class="dv">2</span> type<span class="op">&gt;</span> parameter_2_name<span class="op">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                            <span class="op">...);</span></span></code></pre></div>
+<p>So, if we for instance want to create a function called
+<code>max</code> that returns the maximum of two integers, we could
+declare it as:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> max<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">);</span></span></code></pre></div>
+<p>This only tells the compiler that <em>there is</em> a function called
+<code>max</code> that takes two integers as parameters and returns an
+integer. We have not yet <em>implemented</em> or <em>defined</em> the
+function. Declaring a function, without giving the definition, is
+necessary if the function definition resides in a different C file, or
+if it lies <em>after</em> the calling function <a href="#fn2"
+class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> max<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">);</span> <span class="co">// Function declaration</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> main<span class="op">()</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> a <span class="op">=</span> max<span class="op">(</span><span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">);</span> <span class="co">// Function call</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">// Function definition</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> max<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span><span class="op">(</span>a <span class="op">&gt;</span> b<span class="op">)</span> <span class="cf">return</span> a<span class="op">;</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="cf">return</span> b<span class="op">;</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>In the example above, the function <code>max</code> is first
+<em>declared</em> on line 1. This allows us to <em>call</em> the
+function on line 5. Finally, starting on line 9, we <em>define</em> the
+function by providing the code that shall be run.</p>
+<p>A function can only be <em>defined</em> once, in one file, in a C
+program but needs to be <em>declared</em> before it can be called in all
+C files that need to call it. Note that a function definition also
+counts as a declaration, so the following code is perfectly valid:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> max<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span> <span class="co">// Function declaration AND definition</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span><span class="op">(</span>a <span class="op">&gt;</span> b<span class="op">)</span> <span class="cf">return</span> a<span class="op">;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="cf">return</span> b<span class="op">;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> main<span class="op">()</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> a <span class="op">=</span> max<span class="op">(</span><span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">);</span> <span class="co">// Function call</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="sec:intro:function_parameters">Function parameters</h3>
+<p>Unlike most modern languages (including C++), C <em>only</em> allows
+passing function parameters <em>by value</em>. That means that every
+time you call a function in C, the parameters are <em>copied</em> to the
+called function. Any changes that happen to the variables in the called
+function are local to that function:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> set_to_five<span class="op">(</span><span class="dt">int</span> a<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    a <span class="op">=</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> main<span class="op">()</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> x <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    set_to_five<span class="op">(</span>x<span class="op">);</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;x = </span><span class="sc">%i\n</span><span class="st">&quot;</span><span class="op">,</span> x<span class="op">);</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>This program will print <code>x = 0</code> to the console. When
+calling function <code>set_to_five</code> on line 7, the value of
+<code>x</code> was <em>copied</em> into the parameter <code>a</code> and
+when that value is changed on line 2, the value of <code>x</code> in
+<code>main</code> is not affected.</p>
+<p>It is not uncommon that we <em>want</em> a function to change the
+value of a parameter. Consider a function <code>swap(x, y)</code> that
+should simply swap the values of x and y. The following code:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> swap<span class="op">(</span><span class="dt">int</span> x<span class="op">,</span> <span class="dt">int</span> y<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> tmp <span class="op">=</span> y<span class="op">;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> x<span class="op">;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> tmp<span class="op">;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> main<span class="op">()</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> a <span class="op">=</span> <span class="dv">5</span><span class="op">,</span> b <span class="op">=</span> <span class="dv">2</span><span class="op">;</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    swap<span class="op">(</span>a<span class="op">,</span> b<span class="op">);</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;a = </span><span class="sc">%i</span><span class="st">, b = </span><span class="sc">%i\n</span><span class="st">&quot;</span><span class="op">,</span> a<span class="op">,</span> b<span class="op">);</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>would not not accomplish anything, and would output
+<code>a = 5, b = 2</code>.</p>
+<p>The solution, in C, is to use <em>pointers</em>. Pointers will be
+discussed in detail in a future Lecture, but we will take this
+opportunity to show one case where they are useful. A pointer is the
+<em>address</em> of a variable. If we send (copies of) the
+<em>addresses</em> of <code>a</code> and <code>b</code> to the function
+<code>sort</code>, we <em>can</em> modify their values and get the
+expected result.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> swap<span class="op">(</span><span class="dt">int</span> <span class="op">*</span>x<span class="op">,</span> <span class="dt">int</span> <span class="op">*</span>y<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> tmp <span class="op">=</span> <span class="op">*</span>y<span class="op">;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>y <span class="op">=</span> <span class="op">*</span>x<span class="op">;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>x <span class="op">=</span> tmp<span class="op">;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> main<span class="op">()</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> a <span class="op">=</span> <span class="dv">5</span><span class="op">,</span> b <span class="op">=</span> <span class="dv">2</span><span class="op">;</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    swap<span class="op">(&amp;</span>a<span class="op">,</span> <span class="op">&amp;</span>b<span class="op">);</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;a = </span><span class="sc">%i</span><span class="st">, b = </span><span class="sc">%i\n</span><span class="st">&quot;</span><span class="op">,</span> a<span class="op">,</span> b<span class="op">);</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>This code will output <code>a = 2, b = 5</code>, but the syntax is
+probably quite confusing at the moment. We will return to this example
+later.</p>
+<h3 id="sec:language:datatypes">Basic Data Types</h3>
+<p>The only built-in data types in C are integers and floating point
+numbers. Anything more complex, such as a data type describing a player
+in a game, or the properties of some device, are built from these basic
+types using <code>structs</code>, <code>arrays</code>, and
+<code>unions</code>, which will be described in future Lectures.</p>
+<p>In addition to choosing whether a variable should be integer or
+floating point, we also have to specify how many bytes it should occupy
+(i.e., its range) and, in the case of integers, whether it should be
+signed or unsigned. For historical reasons, the C specification allows
+for several more or less confusing ways of describing integer types, but
+the table below describes the ones we will use in this course.</p>
+<table id="tab:integers">
+<caption>Integer data types</caption>
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 46%" />
+<col style="width: 9%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th>type</th>
+<th>range</th>
+<th>bytes</th>
+<th>short name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>unsigned char</code></td>
+<td>0 to 255</td>
+<td>1</td>
+<td><code>uint8_t</code></td>
+</tr>
+<tr>
+<td><code>unsigned short</code></td>
+<td>0 to 65535</td>
+<td>2</td>
+<td><code>uint16_t</code></td>
+</tr>
+<tr>
+<td><code>unsigned int</code></td>
+<td>0 to <span class="math inline">2<sup>32</sup>&#x2005;&#x2212;&#x2005;1</span></td>
+<td>4</td>
+<td><code>uint32_t</code></td>
+</tr>
+<tr>
+<td><code>unsigned long long</code></td>
+<td>0 to <span class="math inline">2<sup>64</sup>&#x2005;&#x2212;&#x2005;1</span></td>
+<td>8</td>
+<td><code>uint64_t</code></td>
+</tr>
+<tr>
+<td><code>signed char</code></td>
+<td>-127 to 127</td>
+<td>1</td>
+<td><code>int8_t</code></td>
+</tr>
+<tr>
+<td><code>signed short</code></td>
+<td>-32767 to 32767</td>
+<td>2</td>
+<td><code>int16_t</code></td>
+</tr>
+<tr>
+<td><code>signed int</code></td>
+<td>(<span class="math inline">&#x2212;2<sup>31</sup>&#x2005;+&#x2005;1</span>) to (<span
+class="math inline">2<sup>31</sup>&#x2005;&#x2212;&#x2005;1</span>)</td>
+<td>4</td>
+<td><code>int32_t</code></td>
+</tr>
+<tr>
+<td><code>signed long long</code></td>
+<td>(<span class="math inline">&#x2212;2<sup>63</sup>&#x2005;+&#x2005;1</span>) to (<span
+class="math inline">2<sup>63</sup>&#x2005;&#x2212;&#x2005;1</span>)</td>
+<td>8</td>
+<td><code>int64_t</code></td>
+</tr>
+</tbody>
+</table>
+<p>If you do not prefix your data type with <code>signed</code> or
+<code>unsigned</code>, it is assumed to be signed <em>except</em> if it
+is a <code>char</code> (a one byte integer), in which case its
+signedness depends on the architecture (!). Because the notation can be
+somewhat confusing, it is common to include the file
+<code>stdint.h</code> which allows us to use the short, descriptive
+names listed in the last column of the table above.</p>
+<p>The floating-point data types have a simpler syntax and consist only
+of <code>float</code> or <code>double</code> for the 4 and 8 byte data
+types respectively.</p>
+<h3 id="type-casting">Type Casting</h3>
+<p>We often have to convert from one data type to another. This can be
+done either <em>implicitly</em> or <em>explicitly</em>:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> main<span class="op">()</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">float</span> a <span class="op">=</span> <span class="fl">200.501</span><span class="bu">f</span><span class="op">;</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> b <span class="op">=</span> a<span class="op">;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">unsigned</span> <span class="dt">char</span> c <span class="op">=</span> a <span class="op">*</span> b<span class="op">;</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>In the example above, on line 4, the value 200.501 is cast to an
+integer and stored in variable <code>b</code>. Since an integer cannot
+store a floating point value, it will be truncated to 200. On the next
+line <code>b</code> is first promoted to a floating point number, then
+<code>a * b</code> is calculated as a floating point number 40100.2,
+then that value is cast to an <code>unsigned char</code> and stored in
+the variable <code>c</code>. The result is again truncated to a whole
+number 40100 (<code>0x9CA4</code>), and since an unsigned char can only
+store values up to 255, only the lowest byte of the result
+(<code>0xA4</code>) will remain in <code>c</code>.</p>
+<p>If this seems a bit complicated, that is because it is. The C
+specification has a large number of very strict rules about what
+happens, and in what order, when casting between datatypes, but it can
+be hard to remember. Therefore, it is often better to
+<em>explicitly</em> describe what casts should be done:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>    <span class="dt">float</span> a <span class="op">=</span> <span class="fl">200.501</span><span class="bu">f</span><span class="op">;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> b <span class="op">=</span> <span class="op">(</span><span class="dt">int</span><span class="op">)</span> a<span class="op">;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">unsigned</span> <span class="dt">char</span> c <span class="op">=</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">char</span><span class="op">)(</span>a <span class="op">*</span> <span class="op">(</span><span class="dt">float</span><span class="op">)</span> b<span class="op">);</span></span></code></pre></div>
+<h3 id="sec:language:conditional">Conditional execution</h3>
+<p>Choosing whether to execute code depending on some condition in C is
+similar to most high level languages. In the example below, we use first
+the <em>if</em> statement and then the <em>switch</em> statement to do
+the same thing:</p>
+<center>
+<strong>if statement:</strong>
+</center>
+<div class="sourceCode" id="cb13"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span><span class="op">(</span>a <span class="op">==</span> <span class="dv">5</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;a is 5&quot;</span><span class="op">);</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span> <span class="cf">if</span><span class="op">(</span>a <span class="op">==</span> <span class="dv">4</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;a is 4&quot;</span><span class="op">);</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span> <span class="cf">if</span><span class="op">(</span>a <span class="op">==</span> <span class="dv">3</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;a is 3&quot;</span><span class="op">);</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;a is something else&quot;</span><span class="op">);</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<center>
+<strong>switch statement:</strong>
+</center>
+<div class="sourceCode" id="cb14"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="cf">switch</span><span class="op">(</span>a<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="dv">5</span><span class="op">:</span> printf<span class="op">(</span><span class="st">&quot;a is 5&quot;</span><span class="op">);</span> <span class="cf">break</span><span class="op">;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="dv">4</span><span class="op">:</span> printf<span class="op">(</span><span class="st">&quot;a is 4&quot;</span><span class="op">);</span> <span class="cf">break</span><span class="op">;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="dv">3</span><span class="op">:</span> printf<span class="op">(</span><span class="st">&quot;a is 3&quot;</span><span class="op">);</span> <span class="cf">break</span><span class="op">;</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">default</span><span class="op">:</span> <span class="op">{</span> printf<span class="op">(</span><span class="st">&quot;a is something else&quot;</span><span class="op">);</span> <span class="cf">break</span><span class="op">;</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Note the <code>break</code> statement when using switch. It means
+that you should break out of the switch statement. If you forget that,
+the code will continue to execute the subsequent <code>case</code>
+statements, which <em>can</em> be used to your advantage in some cases,
+but is also a very common source of bugs.</p>
+<p>One important thing to note is that there is no <code>true</code> or
+<code>false</code> datatype in C. Instead, the result of a comparison is
+always an integer, with 0 meaning false and any other number meaning
+true. You will see examples of where this can be important in the
+following sections.</p>
+<h3 id="conditional-operator">Conditional operator</h3>
+<p>In some simple cases, when a variable is to be assigned a value based
+on some condition, the <em>conditional operator</em> can be a cleaner
+way to express your intention:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Conditional operator:</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co">// &lt;variable&gt; = &lt;condition&gt; ? &lt;if condition is true&gt; : &lt;if condition is false&gt;;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Example:</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> a <span class="op">=</span> <span class="op">(</span>b <span class="op">&gt;</span> <span class="dv">5</span><span class="op">)</span> <span class="op">?</span> <span class="dv">20</span> <span class="op">:</span> <span class="dv">30</span><span class="op">;</span> <span class="co">// a is set to 20 if b is more than 5 and 30 otherwise</span></span></code></pre></div>
+<h3 id="sec:language:iterations">Iterating</h3>
+<p>Writing code that <em>iterates</em> or <em>loops</em> is also very
+similar to other imperative languages. The example below illustrates how
+<code>for</code> or <code>while</code> loops can be used to achieve the
+same thing:</p>
+<!-- to make it even simpler you could write a function with only one argument, like factorial(n)
+     ERIK: Valid point, but I don't have the strength today. TODO. 
+     Sergei: Counter-point: students who read/need this may not know what factorial is. Power is an easier function. :)
+ -->
+<center>
+<strong>for statement:</strong>
+</center>
+<div class="sourceCode" id="cb16"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> pow<span class="op">(</span><span class="dt">int</span> v<span class="op">,</span> <span class="dt">int</span> p<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> result <span class="op">=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> p<span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>        result <span class="op">=</span> result <span class="op">*</span> v<span class="op">;</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> result<span class="op">;</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<center>
+<strong>while statement:</strong>
+</center>
+<div class="sourceCode" id="cb17"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> pow<span class="op">(</span><span class="dt">int</span> v<span class="op">,</span> <span class="dt">int</span> p<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> result <span class="op">=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span><span class="op">(</span>i <span class="op">&lt;</span> p<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>      result <span class="op">=</span> result <span class="op">*</span> v<span class="op">;</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>      i <span class="op">+=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> result<span class="op">;</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The <code>for</code> statement is generally used when we are
+iterating a known number of times, and the <code>while</code> statement
+is used when we only know that we should loop until some condition is
+met. In either case, we can use the <code>break</code> statement to
+immediately break out of the loop, or the <code>continue</code>
+statement to jump back to the beginning of the loop:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> rand<span class="op">();</span> <span class="co">// Expecting this function to exist elsewhere</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>            <span class="co">// and that it returns a random number.</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Count the number of positive numbers we get</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// before we get a zero</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> result <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span><span class="op">(</span><span class="dv">1</span><span class="op">)</span> <span class="op">{</span>  <span class="co">// 1 is &quot;true&quot; in C</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> v <span class="op">=</span> rand<span class="op">();</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span><span class="op">(</span>v <span class="op">&lt;</span> <span class="dv">0</span><span class="op">)</span> <span class="cf">continue</span><span class="op">;</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>        result <span class="op">+=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span><span class="op">(</span>v <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="cf">break</span><span class="op">;</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="the-infamous-goto-statement">The infamous <code>goto</code>
+statement</h3>
+<p><em>Unlike</em> most other modern languages, C actually has a
+<code>goto</code> statement, which works exactly like the &#x2018;&#x2019;jump&#x2019;&#x2019; or
+&#x2018;&#x2019;branch&#x2019;&#x2019; instruction in assembler. This sort of low level statement
+has been removed from modern languages because it provides a very easy
+way to write completely undebuggable code, and we recommend that you
+forget that you ever saw this small paragraph and never use it.</p>
+<h3 id="sec:language:operators">Operators</h3>
+<p>Most of the operators in C will be well known to you, if not from
+previous coding experience then from maths, and we will not go through
+all of them in detail as they can be easily found on the internet. We
+will only quickly go through the different classes, and highlight some
+important details:</p>
+<h3 id="arithmetic-operators---etc">Arithmetic Operators,
+(<code>+, -, *</code>, etc)</h3>
+<p>We have already seen these used in the text and you probably know how
+they work. Worth noting are the increment and decrement operators. Also
+make sure you understand the modulus operator.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> a <span class="op">=</span> <span class="dv">10</span><span class="op">,</span> b <span class="op">=</span> <span class="dv">3</span><span class="op">;</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> c <span class="op">=</span> a <span class="op">+</span> b<span class="op">;</span> <span class="co">// Addition</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> d <span class="op">=</span> a <span class="op">-</span> b<span class="op">;</span> <span class="co">// Subtraction</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> e <span class="op">=</span> a <span class="op">*</span> b<span class="op">;</span> <span class="co">// Multiplication</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> f <span class="op">=</span> a <span class="op">/</span> b<span class="op">;</span> <span class="co">// Integer division</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> g <span class="op">=</span> a <span class="op">%</span> b<span class="op">;</span> <span class="co">// Modulus (remainder of an integer division)</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> h <span class="op">=</span> a<span class="op">++;</span>   <span class="co">// Increment Operator (assign a to h, then increment a)</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> i <span class="op">=</span> <span class="op">++</span>a<span class="op">;</span>   <span class="co">// Increment Operator (increment a, then assign a to i)</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> j <span class="op">=</span> a<span class="op">--;</span>   <span class="co">// Decrement Operator (assign a to j, then decrement a)</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> k <span class="op">=</span> <span class="op">--</span>a<span class="op">;</span>   <span class="co">// Decrement Operator (decrement a, then assign a to k)</span></span></code></pre></div>
+<h3 id="relational-operators">Relational Operators,
+<code>==, !=, &gt;, &lt;, &gt;=, &lt;=</code></h3>
+<p>These are the operators we use to compare variables and they are all
+probably known to you. Remember that, in C, the result of a relational
+operator is an integer (0 if false and 1 otherwise), so you
+<em>might</em> see expressions such as:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> a <span class="op">=</span> <span class="dv">20</span> <span class="op">+</span> <span class="op">(</span>a <span class="op">&gt;</span> c<span class="op">);</span> <span class="co">// 21 if a is more than c</span></span></code></pre></div>
+<h3 id="logical-operators">Logical Operators,
+<code>&amp;&amp;, ||, !</code></h3>
+<p>These are logical operators and are mostly used as in other
+languages:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span><span class="op">(</span>a <span class="op">&amp;&amp;</span> b<span class="op">)</span> <span class="co">// If a is non-zero AND b is non-zero</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span><span class="op">(</span>a <span class="op">||</span> b<span class="op">)</span> <span class="co">// If a OR b is non-zero</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span><span class="op">(!</span>a<span class="op">)</span>     <span class="co">// If a is NOT non-zero (i.e., if a is zero)</span></span></code></pre></div>
+<h3 id="bitwise-operators">Bitwise Operators,
+<code>&amp;, |, ^, ~, &lt;&lt;, &gt;&gt;</code></h3>
+<p>The bitwise operators are easy to confuse with the logical operators,
+but they are <em>not</em> the same thing. The result of these operators
+is not a boolean value, but an integer where the operation has been
+performed per bit. While these operations look the same in most modern
+languages, you may not have come across them as often, and they will be
+very important in this course, so make sure you understand the
+following:</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Assume a = (binary) 10101010 and b is 00001111</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>c <span class="op">=</span> a <span class="op">&amp;</span> b<span class="op">;</span>       <span class="co">// Bitwise AND, c == 00001010</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>c <span class="op">=</span> a <span class="op">|</span> b<span class="op">;</span>       <span class="co">// Bitwise OR, c == 10101111</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>c <span class="op">=</span> a <span class="op">^</span> b<span class="op">;</span>       <span class="co">// Bitwise XOR, c == 10100101</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>c <span class="op">=</span> <span class="op">~</span>a<span class="op">;</span>          <span class="co">// Binary one&#39;s complement, c = 01010101</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>c <span class="op">=</span> a <span class="op">&lt;&lt;</span> <span class="dv">2</span><span class="op">;</span>      <span class="co">// Left shift operator, c = 10101000</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>c <span class="op">=</span> a <span class="op">&gt;&gt;</span> <span class="dv">6</span><span class="op">;</span>      <span class="co">// Right shift operator,</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>                 <span class="co">//   c = 00000010 if a is unsigned</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>                 <span class="co">//   c = 11111110 if a is signed</span></span></code></pre></div>
+<h3 id="assignment-operators">Assignment Operators</h3>
+<p>There are several short-hand assignment operators that do an
+assignment and an operation in the same operator. A few examples:</p>
+<pre><code>c += b;   // Same as c = c + b
+c &lt;&lt;= b;  // Same as c = c &lt;&lt; b
+c ^= b;   // Same as c = c ^ b</code></pre>
+<h3 id="precedence-of-operators">Precedence of operators</h3>
+<p>There are strict rules for which operators take precedence in C. For
+example, <code>a = b * c + d</code> means that we first multiply b and
+c, then add d.&#xA0;These rules are hard to remember for every single
+operator, however, and it is usually a good idea to make precedence
+clear using parentheses whenever precedence is not absolutely
+obvious.</p>
+<p><strong>Text and excercises in the Workbook (Arbetsboken)</strong>
+Chapter 2, up until 2.2</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Of course, in reality, both registers are physically
+connected to the pin all the time, but the connection can be switched by
+a transistor.<a href="#fnref1" class="footnote-back"
+role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+<li id="fn2"><p>It sometimes has to. Consider the case where function
+<code>a()</code> calls <code>b()</code>, which then calls
+<code>a()</code> again.<a href="#fnref2" class="footnote-back"
+role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+</ol>
+</section>
+</body>
+</html>

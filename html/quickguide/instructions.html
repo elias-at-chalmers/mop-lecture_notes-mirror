@@ -1,0 +1,1949 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>instructions</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+<h1>
+Short descriptions
+</h1>
+<p><tiny> <em>rd</em> : Destination register <br> <em>rs, rs1, rs2</em>
+: Source registers <br> <em>imm</em>: Immediate value. Se detailed
+description for restrictions. <br> <em>sext</em>: Sign Extend <br>
+<em>zext</em>: Zero Extend <br></p>
+<p></tiny></p>
+<!DOCTYPE html>
+<html><head>
+<meta charset='utf-8'>
+<style>
+body { font-family: sans-serif; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #ccc; padding: 6px; }
+th { background: #eee; }
+code { background: #f4f4f4; padding: 2px 4px; }
+</style>
+</head><body>
+<b>Immediate &amp; Address Construction</b>
+<table>
+<tr><th>Instruction</th>
+<th>Mnemonic</th>
+<th>Result</th>
+</tr>
+<tr>
+<td><code><a href='#instr-lui'>lui rd, imm</a></code></td>
+<td>Load upper immediate</td>
+<td>rd &#x2190; imm &lt;&lt; 12</td>
+</tr>
+<tr>
+<td><code><a href='#instr-auipc'>auipc rd, imm</a></code></td>
+<td>Add upper immediate to PC</td>
+<td>rd &#x2190; PC + (imm &lt;&lt; 12)</td>
+</tr>
+<tr>
+<td><code><a href='#instr-li'>li rd, imm</a></code></td>
+<td>Load immediate</td>
+<td>rd &#x2190; imm</td>
+</tr>
+<tr>
+<td><code><a href='#instr-la'>la rd, symbol</a></code></td>
+<td>Load address</td>
+<td>rd &#x2190; address</td>
+</tr>
+<tr>
+<td><code><a href='#instr-lla'>lla rd, symbol</a></code></td>
+<td>Load local address</td>
+<td>rd &#x2190; local address</td>
+</tr>
+</table>
+<b>Integer Arithmetic &amp; Logic</b>
+<table>
+<tr><th>Instruction</th>
+<th>Mnemonic</th>
+<th>Result</th>
+</tr>
+<tr>
+<td><code><a href='#instr-addi'>addi rd, rs1, imm</a></code></td>
+<td>Add immediate</td>
+<td>rd &#x2190; rs1 + imm</td>
+</tr>
+<tr>
+<td><code><a href='#instr-xori'>xori rd, rs1, imm</a></code></td>
+<td>XOR immediate</td>
+<td>rd &#x2190; rs1 ^ imm</td>
+</tr>
+<tr>
+<td><code><a href='#instr-ori'>ori rd, rs1, imm</a></code></td>
+<td>OR immediate</td>
+<td>rd &#x2190; rs1 | imm</td>
+</tr>
+<tr>
+<td><code><a href='#instr-andi'>andi rd, rs1, imm</a></code></td>
+<td>AND immediate</td>
+<td>rd &#x2190; rs1 &amp; imm</td>
+</tr>
+<tr>
+<td><code><a href='#instr-add'>add rd, rs1, rs2</a></code></td>
+<td>Add</td>
+<td>rd &#x2190; rs1 + rs2</td>
+</tr>
+<tr>
+<td><code><a href='#instr-sub'>sub rd, rs1, rs2</a></code></td>
+<td>Subtract</td>
+<td>rd &#x2190; rs1 &#x2212; rs2</td>
+</tr>
+<tr>
+<td><code><a href='#instr-xor'>xor rd, rs1, rs2</a></code></td>
+<td>XOR</td>
+<td>rd &#x2190; rs1 ^ rs2</td>
+</tr>
+<tr>
+<td><code><a href='#instr-or'>or rd, rs1, rs2</a></code></td>
+<td>OR</td>
+<td>rd &#x2190; rs1 | rs2</td>
+</tr>
+<tr>
+<td><code><a href='#instr-and'>and rd, rs1, rs2</a></code></td>
+<td>AND</td>
+<td>rd &#x2190; rs1 &amp; rs2</td>
+</tr>
+<tr>
+<td><code><a href='#instr-mul'>mul rd, rs1, rs2</a></code></td>
+<td>Multiply (lower 32 bits)</td>
+<td>rd &#x2190; (rs1 &#xD7; rs2)[31:0]</td>
+</tr>
+<tr>
+<td><code><a href='#instr-mulh'>mulh rd, rs1, rs2</a></code></td>
+<td>Multiply high (signed &#xD7; signed)</td>
+<td>rd &#x2190; (rs1 &#xD7; rs2)[63:32] (signed)</td>
+</tr>
+<tr>
+<td><code><a href='#instr-mulhu'>mulhu rd, rs1, rs2</a></code></td>
+<td>Multiply high (unsigned &#xD7; unsigned)</td>
+<td>rd &#x2190; (rs1 &#xD7; rs2)[63:32] (unsigned)</td>
+</tr>
+<tr>
+<td><code><a href='#instr-mulhsu'>mulhsu rd, rs1, rs2</a></code></td>
+<td>Multiply high (signed &#xD7; unsigned)</td>
+<td>rd &#x2190; (rs1 &#xD7; rs2)[63:32] (signed &#xD7; unsigned)</td>
+</tr>
+<tr>
+<td><code><a href='#instr-div'>div rd, rs1, rs2</a></code></td>
+<td>Divide (signed)</td>
+<td>rd &#x2190; rs1 &#xF7; rs2 (signed)</td>
+</tr>
+<tr>
+<td><code><a href='#instr-divu'>divu rd, rs1, rs2</a></code></td>
+<td>Divide (unsigned)</td>
+<td>rd &#x2190; rs1 &#xF7; rs2 (unsigned)</td>
+</tr>
+<tr>
+<td><code><a href='#instr-rem'>rem rd, rs1, rs2</a></code></td>
+<td>Remainder (signed)</td>
+<td>rd &#x2190; rs1 % rs2 (signed)</td>
+</tr>
+<tr>
+<td><code><a href='#instr-remu'>remu rd, rs1, rs2</a></code></td>
+<td>Remainder (unsigned)</td>
+<td>rd &#x2190; rs1 % rs2 (unsigned)</td>
+</tr>
+</table>
+<b>Shifts &amp; Bit Manipulation</b>
+<table>
+<tr><th>Instruction</th>
+<th>Mnemonic</th>
+<th>Result</th>
+</tr>
+<tr>
+<td><code><a href='#instr-slli'>slli rd, rs1, imm</a></code></td>
+<td>Shift left logical immediate</td>
+<td>rd &#x2190; rs1 &lt;&lt; imm</td>
+</tr>
+<tr>
+<td><code><a href='#instr-srli'>srli rd, rs1, imm</a></code></td>
+<td>Shift right logical immediate</td>
+<td>rd &#x2190; rs1 &gt;&gt; imm</td>
+</tr>
+<tr>
+<td><code><a href='#instr-srai'>srai rd, rs1, imm</a></code></td>
+<td>Shift right arithmetic immediate</td>
+<td>rd &#x2190; rs1 &gt;&gt;&gt; imm</td>
+</tr>
+<tr>
+<td><code><a href='#instr-not'>not rd, rs</a></code></td>
+<td>Bitwise NOT</td>
+<td>rd &#x2190; ~rs</td>
+</tr>
+</table>
+<b>Comparison &amp; Set Instructions</b>
+<table>
+<tr><th>Instruction</th>
+<th>Mnemonic</th>
+<th>Result</th>
+</tr>
+<tr>
+<td><code><a href='#instr-slti'>slti rd, rs1, imm</a></code></td>
+<td>Set less than immediate (signed)</td>
+<td>rd &#x2190; rs1 &lt; imm</td>
+</tr>
+<tr>
+<td><code><a href='#instr-sltiu'>sltiu rd, rs1, imm</a></code></td>
+<td>Set less than immediate (unsigned)</td>
+<td>rd &#x2190; rs1 &lt; imm (unsigned)</td>
+</tr>
+<tr>
+<td><code><a href='#instr-slt'>slt rd, rs1, rs2</a></code></td>
+<td>Set less than (signed)</td>
+<td>rd &#x2190; rs1 &lt; rs2</td>
+</tr>
+<tr>
+<td><code><a href='#instr-sltu'>sltu rd, rs1, rs2</a></code></td>
+<td>Set less than (unsigned)</td>
+<td>rd &#x2190; rs1 &lt; rs2 (unsigned)</td>
+</tr>
+<tr>
+<td><code><a href='#instr-seqz'>seqz rd, rs</a></code></td>
+<td>Set if equal to zero</td>
+<td>rd &#x2190; (rs == 0)</td>
+</tr>
+<tr>
+<td><code><a href='#instr-snez'>snez rd, rs</a></code></td>
+<td>Set if not equal to zero</td>
+<td>rd &#x2190; (rs &#x2260; 0)</td>
+</tr>
+<tr>
+<td><code><a href='#instr-sltz'>sltz rd, rs</a></code></td>
+<td>Set if less than zero</td>
+<td>rd &#x2190; (rs &lt; 0)</td>
+</tr>
+<tr>
+<td><code><a href='#instr-sgtz'>sgtz rd, rs</a></code></td>
+<td>Set if greater than zero</td>
+<td>rd &#x2190; (rs &gt; 0)</td>
+</tr>
+</table>
+<b>Register Move &amp; Unary</b>
+<table>
+<tr><th>Instruction</th>
+<th>Mnemonic</th>
+<th>Result</th>
+</tr>
+<tr>
+<td><code><a href='#instr-nop'>nop</a></code></td>
+<td>No operation</td>
+<td>No effect</td>
+</tr>
+<tr>
+<td><code><a href='#instr-mv'>mv rd, rs</a></code></td>
+<td>Move register</td>
+<td>rd &#x2190; rs</td>
+</tr>
+<tr>
+<td><code><a href='#instr-neg'>neg rd, rs</a></code></td>
+<td>Negate</td>
+<td>rd &#x2190; &#x2212;rs</td>
+</tr>
+</table>
+<b>Control Flow Instructions</b>
+<table>
+<tr><th>Instruction</th>
+<th>Mnemonic</th>
+<th>Result</th>
+</tr>
+<tr>
+<td><code><a href='#instr-jal'>jal rd, offset</a></code></td>
+<td>Jump and link</td>
+<td>rd &#x2190; PC+4; PC &#x2190; PC+offset</td>
+</tr>
+<tr>
+<td><code><a href='#instr-jalr'>jalr rd, offset(rs1)</a></code></td>
+<td>Jump and link register</td>
+<td>rd &#x2190; PC+4; PC &#x2190; rs1+offset</td>
+</tr>
+<tr>
+<td><code><a href='#instr-beq'>beq rs1, rs2, offset</a></code></td>
+<td>Branch if equal</td>
+<td>PC &#x2190; PC+offset if rs1 = rs2</td>
+</tr>
+<tr>
+<td><code><a href='#instr-bne'>bne rs1, rs2, offset</a></code></td>
+<td>Branch if not equal</td>
+<td>PC &#x2190; PC+offset if rs1 &#x2260; rs2</td>
+</tr>
+<tr>
+<td><code><a href='#instr-blt'>blt rs1, rs2, offset</a></code></td>
+<td>Branch if less than (signed)</td>
+<td>PC &#x2190; PC+offset if rs1 &lt; rs2</td>
+</tr>
+<tr>
+<td><code><a href='#instr-bge'>bge rs1, rs2, offset</a></code></td>
+<td>Branch if greater or equal (signed)</td>
+<td>PC &#x2190; PC+offset if rs1 &#x2265; rs2</td>
+</tr>
+<tr>
+<td><code><a href='#instr-bltu'>bltu rs1, rs2, offset</a></code></td>
+<td>Branch if less than (unsigned)</td>
+<td>PC &#x2190; PC+offset if rs1 &lt; rs2 (u)</td>
+</tr>
+<tr>
+<td><code><a href='#instr-bgeu'>bgeu rs1, rs2, offset</a></code></td>
+<td>Branch if greater or equal (unsigned)</td>
+<td>PC &#x2190; PC+offset if rs1 &#x2265; rs2 (u)</td>
+</tr>
+<tr>
+<td><code><a href='#instr-beqz'>beqz rs, offset</a></code></td>
+<td>Branch if equal to zero</td>
+<td>PC &#x2190; PC+offset if rs = 0</td>
+</tr>
+<tr>
+<td><code><a href='#instr-bnez'>bnez rs, offset</a></code></td>
+<td>Branch if not equal to zero</td>
+<td>PC &#x2190; PC+offset if rs &#x2260; 0</td>
+</tr>
+<tr>
+<td><code><a href='#instr-bgtz'>bgtz rs, offset</a></code></td>
+<td>Branch if greater than zero</td>
+<td>PC &#x2190; PC+offset if rs &gt; 0</td>
+</tr>
+<tr>
+<td><code><a href='#instr-bltz'>bltz rs, offset</a></code></td>
+<td>Branch if less than zero</td>
+<td>PC &#x2190; PC+offset if rs &lt; 0</td>
+</tr>
+<tr>
+<td><code><a href='#instr-bgt'>bgt rs1, rs2, offset</a></code></td>
+<td>Branch if greater than (signed)</td>
+<td>PC &#x2190; PC+offset if rs1 &gt; rs2</td>
+</tr>
+<tr>
+<td><code><a href='#instr-ble'>ble rs1, rs2, offset</a></code></td>
+<td>Branch if less or equal (signed)</td>
+<td>PC &#x2190; PC+offset if rs1 &#x2264; rs2</td>
+</tr>
+<tr>
+<td><code><a href='#instr-bgtu'>bgtu rs1, rs2, offset</a></code></td>
+<td>Branch if greater than (unsigned)</td>
+<td>PC &#x2190; PC+offset if rs1 &gt; rs2 (u)</td>
+</tr>
+<tr>
+<td><code><a href='#instr-bleu'>bleu rs1, rs2, offset</a></code></td>
+<td>Branch if less or equal (unsigned)</td>
+<td>PC &#x2190; PC+offset if rs1 &#x2264; rs2 (u)</td>
+</tr>
+<tr>
+<td><code><a href='#instr-tail'>tail rs</a></code></td>
+<td>Tail call</td>
+<td>PC &#x2190; rs (no return)</td>
+</tr>
+<tr>
+<td><code><a href='#instr-j'>j label</a></code></td>
+<td>Unconditional jump</td>
+<td>PC &#x2190; label</td>
+</tr>
+<tr>
+<td><code><a href='#instr-jr'>jr rs</a></code></td>
+<td>Jump register</td>
+<td>PC &#x2190; rs</td>
+</tr>
+<tr>
+<td><code><a href='#instr-ret'>ret</a></code></td>
+<td>Return</td>
+<td>PC &#x2190; ra</td>
+</tr>
+<tr>
+<td><code><a href='#instr-call'>call symbol</a></code></td>
+<td>Call function</td>
+<td>ra &#x2190; PC+4; PC &#x2190; fn</td>
+</tr>
+</table>
+<b>Load and Store Instructions</b>
+<table>
+<tr><th>Instruction</th>
+<th>Mnemonic</th>
+<th>Result</th>
+</tr>
+<tr>
+<td><code><a href='#instr-lb'>lb rd, offset(rs1)</a></code></td>
+<td>Load byte (signed)</td>
+<td>rd &#x2190; sext(M(rs1 + offset)) [1 byte]</td>
+</tr>
+<tr>
+<td><code><a href='#instr-lh'>lh rd, offset(rs1)</a></code></td>
+<td>Load halfword (signed)</td>
+<td>rd &#x2190; sext(M(rs1 + offset)) [2 bytes]</td>
+</tr>
+<tr>
+<td><code><a href='#instr-lw'>lw rd, offset(rs1)</a></code></td>
+<td>Load word</td>
+<td>rd &#x2190; M(rs1 + offset) [4 bytes]</td>
+</tr>
+<tr>
+<td><code><a href='#instr-lbu'>lbu rd, offset(rs1)</a></code></td>
+<td>Load byte unsigned</td>
+<td>rd &#x2190; zext(M(rs1 + offset)) [1 byte]</td>
+</tr>
+<tr>
+<td><code><a href='#instr-lhu'>lhu rd, offset(rs1)</a></code></td>
+<td>Load halfword unsigned</td>
+<td>rd &#x2190; zext(M(rs1 + offset)) [2 bytes]</td>
+</tr>
+<tr>
+<td><code><a href='#instr-sb'>sb rs2, offset(rs1)</a></code></td>
+<td>Store byte</td>
+<td>M(rs1 + offset) &#x2190; rs2 [1 byte]</td>
+</tr>
+<tr>
+<td><code><a href='#instr-sh'>sh rs2, offset(rs1)</a></code></td>
+<td>Store halfword</td>
+<td>M(rs1 + offset) &#x2190; rs2 [2 bytes]</td>
+</tr>
+<tr>
+<td><code><a href='#instr-sw'>sw rs2, offset(rs1)</a></code></td>
+<td>Store word</td>
+<td>M(rs1 + offset) &#x2190; rs2 [4 bytes]</td>
+</tr>
+</table>
+<b>System Instructions</b>
+<table>
+<tr><th>Instruction</th>
+<th>Mnemonic</th>
+<th>Result</th>
+</tr>
+<tr>
+<td><code><a href='#instr-fence'>fence pred, succ</a></code></td>
+<td>Memory fence</td>
+<td>Order memory ops</td>
+</tr>
+<tr>
+<td><code><a href='#instr-fence.i'>fence.i</a></code></td>
+<td>Instruction fence</td>
+<td>Synchronise instruction stream</td>
+</tr>
+<tr>
+<td><code><a href='#instr-ecall'>ecall</a></code></td>
+<td>Environment call</td>
+<td>Trap to OS</td>
+</tr>
+<tr>
+<td><code><a href='#instr-ebreak'>ebreak</a></code></td>
+<td>Breakpoint</td>
+<td>Trap to debugger</td>
+</tr>
+</table>
+<b>CSR Instructions</b>
+<table>
+<tr><th>Instruction</th>
+<th>Mnemonic</th>
+<th>Result</th>
+</tr>
+<tr>
+<td><code><a href='#instr-csrrw'>csrrw rd, csr, rs1</a></code></td>
+<td>Atomic read/write CSR</td>
+<td>rd &#x2190; csr; csr &#x2190; rs1</td>
+</tr>
+<tr>
+<td><code><a href='#instr-csrrs'>csrrs rd, csr, rs1</a></code></td>
+<td>Atomic read and set CSR bits</td>
+<td>rd &#x2190; csr; csr &#x2190; csr | rs1</td>
+</tr>
+<tr>
+<td><code><a href='#instr-csrrc'>csrrc rd, csr, rs1</a></code></td>
+<td>Atomic read and clear CSR bits</td>
+<td>rd &#x2190; csr; csr &#x2190; csr &amp; ~rs1</td>
+</tr>
+<tr>
+<td><code><a href='#instr-csrrwi'>csrrwi rd, csr, zimm</a></code></td>
+<td>Atomic read/write CSR (immediate)</td>
+<td>rd &#x2190; csr; csr &#x2190; zimm</td>
+</tr>
+<tr>
+<td><code><a href='#instr-csrrsi'>csrrsi rd, csr, zimm</a></code></td>
+<td>Atomic read and set CSR bits (immediate)</td>
+<td>rd &#x2190; csr; csr &#x2190; csr | zimm</td>
+</tr>
+<tr>
+<td><code><a href='#instr-csrrci'>csrrci rd, csr, zimm</a></code></td>
+<td>Atomic read and clear CSR bits (immediate)</td>
+<td>rd &#x2190; csr; csr &#x2190; csr &amp; ~zimm</td>
+</tr>
+<tr>
+<td><code><a href='#instr-csrr'>csrr rd, csr</a></code></td>
+<td>Read CSR</td>
+<td>rd &#x2190; csr</td>
+</tr>
+<tr>
+<td><code><a href='#instr-csrw'>csrw csr, rs</a></code></td>
+<td>Write CSR</td>
+<td>csr &#x2190; rs</td>
+</tr>
+<tr>
+<td><code><a href='#instr-csrs'>csrs csr, rs</a></code></td>
+<td>Set CSR bits</td>
+<td>csr &#x2190; csr | rs</td>
+</tr>
+<tr>
+<td><code><a href='#instr-csrc'>csrc csr, rs</a></code></td>
+<td>Clear CSR bits</td>
+<td>csr &#x2190; csr &amp; ~rs</td>
+</tr>
+</table>
+</body></html>
+
+<h1>
+Long descriptions
+</h1>
+<!DOCTYPE html>
+<html><head>
+<meta charset='utf-8'>
+<style>
+body { font-family: sans-serif; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #ccc; padding: 6px; }
+th { background: #eee; }
+code { background: #f4f4f4; padding: 2px 4px; }
+</style>
+</head><body>
+<b>Immediate &amp; Address Construction</b>
+<h3 id='instr-lui'>lui</h3>
+<p>Load upper immediate</p>
+<p><b>Syntax:</b> <code>lui rd, imm</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>imm</code></td>
+<td>20-bit immediate</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-auipc'>auipc</h3>
+<p>Add upper immediate to PC</p>
+<p><b>Syntax:</b> <code>auipc rd, imm</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>imm</code></td>
+<td>20-bit immediate</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-li'>li (pseudo instruction)</h3>
+<p>Load immediate</p>
+<p><b>Syntax:</b> <code>li rd, imm</code></p>
+<p><b>Implementation: </b>
+<code>lui/addi</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>imm</code></td>
+<td>Assembler-expanded</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-la'>la (pseudo instruction)</h3>
+<p>Load address</p>
+<p><b>Syntax:</b> <code>la rd, symbol</code></p>
+<p><b>Implementation: </b>
+<code>auipc + addi</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>symbol</code></td>
+<td>Assembler-expanded</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-lla'>lla (pseudo instruction)</h3>
+<p>Load local address</p>
+<p><b>Syntax:</b> <code>lla rd, symbol</code></p>
+<p><b>Implementation: </b>
+<code>auipc + addi (local)</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>symbol</code></td>
+<td>Assembler-expanded</td>
+</tr>
+</table>
+<hr>
+<b>Integer Arithmetic &amp; Logic</b>
+<h3 id='instr-addi'>addi</h3>
+<p>Add immediate</p>
+<p><b>Syntax:</b> <code>addi rd, rs1, imm</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>imm</code></td>
+<td>12-bit signed immediate</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-xori'>xori</h3>
+<p>XOR immediate</p>
+<p><b>Syntax:</b> <code>xori rd, rs1, imm</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>imm</code></td>
+<td>12-bit signed immediate</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-ori'>ori</h3>
+<p>OR immediate</p>
+<p><b>Syntax:</b> <code>ori rd, rs1, imm</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>imm</code></td>
+<td>12-bit signed immediate</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-andi'>andi</h3>
+<p>AND immediate</p>
+<p><b>Syntax:</b> <code>andi rd, rs1, imm</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>imm</code></td>
+<td>12-bit signed immediate</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-add'>add</h3>
+<p>Add</p>
+<p><b>Syntax:</b> <code>add rd, rs1, rs2</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-sub'>sub</h3>
+<p>Subtract</p>
+<p><b>Syntax:</b> <code>sub rd, rs1, rs2</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-xor'>xor</h3>
+<p>XOR</p>
+<p><b>Syntax:</b> <code>xor rd, rs1, rs2</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-or'>or</h3>
+<p>OR</p>
+<p><b>Syntax:</b> <code>or rd, rs1, rs2</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-and'>and</h3>
+<p>AND</p>
+<p><b>Syntax:</b> <code>and rd, rs1, rs2</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-mul'>mul</h3>
+<p>Multiply (lower 32 bits)</p>
+<p><b>Syntax:</b> <code>mul rd, rs1, rs2</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-mulh'>mulh</h3>
+<p>Multiply high (signed &#xD7; signed)</p>
+<p><b>Syntax:</b> <code>mulh rd, rs1, rs2</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-mulhu'>mulhu</h3>
+<p>Multiply high (unsigned &#xD7; unsigned)</p>
+<p><b>Syntax:</b> <code>mulhu rd, rs1, rs2</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-mulhsu'>mulhsu</h3>
+<p>Multiply high (signed &#xD7; unsigned)</p>
+<p><b>Syntax:</b> <code>mulhsu rd, rs1, rs2</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-div'>div</h3>
+<p>Divide (signed)</p>
+<p><b>Syntax:</b> <code>div rd, rs1, rs2</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-divu'>divu</h3>
+<p>Divide (unsigned)</p>
+<p><b>Syntax:</b> <code>divu rd, rs1, rs2</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-rem'>rem</h3>
+<p>Remainder (signed)</p>
+<p><b>Syntax:</b> <code>rem rd, rs1, rs2</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-remu'>remu</h3>
+<p>Remainder (unsigned)</p>
+<p><b>Syntax:</b> <code>remu rd, rs1, rs2</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<b>Shifts &amp; Bit Manipulation</b>
+<h3 id='instr-slli'>slli</h3>
+<p>Shift left logical immediate</p>
+<p><b>Syntax:</b> <code>slli rd, rs1, imm</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>imm</code></td>
+<td>0&#x2013;31</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-srli'>srli</h3>
+<p>Shift right logical immediate</p>
+<p><b>Syntax:</b> <code>srli rd, rs1, imm</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>imm</code></td>
+<td>0&#x2013;31</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-srai'>srai</h3>
+<p>Shift right arithmetic immediate</p>
+<p><b>Syntax:</b> <code>srai rd, rs1, imm</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>imm</code></td>
+<td>0&#x2013;31</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-not'>not (pseudo instruction)</h3>
+<p>Bitwise NOT</p>
+<p><b>Syntax:</b> <code>not rd, rs</code></p>
+<p><b>Implementation: </b>
+<code>xori rd, rs, -1</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<b>Comparison &amp; Set Instructions</b>
+<h3 id='instr-slti'>slti</h3>
+<p>Set less than immediate (signed)</p>
+<p><b>Syntax:</b> <code>slti rd, rs1, imm</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>imm</code></td>
+<td>12-bit signed immediate</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-sltiu'>sltiu</h3>
+<p>Set less than immediate (unsigned)</p>
+<p><b>Syntax:</b> <code>sltiu rd, rs1, imm</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>imm</code></td>
+<td>12-bit immediate</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-slt'>slt</h3>
+<p>Set less than (signed)</p>
+<p><b>Syntax:</b> <code>slt rd, rs1, rs2</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-sltu'>sltu</h3>
+<p>Set less than (unsigned)</p>
+<p><b>Syntax:</b> <code>sltu rd, rs1, rs2</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-seqz'>seqz (pseudo instruction)</h3>
+<p>Set if equal to zero</p>
+<p><b>Syntax:</b> <code>seqz rd, rs</code></p>
+<p><b>Implementation: </b>
+<code>sltiu rd, rs, 1</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-snez'>snez (pseudo instruction)</h3>
+<p>Set if not equal to zero</p>
+<p><b>Syntax:</b> <code>snez rd, rs</code></p>
+<p><b>Implementation: </b>
+<code>sltu rd, x0, rs</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-sltz'>sltz (pseudo instruction)</h3>
+<p>Set if less than zero</p>
+<p><b>Syntax:</b> <code>sltz rd, rs</code></p>
+<p><b>Implementation: </b>
+<code>slt rd, rs, x0</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-sgtz'>sgtz (pseudo instruction)</h3>
+<p>Set if greater than zero</p>
+<p><b>Syntax:</b> <code>sgtz rd, rs</code></p>
+<p><b>Implementation: </b>
+<code>slt rd, x0, rs</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<b>Register Move &amp; Unary</b>
+<h3 id='instr-nop'>nop (pseudo instruction)</h3>
+<p>No operation</p>
+<p><b>Syntax:</b> <code>nop</code></p>
+<p><b>Implementation: </b>
+<code>addi x0, x0, 0</code>
+</p>
+<hr>
+<h3 id='instr-mv'>mv (pseudo instruction)</h3>
+<p>Move register</p>
+<p><b>Syntax:</b> <code>mv rd, rs</code></p>
+<p><b>Implementation: </b>
+<code>addi rd, rs, 0</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-neg'>neg (pseudo instruction)</h3>
+<p>Negate</p>
+<p><b>Syntax:</b> <code>neg rd, rs</code></p>
+<p><b>Implementation: </b>
+<code>sub rd, x0, rs</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<b>Control Flow Instructions</b>
+<h3 id='instr-jal'>jal</h3>
+<p>Jump and link</p>
+<p><b>Syntax:</b> <code>jal rd, offset</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>signed 20-bit immediate</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-jalr'>jalr</h3>
+<p>Jump and link register</p>
+<p><b>Syntax:</b> <code>jalr rd, offset(rs1)</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>signed 12-bit immediate</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-beq'>beq</h3>
+<p>Branch if equal</p>
+<p><b>Syntax:</b> <code>beq rs1, rs2, offset</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>12-bit signed offset</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-bne'>bne</h3>
+<p>Branch if not equal</p>
+<p><b>Syntax:</b> <code>bne rs1, rs2, offset</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>12-bit signed offset</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-blt'>blt</h3>
+<p>Branch if less than (signed)</p>
+<p><b>Syntax:</b> <code>blt rs1, rs2, offset</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>12-bit signed offset</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-bge'>bge</h3>
+<p>Branch if greater or equal (signed)</p>
+<p><b>Syntax:</b> <code>bge rs1, rs2, offset</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>12-bit signed offset</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-bltu'>bltu</h3>
+<p>Branch if less than (unsigned)</p>
+<p><b>Syntax:</b> <code>bltu rs1, rs2, offset</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>12-bit signed offset</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-bgeu'>bgeu</h3>
+<p>Branch if greater or equal (unsigned)</p>
+<p><b>Syntax:</b> <code>bgeu rs1, rs2, offset</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>12-bit signed offset</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-beqz'>beqz (pseudo instruction)</h3>
+<p>Branch if equal to zero</p>
+<p><b>Syntax:</b> <code>beqz rs, offset</code></p>
+<p><b>Implementation: </b>
+<code>beq rs, x0, offset</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rs</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>12-bit signed offset</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-bnez'>bnez (pseudo instruction)</h3>
+<p>Branch if not equal to zero</p>
+<p><b>Syntax:</b> <code>bnez rs, offset</code></p>
+<p><b>Implementation: </b>
+<code>bne rs, x0, offset</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rs</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>12-bit signed offset</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-bgtz'>bgtz (pseudo instruction)</h3>
+<p>Branch if greater than zero</p>
+<p><b>Syntax:</b> <code>bgtz rs, offset</code></p>
+<p><b>Implementation: </b>
+<code>blt x0, rs, offset</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rs</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>12-bit signed offset</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-bltz'>bltz (pseudo instruction)</h3>
+<p>Branch if less than zero</p>
+<p><b>Syntax:</b> <code>bltz rs, offset</code></p>
+<p><b>Implementation: </b>
+<code>blt rs, x0, offset</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rs</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>12-bit signed offset</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-bgt'>bgt (pseudo instruction)</h3>
+<p>Branch if greater than (signed)</p>
+<p><b>Syntax:</b> <code>bgt rs1, rs2, offset</code></p>
+<p><b>Implementation: </b>
+<code>blt rs2, rs1, offset</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>12-bit signed offset</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-ble'>ble (pseudo instruction)</h3>
+<p>Branch if less or equal (signed)</p>
+<p><b>Syntax:</b> <code>ble rs1, rs2, offset</code></p>
+<p><b>Implementation: </b>
+<code>bge rs2, rs1, offset</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>12-bit signed offset</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-bgtu'>bgtu (pseudo instruction)</h3>
+<p>Branch if greater than (unsigned)</p>
+<p><b>Syntax:</b> <code>bgtu rs1, rs2, offset</code></p>
+<p><b>Implementation: </b>
+<code>bltu rs2, rs1, offset</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>12-bit signed offset</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-bleu'>bleu (pseudo instruction)</h3>
+<p>Branch if less or equal (unsigned)</p>
+<p><b>Syntax:</b> <code>bleu rs1, rs2, offset</code></p>
+<p><b>Implementation: </b>
+<code>bgeu rs2, rs1, offset</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>12-bit signed offset</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-tail'>tail (pseudo instruction)</h3>
+<p>Tail call</p>
+<p><b>Syntax:</b> <code>tail rs</code></p>
+<p><b>Implementation: </b>
+<code>jalr x0, rs, 0</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rs</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-j'>j (pseudo instruction)</h3>
+<p>Unconditional jump</p>
+<p><b>Syntax:</b> <code>j label</code></p>
+<p><b>Implementation: </b>
+<code>jal x0, label</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>label</code></td>
+<td>Immediate / value</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-jr'>jr (pseudo instruction)</h3>
+<p>Jump register</p>
+<p><b>Syntax:</b> <code>jr rs</code></p>
+<p><b>Implementation: </b>
+<code>jalr x0, rs, 0</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rs</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-ret'>ret (pseudo instruction)</h3>
+<p>Return</p>
+<p><b>Syntax:</b> <code>ret</code></p>
+<p><b>Implementation: </b>
+<code>jalr x0, ra, 0</code>
+</p>
+<hr>
+<h3 id='instr-call'>call (pseudo instruction)</h3>
+<p>Call function</p>
+<p><b>Syntax:</b> <code>call symbol</code></p>
+<p><b>Implementation: </b>
+<code>jal ra, symbol</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>symbol</code></td>
+<td>Immediate / value</td>
+</tr>
+</table>
+<hr>
+<b>Load and Store Instructions</b>
+<h3 id='instr-lb'>lb</h3>
+<p>Load byte (signed)</p>
+<p><b>Syntax:</b> <code>lb rd, offset(rs1)</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>signed 12-bit immediate</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-lh'>lh</h3>
+<p>Load halfword (signed)</p>
+<p><b>Syntax:</b> <code>lh rd, offset(rs1)</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>signed 12-bit immediate</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-lw'>lw</h3>
+<p>Load word</p>
+<p><b>Syntax:</b> <code>lw rd, offset(rs1)</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>signed 12-bit immediate</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-lbu'>lbu</h3>
+<p>Load byte unsigned</p>
+<p><b>Syntax:</b> <code>lbu rd, offset(rs1)</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>signed 12-bit immediate</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-lhu'>lhu</h3>
+<p>Load halfword unsigned</p>
+<p><b>Syntax:</b> <code>lhu rd, offset(rs1)</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>signed 12-bit immediate</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-sb'>sb</h3>
+<p>Store byte</p>
+<p><b>Syntax:</b> <code>sb rs2, offset(rs1)</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>signed 12-bit immediate</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-sh'>sh</h3>
+<p>Store halfword</p>
+<p><b>Syntax:</b> <code>sh rs2, offset(rs1)</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>signed 12-bit immediate</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-sw'>sw</h3>
+<p>Store word</p>
+<p><b>Syntax:</b> <code>sw rs2, offset(rs1)</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rs2</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>signed 12-bit immediate</td>
+</tr>
+</table>
+<hr>
+<b>System Instructions</b>
+<h3 id='instr-fence'>fence</h3>
+<p>Memory fence</p>
+<p><b>Syntax:</b> <code>fence pred, succ</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>pred</code></td>
+<td>Immediate / value</td>
+</tr>
+<tr>
+<td><code>succ</code></td>
+<td>Immediate / value</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-fence.i'>fence.i</h3>
+<p>Instruction fence</p>
+<p><b>Syntax:</b> <code>fence.i</code></p>
+<hr>
+<h3 id='instr-ecall'>ecall</h3>
+<p>Environment call</p>
+<p><b>Syntax:</b> <code>ecall</code></p>
+<hr>
+<h3 id='instr-ebreak'>ebreak</h3>
+<p>Breakpoint</p>
+<p><b>Syntax:</b> <code>ebreak</code></p>
+<hr>
+<b>CSR Instructions</b>
+<h3 id='instr-csrrw'>csrrw</h3>
+<p>Atomic read/write CSR</p>
+<p><b>Syntax:</b> <code>csrrw rd, csr, rs1</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd may be x0</td>
+</tr>
+<tr>
+<td><code>csr</code></td>
+<td>CSR must be accessible</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-csrrs'>csrrs</h3>
+<p>Atomic read and set CSR bits</p>
+<p><b>Syntax:</b> <code>csrrs rd, csr, rs1</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd may be x0</td>
+</tr>
+<tr>
+<td><code>csr</code></td>
+<td>CSR must be accessible</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-csrrc'>csrrc</h3>
+<p>Atomic read and clear CSR bits</p>
+<p><b>Syntax:</b> <code>csrrc rd, csr, rs1</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd may be x0</td>
+</tr>
+<tr>
+<td><code>csr</code></td>
+<td>CSR must be accessible</td>
+</tr>
+<tr>
+<td><code>rs1</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-csrrwi'>csrrwi</h3>
+<p>Atomic read/write CSR (immediate)</p>
+<p><b>Syntax:</b> <code>csrrwi rd, csr, zimm</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd may be x0</td>
+</tr>
+<tr>
+<td><code>csr</code></td>
+<td>CSR must be accessible</td>
+</tr>
+<tr>
+<td><code>zimm</code></td>
+<td>5-bit immediate</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-csrrsi'>csrrsi</h3>
+<p>Atomic read and set CSR bits (immediate)</p>
+<p><b>Syntax:</b> <code>csrrsi rd, csr, zimm</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd may be x0</td>
+</tr>
+<tr>
+<td><code>csr</code></td>
+<td>CSR must be accessible</td>
+</tr>
+<tr>
+<td><code>zimm</code></td>
+<td>5-bit immediate</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-csrrci'>csrrci</h3>
+<p>Atomic read and clear CSR bits (immediate)</p>
+<p><b>Syntax:</b> <code>csrrci rd, csr, zimm</code></p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd may be x0</td>
+</tr>
+<tr>
+<td><code>csr</code></td>
+<td>CSR must be accessible</td>
+</tr>
+<tr>
+<td><code>zimm</code></td>
+<td>5-bit immediate</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-csrr'>csrr (pseudo instruction)</h3>
+<p>Read CSR</p>
+<p><b>Syntax:</b> <code>csrr rd, csr</code></p>
+<p><b>Implementation: </b>
+<code>csrrs rd, csr, x0</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>rd</code></td>
+<td>rd &#x2260; x0</td>
+</tr>
+<tr>
+<td><code>csr</code></td>
+<td>CSR must be accessible</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-csrw'>csrw (pseudo instruction)</h3>
+<p>Write CSR</p>
+<p><b>Syntax:</b> <code>csrw csr, rs</code></p>
+<p><b>Implementation: </b>
+<code>csrrw x0, csr, rs</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>csr</code></td>
+<td>CSR must be accessible</td>
+</tr>
+<tr>
+<td><code>rs</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-csrs'>csrs (pseudo instruction)</h3>
+<p>Set CSR bits</p>
+<p><b>Syntax:</b> <code>csrs csr, rs</code></p>
+<p><b>Implementation: </b>
+<code>csrrs x0, csr, rs</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>csr</code></td>
+<td>CSR must be accessible</td>
+</tr>
+<tr>
+<td><code>rs</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+<h3 id='instr-csrc'>csrc (pseudo instruction)</h3>
+<p>Clear CSR bits</p>
+<p><b>Syntax:</b> <code>csrc csr, rs</code></p>
+<p><b>Implementation: </b>
+<code>csrrc x0, csr, rs</code>
+</p>
+<table>
+<tr><th>Operand</th><th>Explanation</th></tr>
+<tr>
+<td><code>csr</code></td>
+<td>CSR must be accessible</td>
+</tr>
+<tr>
+<td><code>rs</code></td>
+<td>Source register</td>
+</tr>
+</table>
+<hr>
+</body></html>
+</body>
+</html>

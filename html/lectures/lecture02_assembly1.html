@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>lecture02_assembly1</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+<!-- markdownlint-disable MD012 -->
+<!-- markdownlint-disable MD022 -->
+<!-- **Things that are in the Workbook that should possibly be in this lecture**
+MUL/DIV, (Arrays) -->
+<hr />
+<p>In this lecture you will learn about the basics of assembly
+programming on a small RISC-V processor.</p>
+<h1 id="the-risc-v-instruction-set-architecture-isa">The RISC-V
+Instruction Set Architecture (ISA)</h1>
+<p>In this course, you will learn to program a microcontroller based on
+a RISC-V processor. Today, almost every phone, computer, or smart device
+runs on a processor from one of a handful of companies (e.g.&#xA0;ARM,
+Intel). RISC-V changes that: it&#x2019;s an open alternative that anyone can
+use, extend, and build on, and it is becoming increasingly important in
+both industry and research. In this course, you&#x2019;ll learn to program real
+hardware built on RISC-V. So what does it mean to be a &#x201C;RISC-V&#x201D;
+processor?</p>
+<p>RISC-V is an <em>Instruction Set Architecture</em> (ISA). That is, it
+specifies a processor&#x2019;s behaviour in terms of the <em>instruction
+set</em>, the <em>registers</em>, and the <em>memory model</em>, and how
+all of these components interact. Anyone is allowed to use this
+specification to <em>implement</em> their own processor, without paying
+anyone. For example, in this course we will use the MD307 lab kit, which
+contains a CH32V307 microcontroller (a chip developed by the company
+WCH), which in turn contains (as part of the chip) a QingKe V4
+<em>processor core</em>, which is an implementation of the RISC-V
+ISA.</p>
+<p>Other companies have implemented their own processor cores, in their
+own microcontrollers, that are also based on the RISC-V ISA. Raspberry
+Pi, for instance, has implemented a RISC-V core called Hazard3 in their
+RP2350 microcontroller, which is the heart of the Raspberry Pico 2.
+Since both machines use the same ISA, they can use the same compiler
+toolchains to produce executable code, and can in some cases even run
+the <em>same</em> binary code, even though the actual hardware is
+completely different.</p>
+<h2 id="variants-and-extensions">Variants and Extensions</h2>
+<p>RISC-V is intended to be used in a huge range of devices, from small
+microcontrollers in your car key or fridge, to CPUs in the nodes of a
+machine-learning data center. Therefore, the specification is divided
+into what is called the <em>base integer instruction set</em>, which
+only describes 47 separate instructions, and a large number of
+<em>extensions</em> that describe instructions for additional
+functionality. Anyone that decides to build a RISC-V processor will have
+to decide which of these extensions they want to support. Implementing
+more extensions naturally means more work, and probably means that the
+chip will be more expensive and draw more power. Similarly, anyone who
+<em>buys</em> a processor for use in their product will have to choose
+which extensions it should support.</p>
+<p>Let&#x2019;s consider a few examples:</p>
+<ul>
+<li><strong>A TV remote control</strong> will need a little
+microcontroller to recognize when you press a button and send the
+appropriate infrared signal to your TV. This microcontroller does not do
+any advanced processing of any kind, and does not have to be very fast.
+The basic 32-bit integer instruction set (called RV32I) will be
+sufficient.</li>
+<li><strong>A calculator</strong> can be a similarly simple device, but
+will be quite useless if it cannot handle very large numbers. You would
+probably choose the 64-bit version of the basic instruction set for this
+(called RV64I). It would also be silly to create a calculator that can
+only handle integers, so you would want a microcontroller with the
+<strong>F</strong> (<em>single-precision floating point</em>) or
+<strong>D</strong> (<em>double-precision floating point</em>)
+extensions. If a processor implements these extensions, it means it can
+handle an additional set of instructions that deal with floating-point
+numbers.</li>
+<li><strong>A simple digital watch</strong> needs to be extremely power
+efficient (so that you don&#x2019;t have to charge the battery several times
+every day). Among other things, that means reducing the amount of memory
+and the number of memory transactions required. Such a device might
+require the <strong>C</strong> (<em>compressed instructions</em>)
+extension. This extension adds a number of 16-bit wide machine
+instructions, and will be discussed a bit more later in the course.
+<!-- LATER: Discuss this in depth when covering how instructions are executed --></li>
+<li><strong>A modern desktop PC</strong>, on the other hand, will
+require LOTS of memory and should be able to run many processes at once,
+and as quickly as possible. Power efficiency is not as important. A
+processor for a desktop computer will need to use the (RV64I) basic
+instruction set (so it can access more than 4GB of memory), it will need
+to use several additional extensions that allow for <em>virtual
+memory</em>, <em>atomic operations</em>, <em>vector processing</em>,
+etc. These extensions are all out of scope for this course.</li>
+</ul>
+<p>The microcontroller used in this course (CH32F307) is a 32-bit
+processor (RV32I) with the M (integer multiplication and divide), A
+(atomic operations), F (floating point), C (compressed instructions),
+Zicsr (Control and Status Register instructions), and Zifencei
+(instruction-fetch fence) extensions. In the remainder of the course
+material, we will only focus on the base instruction set (RV32I), with
+the M and Zicsr extensions. We will compile our programs in such a way
+that only these instructions are used (except in special cases), to keep
+the complexity down. You can find information about <em>all</em> the
+extensions and variants on the official <a
+href="https://riscv.org/specifications/ratified/">RISC-V
+homepage</a>.</p>
+<h2 id="the-application-binary-interface-abi">The Application Binary
+Interface (ABI)</h2>
+<p>Before we go any further in describing how a RISC-V processor works,
+it&#x2019;s important to understand the <strong>ABI</strong>. While the ISA
+defines the rules that a hardware design must follow to qualify as a
+RISC-V processor, the ABI (Application Binary Interface) defines how
+compiled programs interact at the binary level. In other words, it
+provides rules for how machine code should be written so that
+independently compiled programs and libraries can work together.</p>
+<p>For example, the ISA specifies that the processor must have 32
+general-purpose 32-bit registers, but it doesn&#x2019;t define what each
+register is used for. The ABI, on the other hand, specifies that when a
+function returns an integer, it should place the result in register x10
+(also known as a0). If your assembly program - or your C compiler -
+follows that rule, it can seamlessly interoperate with other code that
+follows the same ABI.</p>
+<p>In this course, all compilers and assembly code will adhere to the
+ABI. This not only ensures compatibility between different pieces of
+code, but also makes assembly programs much easier to understand and
+maintain.</p>
+<h2 id="the-basic-32-bit-integer-instruction-set-architecture-rv32i">The
+Basic 32-bit Integer Instruction Set Architecture (RV32I)</h2>
+<p>Initially, we will only talk about the very basics of the RISC-V
+specification, RV32I. This part of the specification must be implemented
+by <em>any</em> 32-bit RISC-V processor. The specification tells us what
+<em>registers</em> shall be available, what the basic set of <em>machine
+instructions</em> are, and how they are encoded.</p>
+<h3 id="registers">Registers</h3>
+<p>A processor that implements RV32I must implement 33 registers. There
+are 32 <em>general purpose</em> registers, <code>x0-x31</code> and one
+program counter, <code>pc</code>. The general purpose registers can
+contain any 32 bit word and any instruction can use either of these
+registers interchangeably.</p>
+<p>The first register, <code>x0</code>, is special; it is hardwired to
+always be zero, and writes to it are ignored. This simplifies the
+hardware and instructions by always having a <code>0</code> to feed the
+ALU. We will see examples of this later on in the text.</p>
+<p>While the <strong>ISA</strong> puts no restrictions on how these
+registers are used, the <strong>ABI</strong> suggests which registers
+are to be used for what, and gives them special names.</p>
+<table>
+<thead>
+<tr>
+<th>Register</th>
+<th>ABI Name</th>
+<th>Recommended Usage (ABI)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>x0</code></td>
+<td><code>zero</code></td>
+<td>Hard-wired to zero</td>
+</tr>
+<tr>
+<td><code>x1</code></td>
+<td><code>ra</code></td>
+<td>Return Address</td>
+</tr>
+<tr>
+<td><code>x2</code></td>
+<td><code>sp</code></td>
+<td>Stack pointer</td>
+</tr>
+<tr>
+<td><code>x3</code></td>
+<td><code>gp</code></td>
+<td>Global pointer</td>
+</tr>
+<tr>
+<td><code>x4</code></td>
+<td><code>tp</code></td>
+<td>Thread pointer</td>
+</tr>
+<tr>
+<td><code>x5</code>-<code>x7</code></td>
+<td><code>t0-t2</code></td>
+<td>Temporary.</td>
+</tr>
+<tr>
+<td><code>x8</code></td>
+<td><code>s0 / fp</code></td>
+<td>Frame pointer</td>
+</tr>
+<tr>
+<td><code>x9</code></td>
+<td><code>s1</code></td>
+<td>Saved register</td>
+</tr>
+<tr>
+<td><code>x10</code>-<code>x17</code></td>
+<td><code>a0-a7</code></td>
+<td>Function argument / Return value</td>
+</tr>
+<tr>
+<td><code>x18</code>-<code>x27</code></td>
+<td><code>s2-s11</code></td>
+<td>Saved Register</td>
+</tr>
+<tr>
+<td><code>x28</code>-<code>x31</code></td>
+<td><code>t3-t6</code></td>
+<td>Temporary</td>
+</tr>
+</tbody>
+</table>
+<p>We will return to all of these different uses later on, and for now
+it is sufficient that you are aware that, in assembly code, you can
+refer to either the register name (e.g., <code>x5</code>) or the ABI
+name (<code>t0</code>), and it really makes no difference other than for
+compatibility and readability.</p>
+<p>Apart from the general purpose registers, the only other register is
+the program counter, <code>pc</code>. This register always contains the
+address to the next instruction to be executed, and exists in almost all
+processor designs.</p>
+<p>&#x1F4A1; <strong>Note:</strong> <em>If you have previous experience with
+assembly programming on other processors you might be surprised that all
+registers are general-purpose and that there is no specific stack
+pointer, link register, or even a flag register described in the ISA.
+There are good reasons for this, and we will address why RISC-V does not
+need them in upcoming sections.</em></p>
+<h3 id="instruction-set-and-assembly-code">Instruction Set and Assembly
+Code</h3>
+<p>The RV32I instruction set only contains 47 distinct instructions.
+RISC (Reduced Instruction Set Computer) architectures aim to keep
+instructions simple and limited in number, emphasizing a small set of
+frequently used operations. The idea is to keep the hardware as simple
+as possible, and leave it to the compiler (or programmer) to create more
+complex behavior by combining simple instructions. Using simple
+instructions often allows each one to execute in a single clock cycle,
+simplifies pipelining <a href="#fn1" class="footnote-ref" id="fnref1"
+role="doc-noteref"><sup>1</sup></a>, and improves processor
+scalability.</p>
+<p>However, this also means that a program written directly in machine
+instructions is not always easy for a programmer to understand.
+Therefore, we usually use <em>assembly language</em> as the lowest-level
+language in which we write programs. The assembly language includes all
+the instructions that the machine understands, but also a number of
+<em>pseudo instructions</em> that the &#x201C;assembler&#x201D; translates into one or
+more machine instructions.</p>
+<p>As a simple example, you will have seen in previous courses that one
+thing we often want to do is to copy a value from one register to
+another. In assembly language, this looks like:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">mv</span> <span class="kw">x1</span><span class="op">,</span> <span class="kw">x2</span>              <span class="op">//</span> Move <span class="op">(</span>actually copy<span class="op">)</span> the contents of <span class="kw">x2</span> to <span class="kw">x1</span></span></code></pre></div>
+<p>However, the RV32I instruction set does not include a specific
+instruction for copying values between registers. Instead, the
+<code>mv</code> pseudo-instruction will be translated by the assembler
+into:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">add</span> <span class="kw">x1</span><span class="op">,</span> <span class="kw">x2</span><span class="op">,</span> <span class="kw">x0</span>        <span class="op">//</span> Add <span class="dv">0</span> to <span class="kw">x2</span> <span class="kw">and</span> store the result <span class="kw">in</span> <span class="kw">x1</span></span></code></pre></div>
+<p>This might look strange (to someone reading the machine code), but
+has exactly the same effect: the contents of x2 are copied to x1. Since
+we can implement <code>mv</code> with <code>add</code>, the processor
+simply reuses the <code>add</code> instruction. We will see many more
+examples of how pseudo-instructions are compiled into machine code
+later.</p>
+<!-- TODO: Add an "enrichment" box about pipelining, or bring it up in a last lecture -->
+<h3 id="loadstore-architecture.">Load/Store architecture.</h3>
+<p>Another important principle behind the development of the RISC-V
+architecture is that it is a &#x201C;Load/Store&#x201D; architecture. This means that
+the &#x201C;load&#x201D; and &#x201C;store&#x201D; instructions are the <em>only</em> instructions
+that communicate with the memory bus. All other instructions (e.g.,
+arithmetic instructions, shifts, or branches) operate only on registers.
+As an example, other processors (like the Intel x86 architecture) have
+instructions like:</p>
+<pre><code>add register_0, M(register_1)     // Take the value in memory at the address 
+                                  // pointed to by r1, and add it to r0</code></pre>
+<p>In RISC-V, this is expressed in two instructions:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">lw</span> <span class="kw">x3</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">x2</span><span class="op">)</span>         <span class="op">//</span> Load the value <span class="kw">in</span> memory at the address pointed to by <span class="kw">x2</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">add</span> <span class="kw">x1</span><span class="op">,</span> <span class="kw">x1</span><span class="op">,</span> <span class="kw">x3</span>       <span class="op">//</span> Add that value to <span class="kw">x1</span></span></code></pre></div>
+<p>This might seem unnecessary, but there are several reasons behind
+this choice. Firstly, it greatly simplifies the hardware design (simpler
+hardware usually means faster and less error-prone hardware). Secondly,
+it makes pipelining simpler <a href="#fn2" class="footnote-ref"
+id="fnref2" role="doc-noteref"><sup>2</sup></a> and allows the compiler
+to make optimizations that make the code run faster.</p>
+<h3 id="instruction-cycle">Instruction Cycle</h3>
+<p>Before we go on to write a first little program, let&#x2019;s recap how a
+processor executes code. We will introduce a simple model that will do
+for now, and then extend it a little when we get to interrupts and
+exceptions, later on in the course.</p>
+<p>When the machine turns on, it will enter a <code>RESET</code> phase,
+which initializes registers and puts the processor into a known state.
+After that, the following &#x201C;state machine&#x201D; starts running (one step every
+clock cycle):</p>
+<ol type="1">
+<li><strong>Fetch Instruction -</strong> In this state, whatever address
+is in the <code>PC</code> register will be used to fetch the next
+instruction. In a basic RV32I architecture <em>every</em> instruction
+(including all operands) is exactly 32 bits<a href="#fn3"
+class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>.
+When the instruction has been fetched from memory, the address in PC is
+increased by 4 bytes (32 bits) so that it points to the next
+instruction.</li>
+<li><strong>Decode Instruction -</strong> The 32 bits in the machine
+code instruction are used to pack the &#x201C;op-code&#x201D; (which instruction this
+is, e.g., <code>add</code>) and the operands (e.g., source register x1
+and destination register x2). The processor will now look at these bits
+and decide on the operation to execute. For example, if the instruction
+is <code>add x1, x2, x0</code>, it will make registers <code>x2</code>
+and <code>x0</code> available as the inputs to the ALU and will
+configure the ALU to do an addition.</li>
+<li><strong>Execute Instruction -</strong> In this state, the operation,
+whatever it was, is executed. This might mean performing the addition
+for an <code>add</code> instruction, or calculating the address of a
+<code>load</code> instruction.</li>
+<li><strong>Store/Writeback -</strong> The final phase writes the result
+un the bus into memory or into a destination register.</li>
+</ol>
+<p>When the &#x201C;store&#x201D; phase is complete, the cycle starts again from the
+beginning.</p>
+<p>&#x1F4A1; <strong>Note:</strong> <em>If all of this were strictly true, the
+processor would only execute an instruction once every four clock-cycles
+when, in fact, it will execute approximately one instruction every
+clock-cycle. This is due to pipelining and instruction pre-fetching,
+which is out of scope for this course.</em></p>
+<h1 id="introduction-to-risc-v-assembly-programming">Introduction to
+RISC-V Assembly Programming</h1>
+<p>We will now look at how to write assembly code for a very simple
+program, and examine what machine code the assembler produces. Let&#x2019;s say
+we want our program to do the following:</p>
+<pre><code>1. Put the value 10 in t0
+2. Decrease the value in t0 by 2
+3. If t0 &gt; 0, go back to line 2</code></pre>
+<p>In RISC-V assembly code, we could write this as:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>    <span class="kw">li</span> <span class="kw">t0</span><span class="op">,</span> <span class="dv">10</span>         <span class="co"># 1. Load 10 into t0</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">loop:</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">addi</span> <span class="kw">t0</span><span class="op">,</span> <span class="kw">t0</span><span class="op">,</span> <span class="op">-</span><span class="dv">2</span>   <span class="co"># 2. Subtract 2 from t0</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">bgtz</span> <span class="kw">t0</span><span class="op">,</span> <span class="kw">loop</span>     <span class="co"># 3. If t0 &gt; 0, go back to &#39;loop&#39;</span></span></code></pre></div>
+<ul>
+<li><p>In the first line: <code>li t0, 10</code>, <code>li</code> stands
+for &#x201C;Load Immediate&#x201D;, that is, we load a register with a value given
+immediately in the code (not a value from memory). The first operand,
+<code>t0</code>, is the <em>destination register</em>, and the second
+value is the value we want to put there.</p></li>
+<li><p>The second line is just a &#x201C;label&#x201D;. When compiled, every
+instruction will be at a specific address in memory and the label,
+&#x201C;loop&#x201D; in this case, will be translated to that the address that the
+next instruction starts at.</p></li>
+<li><p>On the third line, <code>addi t0, t0, -2</code>,
+<code>addi</code> stands for &#x201C;Add Immediate&#x201D;. Again, &#x201C;immediate&#x201D; means
+that the value that we want to add to the source register is given
+directly in the instruction. The first operand is, again, the
+<em>destination register</em>. The second operand is the <em>source
+register</em>, and the third operand is the value we want to add to the
+source register and put in the destination register. Note that there is
+no &#x201C;Subtract Immediate&#x201D; instruction, because adding <code>-x</code> to a
+register is the same as subtracting <code>x</code>.</p></li>
+<li><p>Finally, on the fourth line: <code>bgtz t0, loop</code>,
+<code>bgtz</code> stands for &#x201C;Branch if Greater Than Zero&#x201D;. The first
+operand is the register we want to check, and the second operand is the
+label (address) we want to jump to if the value of that register is
+greater than zero.</p></li>
+</ul>
+<h2 id="pseudo-instructions-and-machine-code">Pseudo Instructions and
+Machine Code</h2>
+<p>Now let&#x2019;s see what happens if we compile this assembly program to
+machine code. If we take the machine code created by the assembler and
+ask the <code>objdump</code> tool to tell us what instructions it
+represents, the answer is:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>   <span class="kw">addi</span>    <span class="kw">t0</span><span class="op">,</span><span class="kw">zero</span><span class="op">,</span><span class="dv">10</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>   <span class="fu">loop:</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>   <span class="kw">addi</span>    <span class="kw">t0</span><span class="op">,</span><span class="kw">t0</span><span class="op">,-</span><span class="dv">2</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>   <span class="cf">blt</span>     <span class="kw">zero</span><span class="op">,</span> <span class="kw">t0</span><span class="op">,</span> <span class="kw">loop</span></span></code></pre></div>
+<p>This is slightly different from the code we wrote! Let&#x2019;s see what
+changed and why:</p>
+<ul>
+<li><code>li t0, 10</code> &#x2794; <code>addi t0, zero, 10</code>: The &#x201C;Load
+Immediate&#x201D; instruction that we used is a pseudo instruction. The
+processor does not have to implement this instruction, because it
+already has the &#x201C;Add Immediate&#x201D; instruction. By adding the constant 10
+to the &#x201C;zero&#x201D; register (which is always 0), and store the result in
+<code>t0</code>, we achieve the same thing.</li>
+<li><code>bgtz t0, loop</code> &#x2794; <code>blt zero,t0</code>: In our
+assembly code, we used the &#x201C;Branch if Greater Than Zero&#x201D; instruction,
+but the assembler has translated this into the &#x201C;Branch if Less Than&#x201D;
+instruction. It compares if 0 is less than <code>t0</code>, and jumps if
+that is true. This is equivalent because (x &gt; y) &#x2794; (y &lt; x).</li>
+</ul>
+<p>In this course, you will learn how to write <em>assembly code</em>,
+and we will not worry too much about what <em>machine code</em> it turns
+into, most of the time. It is important to understand, however, that
+even when writing assembly, the code you write is not always exactly the
+code that is executed. So far we have seen that the assembler will
+sometimes replace your pseudo instruction with an equivalent instruction
+and next we will see that some pseudo instructions will turn into
+<em>several</em> machine code instructions.</p>
+<h3 id="loading-a-large-constant">Loading a large constant</h3>
+<p>We will now change the very first line of our program to:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>   <span class="kw">li</span> <span class="kw">t0</span><span class="op">,</span> <span class="dv">1000000</span></span></code></pre></div>
+<p>The only difference is that we load the register with one million,
+rather than 10. If we examine the machine code now, we will see that
+this turns into:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>   <span class="kw">lui</span>     <span class="kw">t0</span><span class="op">,</span><span class="bn">0xf4</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>   <span class="kw">add</span>     <span class="kw">t0</span><span class="op">,</span><span class="kw">t0</span><span class="op">,</span><span class="bn">0x240</span></span></code></pre></div>
+<p>Feel free to raise an eybrow and shake your head a little at this
+point. When you are done, let&#x2019;s see what happened. When we asked the
+assembler to put the value 10 into <code>t0</code>, this could be
+achieved with a single &#x201C;addi&#x201D; instruction. In machine code, any
+instruction is coded into a 32-bit value, and the processor knows how to
+decode this value. The value will consist of an &#x201C;opcode&#x201D; that identifies
+the type of instruction, and some operands to the instruction. In the
+case of the <code>addi</code> instruction, this looks like<a href="#fn4"
+class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>
+:</p>
+<table>
+<thead>
+<tr>
+<th>Opcode</th>
+<th>Function</th>
+<th>Source Register</th>
+<th>Destination Register</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>7 bits</td>
+<td>3 bits</td>
+<td>5 bits</td>
+<td>5 bits</td>
+<td>12 bits</td>
+</tr>
+</tbody>
+</table>
+<p>So there are 7 bits for the opcode (which allows for 128 different
+opcodes), 3 bits for the &#x201C;function&#x201D; (different variants of the same
+instruction), 5 bits for the registers (which let&#x2019;s us point out any of
+the 32 general-purpose registers) and 12 bits for the value that we want
+to add. When the assembler is asked to load a value that does
+<em>not</em> fit into 12 bits, it simply cannot express that in a
+single, 32-bit, instruction.</p>
+<p>Instead, it will translate your assembly instruction into
+<em>two</em> machine instructions. The first instruction,
+<code>lui</code>, stands for &#x201C;Load Upper Immediate&#x201D;. It takes a
+destination register and a 20-bit value as operands, and it loads the
+20-bit value into the 20 upper bits of the destination register.</p>
+<p>Since 1000000, in decimal, is <code>0xf4240</code> in hexadecimal,
+<code>t0</code> will be loaded with the value <code>0x000F4000</code>
+after the <code>lui</code> instruction. The next instruction has to fill
+in the lower 12 bits, which can be achieved with an <code>add</code>
+instruction (where we have 12 bits for the value).</p>
+<h2 id="arithmetic-and-logical-instructions">Arithmetic and Logical
+instructions</h2>
+<p>The table below lists all the ALU instructions in RV32I (the
+instructions that perform some operation on the operands and stores the
+result in a register). These can be divided into &#x201C;register-register&#x201D;
+instructions where the operands consists only of registers, and
+&#x201C;register-immediate&#x201D; instructions, where one of the operands is a
+(small) constant that is embedded in the instruction&#x2019;s machine code. All
+immediate instructions end with i (for immediate), except for a few that
+use u to indicate unsigned interpretation of the immediate value.</p>
+<p>Throughout this table, and the rest of the text, <code>rd</code>
+means &#x201C;destination register&#x201D; and <code>rs</code> means &#x201C;source
+register&#x201D;.</p>
+<div class="boxed">
+<!DOCTYPE html>
+<html><head>
+<meta charset='utf-8'>
+<style>
+body { font-family: sans-serif; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #ccc; padding: 6px; }
+th { background: #eee; }
+code { background: #f4f4f4; padding: 2px 4px; }
+</style>
+</head><body>
+<b>Immediate &amp; Address Construction</b>
+<table>
+<tr><th>Instruction</th>
+<th>Mnemonic</th>
+<th>Result</th>
+</tr>
+<tr>
+<td><code>lui rd, imm</code></td>
+<td>Load upper immediate</td>
+<td>rd &#x2190; imm &lt;&lt; 12</td>
+</tr>
+<tr>
+<td><code>auipc rd, imm</code></td>
+<td>Add upper immediate to PC</td>
+<td>rd &#x2190; PC + (imm &lt;&lt; 12)</td>
+</tr>
+<tr>
+<td><code>li rd, imm</code></td>
+<td>Load immediate</td>
+<td>rd &#x2190; imm</td>
+</tr>
+<tr>
+<td><code>la rd, symbol</code></td>
+<td>Load address</td>
+<td>rd &#x2190; address</td>
+</tr>
+<tr>
+<td><code>lla rd, symbol</code></td>
+<td>Load local address</td>
+<td>rd &#x2190; local address</td>
+</tr>
+</table>
+<b>Integer Arithmetic &amp; Logic</b>
+<table>
+<tr><th>Instruction</th>
+<th>Mnemonic</th>
+<th>Result</th>
+</tr>
+<tr>
+<td><code>addi rd, rs1, imm</code></td>
+<td>Add immediate</td>
+<td>rd &#x2190; rs1 + imm</td>
+</tr>
+<tr>
+<td><code>xori rd, rs1, imm</code></td>
+<td>XOR immediate</td>
+<td>rd &#x2190; rs1 ^ imm</td>
+</tr>
+<tr>
+<td><code>ori rd, rs1, imm</code></td>
+<td>OR immediate</td>
+<td>rd &#x2190; rs1 | imm</td>
+</tr>
+<tr>
+<td><code>andi rd, rs1, imm</code></td>
+<td>AND immediate</td>
+<td>rd &#x2190; rs1 &amp; imm</td>
+</tr>
+<tr>
+<td><code>add rd, rs1, rs2</code></td>
+<td>Add</td>
+<td>rd &#x2190; rs1 + rs2</td>
+</tr>
+<tr>
+<td><code>sub rd, rs1, rs2</code></td>
+<td>Subtract</td>
+<td>rd &#x2190; rs1 &#x2212; rs2</td>
+</tr>
+<tr>
+<td><code>xor rd, rs1, rs2</code></td>
+<td>XOR</td>
+<td>rd &#x2190; rs1 ^ rs2</td>
+</tr>
+<tr>
+<td><code>or rd, rs1, rs2</code></td>
+<td>OR</td>
+<td>rd &#x2190; rs1 | rs2</td>
+</tr>
+<tr>
+<td><code>and rd, rs1, rs2</code></td>
+<td>AND</td>
+<td>rd &#x2190; rs1 &amp; rs2</td>
+</tr>
+<tr>
+<td><code>mul rd, rs1, rs2</code></td>
+<td>Multiply (lower 32 bits)</td>
+<td>rd &#x2190; (rs1 &#xD7; rs2)[31:0]</td>
+</tr>
+<tr>
+<td><code>mulh rd, rs1, rs2</code></td>
+<td>Multiply high (signed &#xD7; signed)</td>
+<td>rd &#x2190; (rs1 &#xD7; rs2)[63:32] (signed)</td>
+</tr>
+<tr>
+<td><code>mulhu rd, rs1, rs2</code></td>
+<td>Multiply high (unsigned &#xD7; unsigned)</td>
+<td>rd &#x2190; (rs1 &#xD7; rs2)[63:32] (unsigned)</td>
+</tr>
+<tr>
+<td><code>mulhsu rd, rs1, rs2</code></td>
+<td>Multiply high (signed &#xD7; unsigned)</td>
+<td>rd &#x2190; (rs1 &#xD7; rs2)[63:32] (signed &#xD7; unsigned)</td>
+</tr>
+<tr>
+<td><code>div rd, rs1, rs2</code></td>
+<td>Divide (signed)</td>
+<td>rd &#x2190; rs1 &#xF7; rs2 (signed)</td>
+</tr>
+<tr>
+<td><code>divu rd, rs1, rs2</code></td>
+<td>Divide (unsigned)</td>
+<td>rd &#x2190; rs1 &#xF7; rs2 (unsigned)</td>
+</tr>
+<tr>
+<td><code>rem rd, rs1, rs2</code></td>
+<td>Remainder (signed)</td>
+<td>rd &#x2190; rs1 % rs2 (signed)</td>
+</tr>
+<tr>
+<td><code>remu rd, rs1, rs2</code></td>
+<td>Remainder (unsigned)</td>
+<td>rd &#x2190; rs1 % rs2 (unsigned)</td>
+</tr>
+</table>
+<b>Shifts &amp; Bit Manipulation</b>
+<table>
+<tr><th>Instruction</th>
+<th>Mnemonic</th>
+<th>Result</th>
+</tr>
+<tr>
+<td><code>slli rd, rs1, imm</code></td>
+<td>Shift left logical immediate</td>
+<td>rd &#x2190; rs1 &lt;&lt; imm</td>
+</tr>
+<tr>
+<td><code>srli rd, rs1, imm</code></td>
+<td>Shift right logical immediate</td>
+<td>rd &#x2190; rs1 &gt;&gt; imm</td>
+</tr>
+<tr>
+<td><code>srai rd, rs1, imm</code></td>
+<td>Shift right arithmetic immediate</td>
+<td>rd &#x2190; rs1 &gt;&gt;&gt; imm</td>
+</tr>
+<tr>
+<td><code>not rd, rs</code></td>
+<td>Bitwise NOT</td>
+<td>rd &#x2190; ~rs</td>
+</tr>
+</table>
+<b>Register Move &amp; Unary</b>
+<table>
+<tr><th>Instruction</th>
+<th>Mnemonic</th>
+<th>Result</th>
+</tr>
+<tr>
+<td><code>nop</code></td>
+<td>No operation</td>
+<td>No effect</td>
+</tr>
+<tr>
+<td><code>mv rd, rs</code></td>
+<td>Move register</td>
+<td>rd &#x2190; rs</td>
+</tr>
+<tr>
+<td><code>neg rd, rs</code></td>
+<td>Negate</td>
+<td>rd &#x2190; &#x2212;rs</td>
+</tr>
+</table>
+</body></html>
+
+</div>
+<p>Several of these instructions are actually pseudo instructions. You
+can find out how they are implemented and other useful information in
+the <a
+href="https://www.cse.chalmers.se/edu/resources/mop/lecture_notes/quickguide.html">QuickGuide</a>.</p>
+<h2 id="load-and-store-operations">Load and Store Operations</h2>
+<p>We have seen the basic instructions that let us perform calculations
+on constants and values in registers. But there is very little point in
+doing that if we cannot somehow communicate the results to a user, or
+store them in memory. This is all done by the Load and Store
+instructions, which we will discuss next.</p>
+<p>It is important to understand that <em>all</em> communication with
+things outside the processor core happens via load/store operations. Our
+processor has an SRAM (a 64KB read/write memory module) mapped to the
+address range <code>0x20000000-0x2000FFFF</code>, so any reads or writes
+to addresses within that range will go to memory. Other memory areas are
+the &#x201C;System Control Space&#x201D; and the &#x201C;Peripheral Registers&#x201D; area. You can
+see an overview of the memory mapping in the figure below. We will talk
+about how these other areas are used later on in the course, but for now
+we will stick to the SRAM.</p>
+<p><img src="../images/address_space.png" /></p>
+<h3 id="loading-data-from-memory">Loading data from memory</h3>
+<p>Let&#x2019;s say we want to read the third byte in SRAM into a register. You
+could write:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>   <span class="kw">la</span> <span class="kw">t0</span><span class="op">,</span> <span class="bn">0x20000002</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>   <span class="kw">lb</span> <span class="kw">t0</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">t0</span><span class="op">)</span></span></code></pre></div>
+<p>The first instruction <code>la</code> (Load Address) takes two
+operands: a destination register (<code>t0</code>) and an address
+(<code>0x20000002</code>, the third byte in SRAM). Since we prepended
+the address with <code>0x</code>, the address will be expected to be in
+hexadecimal form. The result of this pseudoinstruction is that the
+address will end up in register <code>t0</code> and the instruction will
+be expanded into one <code>lui</code> and one <code>addi</code>
+instruction, just as for the <code>li</code> pseudoinstruction that we
+discussed in the previous section.</p>
+<p>The second assembler instruction, <code>lb</code> (Load Byte), takes
+three operands. The first operand (<code>t0</code>) is the destination
+register (as usual). The second operand (<code>0</code>) is the
+<em>offset</em> from the <em>base address</em>, which is the third
+operand (<code>t0</code>).</p>
+<p>When the address is put on the address bus, there is logic on the
+chip that will first note that this address is in the SRAM memory area
+(<code>0x20000000-0x2000FFFF</code>). It will subtract
+<code>0x20000000</code> from the address, and pass the resulting address
+(<code>2</code>) on to the SRAM module. Let&#x2019;s say the third byte
+contains the value <code>9</code>. The SRAM will read out this byte and
+put it on the 32-bit data bus by first sign-extending it to 32 bits
+[^6]. Whatever <code>t0</code> contained before, it will now contain the
+32-bit value <code>0x00000009</code>.</p>
+<p>There are a few important things to note about this simple read
+operation:</p>
+<ul>
+<li>The processor core and compiler have no idea whether you are trying
+to read from SRAM, FLASH, or anything else. It will put an address on
+the bus and let the memory system figure out the routing.</li>
+<li>The <em>name of the instruction</em> decides how many bytes you want
+to read, starting at the address. You can read 8 bits, 16 bits, or 32
+bits with <code>lb</code> (Load Byte), <code>lh</code> (Load Halfword),
+or <code>lw</code> (Load Word) respectively.</li>
+</ul>
+<h3 id="storing-data-to-memory">Storing data to memory</h3>
+<p>Storing data works in very much the same way. We first load a base
+address into a register using <code>la</code> and then write a
+register&#x2019;s value to that address using the <code>sb</code> (Store Byte,
+8 bits), <code>sh</code> (Store Halfword, 16 bits), or <code>sw</code>
+(Store Word, 32 bits) instruction.</p>
+<p>As an example, let&#x2019;s say we want to store the values 1, 2, and 3 into
+the first three <em>half-words</em> of the SRAM <a href="#fn5"
+class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>. We
+could write:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>   <span class="kw">la</span> <span class="kw">x1</span><span class="op">,</span> <span class="bn">0x20000000</span>    <span class="op">//</span> Put the base address <span class="bn">0x20000000</span> <span class="op">(</span>start of SRAM<span class="op">)</span> <span class="kw">in</span> <span class="kw">x1</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>   <span class="kw">li</span> <span class="kw">x2</span><span class="op">,</span> <span class="dv">1</span>             <span class="op">//</span> Put the value <span class="dv">1</span> <span class="kw">into</span> <span class="kw">x2</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>   <span class="kw">sh</span> <span class="kw">x2</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">x1</span><span class="op">)</span>         <span class="op">//</span> Store the lower two bytes of <span class="kw">x2</span> <span class="kw">into</span> memory at address</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                        <span class="op">//</span> base register <span class="op">(</span><span class="kw">x1</span><span class="op">)</span> <span class="op">+</span> offset <span class="op">(</span><span class="dv">0</span><span class="op">)</span> <span class="op">=</span>  <span class="bn">0x20000000</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>   <span class="kw">li</span> <span class="kw">x2</span><span class="op">,</span> <span class="dv">2</span>             <span class="op">//</span> Put the value <span class="dv">2</span> <span class="kw">into</span> <span class="kw">x2</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>   <span class="kw">sh</span> <span class="kw">x2</span><span class="op">,</span> <span class="dv">2</span><span class="op">(</span><span class="kw">x1</span><span class="op">)</span>         <span class="op">//</span> Store the lower two bytes of <span class="kw">x2</span> <span class="kw">into</span> memory at address <span class="bn">0x20000002</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>   <span class="kw">li</span> <span class="kw">x2</span><span class="op">,</span> <span class="dv">3</span>             <span class="op">//</span> Put the value <span class="dv">3</span> <span class="kw">into</span> <span class="kw">x2</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>   <span class="kw">sh</span> <span class="kw">x2</span><span class="op">,</span> <span class="dv">4</span><span class="op">(</span><span class="kw">x1</span><span class="op">)</span>         <span class="op">//</span> Store the lower two bytes of <span class="kw">x2</span> <span class="kw">into</span> memory at address <span class="bn">0x20000004</span></span></code></pre></div>
+<p>On the first line, we load the base address <code>0x20000000</code>
+into <code>x1</code>. We will then use this as the base address for
+<em>all three</em> store operations. On the second line, we just load
+the value 1 into another register (<code>x2</code>). On the third line
+we do the first actual store operation. The value in <code>x2</code>
+gets stored into memory at address <code>0x20000000</code>. The address
+is calculated by taking the value in <code>x1</code>
+(<code>0x20000000</code>) and adding the offset from the instruction
+(<code>0</code>). Note that the offset is always given in
+<em>bytes</em>, not words or halfwords.</p>
+<p>This is then repeated for the second and third values, where the
+offsets are 2 and 4, respectively.</p>
+<p>Things to note about the store instruction:</p>
+<ul>
+<li>Again, the name of the instruction tells the processor how many
+bytes you are writing. If you write a byte, or a halfword, only the
+lowest bytes in the register will be written to memory. There is no sign
+extension needed here.</li>
+<li>The store instructions are the only instructions (that you will come
+across in this course) where the first operand is <em>not</em> the
+destination register. Instead, the first operand is the source register
+and the following operands define the destination.</li>
+</ul>
+<h2 id="variables">Variables</h2>
+<p>So far, we have read and written data to memory at <em>absolute
+addresses</em>. Sometimes that is exactly what we want to do, but often
+we just want to store data in a variable without caring where in memory
+it resides.</p>
+<p>Let&#x2019;s look at a final example where we have two variables,
+<code>var_a</code> and <code>var_b</code>, each one byte in size, and we
+want to add them together and store the result in <code>x1</code>:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>   <span class="op">//</span> Load the value of var_a <span class="kw">into</span> <span class="kw">x2</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>   <span class="kw">la</span> <span class="kw">x1</span><span class="op">,</span> var_a</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>   <span class="kw">lb</span> <span class="kw">x2</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">x1</span><span class="op">)</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>   <span class="op">//</span> Load the value of var_b <span class="kw">into</span> <span class="kw">x3</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>   <span class="kw">la</span> <span class="kw">x1</span><span class="op">,</span> var_b</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>   <span class="kw">lb</span> <span class="kw">x3</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">x1</span><span class="op">)</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>   <span class="op">//</span> Put the sum <span class="kw">in</span> <span class="kw">x1</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>   <span class="kw">add</span> <span class="kw">x1</span><span class="op">,</span> <span class="kw">x2</span><span class="op">,</span> <span class="kw">x3</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>   <span class="op">//</span> <span class="kw">x1</span> should now contain <span class="dv">30</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>   </span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>   <span class="fu">var_a:</span> <span class="kw">.byte</span> <span class="dv">10</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>   <span class="fu">var_b:</span> <span class="kw">.byte</span> <span class="dv">20</span></span></code></pre></div>
+<p>When the assembler <a href="#fn6" class="footnote-ref" id="fnref6"
+role="doc-noteref"><sup>6</sup></a> sees the first line:
+<code>la x1, var_a</code>, it replaces the variable name with the
+address of the label var_a. We <em>could</em> calculate that address
+ourselves (by counting the instructions that precede the label) but that
+would be terribly annoying and rather pointless.</p>
+<p>At the end of the code, we &#x201C;allocate&#x201D; space for the variables:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>   <span class="fu">var_a:</span> <span class="kw">.byte</span> <span class="dv">10</span></span></code></pre></div>
+<p>Here, <code>var_a:</code> is a label that marks a memory location,
+and <code>.byte 10</code> reserves one byte at that location and
+initializes it to 10. The same applies to <code>var_b</code>.</p>
+<h3 id="sign-extension">Sign extension</h3>
+<p>An important point to note is that, irrespective of whether an 8-,
+16-, or 32-bit integer is loaded into a register, the value is
+represented internally as a 32-bit integer. For unsigned integers, this
+simply means that the value is placed in the least significant bits of
+the register, while the remaining higher-order bits are filled with
+zeros. The situation is more subtle for signed integers.</p>
+<p>Consider the following example:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="dt">unsigned</span> <span class="dt">char</span> a <span class="op">=</span> <span class="dv">251</span><span class="op">;</span>  <span class="co">// 0xFB in memory</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="dt">signed</span> <span class="dt">char</span> b <span class="op">=</span> <span class="op">-</span><span class="dv">5</span><span class="op">;</span>     <span class="co">// 0xFB in memory</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> c <span class="op">=</span> a <span class="op">+</span> b<span class="op">;</span></span></code></pre></div>
+<p>Since 251&#x2212;5=246, we expect <code>c</code> to hold the value 246 after
+these statements. However, when stored in memory as single bytes, both
+<code>a</code> and <code>b</code> have the bit pattern
+<code>0xFB</code>. Consequently, whenever a value smaller than 32 bits
+is loaded from memory, the processor must be told whether the value
+should be interpreted as signed or unsigned.</p>
+<p>If the value is signed, it must be sign-extended before being placed
+into a register. Sign extension is straightforward: the most significant
+bit of the original value (bit 7 in the case of a <code>char</code>) is
+replicated into all higher-order bits of the destination register.</p>
+<p>In assembly, the code above might be written as follows:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">la</span> <span class="kw">t0</span><span class="op">,</span> a          <span class="co"># Load address of `a` to t0</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="kw">lbu</span> <span class="kw">t0</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">t0</span><span class="op">)</span>     <span class="co"># Load `a` as an unsigned byte into t0. t0 = 0x000000FB</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="kw">la</span> <span class="kw">t1</span><span class="op">,</span> b          <span class="co"># Load address of `b` into t1</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="kw">lb</span> <span class="kw">t1</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">t1</span><span class="op">)</span>      <span class="co"># Load `b` as a signed byte into t1. t1 = 0xFFFFFFFB</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="kw">add</span> <span class="kw">t2</span><span class="op">,</span> <span class="kw">t0</span><span class="op">,</span> <span class="kw">t1</span>    <span class="co"># Add values into t2.</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="kw">la</span>   <span class="kw">t3</span><span class="op">,</span> c        <span class="co"># Load address of `c` into t3</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="kw">sw</span>   <span class="kw">t2</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">t3</span><span class="op">)</span>    <span class="co"># Store the 32-bit result to memory</span></span></code></pre></div>
+<h3 id="load-and-store-global">Load and Store Global</h3>
+<p>Since loading variables to registers from memory and storing
+variables from register to memory are very common operations, there are
+very useful pseudo instructions available that simplify this in the
+assembly language.</p>
+<p>To load a variable, <code>var_a</code> from memory, into register
+<code>x1</code>, with a single (pseudo) instruction, you can write:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">lb</span> <span class="kw">x1</span><span class="op">,</span> var_a</span></code></pre></div>
+<p>To store the contents of register <code>x1</code>, into a variable
+<code>var b</code>, with a single (pseudo) instruction, you can
+write:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">sb</span> <span class="kw">x1</span><span class="op">,</span> var_b<span class="op">,</span> <span class="kw">x2</span></span></code></pre></div>
+<p>Now, where did that <code>x2</code> come from? Think about the
+<em>actual</em> instructions that this pseudo instruction has to create;
+In order to store the contents of x1 into the variable, it first has to
+calculate the address to the variable and put that into a register. The
+assembler cannot choose a register on its own, since it does not know
+what registers you (the programmer) want to preserve. Therefore, in the
+<code>sb</code> instruction, you supply a <em>temporary</em> register
+that it can use for the address calculation.</p>
+<p>In the former example (with the <code>lb</code> instruction) we do
+not have to supply a temporary register, since the assembler knows that
+it is going to overwrite the contents of <code>x1</code> and can use the
+same register for address calculations.</p>
+<p>&#x1F4A1; <strong>Note:</strong> <em>If you look at the machine instructions
+created when using these pseudo instructions, you will probably see that
+they turn into two instructions, one <code>auipc</code> instruction and
+one <code>lb</code>/<code>sb</code> instruction, rather than the three
+instructions you would get from <code>la</code> and then
+<code>lb</code>. This is just the most efficient way of implementing
+it.</em></p>
+<h2 id="loadstore-instructions">Load/Store Instructions</h2>
+<p>To summarize, every load or store operation requires calculating the
+address where we want to read or write the value. Often, this is done
+with the pseudoinstruction <code>la</code> (Load Address):</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">la</span> rd<span class="op">,</span> address       <span class="op">//</span> Put the address <span class="kw">into</span> the destination register rd</span></code></pre></div>
+<p>The <code>address</code> can either be an absolute address (e.g.,
+0x20000002) or a <em>variable name</em>. The load and store operations
+themselves are given in the following table. Some of these you have seen
+and some will be discussed further in the next lecture.</p>
+<div class="boxed">
+<!DOCTYPE html>
+<html><head>
+<meta charset='utf-8'>
+<style>
+body { font-family: sans-serif; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #ccc; padding: 6px; }
+th { background: #eee; }
+code { background: #f4f4f4; padding: 2px 4px; }
+</style>
+</head><body>
+<b>Load and Store Instructions</b>
+<table>
+<tr><th>Instruction</th>
+<th>Mnemonic</th>
+<th>Result</th>
+</tr>
+<tr>
+<td><code>lb rd, offset(rs1)</code></td>
+<td>Load byte (signed)</td>
+<td>rd &#x2190; sext(M(rs1 + offset)) [1 byte]</td>
+</tr>
+<tr>
+<td><code>lh rd, offset(rs1)</code></td>
+<td>Load halfword (signed)</td>
+<td>rd &#x2190; sext(M(rs1 + offset)) [2 bytes]</td>
+</tr>
+<tr>
+<td><code>lw rd, offset(rs1)</code></td>
+<td>Load word</td>
+<td>rd &#x2190; M(rs1 + offset) [4 bytes]</td>
+</tr>
+<tr>
+<td><code>lbu rd, offset(rs1)</code></td>
+<td>Load byte unsigned</td>
+<td>rd &#x2190; zext(M(rs1 + offset)) [1 byte]</td>
+</tr>
+<tr>
+<td><code>lhu rd, offset(rs1)</code></td>
+<td>Load halfword unsigned</td>
+<td>rd &#x2190; zext(M(rs1 + offset)) [2 bytes]</td>
+</tr>
+<tr>
+<td><code>sb rs2, offset(rs1)</code></td>
+<td>Store byte</td>
+<td>M(rs1 + offset) &#x2190; rs2 [1 byte]</td>
+</tr>
+<tr>
+<td><code>sh rs2, offset(rs1)</code></td>
+<td>Store halfword</td>
+<td>M(rs1 + offset) &#x2190; rs2 [2 bytes]</td>
+</tr>
+<tr>
+<td><code>sw rs2, offset(rs1)</code></td>
+<td>Store word</td>
+<td>M(rs1 + offset) &#x2190; rs2 [4 bytes]</td>
+</tr>
+</table>
+</body></html>
+
+</div>
+<p>In all of these instructions, <code>offset</code> is a small number
+(12 bits) and <code>rs1</code> is a register containing the base
+address. <code>sext</code> means &#x201C;sign extend&#x201D;, and <code>zext</code>
+means &#x201C;zero extend&#x201D;.</p>
+<h1 id="memory-alignment">Memory alignment</h1>
+<p>So far, we have carefully and skillfully avoided one thorny issue
+that most novice assembler programmers find a bit challenging: Memory
+Alignment. Hopefully, this section will help you realize that it is not
+very difficult at all.</p>
+<h2 id="why-we-need-it">Why we need it</h2>
+<p>Whatever type of memory module you encounter, the data will be stored
+as <em>bits</em> that are either 0 or 1. To read or write data you will
+supply the memory with an address that is expressed in <em>bytes</em>.
+In the simplest, old, 8-bit, memories the address would be sent to the
+memory chip (one line per bit) and the memory chip would output the
+eight bits of data on that address onto the data bus.</p>
+<p>On more modern hardware, and specifically on our CH32F307, the
+registers are 32 bits wide, and it is much more common that we want to
+load or store 32 bits at once. Therefore, the data bus is 32 bits wide
+so that we can send an address to the memory &#x201C;chip&#x201D; <a href="#fn7"
+class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a> and
+read a whole 32-bit word in one cycle. The figure below illustrates such
+a read operation, where the processor reads a 4-byte word, starting at
+the address <code>0x20000008</code>.</p>
+<p><img src="../images/valid_word_access.png" /></p>
+<blockquote>
+<p>TODO: Make memory grow upwards.</p>
+</blockquote>
+<p>This works fine. The processor will put the <em>byte</em> address
+<code>0x20000008</code> on the address bus, and the address logic can
+divide this by 4 to find which <em>word</em> it should put on the data
+bus. Now consider what happens if the processor wants to read a 4-byte
+word starting at address <code>0x20000006</code> instead:</p>
+<p><img src="../images/invalid_word_access.png" /></p>
+<p>Now we have a problem. A 4-byte word starting at
+<code>0x20000006</code> would span over <em>two</em> rows in the memory.
+The memory module cannot simply pick one of the words and put it on the
+data bus. The solution would be to first put the word starting on
+<code>0x20000004</code> in a register, then shift that two bytes to the
+right, then read the word starting at <code>0x20000008</code> in another
+register and shift that two bytes to the left, and finally ORing these
+two registers onto the data bus.</p>
+<p>While that is by no means impossible, it would mean much more
+complicated logic in the memory module, and it would mean that reading
+out the word would take at least two cycles, instead of one. Instead,
+most architectures simply do not allow these kinds of accesses <a
+href="#fn8" class="footnote-ref" id="fnref8"
+role="doc-noteref"><sup>8</sup></a>:</p>
+<blockquote>
+<p><strong>Rule:</strong> 4-byte words must be 4-byte aligned (address
+divisible by 4)</p>
+</blockquote>
+<p>Another way to say this is that a 4-byte word must be 4-byte
+<em>aligned</em> in memory. If we do not follow this rule, the program
+will simply crash (actually, it will cause an &#x201C;exception&#x201D;, but more on
+that later).</p>
+<p>What if we try to read or write a 2-byte word? This is illustrated in
+the two figures below:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th><img src="../images/valid_halfword_access.png" alt="Image 1" /></th>
+<th><img src="../images/invalid_halfword_access.png"
+alt="Image 2" /></th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<p>When trying to access a halfword (2 bytes) at address
+<code>0x20000006</code> the address logic can simply divide the address
+by four to find the row in memory containing the halfword. It can then
+use the remainder as input to a MUX that chooses the upper or lower part
+of the word to put on the data bus. This logic is simple enough to
+include in the memory chip, and completes in a single cycle, so this
+access is allowed.</p>
+<p>Consider the case on the right, however, where we want to read a
+halfword from address <code>0x20000005</code>. Now, even though the
+halfword <em>is</em> &#x201C;inside&#x201D; one row of memory, the simple MUX logic
+doesn&#x2019;t quite work. If we tried to read a halfword from, e.g., address
+<code>0x20000007</code> instead, the situation would be the same is
+above; the halfword resides in two different rows of the memory. For
+halfwords, the alignment rule simply boils down to:</p>
+<blockquote>
+<p><strong>Rule:</strong> 2-byte words must be 2-byte aligned (address
+divisible by 2)</p>
+</blockquote>
+<p>Finally, if we read a single byte (with <code>lb</code>) there are no
+alignment rules. A byte will always reside in exactly one of the 32-bit
+rows, so the logic to extract it onto the databus is very simple.</p>
+<h2 id="how-to-do-it">How to do it</h2>
+<p>In this course, you will encounter many scenarios where you
+accidentally break one of these rules and crash your program, since we
+will do a lot of programming with absolute addresses. When working with
+variables, however, there is a simple syntax that makes sure that your
+data is correctly aligned.</p>
+<p>Let&#x2019;s revisit the example code with variables above, but this time,
+<code>var_b</code> is a four byte word:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>   <span class="op">//</span> Load the value of var_a <span class="kw">into</span> <span class="kw">x2</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>   <span class="kw">la</span> <span class="kw">x1</span><span class="op">,</span> var_a</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>   <span class="kw">lb</span> <span class="kw">x2</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">x1</span><span class="op">)</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>   <span class="op">//</span> Load the value of var_b <span class="kw">into</span> <span class="kw">x3</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>   <span class="kw">la</span> <span class="kw">x1</span><span class="op">,</span> var_b</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>   <span class="kw">lw</span> <span class="kw">x3</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">x1</span><span class="op">)</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>   <span class="op">//</span> Put the sum <span class="kw">in</span> <span class="kw">x1</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>   <span class="kw">add</span> <span class="kw">x1</span><span class="op">,</span> <span class="kw">x2</span><span class="op">,</span> <span class="kw">x3</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>   <span class="op">//</span> <span class="kw">x1</span> should now contain <span class="dv">30</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>   <span class="fu">var_a:</span> <span class="kw">.byte</span> <span class="dv">10</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>   <span class="fu">var_b:</span> <span class="kw">.word</span> <span class="dv">20</span></span></code></pre></div>
+<p>Since the first machine code instruction starts at 0x20000000, and
+all machine code is 32 bits on our platform, we know that
+<code>var_a</code> will be at an address that is divisible by 4. At that
+address, we make room for <em>one byte</em> so <code>var_b</code> will
+<em>not</em> be on an address that is dividible by 4! That means that if
+we compiled and ran this program, the <code>lw</code> instruction on
+line 6 would crash.</p>
+<p>To avoid this, we simply tell the compiler that we want
+<code>var_b</code> to be word aligned:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>   <span class="fu">var_a:</span> <span class="kw">.byte</span> <span class="dv">10</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>   <span class="kw">.align</span> <span class="dv">2</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>   <span class="fu">var_b:</span> <span class="kw">.word</span> <span class="dv">20</span></span></code></pre></div>
+<p>The syntax here is a bit confusing. The <code>.align x</code>
+directive means that the compiler should insert a number of empty bytes
+here, so that the next address is divisible by <code>2^x</code>. So, if
+we want a word-aligned address, we say <code>.align 2</code> and if we
+want a halfword-aligned address, we say <code>.align 1</code>.</p>
+<!--
+## Stuff they should know after this lecture
+
+* Difference between assembly and machine code, and why it needs to be different
+* ... TBD
+
+## Assignments we can give them to test their knowledge of this lecture
+* Ask them to check how different assembly instructions turn into which machine instructions
+* Some sort of concept-map where we ask them to connect the different concepts introduced (ISA/ABI/Processor/Processor Core, etc...).
+
+-->
+<p><strong>Links:</strong> <a
+href="https://drive.google.com/file/d/1uviu1nH-tScFfgrovvFCrj7Omv8tFtkp/view">Unprivileged
+ISA</a> , <a
+href="https://github.com/riscv-non-isa/riscv-asm-manual/releases/download/v0.0.1/riscv-asm.pdf">RISC-V
+Assembly Programmer&#x2019;s Manual</a>, <a
+href="https://docs.riscv.org/reference/application-software/abi/_attachments/riscv-abi.pdf?utm_source=chatgpt.com">RISC-V
+ABI Specification</a></p>
+<p><strong>Text and excercises in the Workbook (Arbetsboken)</strong>
+Chapter 1, Pages 7-16 Chapter 1, Pages 24-33</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Pipelining is when the processor executes several
+instructions at once, and will not be covered in this course. It is
+explained in detail in the Computer Architecture course.<a
+href="#fnref1" class="footnote-back" role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+<li id="fn2"><p>Pipelining is when the processor executes several
+instructions at once, and will not be covered in this course. It is
+explained in detail in the Computer Architecture course.<a
+href="#fnref2" class="footnote-back" role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+<li id="fn3"><p>On other architectures, instructions may be followed by
+operands, and a RISC-V with the <code>C</code> extension allows for
+&#x201C;compressed&#x201D; instructions that are 16 bit wide, but in this course we
+will only use purely 32-bit instructions.<a href="#fnref3"
+class="footnote-back" role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+<li id="fn4"><p>This is not the exact ordering of the bits used in
+reality.<a href="#fnref4" class="footnote-back"
+role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+<li id="fn5"><p>Don&#x2019;t try this at home! The beginning of SRAM is usually
+where your code resides.<a href="#fnref5" class="footnote-back"
+role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+<li id="fn6"><p>To be precise, the final address is actually calculated
+by the <em>linker</em>, but we will cover that in a later lecture.<a
+href="#fnref6" class="footnote-back" role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+<li id="fn7"><p>The SRAM we are accessing is actually not its own chip,
+but is built into the same chip that holds the processor.<a
+href="#fnref7" class="footnote-back" role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+<li id="fn8"><p>To be perfectly honest, modern architectures, including
+CH32V307, actually <em>do</em> implement this logic and you can enable
+unaligned accesses. It is, however, good practise not to as it will
+affect performance, sometimes severely.<a href="#fnref8"
+class="footnote-back" role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+</ol>
+</section>
+</body>
+</html>

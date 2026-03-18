@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>lab1_eterm8</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+<h1 id="laboration-1-terminal-gdb">Laboration 1 (Terminal GDB)</h1>
+<p>In this lab, you will finally get to run some code on, and connect
+some real hardware to, the real MD307 microcontroller. By the time you
+take this lab you should know quite a lot about assembly programming on
+a RISC-V system, you should know the basics of how to put signals onto
+the GPIO pins, and you should be familiar with creating, compiling, and
+running an assembly program in the simulator environment.</p>
+<h2 id="preparations">Preparations</h2>
+<p>You MUST have done the preparation task for this lab, and have
+submitted your answers to Canvas. If you have not, this will take too
+much time so talk to a TA and see if there is room on a later Lab
+session.</p>
+<h2 id="lab-environment">Lab environment</h2>
+<p><strong>This whole lab should be done by connecting the MD307 to the
+stationary computer in the lab. You cannot use your own laptops. When
+connecting your MD307, make sure to connect the USB cable to the little
+usb hub behind the screen, <em>not</em> the screen itself.</strong></p>
+<p>In all program development, but <em>especially</em> when you are
+programming close to the metal (machine oriented), it is essential to be
+able to run your program through a <em>debugger</em>.</p>
+<p>When you are ready to ship your program, you will compile it to an
+<code>.elf</code> file and use a tool to send it to your
+microcontrollers flash memory (so that it starts any time you turn the
+device on), but while developing the program, uploading, starting, and
+stopping is handled by the debugger.</p>
+<p>In this version of the lab, we do all debugging from the
+<em>terminal</em> using GDB (GNU DeBugger) directly &#x2014; no IDE
+required.</p>
+<h3 id="how-the-debug-setup-works">How the debug setup works</h3>
+<p>GDB is a command-line tool and a protocol. You start GDB and point it
+at your compiled <code>.elf</code> file:</p>
+<pre><code>$ riscv32-unknown-elf-gdb excercise02.elf
+GNU gdb (&#39;riscv32-embecosm-gcc-win64-20230813&#39;) 14.0.50.20230813-git
+Copyright (C) 2023 Free Software Foundation, Inc.
+For help, type &quot;help&quot;.
+Reading symbols from excercise02.elf...
+(gdb)</code></pre>
+<p>The GDB client connects via TCP to a GDB <em>server</em>. When using
+the simulator, <code>SimServer</code> is the GDB server. When (like
+today) you are connecting real hardware, you start a program called
+<code>OpenOCD</code> instead. <code>OpenOCD</code> is a GDB server that
+speaks the GDB protocol on one side and forwards commands over USB to
+your MD307 on the other.</p>
+<p><img src="../images/debug_setup.png" /></p>
+<p>At the other end of the USB cable is your MD307. It has a little chip
+(the GDB module in the image) that talks directly to the USB port. When
+it receives a command on the USB port, it translates it into a serial
+protocol that talks directly with the microcontroller&#x2019;s debug module.
+The details of this protocol are <em>way</em> out of scope for this
+course (and, unfortunately, proprietary) but it is important to
+understand this basic picture of how your program gets loaded into
+memory, started and stopped.</p>
+<h3 id="assemble-your-program">Assemble your program</h3>
+<ol type="1">
+<li>Download this assembler program: <a
+href="assignment1.asm">assignment1.asm</a>. Assemble it using Eterm8 and
+make sure a <code>.elf</code> file is produced.</li>
+</ol>
+<h3 id="starting-the-debug-session">Starting the debug session</h3>
+<ol type="1">
+<li><p><strong>Start OpenOCD</strong> using the shortcut on the desktop.
+You should see output ending with something like:</p>
+<pre><code>Info : Listening on port 3333 for gdb connections</code></pre></li>
+<li><p><strong>Start GDB</strong> using the shortcut on the desktop. A
+terminal window will appear. Point GDB at your <code>.elf</code> file
+using the <code>file</code> command:</p>
+<pre><code>(gdb) file assignment1.elf</code></pre></li>
+<li><p><strong>Connect to OpenOCD</strong> from within GDB:</p>
+<pre><code>(gdb) target extended-remote localhost:3333</code></pre>
+<p>Note: Make sure the port number matches the port number listed in
+step 1.</p></li>
+<li><p><strong>Upload your program</strong> to the MD307:</p>
+<pre><code>(gdb) load</code></pre></li>
+<li><p><strong>Start execution</strong>:</p>
+<pre><code>(gdb) continue</code></pre></li>
+</ol>
+<h3 id="essential-gdb-commands">Essential GDB commands</h3>
+<table>
+<colgroup>
+<col style="width: 31%" />
+<col style="width: 24%" />
+<col style="width: 44%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Short</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>continue</code></td>
+<td><code>c</code></td>
+<td>Resume execution until next breakpoint or crash</td>
+</tr>
+<tr>
+<td><code>stepi</code></td>
+<td><code>si</code></td>
+<td>Execute one assembly instruction (step <em>into</em> calls)</td>
+</tr>
+<tr>
+<td><code>nexti</code></td>
+<td><code>ni</code></td>
+<td>Execute one assembly instruction (step <em>over</em> calls)</td>
+</tr>
+<tr>
+<td><code>break location</code></td>
+<td><code>b</code></td>
+<td>Set a breakpoint, e.g.&#xA0;<code>break assignment.s:20</code></td>
+</tr>
+<tr>
+<td><code>info breakpoints</code></td>
+<td><code>i b</code></td>
+<td>List all breakpoints</td>
+</tr>
+<tr>
+<td><code>delete N</code></td>
+<td><code>d N</code></td>
+<td>Delete breakpoint number N</td>
+</tr>
+<tr>
+<td><code>info registers</code></td>
+<td><code>i r</code></td>
+<td>Show all general-purpose register values</td>
+</tr>
+<tr>
+<td><code>print $reg</code></td>
+<td><code>p</code></td>
+<td>Print a single register, e.g.&#xA0;<code>print $a0</code></td>
+</tr>
+<tr>
+<td><code>x/Nx addr</code></td>
+<td></td>
+<td>Examine N words of memory at addr,
+e.g.&#xA0;<code>x/8x 0x20000000</code></td>
+</tr>
+<tr>
+<td><code>list</code></td>
+<td><code>l</code></td>
+<td>Show source code around current location</td>
+</tr>
+<tr>
+<td><code>backtrace</code></td>
+<td><code>bt</code></td>
+<td>Show the call stack</td>
+</tr>
+<tr>
+<td><code>load</code></td>
+<td></td>
+<td>Re-upload the <code>.elf</code> file (after recompiling)</td>
+</tr>
+<tr>
+<td><code>monitor reset halt</code></td>
+<td></td>
+<td>Reset the microcontroller and halt at the start</td>
+</tr>
+<tr>
+<td><code>quit</code></td>
+<td><code>q</code></td>
+<td>Exit GDB</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Tip:</strong> After a code change, recompile, then in GDB
+type <code>load</code> followed by <code>monitor reset halt</code> and
+<code>continue</code> &#x2014; no need to restart GDB or OpenOCD.</p>
+<h2 id="lab-exercise-1---debug-somebody-elses-code">Lab Exercise 1 -
+Debug somebody else&#x2019;s code</h2>
+<blockquote>
+<p><strong>Important:</strong> You should spend a maximum of one hour on
+this exercise. If you get stuck at some point for more than 15 minutes,
+grab a TA &#x2014; they will guide you to the next step. <em>It is important
+that you proceed to the second exercise within an hour, whether you
+found all bugs or not</em>.</p>
+</blockquote>
+<p>Time to try it. The program you have just uploaded to the MD307 is an
+attempt at solving the same task as you solved for the preparation, but
+unfortunately whoever wrote this was not as bright as you and it is
+riddled with bugs!</p>
+<p>In fact, if you try to run the code, it will just crash. So, start
+the program and then slowly step through it using <code>stepi</code> (or
+<code>si</code>). <strong>Where did it crash?</strong> (GDB will print
+something like <code>Program received signal SIGTRAP</code> or simply
+stop responding to <code>stepi</code>.)</p>
+<p>Now restart the program (<code>monitor reset halt</code>) and step
+until you are at the instruction where it crashed last time (but don&#x2019;t
+execute it, or it crashes again). Inspect the register values with
+<code>info registers</code>. <strong>Why does this instruction crash the
+machine?</strong> Look at the surrounding code (<code>list</code>) and
+you should be able to fix the first bug. Write down what it was, so you
+can show the TA.</p>
+<p>If you run the program again it will still crash, but this time you
+should make it through the <code>copyelements</code> function. Set a
+breakpoint right after the call to that function:</p>
+<pre><code>(gdb) break assignment.s:LINE_NUMBER</code></pre>
+<p>(replace <code>LINE_NUMBER</code> with the line right after the
+function call) and run the program until you hit the breakpoint
+(<code>continue</code>).</p>
+<p>Now keep stepping with <code>si</code> until you see where it
+crashes. <strong>Where does it crash?</strong> Restart the program and
+run to this line again. Look at the registers with
+<code>info registers</code>. Do the contents of the registers make
+sense? Where did they stop making sense (step through the program)?
+<strong>Fix the bug.</strong></p>
+<p>Now set breakpoints at the two test-related lines that contains the
+instruction <code>j worked</code> and <code>j error</code></p>
+<pre><code>(gdb) break assignment.s:FIRST_LINE
+(gdb) break assignment.s:SECOND_LINE</code></pre>
+<p>Run the program again (<code>continue</code>) and when it breaks on
+the first instruction, continue (<code>c</code>) &#x2014; the program will stop
+at the second breakpoint, so there are still problems!</p>
+<p>Figure out why the program does not pass the test, then find a TA and
+show them your findings.</p>
+<h2 id="lab-exercise-2---let-there-be-light">Lab Exercise 2 - Let there
+be light!</h2>
+<p>Finally time to play with LED lights. In the box next to your MD307
+you should have found a spider-like contraption looking something like
+this (or maybe just a single colored LED light with two legs): <img
+src="../images/rgb_led_light.png" /></p>
+<p>Your next task is to make this light turn on. You can test it
+immediately by connecting the ground leg (the one with the resistor) to
+GND, and (one of) the other legs to 3.3V:</p>
+<p><img src="../images/LED.png" /></p>
+<p>But obviously, the goal is to control it from your program, so
+connect the anode to one of the GPIO pins instead (PD6 could be a good
+one). Download template code: <a
+href="assignment2.asm">assignment2.asm</a>. There is not much code
+there, so it&#x2019;s up to you now.</p>
+<blockquote>
+<p>&#x26A0;&#xFE0F; <strong>Important:</strong> You will probably not have time to
+complete all of these assignments. It is much more important that you
+understand what you are doing than that you complete all the tasks.</p>
+</blockquote>
+<h3 id="task-1-turn-it-on.">Task 1: Turn it on.</h3>
+<p>You have seen this in the lectures and you might have done something
+very similar in exercises already. Configure your chosen pin as a
+Push-Pull, Output, pin and write a <code>1</code> to the corresponding
+bit in the <code>ODATA</code> register. Step through your code with
+<code>si</code> and make sure the light goes on when you expect it
+to.</p>
+<h3 id="task-2-make-it-blink">Task 2: Make it blink</h3>
+<p>Write a little <code>delay</code> function that is just a for loop
+that keeps the machine busy for a while. Then write a loop where
+you:</p>
+<pre><code>    Turn the light on
+    delay
+    Turn the light off
+    delay
+    repeat</code></pre>
+<h3 id="task-3-making-it-pulsate">Task 3: Making it pulsate&#x2026;</h3>
+<p>Now we want the light to go from off, to stronger and stronger. But
+how can we do that when all we can do is turn it on or off? We will use
+a trick called <em>Pulse Width Modulation</em> (PWM). The idea is that
+we divide time into a very short interval, just a few thousand
+clock-cycles (4096 will work pretty well). We will call this time
+interval a <em>period</em> (P). Then we say that the light will be
+<em>on</em> for a part of this interval (0-100%, we call this the
+<em>duty cycle</em>) and off for the remainder of the interval.</p>
+<p>In other words, we make the lamp blink very very quickly. If our
+period is short enough, we will not perceive this as blinking; we will
+just see the light glowing with different strength. With a low duty
+cycle (say, 10% or 400 cycles), it will be very dim, and with a high
+duty cycle it will shine brightly.</p>
+<p><img src="../images/duty_cycle.png" /></p>
+<p>Start by making the light glow dimly, with a low duty cycle, and then
+try to write a loop where you increase the duty cycle gradually until
+you hit max. In pseudo code:</p>
+<pre><code>duty cycle = 0
+loop: 
+    increase duty_cycle
+    if duty_cycle &gt; 4096, set to 0
+    for i = 0 to 4096: 
+        if i &lt; duty_cycle: 
+           light should be on
+        else 
+           light should be off
+    jump to loop</code></pre>
+<h3 id="task-4-rgb-lights">Task 4: RGB Lights!</h3>
+<p>If you have made it this far, great work! If you have time to
+complete this task as well, <strong>wow!</strong> Go find the TA and ask
+for an RGB LED, if you don&#x2019;t have one already. Then connect it and make
+it pulsate with all the colors of the rainbow. Then record it and show
+your lecturer for a gold star sticker<a href="#fn1" class="footnote-ref"
+id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+<h3 id="task-5-getting-approved">Task 5: Getting Approved</h3>
+<p>After thoroughly testing and verifying that your program works as
+expected, demonstrate your solution to a TA. Show them that the program
+works. Explain the bugs you found and how you fixed them. Answer any
+questions they may have.</p>
+<p><strong><em>If you are approved by the TA, it is YOUR responsibility
+to verify that it has been documented in Canvas under &#x2018;Grades&#x2019;. Do so
+before leaving!</em></strong></p>
+<section id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>The gold star has no monetary value and does not affect
+your grade. It might also be a virtual gold star sticker if I cannot
+find a real one.<a href="#fnref1" class="footnote-back"
+role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+</ol>
+</section>
+</body>
+</html>

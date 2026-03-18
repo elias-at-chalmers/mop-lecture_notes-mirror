@@ -1,0 +1,157 @@
+/* Modern Lecture Notes CSS */
+
+/* General document styling */
+body {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    font-size: 18px;
+    color: #333;
+    background-color: #fdfdfd;
+    margin: 2rem auto;
+    max-width: 900px;
+    padding: 0 1rem;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6, summary.h3 {
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    font-weight: 600;
+    color: #222;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+h1 { border-bottom: 2px solid #eee; padding-bottom: 0.3rem; }
+h2 { border-bottom: 1px solid #eee; padding-bottom: 0.2rem; }
+
+/* Paragraphs */
+p {
+    margin-bottom: 1rem;
+}
+
+
+summary {
+  display: list-item;              /* ← required for arrow */
+  width: 100%;
+  box-sizing: border-box;
+
+  background-color: #8f8f8f;
+  color: #ffffff;
+
+  /*padding: 0.75em 1em;*/
+  /*padding-left: 2.25em;             space for arrow */
+
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* Optional: nicer hover/focus */
+summary:hover {
+  background-color: #3a3a3a;
+}
+
+summary:focus {
+  outline: 2px solid #6aa9ff;
+  outline-offset: -2px;
+}
+
+/* Links */
+a {
+    color: #1a73e8;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Code blocks */
+code {
+    font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+    font-size: 0.9em;
+    background-color: #f5f5f5;
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+}
+
+/* Code blocks */
+pre code {
+    font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+    font-size: 0.85em;
+    background-color: #f0f0f0;
+    padding: 0.5em;
+    display: block;
+    overflow-x: auto;
+    border-radius: 4px;
+}
+pre {
+    padding: 1rem;
+    overflow-x: auto;
+}
+
+/* Blockquotes */
+blockquote {
+    border-left: 4px solid #ccc;
+    padding-left: 1rem;
+    color: #555;
+    margin: 1rem 0;
+    font-style: italic;
+}
+
+/* Lists */
+ul, ol {
+    margin: 1rem 0 1rem 2rem;
+}
+
+/* Tables */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 0.1rem 1rem;
+}
+
+th {
+    background-color: #f3f3f3;
+}
+
+/* Horizontal rule */
+hr {
+    border: 0;
+    height: 1px;
+    background: #eee;
+    margin: 2rem 0;
+}
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .boxed {
+    border: 1px solid #ccc;
+    padding: 0.8em;
+    margin: 1em 0;
+    border-radius: 4px;
+}
+
+/* For foldable things in table */
+.fold-table .detail {
+  display: none;
+}
+
+.fold-table .detail.open {
+  display: table-row;
+}
+
+.fold-table .summary {
+  cursor: pointer;
+  background: #EfEfEf;
+  color: black;
+  /*font-weight: 600;*/
+}

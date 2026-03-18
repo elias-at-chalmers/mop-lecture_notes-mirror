@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>tenta_2025_03_17</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+<style>
+body {
+    max-width: none !important;
+}
+h1 {
+    background-color: #2c2c2c;
+    color: #ffffff;
+    padding: 0.4em 0.7em;
+    border-radius: 4px;
+}
+td pre {
+    padding: 0;
+    margin: 0;
+}
+td pre code {
+    padding: 0.3em 0.5em;
+    white-space: pre;
+}
+td:has(pre) {
+    padding: 0.2rem 0.3rem;
+}
+</style>
+<h1 id="uppgift-1-2-4-p">Uppgift 1 (&#x2013;2 &#x2026; 4 p)</h1>
+<p>F&#xF6;ljande deklarationer &#xE4;r givna som globala variabler i C:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">unsigned</span> <span class="dt">short</span> a <span class="op">=</span> <span class="dv">2</span><span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="dt">unsigned</span> <span class="dt">char</span>  b <span class="op">=</span> <span class="dv">4</span><span class="op">;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="dt">short</span>          c<span class="op">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>            d<span class="op">[</span><span class="dv">20</span><span class="op">];</span></span></code></pre></div>
+<hr />
+<p><strong>a)</strong> Vilket av f&#xF6;ljande alternativ &#xE4;r en korrekt
+assemblerdeklaration av variablerna? Om tv&#xE5; eller fler alternativ &#xE4;r
+korrekta, v&#xE4;lj det som anv&#xE4;nder <strong>minst minne</strong>. (&#x2013;1 &#x2026; 2
+p)</p>
+<hr />
+<h2 id="svarsalternativ">Svarsalternativ</h2>
+<table>
+<tr>
+<td>
+A
+</td>
+<td>
+B
+</td>
+<td>
+C
+</td>
+<td>
+D
+</td>
+</tr>
+<tr>
+<td>
+<pre><code>.align 1
+a: .hword 2
+b: .byte 4
+c: .space 2
+.align 2
+d: .space 80</code></pre>
+</td>
+<td>
+<pre><code>.align 1
+a: .space 2
+b: .space 1
+.align 1
+c: .space 2
+.align 2
+d: .space 80</code></pre>
+</td>
+<td>
+<pre><code>.align 1
+a: .hword 2
+b: .byte 4
+.align 1
+c: .space 2
+.align 2
+d: .space 20</code></pre>
+</td>
+<td>
+<pre><code>.align 1
+a: .hword 2
+b: .byte 4
+.align 1
+c: .hword 2
+.align 2
+d: .space 80</code></pre>
+</td>
+</tr>
+<tr>
+<td>
+E
+</td>
+<td>
+F
+</td>
+<td>
+G
+</td>
+<td>
+H
+</td>
+</tr>
+<tr>
+<td>
+<pre><code>.align 1
+a: .hword 2
+b: .byte 4
+c: .hword 2
+.align 2
+d: .space 80</code></pre>
+</td>
+<td>
+<pre><code>.align 1
+a: .space 2
+b: .space 1
+c: .space 2
+.align 2
+d: .space 80</code></pre>
+</td>
+<td>
+<pre><code>.align 1
+a: .hword 2
+b: .byte 4
+.align 1
+c: .space 2
+.align 2
+d: .space 80</code></pre>
+</td>
+<td>
+<pre><code>.align 1
+a: .space 2
+b: .space 1
+c: .hword 2
+.align 2
+d: .space 80</code></pre>
+</td>
+</tr>
+</table>
+<details>
+<summary>
+Svar
+</summary>
+<p><strong>Svar: G</strong></p>
+<ul>
+<li><code>a: .hword 2</code> deklarerar <code>unsigned short</code> (2
+byte) med v&#xE4;rdet 2 &#x2713;</li>
+<li><code>b: .byte 4</code> deklarerar <code>unsigned char</code> (1
+byte) med v&#xE4;rdet 4 &#x2713;</li>
+<li><code>.align 1</code> kr&#xE4;vs innan <code>c</code> f&#xF6;r att justera
+till 2-byte-gr&#xE4;ns (n&#xF6;dv&#xE4;ndigt efter den 1 byte stora <code>b</code>)
+&#x2713;</li>
+<li><code>c: .space 2</code> ger <code>short</code> (2 byte,
+nollinitieras vilket &#xE4;r korrekt f&#xF6;r en global variabel) &#x2713;</li>
+<li><code>.align 2</code> och <code>d: .space 80</code> ger
+4-byte-justerad <code>int[20]</code> (20 &#xD7; 4 = 80 byte) &#x2713;</li>
+</ul>
+<p>Alternativ A saknar <code>.align 1</code> f&#xF6;re <code>c</code> &#x2192;
+<code>c</code> hamnar p&#xE5; en oj&#xE4;mn (feljusterad) adress. Alternativ D
+initierar <code>c</code> till 2 med <code>.hword 2</code>, ist&#xE4;llet f&#xF6;r
+0. Alternativ G &#xE4;r det enda korrekta alternativet (och minst
+minneskr&#xE4;vande bland korrekta).</p>
+</details>
+<hr />
+<p>F&#xF6;ljande tilldelning skall g&#xF6;ras:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>d<span class="op">[</span>a <span class="op">+</span> b<span class="op">]</span> <span class="op">=</span> c<span class="op">;</span></span></code></pre></div>
+<hr />
+<p><strong>b)</strong> Vilket av f&#xF6;ljande alternativ &#xE4;r en korrekt
+implementation av tilldelningen i RISC-V assembler?<br />
+(&#x2013;1 &#x2026; 2 p)</p>
+<hr />
+<h2 id="svarsalternativ-1">Svarsalternativ</h2>
+<table>
+<tr>
+<td>
+A
+</td>
+<td>
+B
+</td>
+<td>
+C
+</td>
+<td>
+D
+</td>
+</tr>
+<tr>
+<td>
+<pre><code>la   t0, a
+lhu  t0, 0(t0)
+la   t1, b
+lbu  t1, 0(t1)
+add  t0, t0, t1
+slli t0, t0, 2
+la   t1, d
+add  t0, t0, t1
+la   t2, c
+lh   t2, 0(t2)
+sh   t2, 0(t0)</code></pre>
+</td>
+<td>
+<pre><code>la   t0, a
+lhu  t0, 0(t0)
+la   t1, b
+lbu  t1, 0(t1)
+add  t0, t0, t1
+slli t0, t0, 4
+la   t1, d
+add  t0, t0, t1
+la   t2, c
+lh   t2, 0(t2)
+sw   t2, 0(t0)</code></pre>
+</td>
+<td>
+<pre><code>la   t0, a
+lhu  t0, 0(t0)
+la   t1, b
+lbu  t1, 0(t1)
+add  t0, t0, t1
+slli t0, t0, 2
+la   t1, d
+add  t0, t0, t1
+la   t2, c
+lh   t2, 0(t2)
+sw   t2, 0(t0)</code></pre>
+</td>
+<td>
+<pre><code>la   t0, a
+lw   t0, 0(t0)
+la   t1, b
+lw   t1, 0(t1)
+add  t0, t0, t1
+slli t0, t0, 2
+la   t1, d
+add  t0, t0, t1
+la   t2, c
+lw   t2, 0(t2)
+sw   t2, 0(t0)</code></pre>
+</td>
+</tr>
+<tr>
+<td>
+E
+</td>
+<td>
+F
+</td>
+<td>
+G
+</td>
+<td>
+H
+</td>
+</tr>
+<tr>
+<td>
+<pre><code>la   t0, a
+lhu  t0, 0(t0)
+la   t1, b
+lbu  t1, 0(t1)
+add  t0, t0, t1
+slli t0, t0, 2
+la   t1, d
+la   t2, c
+lh   t2, 0(t2)
+sw   t2, 0(t1)</code></pre>
+</td>
+<td>
+<pre><code>la   t0, a
+lhu  t0, 0(t0)
+la   t1, b
+lbu  t1, 0(t1)
+add  t0, t0, t1
+la   t1, d
+add  t0, t0, t1
+la   t2, c
+lh   t2, 0(t2)
+sw   t2, 0(t0)</code></pre>
+</td>
+<td>
+<pre><code>la   t0, a
+lhu  t0, 0(t0)
+la   t1, b
+lbu  t1, 0(t1)
+add  t0, t0, t1
+slli t0, t0, 2
+la   t1, d
+add  t0, t0, t1
+la   t2, c
+lhu  t2, 0(t2)
+sw   t2, 0(t0)</code></pre>
+</td>
+<td>
+<pre><code>la   t0, a
+lhu  t0, 0(t0)
+la   t1, b
+lbu  t1, 0(t1)
+add  t0, t0, t1
+slli t0, t0, 2
+la   t1, d
+add  t0, t0, t1
+la   t2, c
+lh   t2, 0(t2)
+sb   t2, 0(t0)</code></pre>
+</td>
+</tr>
+</table>
+<details>
+<summary>
+Svar
+</summary>
+<p><strong>Svar: C</strong></p>
+<ul>
+<li><code>lhu t0, 0(t0)</code> &#x2014; laddar <code>a</code> (unsigned short)
+med nollutvidgning &#x2713;</li>
+<li><code>lbu t1, 0(t1)</code> &#x2014; laddar <code>b</code> (unsigned char)
+med nollutvidgning &#x2713;</li>
+<li><code>slli t0, t0, 2</code> &#x2014; multiplicerar index med 4
+(sizeof(int)) &#x2713;</li>
+<li><code>lh t2, 0(t2)</code> &#x2014; laddar <code>c</code> (signed short) med
+tecknutvidgning till 32 bit &#x2713;</li>
+<li><code>sw t2, 0(t0)</code> &#x2014; lagrar 4 byte till
+<code>int</code>-arrayen <code>d</code> &#x2713;</li>
+</ul>
+<p>Alternativ A anv&#xE4;nder <code>sh</code> (lagrar bara 2 byte) ist&#xE4;llet
+f&#xF6;r <code>sw</code> f&#xF6;r en <code>int</code>-array &#x2192; fel. Alternativ G
+anv&#xE4;nder <code>lhu</code> (unsigned) f&#xF6;r <code>c</code> som &#xE4;r en
+tecknad <code>short</code> &#x2192; fel. Alternativ C &#xE4;r korrekt.</p>
+</details>
+<hr />
+<h1 id="uppgift-2-2-6-p">Uppgift 2 (&#x2013;2 &#x2026; 6 p)</h1>
+<p><strong>a)</strong> F&#xF6;ljande C-funktion skall &#xF6;vers&#xE4;ttas till
+assembler:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> f<span class="op">(</span><span class="dt">short</span> a<span class="op">,</span> <span class="dt">short</span> b<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;=</span> a<span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>        b <span class="op">=</span> b <span class="op">+</span> b<span class="op">;</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> b<span class="op">;</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Vilket av f&#xF6;ljande alternativ &#xE4;r en korrekt implementation? (&#x2013;1 &#x2026; 3
+p)</p>
+<hr />
+<h2 id="svarsalternativ-2">Svarsalternativ</h2>
+<table>
+<tr>
+<td>
+A
+</td>
+<td>
+B
+</td>
+<td>
+C
+</td>
+<td>
+D
+</td>
+</tr>
+<tr>
+<td>
+<pre><code>f:
+    li   t0, 0
+l:
+    bgt  t0, a0, r
+    addi t0, t0, 1
+    add  a1, a1, a1
+    j    l
+r:
+    ret</code></pre>
+</td>
+<td>
+<pre><code>f:
+    li   t0, 0
+l:
+    bge  t0, a0, r
+    addi t0, t0, 1
+    add  a1, a1, a1
+    j    l
+r:
+    mv   a0, a1
+    ret</code></pre>
+</td>
+<td>
+<pre><code>f:
+    li   t0, 0
+l:
+    bgt  t0, a0, r
+    addi t0, t0, 1
+    add  a1, a1, a1
+    j    l
+r:
+    mv   a0, a1
+    ret</code></pre>
+</td>
+<td>
+<pre><code>f:
+    li   t0, 0
+l:
+    blt  t0, a0, r
+    addi t0, t0, 1
+    add  a1, a1, a1
+    j    l
+r:
+    mv   a0, a1
+    ret</code></pre>
+</td>
+</tr>
+<tr>
+<td>
+E
+</td>
+<td>
+F
+</td>
+<td>
+G
+</td>
+<td>
+H
+</td>
+</tr>
+<tr>
+<td>
+<pre><code>f:
+    li   t0, 0
+l:
+    bgtu t0, a0, r
+    addi t0, t0, 1
+    add  a1, a1, a1
+    j    l
+r:
+    mv   a0, a1
+    ret</code></pre>
+</td>
+<td>
+<pre><code>f:
+    li   t0, 0
+l:
+    bgt  t0, a0, r
+    add  a1, a1, a1
+    addi t0, t0, 1
+    j    l
+r:
+    mv   a0, a1
+    ret</code></pre>
+</td>
+<td>
+<pre><code>f:
+    li   t0, 0
+l:
+    ble  t0, a0, r
+    addi t0, t0, 1
+    add  a1, a1, a1
+    j    l
+r:
+    mv   a0, a1
+    ret</code></pre>
+</td>
+<td>
+<pre><code>f:
+    li   t0, 0
+l:
+    bgt  t0, a0, r
+    addi t0, t0, 1
+    add  a1, a1, a1
+r:
+    mv   a0, a1
+    ret</code></pre>
+</td>
+</tr>
+</table>
+<details>
+<summary>
+Svar
+</summary>
+<p><strong>Svar: C</strong> (alternativt F &#x2013; b&#xE5;da korrekta, samma antal
+instruktioner)</p>
+<p>Loopondstillst&#xE5;ndet <code>i &lt;= a</code> i C-koden implementeras
+med <code>bgt t0, a0, r</code> (hoppa ut om <code>i &gt; a</code>).
+Returv&#xE4;rdet &#xE4;r <code>b</code> (i <code>a1</code>), som m&#xE5;ste kopieras
+till <code>a0</code> med <code>mv a0, a1</code> innan
+<code>ret</code>.</p>
+<ul>
+<li>Alternativ A saknar <code>mv a0, a1</code> &#x2192; returnerar fel
+v&#xE4;rde.</li>
+<li>Alternativ B anv&#xE4;nder <code>bge</code> (hoppar ut om
+<code>i &gt;= a</code>) &#x2192; k&#xF6;r ett f&#xF6;r f&#xE5; varv.</li>
+<li>Alternativ D anv&#xE4;nder <code>blt</code> (hoppar ut om
+<code>i &lt; a</code>) &#x2192; k&#xF6;r ett f&#xF6;r m&#xE5;nga varv.</li>
+<li>Alternativ G anv&#xE4;nder <code>ble</code> (vilken &#xE4;r bakv&#xE4;nd &#x2013; loopen
+k&#xF6;rs aldrig) &#x2192; fel.</li>
+<li>Alternativ H saknar <code>j l</code> &#x2192; ingen loop.</li>
+<li><strong>C och F</strong> &#xE4;r korrekta (ordningen increment/dubblering
+i loopkroppen spelar ingen roll).</li>
+</ul>
+</details>
+<hr />
+<p><strong>b)</strong> F&#xF6;ljande C-program skall &#xF6;vers&#xE4;ttas till
+assembler (RISC-V, RV32IMAC):</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> g<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">,</span> <span class="dt">int</span> c<span class="op">,</span> <span class="dt">int</span> d<span class="op">);</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> f<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">,</span> <span class="dt">int</span> c<span class="op">,</span> <span class="dt">int</span> d<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> g<span class="op">(</span>a<span class="op">,</span> b<span class="op">,</span> c<span class="op">,</span> d<span class="op">)</span> <span class="op">+</span> g<span class="op">(</span>d<span class="op">,</span> b<span class="op">,</span> c<span class="op">,</span> a<span class="op">);</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Vilket av f&#xF6;ljande alternativ &#xE4;r en korrekt implementation av
+funktionen <code>f</code>?<br />
+(Om tv&#xE5; eller fler &#xE4;r korrekta, v&#xE4;lj den med minst instruktioner.)<br />
+(&#x2013;1 &#x2026; 3 p)</p>
+<hr />
+<h2 id="svarsalternativ-3">Svarsalternativ</h2>
+<table>
+<tr>
+<td>
+A
+</td>
+<td>
+B
+</td>
+<td>
+C
+</td>
+<td>
+D
+</td>
+</tr>
+<tr>
+<td>
+<pre><code>f:
+    mv   t0, a0
+    call g
+    mv   a0, a3
+    mv   a3, t0
+    call g
+    add  a0, a0, t1
+    ret</code></pre>
+</td>
+<td>
+<pre><code>f:
+    addi sp, sp, -16
+    sw   ra, 12(sp)
+    mv   t0, a0
+    call g
+    mv   t1, a0
+    mv   a0, a3
+    mv   a3, t0
+    call g
+    add  a0, a0, t1
+    lw   ra, 12(sp)
+    addi sp, sp, 16
+    ret</code></pre>
+</td>
+<td>
+<pre><code>f:
+    addi sp, sp, -16
+    sw   s0, 8(sp)
+    sw   ra, 12(sp)
+    mv   s0, a0
+    call g
+    mv   a0, a3
+    mv   a3, s0
+    call g
+    add  a0, a0, a1
+    lw   s0, 8(sp)
+    lw   ra, 12(sp)
+    addi sp, sp, 16
+    ret</code></pre>
+</td>
+<td>
+<pre><code>f:
+    addi sp, sp, -8
+    sw   ra, 4(sp)
+    mv   s0, a0
+    call g
+    mv   t0, a0
+    mv   a0, a3
+    mv   a3, s0
+    call g
+    add  a0, a0, t0
+    lw   ra, 4(sp)
+    addi sp, sp, 8
+    ret</code></pre>
+</td>
+</tr>
+<tr>
+<td>
+E
+</td>
+<td>
+F
+</td>
+<td>
+G
+</td>
+<td>
+H
+</td>
+</tr>
+<tr>
+<td>
+<pre><code>f:
+    addi sp, sp, -16
+    sw   ra, 12(sp)
+    mv   t0, a0
+    call g
+    mv   t1, a0
+    mv   a0, a3
+    mv   a3, t0
+    call g
+    add  a0, a0, t1
+    lw   ra, 12(sp)
+    addi sp, sp, 16
+    ret</code></pre>
+</td>
+<td>
+<pre><code>f:
+    mv   s0, a0
+    call g
+    mv   t0, a0
+    mv   a0, a3
+    mv   a3, s0
+    call g
+    add  a0, a0, t0
+    ret</code></pre>
+</td>
+<td>
+<pre><code>f:
+    addi sp, sp, -16
+    sw   s0, 8(sp)
+    sw   ra, 12(sp)
+    mv   s0, a0
+    call g
+    mv   t0, a0
+    mv   a0, a3
+    mv   a3, s0
+    call g
+    add  a0, a0, t0
+    lw   s0, 8(sp)
+    lw   ra, 12(sp)
+    addi sp, sp, 16
+    ret</code></pre>
+</td>
+<td>
+<!-- Note, not optimal but a correct solution compiled by https://godbolt.org/ -->
+<pre><code>f:
+    addi    sp,sp,-32
+    sw      ra,28(sp)
+    sw      s0,24(sp)
+    sw      s1,20(sp)
+    sw      s2,16(sp)
+    sw      s3,12(sp)
+    sw      s4,8(sp)
+    mv      s4,a0
+    mv      s3,a1
+    mv      s2,a2
+    mv      s1,a3
+    call    g
+    mv      s0,a0
+    mv      a3,s4
+    mv      a2,s2
+    mv      a1,s3
+    mv      a0,s1
+    call    g
+    add     a0,s0,a0
+    lw      ra,28(sp)
+    lw      s0,24(sp)
+    lw      s1,20(sp)
+    lw      s2,16(sp)
+    lw      s3,12(sp)
+    lw      s4,8(sp)
+    addi    sp,sp,32
+    ret</code></pre>
+</td>
+</tr>
+</table>
+<details>
+<summary>
+Svar
+</summary>
+<p><strong>Svar: H</strong></p>
+<p>Funktionen <code>f</code> anropar <code>g</code> tv&#xE5; g&#xE5;nger. Inf&#xF6;r
+det andra anropet m&#xE5;ste: 1. Returv&#xE4;rdet fr&#xE5;n f&#xF6;rsta
+<code>g</code>-anropet sparas (&#xF6;verlever n&#xE4;sta <code>call</code>) &#x2192;
+m&#xE5;ste ligga i ett <strong>s-register</strong> (callee-saved). 2.
+Originalt <code>a0</code> (= argument <code>a</code>) m&#xE5;ste sparas f&#xF6;r
+att skickas som <code>a3</code> i andra anropet &#x2192;
+<strong>s-register</strong>. 3. <code>ra</code> m&#xE5;ste sparas p&#xE5; stacken
+(funktionen anropar i sin tur andra funktioner).</p>
+<p>Alternativ <strong>G</strong> anv&#xE4;nder <code>s0</code> f&#xF6;r
+originalv&#xE4;rdet p&#xE5; <code>a0</code>, men sparar f&#xF6;rsta resultatet i
+<code>t0</code> &#x2013; som skrivs &#xF6;ver av det andra <code>g</code>-anropet &#x2192;
+<strong>fel</strong>.</p>
+<p>Alternativ <strong>H</strong> anv&#xE4;nder <code>s0</code> f&#xF6;r
+originalv&#xE4;rdet p&#xE5; <code>a0</code> och <code>s1</code> f&#xF6;r f&#xF6;rsta
+resultatet. B&#xE5;da &#xE4;r callee-saved och &#xF6;verlever det andra anropet. Det &#xE4;r
+den enda l&#xF6;sning med korrekt registerh&#xE5;llning &#x2192;
+<strong>korrekt</strong>.</p>
+<p>Alternativ <strong>B/E</strong> anv&#xE4;nder
+<code>t0</code>/<code>t1</code> som &#xF6;verskrivs av <code>call g</code> &#x2192;
+fel.</p>
+</details>
+<hr />
+<h1 id="uppgift-3-1-6-p">Uppgift 3 (&#x2013;1 &#x2026; 6 p)</h1>
+<p>Funktionen <code>apply_bit_mask(v, m)</code> skall AND:a varje byte i
+en integer <code>v</code> med byten <code>m</code>.<br />
+Den kallande funktionens v&#xE4;rde p&#xE5; <code>v</code> skall uppdateras och
+funktionen skall returnera antalet &#xE4;ndrade bitar.</p>
+<p>Exempel:<br />
+Om masken <code>m = 0b00001111</code> appliceras p&#xE5; v&#xE4;rdet<br />
+<code>v = 0xFFFFFFFF</code><br />
+skall v&#xE4;rdet p&#xE5; <code>v</code> efter funktionsanropet vara
+<code>0x0F0F0F0F</code>,<br />
+och funktionen skall returnera att 16 bitar &#xE4;ndrats.</p>
+<p>Ni f&#xE5;r anta att det finns en funktion som returnerar hur m&#xE5;nga bitar
+som skiljer sig mellan tv&#xE5; integers:</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> count_bit_diff <span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">);</span></span></code></pre></div>
+<p>V&#xE4;lj den kod som korrekt implementerar det beskrivna beteendet.</p>
+<hr />
+<h2 id="svarsalternativ-4">Svarsalternativ</h2>
+<table>
+<tr>
+<td>
+A
+</td>
+<td>
+B
+</td>
+</tr>
+<tr>
+<td>
+<div class="sourceCode" id="cb38"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> apply_bit_mask<span class="op">(</span><span class="dt">int</span> <span class="op">*</span>v<span class="op">,</span> <span class="dt">char</span> m<span class="op">){</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> orig_v <span class="op">=</span> <span class="op">*</span>v<span class="op">;</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="op">*</span>cptr <span class="op">=</span> v<span class="op">;</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">4</span><span class="op">;</span> i<span class="op">++){</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>        <span class="op">*</span>cptr <span class="op">=</span> <span class="op">*</span>cptr <span class="op">&amp;</span> m<span class="op">;</span></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>        cptr<span class="op">++;</span></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> count_bit_diff<span class="op">(</span>orig_v<span class="op">,</span> <span class="op">*</span>v<span class="op">);</span></span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> main<span class="op">(</span><span class="dt">void</span><span class="op">){</span></span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> val <span class="op">=</span> <span class="bn">0xAABBCCEE</span><span class="op">;</span></span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">char</span> m <span class="op">=</span> <span class="bn">0b00001111</span><span class="op">;</span></span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> n_upd <span class="op">=</span> apply_bit_mask<span class="op">(&amp;</span>val<span class="op">,</span> m<span class="op">);</span></span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</td>
+<td>
+<div class="sourceCode" id="cb39"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> apply_bit_mask<span class="op">(</span><span class="dt">int</span> v<span class="op">,</span> <span class="dt">char</span> m<span class="op">){</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> orig_v <span class="op">=</span> v<span class="op">;</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="op">*</span>cptr <span class="op">=</span> <span class="op">&amp;</span>v<span class="op">;</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">4</span><span class="op">;</span> i<span class="op">++){</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>        cptr <span class="op">=</span> cptr <span class="op">&amp;</span> m<span class="op">;</span></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>        cptr<span class="op">++;</span></span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> count_bit_diff<span class="op">(</span>orig_v<span class="op">,</span> v<span class="op">);</span></span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> main<span class="op">(</span><span class="dt">void</span><span class="op">){</span></span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> val <span class="op">=</span> <span class="bn">0xAABBCCEE</span><span class="op">;</span></span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">char</span> m <span class="op">=</span> <span class="bn">0b00001111</span><span class="op">;</span></span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> n_upd <span class="op">=</span> apply_bit_mask<span class="op">(</span>val<span class="op">,</span> m<span class="op">);</span></span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</td>
+</tr>
+<tr>
+<td>
+C
+</td>
+<td>
+D
+</td>
+</tr>
+<tr>
+<td>
+<div class="sourceCode" id="cb40"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> apply_bit_mask<span class="op">(</span><span class="dt">int</span> <span class="op">*</span>v<span class="op">,</span> <span class="dt">char</span> m<span class="op">){</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> orig_v <span class="op">=</span> <span class="op">*</span>v<span class="op">;</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">char</span> <span class="op">*</span>cptr <span class="op">=</span> <span class="op">(</span><span class="dt">char</span><span class="op">*)</span>v<span class="op">;</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">4</span><span class="op">;</span> i<span class="op">++){</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>        <span class="op">*(</span>cptr <span class="op">+</span> i<span class="op">)</span> <span class="op">&amp;=</span> m<span class="op">;</span></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> count_bit_diff<span class="op">(</span>orig_v<span class="op">,</span> <span class="op">*</span>v<span class="op">);</span></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> main<span class="op">(</span><span class="dt">void</span><span class="op">){</span></span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> val <span class="op">=</span> <span class="bn">0xAABBCCEE</span><span class="op">;</span></span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">char</span> m <span class="op">=</span> <span class="bn">0b00001111</span><span class="op">;</span></span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> n_upd <span class="op">=</span> apply_bit_mask<span class="op">(&amp;</span>val<span class="op">,</span> m<span class="op">);</span></span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</td>
+<td>
+<div class="sourceCode" id="cb41"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> apply_bit_mask<span class="op">(</span><span class="dt">int</span> v<span class="op">,</span> <span class="dt">char</span> <span class="op">*</span>m<span class="op">){</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> orig_v <span class="op">=</span> v<span class="op">;</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">char</span> <span class="op">*</span>cptr <span class="op">=</span> <span class="op">&amp;</span>v<span class="op">;</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">4</span><span class="op">;</span> i<span class="op">++){</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>        <span class="op">*</span>cptr <span class="op">=</span> <span class="op">*</span>cptr <span class="op">&amp;</span> <span class="op">*</span>m<span class="op">;</span></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>        cptr <span class="op">+=</span> <span class="dv">8</span><span class="op">;</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> count_bit_diff<span class="op">(</span>orig_v<span class="op">,</span> v<span class="op">);</span></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> main<span class="op">(</span><span class="dt">void</span><span class="op">){</span></span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> val <span class="op">=</span> <span class="bn">0xAABBCCEE</span><span class="op">;</span></span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">char</span> m <span class="op">=</span> <span class="bn">0b00001111</span><span class="op">;</span></span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> n_upd <span class="op">=</span> apply_bit_mask<span class="op">(</span>val<span class="op">,</span> <span class="op">&amp;</span>m<span class="op">);</span></span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</td>
+</tr>
+<tr>
+<td>
+E
+</td>
+<td>
+F
+</td>
+</tr>
+<tr>
+<td>
+<div class="sourceCode" id="cb42"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> apply_bit_mask<span class="op">(</span><span class="dt">int</span> <span class="op">*</span>v<span class="op">,</span> <span class="dt">char</span> m<span class="op">){</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> orig_v <span class="op">=</span> <span class="op">*</span>v<span class="op">;</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="op">*</span>cptr <span class="op">=</span> <span class="op">(</span><span class="dt">char</span><span class="op">*)</span>v<span class="op">;</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">4</span><span class="op">;</span> i<span class="op">++){</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>        <span class="op">*</span>cptr <span class="op">=</span> <span class="op">*</span>cptr <span class="op">&amp;</span> m<span class="op">;</span></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>        cptr <span class="op">+=</span> <span class="dv">8</span><span class="op">;</span></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> count_bit_diff<span class="op">(</span>orig_v<span class="op">,</span> <span class="op">*</span>v<span class="op">);</span></span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> main<span class="op">(</span><span class="dt">void</span><span class="op">){</span></span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> val <span class="op">=</span> <span class="bn">0xAABBCCEE</span><span class="op">;</span></span>
+<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">char</span> m <span class="op">=</span> <span class="bn">0b00001111</span><span class="op">;</span></span>
+<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> n_upd <span class="op">=</span> apply_bit_mask<span class="op">(&amp;</span>val<span class="op">,</span> m<span class="op">);</span></span>
+<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</td>
+<td>
+<div class="sourceCode" id="cb43"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> apply_bit_mask<span class="op">(</span><span class="dt">int</span> v<span class="op">,</span> <span class="dt">char</span> m<span class="op">){</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> orig_v <span class="op">=</span> v<span class="op">;</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="op">*</span>cptr <span class="op">=</span> <span class="op">&amp;</span>v<span class="op">;</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">4</span><span class="op">;</span> i<span class="op">++){</span></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>        <span class="op">*</span>cptr <span class="op">=</span> <span class="op">*</span>cptr <span class="op">&amp;</span> m<span class="op">;</span></span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>        cptr<span class="op">++;</span></span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> count_bit_diff<span class="op">(</span>orig_v<span class="op">,</span> v<span class="op">);</span></span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> main<span class="op">(</span><span class="dt">void</span><span class="op">){</span></span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> val <span class="op">=</span> <span class="bn">0xAABBCCEE</span><span class="op">;</span></span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">char</span> m <span class="op">=</span> <span class="bn">0b00001111</span><span class="op">;</span></span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> n_upd <span class="op">=</span> apply_bit_mask<span class="op">(</span>val<span class="op">,</span> m<span class="op">);</span></span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</td>
+</tr>
+</table>
+<details>
+<summary>
+Svar
+</summary>
+<p><strong>Svar: C</strong></p>
+<ul>
+<li>Parametern <code>v</code> m&#xE5;ste vara <code>int *</code> (pekare) f&#xF6;r
+att kunna modifiera originalet &#x2713;</li>
+<li><code>char *cptr = (char*)v</code> tolkar heltalet byte f&#xF6;r byte
+&#x2713;</li>
+<li><code>*(cptr + i) &amp;= m</code> AND:ar varje byte med masken
+&#x2713;</li>
+<li><code>count_bit_diff(orig_v, *v)</code> returnerar antal &#xE4;ndrade
+bitar &#x2713;</li>
+<li>Anropas med <code>&amp;val</code> &#x2713;</li>
+</ul>
+<p>Alternativ A anv&#xE4;nder <code>int *cptr</code> och &#xF6;kar med 4 byte per
+iteration &#x2192; g&#xE5;r utanf&#xF6;r variabeln. Alternativ B tar <code>v</code> som
+v&#xE4;rde, inte pekare &#x2192; kan inte modifiera originalet. Alternativ C &#xE4;r
+korrekt.</p>
+</details>
+<hr />
+<h1 id="uppgift-4-10-p">Uppgift 4 (10 p)</h1>
+<p>En 8-bitars slumpgeneratormodul (TRNG) &#xE4;r kopplad till GPIO-port C
+och D p&#xE5; en CH32V307 enligt f&#xF6;ljande skiss.</p>
+<figure>
+<img src="../images/exam0.png">
+</figure>
+<p>Vid positiv flank p&#xE5; ing&#xE5;ngen TRIG0 genererar TRNG-modulen ett
+8-bitars slumpm&#xE4;ssigt tal som l&#xE4;ggs ut p&#xE5; dess utg&#xE5;ngar DATA0-7. Modulen
+opererar enligt f&#xF6;ljande tidskrav:</p>
+<figure>
+<img src="../images/exam1.png">
+</figure>
+<p>tH = 23 mikrosekunder (kortaste tid som TRIG0 m&#xE5;ste vara &#x2018;1&#x2019;)<br />
+tCO = 31 mikrosekunder (l&#xE4;ngsta tid fr&#xE5;n positiv flank p&#xE5; TRIG0 tills
+det slumpm&#xE4;ssiga talet har genererats)</p>
+<hr />
+<p><strong>a)</strong> Skriv en funktion <code>delay_1us()</code> som
+med hj&#xE4;lp av SysTick &#xE5;stadkommer en blockerande delay p&#xE5; 1
+mikrosekund.</p>
+<p>F&#xF6;r full po&#xE4;ng skall du definiera och anv&#xE4;nda makrodefinitioner f&#xF6;r
+SysTick-registren.</p>
+<p>Antag att systemklockan &#xE4;r <strong>144 MHz</strong>.<br />
+(4 p)</p>
+<details>
+<summary>
+Svar
+</summary>
+<p>Vid 144 MHz ger 1 &#xB5;s exakt 144 klockcykler. SysTick r&#xE4;knar upp&#xE5;t och
+s&#xE4;tter <code>CNTIF</code> i <code>STK_SR</code> n&#xE4;r r&#xE4;knaren n&#xE5;r
+j&#xE4;mf&#xF6;relsev&#xE4;rdet <code>STK_CMPLR</code>.</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#define STK_CTLR  </span><span class="op">(*(</span><span class="dt">volatile</span><span class="pp"> </span><span class="dt">unsigned</span><span class="pp"> </span><span class="dt">int</span><span class="op">*)</span><span class="bn">0xE000F000</span><span class="op">)</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#define STK_SR    </span><span class="op">(*(</span><span class="dt">volatile</span><span class="pp"> </span><span class="dt">unsigned</span><span class="pp"> </span><span class="dt">int</span><span class="op">*)</span><span class="bn">0xE000F004</span><span class="op">)</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="pp">#define STK_CNTL  </span><span class="op">(*(</span><span class="dt">volatile</span><span class="pp"> </span><span class="dt">unsigned</span><span class="pp"> </span><span class="dt">int</span><span class="op">*)</span><span class="bn">0xE000F008</span><span class="op">)</span></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="pp">#define STK_CMPLR </span><span class="op">(*(</span><span class="dt">volatile</span><span class="pp"> </span><span class="dt">unsigned</span><span class="pp"> </span><span class="dt">int</span><span class="op">*)</span><span class="bn">0xE000F010</span><span class="op">)</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> delay_1us<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>    STK_SR    <span class="op">=</span> <span class="dv">0</span><span class="op">;</span>      <span class="co">/* Nollst&#xE4;ll CNTIF-flaggan          */</span></span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>    STK_CNTL  <span class="op">=</span> <span class="dv">0</span><span class="op">;</span>      <span class="co">/* Nollst&#xE4;ll r&#xE4;knaren               */</span></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>    STK_CMPLR <span class="op">=</span> <span class="dv">143</span><span class="op">;</span>    <span class="co">/* 144 cykler - 1 = 143             */</span></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">/* INIT=1(bit5), STCLK=1(bit2), STE=1(bit0) = 0b100101 = 0x25 */</span></span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>    STK_CTLR  <span class="op">=</span> <span class="bn">0x25</span><span class="op">;</span></span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="op">(!(</span>STK_SR <span class="op">&amp;</span> <span class="dv">1</span><span class="op">));</span> <span class="co">/* V&#xE4;nta tills CNTIF s&#xE4;tts       */</span></span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>    STK_CTLR  <span class="op">=</span> <span class="dv">0</span><span class="op">;</span>      <span class="co">/* St&#xE4;ng av timern                  */</span></span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>STK_CTLR-bitarna: STE=1 (aktivera), STCLK=1 (anv&#xE4;nd HCLK = 144 MHz),
+INIT=1 (nollst&#xE4;ll r&#xE4;knaren vid start), MODE=0 (r&#xE4;kna upp&#xE5;t), STRE=0
+(ingen auto-reload), STIE=0 (inget avbrott).</p>
+</details>
+<hr />
+<p><strong>b)</strong> Skriv en funktion <code>get_random_char()</code>
+som triggar slumpgeneratorn och d&#xE4;refter l&#xE4;ser och returnerar det
+slumpm&#xE4;ssiga talet.</p>
+<p>Funktionen m&#xE5;ste ta h&#xE4;nsyn till tidskraven ovan.</p>
+<p>F&#xF6;ljande makrodefinitioner &#xE4;r givna:</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#define GPIOC_OUTDR  </span><span class="op">(*(</span><span class="dt">volatile</span><span class="pp"> </span><span class="dt">unsigned</span><span class="pp"> </span><span class="dt">int</span><span class="op">*)</span><span class="bn">0x4001100C</span><span class="op">)</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#define GPIOD_INDR   </span><span class="op">(*(</span><span class="dt">volatile</span><span class="pp"> </span><span class="dt">unsigned</span><span class="pp"> </span><span class="dt">int</span><span class="op">*)</span><span class="bn">0x40011408</span><span class="op">)</span></span></code></pre></div>
+<p>Antag:</p>
+<ul>
+<li>TRIG0 &#xE4;r kopplad till bit 4 p&#xE5; GPIOC</li>
+<li>DATA0&#x2013;7 &#xE4;r kopplade till bit 0&#x2013;7 p&#xE5; GPIOD</li>
+<li>Port C och D &#xE4;r korrekt konfigurerade som utg&#xE5;ng respektive
+ing&#xE5;ng</li>
+<li>Du f&#xE5;r anv&#xE4;nda <code>delay_1us()</code> fr&#xE5;n a)</li>
+<li>Du f&#xE5;r definiera ytterligare delay-funktioner om du vill (ej
+krav)</li>
+</ul>
+<p>GPIO Port C anv&#xE4;nds &#xE4;ven f&#xF6;r att trigga andra enheter, p&#xE5; andra
+pinnar, och du f&#xE5;r inte p&#xE5;verka n&#xE5;gon av dem.<br />
+(4 p)</p>
+<details>
+<summary>
+Svar
+</summary>
+<p>tH = 23 &#xB5;s (TRIG0 m&#xE5;ste vara h&#xF6;g minst 23 &#xB5;s). tCO = 31 &#xB5;s (data
+klart senast 31 &#xB5;s efter positiv flank).</p>
+<p>Strategi: s&#xE4;tt TRIG0 h&#xF6;g &#x2192; v&#xE4;nta tH &#x2192; s&#xE4;tt TRIG0 l&#xE5;g &#x2192; v&#xE4;nta
+&#xE5;terst&#xE5;ende tid (tCO &#x2212; tH = 8 &#xB5;s) &#x2192; l&#xE4;s data.</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="dt">unsigned</span> <span class="dt">char</span> get_random_char<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">/* S&#xE4;tt bit 4 h&#xF6;g, p&#xE5;verka ej &#xF6;vriga pinnar */</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>    GPIOC_OUTDR <span class="op">|=</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">4</span><span class="op">);</span></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">/* V&#xE4;nta minst tH = 23 &#xB5;s */</span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">23</span><span class="op">;</span> i<span class="op">++)</span> delay_1us<span class="op">();</span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">/* S&#xE4;nk TRIG0 */</span></span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>    GPIOC_OUTDR <span class="op">&amp;=</span> <span class="op">~(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">4</span><span class="op">);</span></span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">/* V&#xE4;nta tCO - tH = 31 - 23 = 8 &#xB5;s till (data garanterat klart) */</span></span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">8</span><span class="op">;</span> i<span class="op">++)</span> delay_1us<span class="op">();</span></span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">/* L&#xE4;s DATA0-7 fr&#xE5;n bit 0-7 p&#xE5; GPIOD */</span></span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">char</span><span class="op">)(</span>GPIOD_INDR <span class="op">&amp;</span> <span class="bn">0xFF</span><span class="op">);</span></span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>|=</code> och <code>&amp;= ~</code> anv&#xE4;nds f&#xF6;r att inte st&#xF6;ra
+&#xF6;vriga pinnar p&#xE5; Port C.</p>
+</details>
+<hr />
+<p><strong>c)</strong> Antag att CH32V307 &#xE4;r kopplad till tv&#xE5;
+knappar:</p>
+<ul>
+<li>En bl&#xE5; knapp (p&#xE5; PD0)</li>
+<li>En r&#xF6;d knapp (p&#xE5; PE1)</li>
+</ul>
+<p>Interrupt-prioriteterna &#xE4;r konfigurerade i PFIC_IPRIOR-registren, och
+den r&#xF6;da knappen har h&#xF6;gre prioritet &#xE4;n den bl&#xE5;.</p>
+<ol type="1">
+<li><p>Vad h&#xE4;nder om n&#xE5;gon trycker p&#xE5; den bl&#xE5; knappen medan den r&#xF6;da
+knappens interrupthanterare k&#xF6;rs? (1 p)</p></li>
+<li><p>Vad h&#xE4;nder om n&#xE5;gon trycker p&#xE5; den r&#xF6;da knappen medan den bl&#xE5;
+knappens interrupthanterare k&#xF6;rs? (1 p)</p></li>
+</ol>
+<details>
+<summary>
+Svar
+</summary>
+<ol type="1">
+<li><p><strong>Bl&#xE5; knapp trycks under r&#xF6;d knapps
+interrupthanterare:</strong><br />
+Den bl&#xE5; knappen har l&#xE4;gre prioritet &#xE4;n den r&#xF6;da. Den r&#xF6;da hanteraren
+k&#xF6;rs utan att avbrytas. Det bl&#xE5; avbrottet markeras som <em>pending</em>
+i PFIC och k&#xF6;rs <strong>efter</strong> att den r&#xF6;da hanteraren avslutas
+med <code>mret</code>.</p></li>
+<li><p><strong>R&#xF6;d knapp trycks under bl&#xE5; knapps
+interrupthanterare:</strong><br />
+Den r&#xF6;da knappen har h&#xF6;gre prioritet. Processorn avbryter (preemptar)
+den bl&#xE5; hanteraren, sparar tillst&#xE5;ndet och hoppar till den r&#xF6;da
+knapprens hanterare. N&#xE4;r den r&#xF6;da hanteraren avslutas med
+<code>mret</code> &#xE5;terupptas den bl&#xE5; hanteraren fr&#xE5;n den punkt d&#xE4;r den
+avbr&#xF6;ts.</p></li>
+</ol>
+</details>
+<hr />
+<hr />
+<h1 id="uppgift-5-12-p">Uppgift 5 (12 p)</h1>
+<p>Vi vill anv&#xE4;nda CH32V307 som k&#xE4;rnan f&#xF6;r en spelkonsol.<br />
+Vi vill st&#xF6;dja tv&#xE5; spelare, som b&#xE5;da har en inmatningsenhet (joystick)
+som kan flyttas upp, ner, v&#xE4;nster och h&#xF6;ger, och som har en extra
+tryckknapp.</p>
+<figure>
+<img src="../images/exam2.png">
+</figure>
+<p>Systemet &#xE4;r kopplat till GPIO Port D.</p>
+<p>F&#xF6;ljande datatyper &#xE4;r givna:</p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="kw">typedef</span> <span class="kw">enum</span> <span class="op">{</span>on<span class="op">,</span> off<span class="op">}</span> type_button<span class="op">;</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="kw">typedef</span> <span class="kw">enum</span> <span class="op">{</span>none<span class="op">,</span> up<span class="op">,</span> down<span class="op">,</span> left<span class="op">,</span> right<span class="op">}</span> type_move<span class="op">;</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a><span class="kw">typedef</span> <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>    type_move move<span class="op">;</span></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>    type_button button<span class="op">;</span></span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> type_player_input<span class="op">;</span></span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a><span class="kw">typedef</span> <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> x<span class="op">;</span></span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> y<span class="op">;</span></span>
+<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> type_player_position<span class="op">;</span></span></code></pre></div>
+<p>Implementera ditt program i C och f&#xF6;lj stegen nedan:</p>
+<hr />
+<p><strong>a)</strong> Definiera en struct som representerar en
+GPIO-port enligt CH32V307:s registerlayout. Visa sedan hur man refererar
+till CFGLR-registret i Port D med hj&#xE4;lp av denna struct. (2 p)</p>
+<p>Om du v&#xE4;ljer att inte g&#xF6;ra uppgift a) m&#xE5;ste du visa korrekta
+makrodefinitioner f&#xF6;r de register du anv&#xE4;nder i f&#xF6;ljande uppgifter.</p>
+<details>
+<summary>
+Svar
+</summary>
+<p>CH32V307 GPIO-registerlayout (offset fr&#xE5;n basadress):</p>
+<table>
+<thead>
+<tr>
+<th>Offset</th>
+<th>Register</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x00</td>
+<td>CFGLR</td>
+</tr>
+<tr>
+<td>0x04</td>
+<td>CFGHR</td>
+</tr>
+<tr>
+<td>0x08</td>
+<td>INDR</td>
+</tr>
+<tr>
+<td>0x0C</td>
+<td>OUTDR</td>
+</tr>
+<tr>
+<td>0x10</td>
+<td>BSHR</td>
+</tr>
+<tr>
+<td>0x14</td>
+<td>BCR</td>
+</tr>
+<tr>
+<td>0x18</td>
+<td>LCKR</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb48"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="kw">typedef</span> <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">volatile</span> <span class="dt">unsigned</span> <span class="dt">int</span> CFGLR<span class="op">;</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">volatile</span> <span class="dt">unsigned</span> <span class="dt">int</span> CFGHR<span class="op">;</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">volatile</span> <span class="dt">unsigned</span> <span class="dt">int</span> INDR<span class="op">;</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">volatile</span> <span class="dt">unsigned</span> <span class="dt">int</span> OUTDR<span class="op">;</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">volatile</span> <span class="dt">unsigned</span> <span class="dt">int</span> BSHR<span class="op">;</span></span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">volatile</span> <span class="dt">unsigned</span> <span class="dt">int</span> BCR<span class="op">;</span></span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">volatile</span> <span class="dt">unsigned</span> <span class="dt">int</span> LCKR<span class="op">;</span></span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> GPIO_t<span class="op">;</span></span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a><span class="pp">#define GPIOD </span><span class="op">((</span><span class="pp">GPIO_t </span><span class="op">*)</span><span class="bn">0x40011400</span><span class="op">)</span></span></code></pre></div>
+<p>Referens till CFGLR i Port D: <code>GPIOD-&gt;CFGLR</code></p>
+</details>
+<hr />
+<p><strong>b)</strong> Skriv en funktion</p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> init_port<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span></code></pre></div>
+<p>d&#xE4;r du g&#xF6;r de initialiseringar som beh&#xF6;vs f&#xF6;r att Port D skall
+fungera enligt beskrivningen ovan.</p>
+<p>Antag:</p>
+<ul>
+<li>Ing&#xE5;ngsstift skall konfigureras som <strong>input
+pull-up</strong></li>
+<li>Utg&#xE5;ngsstift skall konfigureras som <strong>open-drain</strong></li>
+<li>Endast relevanta bitar i porten f&#xE5;r p&#xE5;verkas</li>
+</ul>
+<p>(2 p)</p>
+<details>
+<summary>
+Svar
+</summary>
+<p>Fr&#xE5;n kopplingsschemat: - <strong>b0&#x2013;b4</strong>: delade ing&#xE5;ngar
+(right=b0, left=b1, down=b2, up=b3, button=b4) &#x2192; <strong>input
+pull-up</strong> - <strong>b5</strong>: ej anv&#xE4;nd, p&#xE5;verkas ej -
+<strong>b6</strong>: radvalsutg&#xE5;ng f&#xF6;r joystick 1 &#x2192; <strong>open-drain
+output</strong> - <strong>b7</strong>: radvalsutg&#xE5;ng f&#xF6;r joystick 2 &#x2192;
+<strong>open-drain output</strong></p>
+<p>Konfigurationsv&#xE4;rden per pinne i CFGLR (CNF[3:2], MODE[1:0]): - Input
+pull-up: CNF=<code>10</code>, MODE=<code>00</code> &#x2192; <code>0x8</code> -
+Open-drain 2MHz: CNF=<code>01</code>, MODE=<code>10</code> &#x2192;
+<code>0x6</code></p>
+<p>CFGLR-bitar: [3:0]=pin0, [7:4]=pin1, &#x2026;, [31:28]=pin7.</p>
+<div class="sourceCode" id="cb50"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> init_port<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">/* Mask: &#xE4;ndra pinnar 0&#x2013;4 (bits 19:0) och 6&#x2013;7 (bits 31:24),</span></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="co">       l&#xE4;mna pin 5 (bits 23:20) or&#xF6;rd */</span></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>    GPIOD<span class="op">-&gt;</span>CFGLR <span class="op">=</span> <span class="op">(</span>GPIOD<span class="op">-&gt;</span>CFGLR <span class="op">&amp;</span> <span class="bn">0x00F00000</span><span class="op">)</span></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>                 <span class="op">|</span> <span class="bn">0x66088888</span><span class="op">;</span></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">/*   bits[31:28] = 0x6 (pin7, open-drain)</span></span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a><span class="co">         bits[27:24] = 0x6 (pin6, open-drain)</span></span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a><span class="co">         bits[23:20] = beh&#xE5;lls fr&#xE5;n original</span></span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a><span class="co">         bits[19:16] = 0x8 (pin4, input pull-up)</span></span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a><span class="co">         bits[15:12] = 0x8 (pin3)</span></span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a><span class="co">         bits[11:8]  = 0x8 (pin2)</span></span>
+<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a><span class="co">         bits[7:4]   = 0x8 (pin1)</span></span>
+<span id="cb50-13"><a href="#cb50-13" aria-hidden="true" tabindex="-1"></a><span class="co">         bits[3:0]   = 0x8 (pin0)  */</span></span>
+<span id="cb50-14"><a href="#cb50-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-15"><a href="#cb50-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">/* Aktivera pull-up f&#xF6;r ing&#xE5;ngarna (b0&#x2013;b4): s&#xE4;tt ODR-bitar till 1 */</span></span>
+<span id="cb50-16"><a href="#cb50-16" aria-hidden="true" tabindex="-1"></a>    GPIOD<span class="op">-&gt;</span>OUTDR <span class="op">|=</span> <span class="bn">0x1F</span><span class="op">;</span></span>
+<span id="cb50-17"><a href="#cb50-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-18"><a href="#cb50-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">/* S&#xE4;tt radvalsutg&#xE5;ngarna inaktiva (h&#xF6;ga = &#xF6;ppen, ingen rad vald) */</span></span>
+<span id="cb50-19"><a href="#cb50-19" aria-hidden="true" tabindex="-1"></a>    GPIOD<span class="op">-&gt;</span>OUTDR <span class="op">|=</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">6</span><span class="op">)</span> <span class="op">|</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">7</span><span class="op">);</span></span>
+<span id="cb50-20"><a href="#cb50-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</details>
+<hr />
+<p><strong>c)</strong> Skriv en funktion</p>
+<div class="sourceCode" id="cb51"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> read_player_input<span class="op">(</span><span class="dt">int</span> pnum<span class="op">,</span> type_player_input <span class="op">*</span>pinput<span class="op">);</span></span></code></pre></div>
+<p>som l&#xE4;ser av den joystick som anges av parametern <code>pnum</code>
+(1 eller 2) och sparar resultatet i strukturen <code>pinput</code>.</p>
+<p>Funktionen skall returnera:</p>
+<ul>
+<li>1 om n&#xE5;gon signal fr&#xE5;n joysticken &#xE4;r aktiv</li>
+<li>0 annars</li>
+</ul>
+<p>(4 p)</p>
+<details>
+<summary>
+Svar
+</summary>
+<p>Det &#xE4;r ett matrisuppl&#xE4;gg: b6/b7 v&#xE4;ljer rad (active-low), b0&#x2013;b4 &#xE4;r
+delade kolumning&#xE5;ngar (active-low med pull-up).</p>
+<p>F&#xF6;r att l&#xE4;sa spelare <code>pnum</code>: aktivera dess rad genom att
+dra b6 (P1) eller b7 (P2) l&#xE5;g, avaktivera den andra, l&#xE4;s sedan
+b0&#x2013;b4.</p>
+<div class="sourceCode" id="cb52"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> read_player_input<span class="op">(</span><span class="dt">int</span> pnum<span class="op">,</span> type_player_input <span class="op">*</span>pinput<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">/* Aktivera r&#xE4;tt rad (active-low), avaktivera den andra */</span></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>pnum <span class="op">==</span> <span class="dv">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>        GPIOD<span class="op">-&gt;</span>OUTDR <span class="op">&amp;=</span> <span class="op">~(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">6</span><span class="op">);</span>   <span class="co">/* b6 l&#xE5;g  &#x2192; joystick 1 aktiv  */</span></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>        GPIOD<span class="op">-&gt;</span>OUTDR <span class="op">|=</span>  <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">7</span><span class="op">);</span>   <span class="co">/* b7 h&#xF6;g  &#x2192; joystick 2 inaktiv */</span></span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>        GPIOD<span class="op">-&gt;</span>OUTDR <span class="op">&amp;=</span> <span class="op">~(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">7</span><span class="op">);</span>   <span class="co">/* b7 l&#xE5;g  &#x2192; joystick 2 aktiv  */</span></span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>        GPIOD<span class="op">-&gt;</span>OUTDR <span class="op">|=</span>  <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">6</span><span class="op">);</span>   <span class="co">/* b6 h&#xF6;g  &#x2192; joystick 1 inaktiv */</span></span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">unsigned</span> <span class="dt">int</span> indr <span class="op">=</span> GPIOD<span class="op">-&gt;</span>INDR<span class="op">;</span></span>
+<span id="cb52-12"><a href="#cb52-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-13"><a href="#cb52-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">/* Avaktivera b&#xE5;da rader efter l&#xE4;sning */</span></span>
+<span id="cb52-14"><a href="#cb52-14" aria-hidden="true" tabindex="-1"></a>    GPIOD<span class="op">-&gt;</span>OUTDR <span class="op">|=</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">6</span><span class="op">)</span> <span class="op">|</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">7</span><span class="op">);</span></span>
+<span id="cb52-15"><a href="#cb52-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-16"><a href="#cb52-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">/* Active-low: 0 = tryckt/aktiv */</span></span>
+<span id="cb52-17"><a href="#cb52-17" aria-hidden="true" tabindex="-1"></a>    type_move move <span class="op">=</span> none<span class="op">;</span></span>
+<span id="cb52-18"><a href="#cb52-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>      <span class="op">(!(</span>indr <span class="op">&amp;</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">3</span><span class="op">)))</span> move <span class="op">=</span> up<span class="op">;</span></span>
+<span id="cb52-19"><a href="#cb52-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="cf">if</span> <span class="op">(!(</span>indr <span class="op">&amp;</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">2</span><span class="op">)))</span> move <span class="op">=</span> down<span class="op">;</span></span>
+<span id="cb52-20"><a href="#cb52-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="cf">if</span> <span class="op">(!(</span>indr <span class="op">&amp;</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">1</span><span class="op">)))</span> move <span class="op">=</span> left<span class="op">;</span></span>
+<span id="cb52-21"><a href="#cb52-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="cf">if</span> <span class="op">(!(</span>indr <span class="op">&amp;</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">0</span><span class="op">)))</span> move <span class="op">=</span> right<span class="op">;</span></span>
+<span id="cb52-22"><a href="#cb52-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-23"><a href="#cb52-23" aria-hidden="true" tabindex="-1"></a>    type_button button <span class="op">=</span> <span class="op">(</span>indr <span class="op">&amp;</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">4</span><span class="op">))</span> <span class="op">?</span> off <span class="op">:</span> on<span class="op">;</span></span>
+<span id="cb52-24"><a href="#cb52-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-25"><a href="#cb52-25" aria-hidden="true" tabindex="-1"></a>    pinput<span class="op">-&gt;</span>move   <span class="op">=</span> move<span class="op">;</span></span>
+<span id="cb52-26"><a href="#cb52-26" aria-hidden="true" tabindex="-1"></a>    pinput<span class="op">-&gt;</span>button <span class="op">=</span> button<span class="op">;</span></span>
+<span id="cb52-27"><a href="#cb52-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-28"><a href="#cb52-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">(</span>move <span class="op">!=</span> none <span class="op">||</span> button <span class="op">==</span> on<span class="op">)</span> <span class="op">?</span> <span class="dv">1</span> <span class="op">:</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb52-29"><a href="#cb52-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</details>
+<hr />
+<p><strong>d)</strong> Skriv en funktion</p>
+<div class="sourceCode" id="cb53"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> update_player_position<span class="op">(</span>type_player_input <span class="op">*</span>pinput<span class="op">,</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>                            type_player_position <span class="op">*</span>player<span class="op">);</span></span></code></pre></div>
+<p>som tar in en struktur med spelarens input och anv&#xE4;nder den f&#xF6;r att
+uppdatera spelarens position.</p>
+<p>Varje g&#xE5;ng en riktningssignal (up/down/left/right) &#xE4;r aktiv skall
+respektive koordinat &#xF6;kas eller minskas med 1.</p>
+<p>(1 p)</p>
+<details>
+<summary>
+Svar
+</summary>
+<div class="sourceCode" id="cb54"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> update_player_position<span class="op">(</span>type_player_input <span class="op">*</span>pinput<span class="op">,</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>                            type_player_position <span class="op">*</span>player<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>pinput<span class="op">-&gt;</span>move <span class="op">==</span> up<span class="op">)</span>    player<span class="op">-&gt;</span>y<span class="op">++;</span></span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>pinput<span class="op">-&gt;</span>move <span class="op">==</span> down<span class="op">)</span>  player<span class="op">-&gt;</span>y<span class="op">--;</span></span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>pinput<span class="op">-&gt;</span>move <span class="op">==</span> left<span class="op">)</span>  player<span class="op">-&gt;</span>x<span class="op">--;</span></span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>pinput<span class="op">-&gt;</span>move <span class="op">==</span> right<span class="op">)</span> player<span class="op">-&gt;</span>x<span class="op">++;</span></span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</details>
+<hr />
+<hr />
+<p><strong>e)</strong> Skriv en huvudfunktion</p>
+<div class="sourceCode" id="cb55"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">);</span></span></code></pre></div>
+<p>som:</p>
+<ol type="1">
+<li>Initierar alla n&#xF6;dv&#xE4;ndiga variabler</li>
+<li>Anropar <code>init_port()</code></li>
+<li>I en evig loop:
+<ul>
+<li>L&#xE4;ser av b&#xE5;da joysticks med <code>read_player_input()</code></li>
+<li>Uppdaterar de tv&#xE5; spelarnas positioner med
+<code>update_player_position()</code></li>
+</ul></li>
+</ol>
+<p>Krav:</p>
+<ul>
+<li>De initiala positionsv&#xE4;rdena skall vara <code>{0, 0}</code></li>
+<li>De initiala ing&#xE5;ngsv&#xE4;rdena skall vara <code>{none, off}</code></li>
+<li>Alla variabler som deklareras skall initieras</li>
+</ul>
+<p>(2 p)</p>
+<details>
+<summary>
+Svar
+</summary>
+<div class="sourceCode" id="cb56"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>    type_player_position pos1   <span class="op">=</span> <span class="op">{</span><span class="dv">0</span><span class="op">,</span> <span class="dv">0</span><span class="op">};</span></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>    type_player_position pos2   <span class="op">=</span> <span class="op">{</span><span class="dv">0</span><span class="op">,</span> <span class="dv">0</span><span class="op">};</span></span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>    type_player_input    input1 <span class="op">=</span> <span class="op">{</span>none<span class="op">,</span> off<span class="op">};</span></span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>    type_player_input    input2 <span class="op">=</span> <span class="op">{</span>none<span class="op">,</span> off<span class="op">};</span></span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a>    init_port<span class="op">();</span></span>
+<span id="cb56-8"><a href="#cb56-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-9"><a href="#cb56-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="op">(</span><span class="dv">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb56-10"><a href="#cb56-10" aria-hidden="true" tabindex="-1"></a>        read_player_input<span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="op">&amp;</span>input1<span class="op">);</span></span>
+<span id="cb56-11"><a href="#cb56-11" aria-hidden="true" tabindex="-1"></a>        read_player_input<span class="op">(</span><span class="dv">2</span><span class="op">,</span> <span class="op">&amp;</span>input2<span class="op">);</span></span>
+<span id="cb56-12"><a href="#cb56-12" aria-hidden="true" tabindex="-1"></a>        update_player_position<span class="op">(&amp;</span>input1<span class="op">,</span> <span class="op">&amp;</span>pos1<span class="op">);</span></span>
+<span id="cb56-13"><a href="#cb56-13" aria-hidden="true" tabindex="-1"></a>        update_player_position<span class="op">(&amp;</span>input2<span class="op">,</span> <span class="op">&amp;</span>pos2<span class="op">);</span></span>
+<span id="cb56-14"><a href="#cb56-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb56-15"><a href="#cb56-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb56-16"><a href="#cb56-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</details>
+<hr />
+<p><strong>f)</strong> Spelkonsollen &#xE4;r ocks&#xE5; kopplad till en TV och
+chefen vill att anrop till <code>printf</code> skall skrivas ut p&#xE5;
+TV:n.</p>
+<p>Vilket bibliotek beh&#xF6;ver &#xE4;ndras f&#xF6;r att detta skall fungera?</p>
+<p>Alternativ:</p>
+<ul>
+<li>C standardbiblioteket<br />
+</li>
+<li>Runtimebiblioteket<br />
+</li>
+<li>Kompilatorbiblioteket<br />
+</li>
+<li>Endast anv&#xE4;ndarbiblioteket</li>
+</ul>
+<p>Motivera kort ditt svar.<br />
+(1 p)</p>
+<details>
+<summary>
+Svar
+</summary>
+<p><strong>C standardbiblioteket.</strong></p>
+<p><code>printf</code> &#xE4;r definierad i C-standardbiblioteket (t.ex.
+newlib/newlib-nano). Internt anropar <code>printf</code> till slut en
+l&#xE5;gniv&#xE5;funktion <code>_write()</code> (en s.k. <em>syscall stub</em>)
+som skickar tecken till en utdataenhet. P&#xE5; en inbyggd plattform utan
+operativsystem m&#xE5;ste man tillhandah&#xE5;lla en egen implementation av
+<code>_write()</code> &#x2013; detta kallas <em>retargeting</em>. Det &#xE4;r allts&#xE5;
+C-standardbibliotekets I/O-lager som beh&#xF6;ver anpassas f&#xF6;r att omdirigera
+utdata till TV:n.</p>
+<p>Runtimebiblioteket hanterar uppstart/nedst&#xE4;ngning,
+kompilatorbiblioteket intrinsics och matematikoperationer &#x2013; ingen av dem
+hanterar <code>printf</code>-utdata.</p>
+</details>
+<hr />
+<h1 id="uppgift-6-12-p">Uppgift 6 (12 p)</h1>
+Betrakta nedanst&#xE5;ende koppling, d&#xE4;r en CH32V307 har kopplats till en
+saxlyft. Saxlyften kan flyttas upp, flyttas ner och stoppas, fr&#xE5;n
+programvara som k&#xF6;rs p&#xE5; CH32V307-kortet, med funktionerna
+<code>move_up()</code>, <code>move_down()</code> och
+<code>stop()</code>. Du kan anta att dessa funktioner redan &#xE4;r
+implementerade.
+<figure style="width:70%; margin: 0 auto">
+<img src="../images/exam3.png">
+</figure>
+<p>Tv&#xE5; fj&#xE4;derbelastade knappar UP och DOWN &#xE4;r anslutna till stiften PD14
+respektive PD15 p&#xE5; CH32V307-kortet. N&#xE4;r respektive knapp trycks in
+st&#xE4;lls det anslutna stiftet till &#x2018;1&#x2019;. N&#xE4;r knappen inte &#xE4;r nedtryckt &#xE4;r
+signalen flytande. M&#xE5;let med denna uppgift &#xE4;r att konfigurera avbrott
+f&#xF6;r stift PD14 respektive PD15, s&#xE5; att avbrott genereras n&#xE4;r knapparna
+trycks ned eller sl&#xE4;pps upp.</p>
+<p>Antag att ingen av knapparna &#xE4;r nedtryckt och att saxlyften inte r&#xF6;r
+sig n&#xE4;r programmet startar. Avbrottshanteraren skall anropa
+<code>move_up()</code> funktionen om UP-knappen trycks ned och
+DOWN-knappen ej &#xE4;r nedtryckt. P&#xE5; samma s&#xE4;tt skall avbrottshanteraren
+anropa <code>move_down()</code> funktionen om DOWN-knappen trycks ned
+och UP-knappen ej &#xE4;r nedtryckt. Saxlyften f&#xE5;r inte r&#xF6;ra sig n&#xE4;r b&#xE5;da
+knapparna &#xE4;r nedtryckta, eller n&#xE4;r ingen av knapparna &#xE4;r nedtryckta.
+Avbrottshanteraren skall anropa <code>stop()</code> funktionen f&#xF6;r att
+stoppa saxlyftens r&#xF6;relse.</p>
+<p>F&#xF6;r resten av denna uppgift kan du anta att korrekt typkonverterade
+makrodefinitioner f&#xF6;r pekare till alla register f&#xF6;r GPIO, AFIO, EXTI och
+PFIC-moduler redan &#xE4;r givna med namnkonventioner enligt QuickGuide.</p>
+<p><strong>a)</strong> Pinnarna PD14 och PD15 skall st&#xE4;llas in som
+ing&#xE5;ngar med pull-down motst&#xE5;nd. Visa hur detta kan uppn&#xE5;s, med hj&#xE4;lp av
+makrodefinitionerna, utan att p&#xE5;verka inst&#xE4;llningarna f&#xF6;r de andra
+stiften. (2p)</p>
+<details>
+<summary>
+Svar
+</summary>
+<p>PD14 och PD15 konfigureras i <code>GPIOD_CFGHR</code> (pinnar 8&#x2013;15).
+Varje pinne tar 4 bitar: - Input pull-up/pull-down: CNF=<code>10</code>,
+MODE=<code>00</code> &#x2192; <code>0x8</code> per pinne - S&#xE4;tt ODR-biten till
+0 &#x2192; aktiverar pull-<strong>down</strong></p>
+<p>Pin 14 sitter i bits [27:24], pin 15 i bits [31:28] av CFGHR.</p>
+<div class="sourceCode" id="cb57"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="co">/* Konfigurera PD14 och PD15 som input pull-down, l&#xE4;mna &#xF6;vriga or&#xF6;rda */</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>GPIOD_CFGHR <span class="op">=</span> <span class="op">(</span>GPIOD_CFGHR <span class="op">&amp;</span> <span class="op">~</span><span class="bn">0xFF000000</span><span class="op">)</span></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>            <span class="op">|</span> <span class="bn">0x88000000</span><span class="op">;</span>      <span class="co">/* 0x8 f&#xF6;r pin15, 0x8 f&#xF6;r pin14 */</span></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a><span class="co">/* ODR-bitar 14 och 15 = 0 &#x2192; pull-down */</span></span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>GPIOD_OUTDR <span class="op">&amp;=</span> <span class="op">~((</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">14</span><span class="op">)</span> <span class="op">|</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">15</span><span class="op">));</span></span></code></pre></div>
+</details>
+<hr />
+<p><strong>b)</strong> Visa hur AFIO konfigureras s&#xE5; att PD14 och PD15
+kopplas till EXTI-modulen i CH32V307. T&#xE4;nk p&#xE5; att bara PD14 och PD15 ska
+konfigureras och att &#xF6;vriga EXTI-linor inte skall p&#xE5;verkas. (2p)</p>
+<details>
+<summary>
+Svar
+</summary>
+<p>AFIO_EXTICR4 (offset 0x14 fr&#xE5;n AFIO-bas 0x40010000) v&#xE4;ljer vilken
+port som driver EXTI12&#x2013;15. Varje linje tar 4 bitar, Port D =
+<code>0x3</code>.</p>
+<ul>
+<li>EXTI14 &#x2192; bits [11:8] = <code>0x3</code></li>
+<li>EXTI15 &#x2192; bits [15:12] = <code>0x3</code></li>
+</ul>
+<div class="sourceCode" id="cb58"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="co">/* Koppla EXTI14 och EXTI15 till Port D, l&#xE4;mna EXTI12/13 or&#xF6;rda */</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>AFIO_EXTICR4 <span class="op">=</span> <span class="op">(</span>AFIO_EXTICR4 <span class="op">&amp;</span> <span class="op">~</span><span class="bn">0x0000FF00</span><span class="op">)</span></span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>             <span class="op">|</span> <span class="op">(</span><span class="bn">0x3</span> <span class="op">&lt;&lt;</span> <span class="dv">8</span><span class="op">)</span>    <span class="co">/* EXTI14 &#x2192; Port D */</span></span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>             <span class="op">|</span> <span class="op">(</span><span class="bn">0x3</span> <span class="op">&lt;&lt;</span> <span class="dv">12</span><span class="op">);</span>  <span class="co">/* EXTI15 &#x2192; Port D */</span></span></code></pre></div>
+</details>
+<hr />
+<p><strong>c)</strong> Visa hur EXTI och PFIC konfigureras s&#xE5; att
+avbrott genereras p&#xE5; b&#xE5;de positiv och negativ flank f&#xF6;r de tv&#xE5; pinnarna.
+(3p)</p>
+<details>
+<summary>
+Svar
+</summary>
+<p><strong>EXTI-konfiguration</strong> (bas 0x40010400):</p>
+<ul>
+<li><code>EXTI_INTENR</code>: aktivera avbrottsmask f&#xF6;r linje 14 och
+15</li>
+<li><code>EXTI_RTENR</code>: aktivera stigande flank</li>
+<li><code>EXTI_FTENR</code>: aktivera fallande flank</li>
+</ul>
+<div class="sourceCode" id="cb59"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>EXTI_INTENR <span class="op">|=</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">14</span><span class="op">)</span> <span class="op">|</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">15</span><span class="op">);</span>  <span class="co">/* Aktivera interrupt-mask         */</span></span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>EXTI_RTENR  <span class="op">|=</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">14</span><span class="op">)</span> <span class="op">|</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">15</span><span class="op">);</span>  <span class="co">/* Trigga p&#xE5; positiv (stigande) flank */</span></span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>EXTI_FTENR  <span class="op">|=</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">14</span><span class="op">)</span> <span class="op">|</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">15</span><span class="op">);</span>  <span class="co">/* Trigga p&#xE5; negativ (fallande) flank */</span></span></code></pre></div>
+<p><strong>PFIC-konfiguration</strong> (bas 0xE000E000):</p>
+<p>PD14/PD15 delar IRQ-nummer <strong>56</strong> (EXTI15_10, se
+vektortabellen). IRQ 56 &#x2192; PFIC_IENR2 (t&#xE4;cker IRQ 32&#x2013;63), bit 56 &#x2212; 32 =
+<strong>24</strong>.</p>
+<div class="sourceCode" id="cb60"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>PFIC_IENR2 <span class="op">|=</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">24</span><span class="op">);</span>  <span class="co">/* Aktivera IRQ 56 (EXTI15_10) i PFIC */</span></span></code></pre></div>
+</details>
+<hr />
+<p><strong>d)</strong> Implementera avbrottshanteraren
+<code>void at_irq(void)</code> s&#xE5; att saxlyften kontrolleras som
+beskrivet ovan. (3p)</p>
+<details>
+<summary>
+Svar
+</summary>
+<div class="sourceCode" id="cb61"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> at_irq<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">/* L&#xE4;s av PD14 (UP) och PD15 (DOWN) */</span></span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> up   <span class="op">=</span> <span class="op">(</span>GPIOD_INDR <span class="op">&gt;&gt;</span> <span class="dv">14</span><span class="op">)</span> <span class="op">&amp;</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> down <span class="op">=</span> <span class="op">(</span>GPIOD_INDR <span class="op">&gt;&gt;</span> <span class="dv">15</span><span class="op">)</span> <span class="op">&amp;</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb61-5"><a href="#cb61-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-6"><a href="#cb61-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>up <span class="op">&amp;&amp;</span> <span class="op">!</span>down<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb61-7"><a href="#cb61-7" aria-hidden="true" tabindex="-1"></a>        move_up<span class="op">();</span></span>
+<span id="cb61-8"><a href="#cb61-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">else</span> <span class="cf">if</span> <span class="op">(</span>down <span class="op">&amp;&amp;</span> <span class="op">!</span>up<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb61-9"><a href="#cb61-9" aria-hidden="true" tabindex="-1"></a>        move_down<span class="op">();</span></span>
+<span id="cb61-10"><a href="#cb61-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb61-11"><a href="#cb61-11" aria-hidden="true" tabindex="-1"></a>        <span class="co">/* B&#xE5;da nedtryckta eller ingen nedtryckt */</span></span>
+<span id="cb61-12"><a href="#cb61-12" aria-hidden="true" tabindex="-1"></a>        stop<span class="op">();</span></span>
+<span id="cb61-13"><a href="#cb61-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb61-14"><a href="#cb61-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-15"><a href="#cb61-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">/* Kvittera avbrottet (skriv 1 f&#xF6;r att nollst&#xE4;lla flaggan) */</span></span>
+<span id="cb61-16"><a href="#cb61-16" aria-hidden="true" tabindex="-1"></a>    EXTI_INTFR <span class="op">=</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">14</span><span class="op">)</span> <span class="op">|</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">15</span><span class="op">);</span></span>
+<span id="cb61-17"><a href="#cb61-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</details>
+<hr />
+<p><strong>e)</strong> Nedanst&#xE5;ende assemblyfil &#xE4;r given. Visa hur
+avbrottsvektorn f&#xF6;r <code>at_irq</code> initieras i vektortabellen, och
+hur <code>mtvec</code> st&#xE4;lls in, under antagandet att systemet anv&#xE4;nder
+<strong>vektorat l&#xE4;ge (mode 01)</strong>. (1p)</p>
+<div class="sourceCode" id="cb62"><pre
+class="sourceCode asm"><code class="sourceCode fasm"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>.extern at_irq</span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>.<span class="bu">section</span> <span class="op">.</span>data</span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a><span class="fu">vector_table:</span></span>
+<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a>    # fyll i h&#xE4;r</span>
+<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-7"><a href="#cb62-7" aria-hidden="true" tabindex="-1"></a>.<span class="bu">section</span> <span class="op">.</span>text</span>
+<span id="cb62-8"><a href="#cb62-8" aria-hidden="true" tabindex="-1"></a><span class="fu">init_interrupts:</span></span>
+<span id="cb62-9"><a href="#cb62-9" aria-hidden="true" tabindex="-1"></a>    # fyll i h&#xE4;r</span>
+<span id="cb62-10"><a href="#cb62-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">ret</span></span></code></pre></div>
+<details>
+<summary>
+Svar
+</summary>
+<p>I vektorat l&#xE4;ge (mode 01) hoppar processorn till
+<code>mtvec_BASE + 4 &#xD7; cause</code> vid ett avbrott. EXTI15_10 har
+IRQ-nummer 56, s&#xE5; hopp-instruktionen placeras p&#xE5; offset
+<code>56 &#xD7; 4 = 0xE0</code> fr&#xE5;n <code>vector_table</code>.</p>
+<p><code>mtvec</code> st&#xE4;lls in p&#xE5; adressen till
+<code>vector_table</code> med de tv&#xE5; l&#xE4;gsta bitarna satta till
+<code>01</code>.</p>
+<div class="sourceCode" id="cb63"><pre
+class="sourceCode asm"><code class="sourceCode fasm"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>.extern at_irq</span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>.<span class="bu">section</span> <span class="op">.</span>data</span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a><span class="fu">vector_table:</span></span>
+<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">org</span> vector_table <span class="op">+</span> <span class="dv">56</span> <span class="op">*</span> <span class="dv">4</span>   <span class="op">#</span> Hoppa till r&#xE4;tt plats f&#xF6;r IRQ <span class="dv">56</span> <span class="op">(</span>EXTI15_10<span class="op">)</span></span>
+<span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a>    j    at_irq</span>
+<span id="cb63-7"><a href="#cb63-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-8"><a href="#cb63-8" aria-hidden="true" tabindex="-1"></a>.<span class="bu">section</span> <span class="op">.</span>text</span>
+<span id="cb63-9"><a href="#cb63-9" aria-hidden="true" tabindex="-1"></a><span class="fu">init_interrupts:</span></span>
+<span id="cb63-10"><a href="#cb63-10" aria-hidden="true" tabindex="-1"></a>    la   t0<span class="op">,</span> vector_table</span>
+<span id="cb63-11"><a href="#cb63-11" aria-hidden="true" tabindex="-1"></a>    ori  t0<span class="op">,</span> t0<span class="op">,</span> <span class="dv">1</span>               <span class="op">#</span> S&#xE4;tt mode <span class="op">=</span> <span class="dv">01</span> <span class="op">(</span>vektorat l&#xE4;ge<span class="op">)</span></span>
+<span id="cb63-12"><a href="#cb63-12" aria-hidden="true" tabindex="-1"></a>    csrw mtvec<span class="op">,</span> t0</span>
+<span id="cb63-13"><a href="#cb63-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">ret</span></span></code></pre></div>
+</details>
+<hr />
+<p><strong>f)</strong> F&#xF6;r att spara pengar skulle man vilja att
+signalerna fr&#xE5;n UP och DOWN knappen gick &#xF6;ver en enda ledning, men man
+har hittills inte kommit p&#xE5; hur man skall kunna synkronisera
+kommunikationen. N&#xE4;mn ett av de protokoll vi pratat om i kursen som kan
+anv&#xE4;ndas f&#xF6;r seriekommunikation utan klocksignal. (1p)</p>
+<details>
+<summary>
+Svar
+</summary>
+<p><strong>UART</strong> (Universal Asynchronous Receiver/Transmitter) &#x2014;
+asynkron kommunikation d&#xE4;r s&#xE4;ndare och mottagare &#xE4;r &#xF6;verens om baudrate
+i f&#xF6;rv&#xE4;g. Ingen separat klocklinje beh&#xF6;vs.</p>
+</details>
+<hr />
+</body>
+</html>

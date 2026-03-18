@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>afio</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+<p>
+Short text about PFIC
+</p>
+<p>
+<details>
+<summary>
+Base addresses
+</summary>
+<code>0x40010000</code><br>
+
+
+</details>
+<details open>
+<summary>
+Register Block Overview
+</summary>
+<table class="fold-table" style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'>
+<colgroup><col style = 'width: 5%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 5%;'></colgroup><tr><th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>offset</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>31</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>30</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>29</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>28</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>27</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>26</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>25</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>24</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>23</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>22</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>21</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>20</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>19</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>18</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>17</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>16</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>15</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>14</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>13</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>12</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>11</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>10</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>9</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>8</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>7</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>6</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>5</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>4</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>3</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>2</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>1</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>Register</th>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x0</td>
+<td colspan=24 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=3 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>ECR</td>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x4</td>
+<td colspan=1 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=3 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>PCFR</td>
+</tr>
+<tr class = 'summary'>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x08 - <br>0x14</td>
+<td colspan=32 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><i>
+Group: External interrupt configuration register 1
+          (AFIO_EXTICR1)
+</i></td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>EXTICR1 ..<br> EXTICR4</td>
+</tr>
+<tr class='detail'>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x08</td>
+<td colspan=16 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>EXTICR1</td>
+</tr>
+<tr class='detail'>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0xC</td>
+<td colspan=16 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>EXTICR2</td>
+</tr>
+<tr class='detail'>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x10</td>
+<td colspan=16 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>EXTICR3</td>
+</tr>
+<tr class='detail'>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x14</td>
+<td colspan=16 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>EXTICR4</td>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x1C</td>
+<td colspan=5 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=5 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=3 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>PCFR2</td>
+</tr>
+</table>
+
+</details>
+<p>
+<hr>
+<details>
+<summary>
+ECR</summary>
+<p>
+Event Control Register
+          (AFIO_ECR)<br>
+</p>
+<small>Access: read-write  Reset Value: 0x00000000  </small>
+<table style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'>
+<tr><colgroup><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'></colgroup><tr><th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>31</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>30</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>29</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>28</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>27</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>26</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>25</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>24</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>23</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>22</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>21</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>20</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>19</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>18</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>17</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>16</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>15</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>14</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>13</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>12</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>11</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>10</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>9</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>8</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>7</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>6</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>5</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>4</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>3</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>2</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>1</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0</th>
+</tr><td colspan=24 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+</td><td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>EVOE</small></td>
+<td colspan=3 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>PORT</small></td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>PIN</small></td>
+</tr></table><b>EVOE</b>: Event Output Enable<br>
+<b>PORT</b>: Port selection<br>
+<b>PIN</b>: Pin selection<br>
+</details>
+<details>
+<summary>
+PCFR</summary>
+<p>
+AF remap and debug I/O configuration
+          register (AFIO_PCFR)<br>
+</p>
+<small>Reset Value: 0x00000000  </small>
+<table style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'>
+<tr><colgroup><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'></colgroup><tr><th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>31</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>30</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>29</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>28</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>27</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>26</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>25</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>24</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>23</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>22</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>21</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>20</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>19</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>18</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>17</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>16</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>15</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>14</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>13</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>12</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>11</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>10</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>9</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>8</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>7</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>6</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>5</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>4</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>3</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>2</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>1</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0</th>
+</tr><td colspan=1 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+</td><td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>PTP_PPSP_RM</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>TIM2ITRA_RM</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>SPI3_RM</small></td>
+<td colspan=1 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+</td><td colspan=3 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>SWCFG</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MII_RMII_SEL</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CAN2RM</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>ETHRM</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>ADC2_ETRGREG_RM</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>ADC2_ETRGINJ_RM</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>ADC1_ETRGREG_RM</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>ADC1_ETRGINJ_RM</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>TIM5CH4RM</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>PD01RM</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CAN1RM</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>TIM4RM</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>TIM3RM</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>TIM2RM</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>TIM1RM</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>USART3RM</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>USART2RM</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>USART1RM</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>I2C1RM</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>SPI1RM</small></td>
+</tr></table><b>PTP_PPSP_RM</b>: Ethernet PTP_PPS remapping<br>
+<b>TIM2ITRA_RM</b>: TIM2 internally triggers 1 remapping<br>
+<b>SPI3_RM</b>: SPI3 remapping<br>
+<b>SWCFG</b>: Serial wire JTAG configuration<br>
+<b>MII_RMII_SEL</b>: MII_RMII_SEL<br>
+<b>CAN2RM</b>: CAN2 remapping<br>
+<b>ETHRM</b>: Ethernet remapping<br>
+<b>ADC2_ETRGREG_RM</b>: ADC 2 external trigger regular conversion remapping<br>
+<b>ADC2_ETRGINJ_RM</b>: ADC 2 External trigger injected conversion remapping<br>
+<b>ADC1_ETRGREG_RM</b>: ADC 1 external trigger regular conversion remapping<br>
+<b>ADC1_ETRGINJ_RM</b>: ADC 1 External trigger injected conversion remapping<br>
+<b>TIM5CH4RM</b>: TIM5 channel4 internal remap<br>
+<b>PD01RM</b>: Port D0/Port D1 mapping on OSCIN/OSCOUT<br>
+<b>CAN1RM</b>: CAN1 remapping<br>
+<b>TIM4RM</b>: TIM4 remapping<br>
+<b>TIM3RM</b>: TIM3 remapping<br>
+<b>TIM2RM</b>: TIM2 remapping<br>
+<b>TIM1RM</b>: TIM1 remapping<br>
+<b>USART3RM</b>: USART3 remapping<br>
+<b>USART2RM</b>: USART2 remapping<br>
+<b>USART1RM</b>: USART1 remapping<br>
+<b>I2C1RM</b>: I2C1 remapping<br>
+<b>SPI1RM</b>: SPI1 remapping<br>
+</details>
+<details><summary>EXTICR1 ... EXTICR4</summary><p>
+External interrupt configuration register 1
+          (AFIO_EXTICR1)<br>
+</p>
+<small>Access: read-write  Reset Value: 0x00000000  </small>
+<table style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'>
+<tr><colgroup><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'></colgroup><tr><th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>31</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>30</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>29</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>28</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>27</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>26</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>25</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>24</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>23</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>22</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>21</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>20</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>19</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>18</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>17</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>16</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>15</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>14</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>13</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>12</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>11</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>10</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>9</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>8</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>7</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>6</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>5</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>4</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>3</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>2</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>1</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0</th>
+</tr><td colspan=16 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+</td><td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>EXTI3</small></td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>EXTI2</small></td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>EXTI1</small></td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>EXTI0</small></td>
+</tr></table><b>EXTI</b>n (n = 0..3): Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E<br>
+<p>
+External interrupt configuration register 2
+          (AFIO_EXTICR2)<br>
+</p>
+<small>Access: read-write  Reset Value: 0x00000000  </small>
+<table style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'>
+<tr><colgroup><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'></colgroup><tr><th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>31</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>30</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>29</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>28</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>27</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>26</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>25</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>24</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>23</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>22</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>21</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>20</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>19</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>18</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>17</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>16</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>15</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>14</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>13</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>12</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>11</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>10</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>9</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>8</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>7</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>6</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>5</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>4</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>3</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>2</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>1</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0</th>
+</tr><td colspan=16 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+</td><td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>EXTI7</small></td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>EXTI6</small></td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>EXTI5</small></td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>EXTI4</small></td>
+</tr></table><b>EXTI</b>n (n = 4..7): Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E<br>
+<p>
+External interrupt configuration register 3
+          (AFIO_EXTICR3)<br>
+</p>
+<small>Access: read-write  Reset Value: 0x00000000  </small>
+<table style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'>
+<tr><colgroup><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'></colgroup><tr><th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>31</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>30</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>29</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>28</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>27</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>26</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>25</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>24</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>23</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>22</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>21</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>20</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>19</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>18</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>17</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>16</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>15</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>14</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>13</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>12</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>11</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>10</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>9</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>8</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>7</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>6</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>5</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>4</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>3</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>2</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>1</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0</th>
+</tr><td colspan=16 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+</td><td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>EXTI11</small></td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>EXTI10</small></td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>EXTI9</small></td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>EXTI8</small></td>
+</tr></table><b>EXTI</b>n (n = 8..11): Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E<br>
+<p>
+External interrupt configuration register 4
+          (AFIO_EXTICR4)<br>
+</p>
+<small>Access: read-write  Reset Value: 0x00000000  </small>
+<table style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'>
+<tr><colgroup><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'></colgroup><tr><th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>31</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>30</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>29</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>28</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>27</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>26</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>25</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>24</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>23</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>22</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>21</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>20</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>19</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>18</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>17</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>16</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>15</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>14</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>13</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>12</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>11</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>10</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>9</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>8</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>7</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>6</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>5</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>4</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>3</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>2</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>1</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0</th>
+</tr><td colspan=16 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+</td><td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>EXTI15</small></td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>EXTI14</small></td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>EXTI13</small></td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>EXTI12</small></td>
+</tr></table><b>EXTI</b>n (n = 12..15): Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E<br>
+</details>
+<details>
+<summary>
+PCFR2</summary>
+<p>
+AF remap and debug I/O configuration
+          register (AFIO_PCFR2)<br>
+</p>
+<small>Reset Value: 0x00000000  </small>
+<table style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'>
+<tr><colgroup><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'></colgroup><tr><th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>31</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>30</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>29</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>28</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>27</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>26</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>25</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>24</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>23</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>22</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>21</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>20</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>19</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>18</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>17</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>16</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>15</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>14</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>13</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>12</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>11</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>10</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>9</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>8</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>7</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>6</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>5</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>4</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>3</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>2</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>1</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0</th>
+</tr><td colspan=5 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+</td><td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>UART1_REMAP2</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>UART8_REMAP</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>UART7_REMAP</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>UART6_REMAP</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>UART5_REMAP</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>UART4_REMAP</small></td>
+<td colspan=5 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+</td><td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>FSMC_NADV</small></td>
+<td colspan=3 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+</td><td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>TIM10_REMAP</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>TIM9_REMAP</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>TIM8_REMAP</small></td>
+<td colspan=2 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+</tr></table><b>UART1_REMAP2</b>: UART1 remapping<br>
+<b>UART8_REMAP</b>: UART8 remapping<br>
+<b>UART7_REMAP</b>: UART7 remapping<br>
+<b>UART6_REMAP</b>: UART6 remapping<br>
+<b>UART5_REMAP</b>: UART5 remapping<br>
+<b>UART4_REMAP</b>: UART4 remapping<br>
+<b>FSMC_NADV</b>: FSMC_NADV<br>
+<b>TIM10_REMAP</b>: TIM10 remapping<br>
+<b>TIM9_REMAP</b>: TIM9 remapping<br>
+<b>TIM8_REMAP</b>: TIM8 remapping<br>
+</details>
+
+
+</p>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".fold-table .summary").forEach(summary => {
+    summary.addEventListener("click", () => {
+      let row = summary.nextElementSibling;
+
+      while (row && !row.classList.contains("summary")) {
+        row.classList.toggle("open");
+        row = row.nextElementSibling;
+      }
+    });
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>lecture01_introduction</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+<h1 id="machine-oriented-programming">Machine Oriented Programming</h1>
+<p>Welcome to this course in <em>Machine Oriented Programming</em>! In a
+previous course, you have seen how simple logic gates can be combined to
+create an ALU, a data path, and finally a complete working tiny
+processor. In this course you will build on this knowledge and learn how
+to program a <strong>real</strong>, modern, off-the-shelf
+<em>microcontroller</em> <a href="#fn1" class="footnote-ref" id="fnref1"
+role="doc-noteref"><sup>1</sup></a>. You will develop programs for this
+device using assembly and C and you will learn how to communicate with
+peripheral devices (lights, buttons, displays and a tiny speaker). As
+illustrated in the image below, the course is also a prerequisite for
+several upcoming courses.</p>
+<p><img src="../images/courses.png" /></p>
+<p>Many of you are probably accustomed to thinking of a microprocessor
+as one of the power-hungry beasts that control your desktop computer,
+your laptop, or your mobile phone. However, these account for only a
+<em>tiny fraction</em> of the processors you use every day. In fact, a
+modern mobile phone typically contains on the order of a hundred small,
+specialized processors and programmable controllers, responsible for
+tasks such as display control, radio communication, and power
+management.</p>
+<p>In your immediate environment, microcontrollers are embedded in
+refrigerators and washing machines regulating temperature, motors, and
+safety interlocks; in microwave ovens and stoves controlling power
+delivery; in thermostats, smoke detectors, and ventilation systems
+maintaining indoor climate and safety; in cars and bicycles managing
+braking, lighting, and battery charging; and in lifts, doors, and access
+systems enforcing timing and safety constraints. Even seemingly inert
+objects such as power adapters, LED light bulbs, battery packs, and
+electric toothbrushes contain programmable controllers executing code
+continuously. In most cases these systems are designed to be invisible,
+reliable, and single-purpose. In short there are several
+<em>billion</em> microcontrollers being produced every year and all of
+these little processors need someone to write programs for them.</p>
+<p>If you do not find washing machine temperature regulation very
+thrilling (yet&#x2026;) it is difficult not to be excited by the thousands of
+hobby projects that people around the world are doing using their
+newfound microcontroller programming skills. Have a look at <a
+href="https://www.seeedstudio.com/blog/2021/03/26/10-raspberry-pi-pico-projects/">these</a>
+<a href="https://projecthub.arduino.cc/">sites</a> and ask yourself if
+<em>you</em> wouldn&#x2019;t like building your own automatic plant watering
+station, guitar effect pedal, autonomous drone, or portable video
+game.</p>
+<p>Even if you have decided, once and for all, that you only want to
+work with the most powerful general-purpose CPUs available, and have
+little interest in their smaller counterparts, don&#x2019;t worry. The RISC-V
+processor you will learn about in this course is exactly the same as the
+fundamental core of an multi-core 64-bit processor, and the concepts and
+techniques that you learn here are directly applicable (and in fact
+essential) to writing secure, high-performance, code for modern desktops
+and servers.</p>
+<h1 id="what-is-a-microcontroller">What is a microcontroller?</h1>
+<p>So, what <em>is</em> a microcontroller, and how does it compare to
+the CPU you plug into your desktop computer&#x2019;s motherboard? Both
+general-purpose CPUs and microcontrollers are <em>Integrated
+Circuits</em> (ICs) fabricated on silicon using CMOS VLSI technology. In
+other words, they are both little silicon chips with spider legs (these
+are called <em>pins</em>). The chips contain millions of transistors
+that make up all of the internal logic. Part of that logic is the ALU
+and data path that you have encountered before, but there are
+<em>many</em> more modules attached to this core processor. In both
+cases, the spider legs are their only means of communication with the
+outside world, so both must be placed onto a <em>Printed Circuit
+Board</em> (PCB). This is a plastic board with thin copper lines that
+connect all of the pins to various other subsystems, such as memory
+(Flash, SRAM, or external DRAM), I/O busses (PCI-Express/USB/Ethernet),
+or <em>General Purpose Input/Output</em> pins (more about these
+later).</p>
+<p>The main difference is that microcontrollers are <em>tiny</em> in
+comparison and lack a number of features that are standard on a general
+purpose CPU:</p>
+<ul>
+<li>A modern microcontroller often has several orders of magnitude fewer
+transistors than a modern desktop CPU.</li>
+<li>A single microcontroller chip might cost 1 to 50SEK, while a CPU
+costs several hundred, to thousands.</li>
+<li>The microcontroller is extremely energy efficient, and can be
+powered for quite some time from a standard 9V battery from the
+supermarket.</li>
+<li>The microcontroller has <em>very</em> restricted memory; usually
+just a few kB of SRAM, while a CPU has a huge memory subsystem with
+several layers of caches.</li>
+<li>The microcontroller usually runs without any operating system, and
+is designed to run one specific task.</li>
+</ul>
+<p>It is important to realize that while microcontrollers are relatively
+simple, and very cheap to buy, they are much too expensive to produce
+specifically for one product. Fabricating a single chip would cost
+<em>at least</em> 100k-1M SEK. They only become cheap when you produce
+(and sell) millions of them.</p>
+<p>PCBs, on the other hand, are very cheap to make these days (you can
+design one and order 5 copies for 50 SEK), so when designing a product
+(let&#x2019;s say an alarm system) you would usually:</p>
+<ul>
+<li>Buy the cheapest microcontroller <em>development board</em> that you
+think will fit your needs. A development board is (at minimum) a PCB
+with the microcontroller and some debugging equipment that lets you
+connect it to your computer for development.</li>
+<li>Connect it to the sensors (movement sensors, for example) and other
+components (flash memory, or AD converters, perhaps) you need on a
+&#x201C;breadboard&#x201D; (see image below)</li>
+<li>Write the software you need on a desktop computer and send it over
+to the development board for testing.</li>
+</ul>
+<blockquote>
+<p>TODO: image of pico with a few components on a breadboard</p>
+</blockquote>
+<p>Once you are satisfied that the software works, you can design a
+schematic for a PCB <a href="#fn2" class="footnote-ref" id="fnref2"
+role="doc-noteref"><sup>2</sup></a> and order the whole thing (with
+microcontroller and components soldered on) from a manufacturer.</p>
+<h1 id="the-lab-computer-md307">The lab computer, MD307</h1>
+<p>In this course, you will learn to program the MD307 development board
+<a href="#fn3" class="footnote-ref" id="fnref3"
+role="doc-noteref"><sup>3</sup></a>. It consists of a <a
+href="https://www.wch-ic.com/products/CH32V307.html">CH32V307</a>
+microcontroller, a debug interface so you can connect it to Visual
+Studio Code, and a number of <em>General Purpose I/O</em> (GPIO) pins,
+that you will connect to peripheral equipment.</p>
+<p>The CH32V307 is a RISC-V <a href="#fn4" class="footnote-ref"
+id="fnref4" role="doc-noteref"><sup>4</sup></a> microcontroller running
+at 144MHz, with (up to) 192kB SRAM and (up to) 256kB FLASH memory. The
+chip also contains various I/O modules (like USB, USART, and Ethernet),
+DACs, ADCs, and several timers. You will learn how to program many of
+these in the course.</p>
+<p><img src="../images/md307.png" /></p>
+<h2 id="the-simulator">The simulator</h2>
+<p>Since we do not have enough MD307 development boards to hand out to
+all of you, much of your development will happen on a simulator. This is
+an <em>Instruction Set Simulator</em> (ISS), meaning that it decodes and
+runs machine code instructions and maintains a model of the processor&#x2019;s
+registers and state but simplifies many micro-architectural details.
+Thus, you can compile and run your code and expect the same behavior as
+if it was the real machine, but it will not be exact in terms of the
+number of cycles an instruction takes. This is usually sufficient for
+most development work, and is a common approach to developing software
+before hardware is available.</p>
+<h1 id="course-organization">Course organization</h1>
+<p>The course consists of lectures, labs, and self-studies. Since the
+course goals are to prepare you for programming real microcontrollers in
+the real world, you are expected to spend a lot of time actually
+programming and doing exercises; just attending lectures or reading
+through the lecture notes will not be enough to pass the exam.</p>
+<h2 id="lectures">Lectures</h2>
+<p>There will be two lectures per week (but a few of the lecture slots
+will be used for repetition and exam preparation) and each lecture will
+introduce some new theory along with practical examples. The lectures
+are not mandatory, but history has shown a <em>clear</em> correlation
+between going to the lectures and passing the exam. Even if you feel
+like you can get all the theory through reading, just getting out of the
+couch and discussing the topics with your class-mates can be a good
+enough reason to go to class.</p>
+<h3 id="lecture-notes">Lecture notes</h3>
+<p>On Canvas, there is one module per lecture where you can find the
+lecture notes. These notes are intended as a text version of the
+lecture, and while <em>some</em> content may differ, they should suffice
+if you miss a class for some reason, or when you want to repeat parts of
+the lecture.</p>
+<h3 id="quizzes">Quizzes</h3>
+<p>Each lecture module on Canvas also contains one or more quizzes.
+These quizzes have multiple choice answers and are intended mainly as a
+way for you to check if you have retained the information in the class
+or lecture notes. Doing them takes only a few minutes and should help
+you find what parts of the notes you need to re-read. Completing the
+quiz with a full score does <em>not</em> mean that you have mastered the
+lecture, however. You will also need practical experience with the
+topics of each lecture, and that is what the lab and exercises are
+for.</p>
+<h3 id="exercises">Exercises</h3>
+<p>The exercises for each lecture are built into our Visual Studio Code
+environment, and are meant to help you with practical experience. There
+are programming exercises for each lecture, that will force you too look
+back into the lecture notes and the QuickGuide. Please note that the
+exam does <em>not</em>, to any great extent, test what you remember of
+the text, or rote-learning. It will test if you are able to perform
+certain programming tasks, so doing exercises is essential to performing
+well in the course.</p>
+<h3 id="workbook">Workbook</h3>
+<p>In addition to the lecture notes and the exercises, there is a
+workbook (available at Chalmers Store) which contains alternative
+descriptions, a large number of examples, and several more exercises. It
+is highly recommended that you follow this book as well, especially if
+you are struggling.</p>
+<h2 id="exercise-sessions">Exercise Sessions</h2>
+<p>Every week you will have the opportunity to go to exercise sessions
+where TAs will be available to answer your questions. Having direct help
+from people who know the topic well while studying is one of the main
+luxuries of studying at a University, and it is highly recommended that
+you go to these sessions.</p>
+<p>On the exercise sessions there will also be hardware available to
+those who want to try developing directly for the machine instead. The
+exercise sessions are booked in advance on a first-come first-served
+basis (with some restrictions), so if you have a restrictive schedule it
+might be wise to book early.</p>
+<h2 id="labs">Labs</h2>
+<p>There are three mandatory labs, and one optional lab that can give
+bonus points on the exam. For each lab, there is a &#x201C;lab preparation&#x201D;
+assignment on Canvas. This assignment must be completed (and you need to
+understand what you did) before you come to the lab. The actual
+time-slot when you can do the lab in the lab room will be booked in
+advance like the exercises.</p>
+<p>In the lab room, you will get to try some tasks that are hard to do
+without access to the real hardware. While passing the labs is mandatory
+for completing the course, doing so is not going to be at all difficult
+as long as you have done the preparation. The point of the labs is to
+enforce your learning, and understanding the labs is essential (and
+almost sufficient) to passing the exam.</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Read: &#x201C;small processor&#x201D; for now.<a href="#fnref1"
+class="footnote-back" role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+<li id="fn2"><p>This is quite easy, and surprisingly fun. You can use
+free software like <a href="www.kicad.org">KiCad</a> for this.<a
+href="#fnref2" class="footnote-back" role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+<li id="fn3"><p>This is a reasonably student-proof development board
+developed at chalmers, but very similar boards are available to buy
+off-the-shelf.<a href="#fnref3" class="footnote-back"
+role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+<li id="fn4"><p>See next lecture.<a href="#fnref4" class="footnote-back"
+role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+</ol>
+</section>
+</body>
+</html>

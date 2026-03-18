@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>QuickGuide</title>
+
+    <style>
+        /* --- Reset & Base Layout --- */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        /* --- Header (title + dropdown) --- */
+        #top-area {
+            background: #ffffff;
+            padding: 24px;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            flex-shrink: 0;
+        }
+
+        h1 {
+            margin: 0 0 12px 0;
+            font-size: 26px;
+            font-weight: 600;
+            color: #222;
+        }
+
+        label {
+            font-size: 14px;
+            margin-right: 8px;
+            color: #444;
+        }
+
+        /* --- Styled Dropdown --- */
+        select {
+            padding: 10px 14px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background: #fafafa;
+            color: #333;
+            outline: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image:
+                linear-gradient(45deg, transparent 50%, #888 50%),
+                linear-gradient(135deg, #888 50%, transparent 50%),
+                linear-gradient(to right, #ddd, #ddd);
+            background-position:
+                calc(100% - 18px) calc(50% - 4px),
+                calc(100% - 13px) calc(50% - 4px),
+                calc(100% - 32px) 50%;
+            background-size:
+                5px 5px,
+                5px 5px,
+                1px 16px;
+            background-repeat: no-repeat;
+        }
+
+        select:hover {
+            background-color: #f0f0f0;
+        }
+
+        select:focus {
+            border-color: #888;
+            background-color: #ffffff;
+        }
+
+        /* --- iframe styling (fills the rest of the page) --- */
+        #content-frame {
+            flex-grow: 1;
+            width: 100%;
+            border: none;
+            background: #ffffff;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.04);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="top-area">
+        <h1>QuickGuide</h1>
+        <label for="peripheral-select">Choose a section:</label>
+        <select id="peripheral-select">
+            <option value="quickguide/registers.html">Registers</option>
+            <option value="quickguide/instructions.html">Instructions</option>
+            <option value="quickguide/directives.html">Directives</option>
+            <option value="quickguide/interrupt_vector_table.html">Vector Table</option>
+            <option value="quickguide/pfic.html">PFIC</option>
+            <option value="quickguide/afio.html">AFIO</option>
+            <option value="quickguide/exti.html">EXTI</option>
+            <option value="quickguide/systick.html">SysTick</option>
+            <option value="quickguide/gpio.html">GPIO</option>
+            <option value="quickguide/ascii_display.html">ASCII Display</option>
+            <option value="quickguide/timer.html">Basic Timers</option>
+            <option value="quickguide/usart.html">USART</option>
+
+        </select>
+    </div>
+
+    <iframe id="content-frame" src=""></iframe>
+
+    <script>
+        const dropdown = document.getElementById("peripheral-select");
+        const frame = document.getElementById("content-frame");
+
+        const STORAGE_KEY = "quickguide-selected-page";
+
+        // Restore saved selection on page load
+        const savedPage = localStorage.getItem(STORAGE_KEY);
+        if (savedPage) {
+            dropdown.value = savedPage;
+            frame.src = savedPage;
+        } else {
+            // Load the default (first option)
+            frame.src = dropdown.value;
+        }
+
+        // Save selection and update iframe when changed
+        dropdown.addEventListener("change", () => {
+            const value = dropdown.value;
+            frame.src = value;
+            localStorage.setItem(STORAGE_KEY, value);
+        });
+    </script>
+
+</body>
+</html>
+
+

@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>lecture03_assembly2</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+<!--
+**Things that are in the Workbook that should possibly be in this lecture**
+Sign Extension (not as important in RISCV, but still needs to be handled somewhere)
+Stack frames? (I think &#xF6;verkurs)
+Arrays with multiple dimensions (definitely  &#xF6;verkurs)
+-->
+<hr />
+<h1 id="control-flow-and-arrays">Control Flow and Arrays</h1>
+<p>This lecture will focus on <em>Program Control Flow</em>, i.e., how
+to make jumps in our code, call subroutines, and make function calls.
+This will include using the ABI conventions for function parameters and
+return values, understanding how the <em>stack</em> works, and how to
+deal with <em>register spilling</em> (i.e., what to do when we do not
+have enough registers). We will round of the lecture with a discussion
+about <em>arrays</em> and how they are implemented in assembly.</p>
+<h2 id="jump-and-link">Jump and Link</h2>
+<p>There are only two instructions in RISC-V that perform unconditional
+jumps (<code>jal</code> and <code>jalr</code>). These are used for a
+number of pseudoinstructions that make the code easier to read. The
+table below describes these two instructions.</p>
+<div class="boxed">
+<!DOCTYPE html>
+<html><head>
+<meta charset='utf-8'>
+<style>
+body { font-family: sans-serif; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #ccc; padding: 6px; }
+th { background: #eee; }
+code { background: #f4f4f4; padding: 2px 4px; }
+</style>
+</head><body>
+<table>
+<tr><th>Instruction</th>
+<th>Mnemonic</th>
+<th>Result</th>
+</tr>
+<tr>
+<td><code>jal rd, offset</code></td>
+<td>Jump and link</td>
+<td>rd &#x2190; PC+4; PC &#x2190; PC+offset</td>
+</tr>
+<tr>
+<td><code>jalr rd, offset(rs1)</code></td>
+<td>Jump and link register</td>
+<td>rd &#x2190; PC+4; PC &#x2190; rs1+offset</td>
+</tr>
+</table>
+</body></html>
+
+</div>
+<p>The word &#x201C;Link&#x201D; in these mnemonics means that we store the return
+address, so that we can return from the jump later.</p>
+<p>There are two versions of the jump and link instruction because the
+simpler one, <code>jal</code>, only allows us to jump a certain offset
+(which is limited to +/- 1MB) <a href="#fn1" class="footnote-ref"
+id="fnref1" role="doc-noteref"><sup>1</sup></a> from the current value
+of <code>pc</code>. Since our SRAM (where the code normally resides) is
+only 128KB in size, that is not normally a problem for us. However, if
+we need to jump to code in FLASH memory, the distance would be too far
+for <code>jal</code> so we must put our address into a separate
+register, and then use <code>jalr</code>, instead. There are other
+reasons for using <code>jalr</code> which we will encounter shortly.</p>
+<h3 id="jump">Jump</h3>
+<p>Sometimes, all we want to do is jump to some other part of the code.
+Let&#x2019;s say you want to make an LED lamp blink continuously as soon as you
+start your machine. Consider the example below:</p>
+<pre><code>  &lt;initialization code&gt;
+blink:
+  &lt;code that turns on an LED lamp, waits 1 second, turns it off, waits 1 sec&gt;
+  j blink    // Jump to the &quot;blink&quot; label</code></pre>
+<p>Here, when making our jump, we have no interest in what the return
+address is (so we do not need &#x201C;Link&#x201D;) but the assembler will still
+translate this pseudo instruction (<code>j</code>) into the real
+instruction (<code>jal</code>):</p>
+<table>
+<colgroup>
+<col style="width: 37%" />
+<col style="width: 20%" />
+<col style="width: 41%" />
+</colgroup>
+<thead>
+<tr>
+<th>Pseudo Instruction</th>
+<th>Mnemonic</th>
+<th>Translation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>j &lt;address or label&gt;</code></td>
+<td>Jump</td>
+<td><code>jal zero, offset</code></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>(offset is calculated from current pc by assembler)</td>
+</tr>
+</tbody>
+</table>
+<p>Since we do not need the return address for this pseudo instruction,
+<code>jal</code> simply stores it into the <code>zero</code> register
+(writes to <code>zero</code>, or <code>x0</code>, are always
+ignored).</p>
+<p>The <code>offset</code> can be either a label (like in the example),
+or an absolute address:
+<code>j 0x20000000    // Jump to the start of our program</code></p>
+<p>In either case, the compiler (or linker) will complain if the address
+we want to jump to is too far away from the current address (i.e., if
+the offset from <code>pc</code> would require &gt; 20 bits). In such
+cases, we have to use the <code>jr</code> (Jump Register) instruction
+instead.</p>
+<table>
+<thead>
+<tr>
+<th>Pseudo Instruction</th>
+<th>Mnemonic</th>
+<th>Translation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>jr rs</code></td>
+<td>Jump</td>
+<td><code>jalr zero, 0(rs)</code></td>
+</tr>
+</tbody>
+</table>
+<p>If we, for example, knew that we had some useful code at address
+0x00000100 (in FLASH memory), we could write:</p>
+<pre class="riscv"><code>li t0, 0x00000100       // Load the address into t0
+jr t0                   // Jump to that address</code></pre>
+<h2 id="branching">Branching</h2>
+<p>Conditionally jumping based on some condition is called &#x201C;branching&#x201D;
+and we wouldn&#x2019;t be able to do much with our computers without it. The
+real instruction that we use for branching are listed in the table
+below:</p>
+<div class="boxed">
+<!DOCTYPE html>
+<html><head>
+<meta charset='utf-8'>
+<style>
+body { font-family: sans-serif; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #ccc; padding: 6px; }
+th { background: #eee; }
+code { background: #f4f4f4; padding: 2px 4px; }
+</style>
+</head><body>
+<table>
+<tr><th>Instruction</th>
+<th>Mnemonic</th>
+<th>Result</th>
+</tr>
+<tr>
+<td><code>beq rs1, rs2, offset</code></td>
+<td>Branch if equal</td>
+<td>PC &#x2190; PC+offset if rs1 = rs2</td>
+</tr>
+<tr>
+<td><code>bne rs1, rs2, offset</code></td>
+<td>Branch if not equal</td>
+<td>PC &#x2190; PC+offset if rs1 &#x2260; rs2</td>
+</tr>
+<tr>
+<td><code>blt rs1, rs2, offset</code></td>
+<td>Branch if less than (signed)</td>
+<td>PC &#x2190; PC+offset if rs1 &lt; rs2</td>
+</tr>
+<tr>
+<td><code>bge rs1, rs2, offset</code></td>
+<td>Branch if greater or equal (signed)</td>
+<td>PC &#x2190; PC+offset if rs1 &#x2265; rs2</td>
+</tr>
+<tr>
+<td><code>bltu rs1, rs2, offset</code></td>
+<td>Branch if less than (unsigned)</td>
+<td>PC &#x2190; PC+offset if rs1 &lt; rs2 (u)</td>
+</tr>
+<tr>
+<td><code>bgeu rs1, rs2, offset</code></td>
+<td>Branch if greater or equal (unsigned)</td>
+<td>PC &#x2190; PC+offset if rs1 &#x2265; rs2 (u)</td>
+</tr>
+</table>
+</body></html>
+
+</div>
+<p>You might think that this looks limited. Why is there no &#x201C;Branch
+Greater Than&#x201D; or &#x201C;Branch Less or Equal&#x201D;? The answer, as usual, is that
+this functionality can be implemented with existing instructions. Since
+a &lt; b =&gt; b &gt; a, <code>bgt rs1, rs2, label</code> (Branch
+Greater Than) can be written as <code>blt rs2, rs1, label</code>. There
+are pseudoinstructions that cover all of the missing operations:</p>
+<div class="boxed">
+<!DOCTYPE html>
+<html><head>
+<meta charset='utf-8'>
+<style>
+body { font-family: sans-serif; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #ccc; padding: 6px; }
+th { background: #eee; }
+code { background: #f4f4f4; padding: 2px 4px; }
+</style>
+</head><body>
+<table>
+<tr><th>Instruction</th>
+<th>Mnemonic</th>
+<th>Result</th>
+</tr>
+<tr>
+<td><code>bgt rs1, rs2, offset</code></td>
+<td>Branch if greater than (signed)</td>
+<td>PC &#x2190; PC+offset if rs1 &gt; rs2</td>
+</tr>
+<tr>
+<td><code>ble rs1, rs2, offset</code></td>
+<td>Branch if less or equal (signed)</td>
+<td>PC &#x2190; PC+offset if rs1 &#x2264; rs2</td>
+</tr>
+<tr>
+<td><code>bgtu rs1, rs2, offset</code></td>
+<td>Branch if greater than (unsigned)</td>
+<td>PC &#x2190; PC+offset if rs1 &gt; rs2 (u)</td>
+</tr>
+<tr>
+<td><code>bleu rs1, rs2, offset</code></td>
+<td>Branch if less or equal (unsigned)</td>
+<td>PC &#x2190; PC+offset if rs1 &#x2264; rs2 (u)</td>
+</tr>
+</table>
+</body></html>
+
+</div>
+<p>Many of these instructions exist in a signed and an unsigned version
+(e.g., <code>blt</code> and <code>bltu</code>). This is necessary since
+the processor does not know if you consider the value in a register to
+be a signed or an unsigned number. Consider the instruction
+<code>blt x1, zero</code>. If <code>x1</code> contains
+<code>0xFFFFFFFB</code>, it is less than zero if we consider it a signed
+integer (-5), but <em>much</em> more than zero if we consider it
+unsigned (4294967291).</p>
+<p>Additionally, there are a number of pseudoinstructions that compare a
+register&#x2019;s value to zero. These are just for convenience and are easily
+implemented using the correspoding instructions and using
+<code>zero</code> as one of the operands:</p>
+<div class="boxed">
+<!DOCTYPE html>
+<html><head>
+<meta charset='utf-8'>
+<style>
+body { font-family: sans-serif; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #ccc; padding: 6px; }
+th { background: #eee; }
+code { background: #f4f4f4; padding: 2px 4px; }
+</style>
+</head><body>
+<table>
+<tr><th>Instruction</th>
+<th>Mnemonic</th>
+<th>Result</th>
+</tr>
+<tr>
+<td><code>beqz rs, offset</code></td>
+<td>Branch if equal to zero</td>
+<td>PC &#x2190; PC+offset if rs = 0</td>
+</tr>
+<tr>
+<td><code>bnez rs, offset</code></td>
+<td>Branch if not equal to zero</td>
+<td>PC &#x2190; PC+offset if rs &#x2260; 0</td>
+</tr>
+<tr>
+<td><code>bgtz rs, offset</code></td>
+<td>Branch if greater than zero</td>
+<td>PC &#x2190; PC+offset if rs &gt; 0</td>
+</tr>
+<tr>
+<td><code>bltz rs, offset</code></td>
+<td>Branch if less than zero</td>
+<td>PC &#x2190; PC+offset if rs &lt; 0</td>
+</tr>
+</table>
+</body></html>
+
+</div>
+<p>Let&#x2019;s put this to use. We want to calculate the factorial of 5 (5! =
+5 * 4 * 3 * 2 * 1). In C, or any C-like high-level language, this could
+look like:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> y <span class="op">=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span><span class="op">(</span><span class="dt">int</span> i<span class="op">=</span><span class="dv">1</span><span class="op">;</span> i<span class="op">&lt;=</span><span class="dv">5</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  y <span class="op">=</span> y <span class="op">*</span> i<span class="op">;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>We can write this same program in RISC-V assembly language as (read
+and make sure you follow):</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">li</span> <span class="kw">t0</span><span class="op">,</span> <span class="dv">1</span>              <span class="co"># Use register t0 for `y`, and set it to 1</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">li</span> <span class="kw">t1</span><span class="op">,</span> <span class="dv">1</span>              <span class="co"># Use register t1 for `i`, and set it to 1</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">forloop:</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">li</span> <span class="kw">t2</span><span class="op">,</span> <span class="dv">5</span>               <span class="co"># Put the value 5 in a temporary register</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">bgt</span> <span class="kw">t1</span><span class="op">,</span> <span class="kw">t2</span><span class="op">,</span> end        <span class="co"># Check if `i` is more than 5</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>                         <span class="co"># and jump to `end` if it is</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">mul</span> <span class="kw">t0</span><span class="op">,</span> <span class="kw">t0</span><span class="op">,</span> <span class="kw">t1</span>         <span class="co"># y * i -&gt; y</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">addi</span> <span class="kw">t1</span><span class="op">,</span> <span class="kw">t1</span><span class="op">,</span> <span class="dv">1</span>         <span class="co"># i++</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">j</span> forloop             <span class="co"># Repeat</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="fu">end:</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># t0 now contains the answer.</span></span></code></pre></div>
+<p>Note that there are no <em>immediate</em> versions of the branch
+instructions. We cannot write <code>bgt t1, 5, end</code>, for example.
+You have to put the value you want to compare against into a register
+first.</p>
+<p>&#x1F4A1; <strong>Note:</strong> <em>If you&#x2019;ve worked with other CPU
+architectures (perhaps in a previous course), you may notice that branch
+handling is different on RISC-V. In many older architectures, a branch
+instruction is preceded by a compare instruction, which compares two
+values using the ALU and sets condition flags (e.g., Negative, Zero,
+etc.) in a flag register. In contrast, RISC-V performs these comparisons
+directly as part of the branch instruction. This design avoids the need
+for a global condition-code register, simplifying the hardware and
+reducing potential pipeline dependencies.</em></p>
+<!---
+### Branchless (Advanced)
+Explain why branchless can be very good. (branch prediction...)
+Show a = min(b, c) branchless
+Connect to a = (b<c)?b:c
+(there should also be an example where the comparison is reused several times... perhaps not important)
+--->
+<h2 id="the-stack">The Stack</h2>
+<p>Before we move on to discuss how function calls are implemented,
+let&#x2019;s quickly recap the <em>Stack</em> and learn how it is used on a
+RISC-V architecture. The stack is a memory area where computer programs
+can store temporary data. The number of registers on any CPU are
+limited, so sometimes we need to <em>push</em> data to memory,
+temporarily, and then <em>pop</em> (or <em>pull</em>) it back into
+registers when we need it.</p>
+<p>On many architectures, the process might look like this:</p>
+<pre><code>  &lt;code that does stuff&gt;
+  &lt;we need to perform a calculation, but we have no free registers&gt;
+  PUSH {t0, t1, t2}       # Copy the contents or registers t0, t1, and t2 to the stack
+  &lt;do calculations that might overwrite t0, t1 and t2&gt;
+  POP {t0, t1, t2}        # Copy the values from the stack, back into t0, t1, and t2</code></pre>
+<p>A stack has one associated register called the <em>stack pointer</em>
+(the RISC-V ABI convention is to use register
+<code>x2</code>/<code>sp</code>). This register always holds the address
+to the <em>top of the stack</em>, i.e., where the last value was pushed.
+The stack pointer needs to be initialized to point at <em>the end
+of</em> some memory area that is known to be free (called the <em>bottom
+of the stack</em>). By convention, the stack grows downward, from higher
+to lower memory addresses. Then, when we need to store a value (let&#x2019;s
+say a 4 byte integer) on the stack, we can store it in memory, at the
+address held by <code>sp</code>, and then reduce the address stored in
+<code>sp</code> by 4 bytes.</p>
+<p>On many architectures, <em>push</em> and <em>pop</em> are actual
+instructions, implemented by the hardware, but in RISC-V it is done
+explicitly with existing instructions. To push register <code>t0</code>
+to the stack, you would write:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>  <span class="kw">addi</span> <span class="kw">sp</span><span class="op">,</span> <span class="kw">sp</span><span class="op">,</span> <span class="op">-</span><span class="dv">4</span>       <span class="co"># Reduce the stack pointer so it points to where we will store t0</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">sw</span>  <span class="kw">t0</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">sp</span><span class="op">)</span>         <span class="co"># Store t0 at the address held by sp</span></span></code></pre></div>
+<p>As you will see soon, we often want to push several registers to the
+stack at the same time. If we needed to push <code>t0</code>,
+<code>t1</code>, and <code>t2</code> to the stack, we could write:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">0:</span>  <span class="kw">addi</span> <span class="kw">sp</span><span class="op">,</span> <span class="kw">sp</span><span class="op">,</span> <span class="op">-</span><span class="dv">12</span>      <span class="co"># Reduce the stack pointer so it points to where we will store</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">1:</span>                        <span class="co"># the LAST value we push (t2)</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">2:</span>  <span class="kw">sw</span> <span class="kw">t0</span><span class="op">,</span> <span class="dv">8</span><span class="op">(</span><span class="kw">sp</span><span class="op">)</span>          <span class="co"># Store the three registers</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">3:</span>  <span class="kw">sw</span> <span class="kw">t1</span><span class="op">,</span> <span class="dv">4</span><span class="op">(</span><span class="kw">sp</span><span class="op">)</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">4:</span>  <span class="kw">sw</span> <span class="kw">t2</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">sp</span><span class="op">)</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="fu">5:</span></span></code></pre></div>
+<figure>
+<img src="../images/pushing_on_stack.png">
+<figcaption style="text-align: center;">
+<em> Left: Initial state, stack pointer is at end-of-stack. Middle: At
+Line 2, stack pointer moved. Right: Line 5: All registers copied to
+stack.</em>
+</figcaption>
+</figure>
+<p>The process is also illustrated in the Figure above.</p>
+<p>To pop the values, we just do the same thing in reverse. We first use
+the current address in the stack-pointer to read out the last three
+values that were pushed, and then we increase the stack pointer. We do
+not <em>remove</em> the values from the stack, we just move the pointer,
+but any subsequent push operation will overwrite that memory:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>  <span class="kw">lw</span> <span class="kw">t2</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">sp</span><span class="op">)</span>    <span class="co"># Read the values back into registers</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">lw</span> <span class="kw">t1</span><span class="op">,</span> <span class="dv">4</span><span class="op">(</span><span class="kw">sp</span><span class="op">)</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">lw</span> <span class="kw">t0</span><span class="op">,</span> <span class="dv">8</span><span class="op">(</span><span class="kw">sp</span><span class="op">)</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">addi</span> <span class="kw">sp</span><span class="op">,</span> <span class="kw">sp</span><span class="op">,</span> <span class="dv">12</span>  <span class="co"># Restore the stack pointer to where it was before we pushed</span></span></code></pre></div>
+<h2 id="function-calls">Function Calls</h2>
+<p>Most high-level languages have the concept of <em>functions</em>
+(sometimes called <em>subroutines</em>). A function takes a number of
+parameters and returns a value. The assembly language does <em>not</em>
+have function calls built into the language but even when writing pure
+assembly we often want to divide code into functions.</p>
+<p>Additionally, we want to be able to mix languages. Sometimes we want
+to write a function in assembly, and call it from our C code, or vice
+versa. For that to work, it is important that we, as assembly
+programmers, follow exactly the same rules as the C compiler does.</p>
+<p>Therefore, there are several <em>conventions</em> (described by the
+ABI) that define how function calls should be done. Let us consider a
+simple function that takes two parameters and returns the smallest:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> min<span class="op">(</span><span class="dt">int</span> a<span class="op">,</span> <span class="dt">int</span> b<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span><span class="op">(</span>a <span class="op">&lt;</span> b<span class="op">)</span> <span class="cf">return</span> a<span class="op">;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span> <span class="cf">return</span> b<span class="op">;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>How can we write this function in RISC-V assembly? How are the
+arguments <code>a</code> and <code>b</code> passed to the function? How
+do we return a value? All of this is described in detail in the ABI
+specification, and we will go through the basics here.</p>
+<h3 id="calling-and-returning-from-a-function">Calling and returning
+from a function</h3>
+<p>When calling a function we need to be able to return from that
+function, and the convention is that the <em>caller</em> (the function
+that makes the function call) saves the return address in register
+<code>ra</code> (The ABI name for register <code>x1</code>). Assume that
+there is a label <code>min</code> (somewhere in the code) that
+corresponds to the address where the function code begins. If the
+distance from the calling instruction to the function fits in the 20-bit
+offset of the <code>jal ra, min</code> instruction, we could use that
+directly. Otherwise, we have to first calculate the full target address
+into a register, and then use the <code>jalr</code> instruction.</p>
+<p>Whether or not the function is close enough could be hard to know in
+some cases. Fortunately, the assembler will accept a simple
+pseudoinstruction, <code>call</code>, which puts the return address into
+<code>ra</code> and generates the proper instructions (<code>jal</code>,
+or <code>auipc</code>+<code>jalr</code>) as needed.</p>
+<p>Since the return address is available in <code>ra</code>, returning
+from a function can always be achieved with:
+<code>jalr zero, 0(ra)</code>. There is also a pseudoinstruction
+<code>ret</code> that translates into the same thing.</p>
+<p>So to call and return from a function we can write:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="cf">call</span> <span class="kw">min</span>      <span class="co"># Stores the return address in ra and jumps to min</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span><span class="kw">min</span> will return to here<span class="op">&gt;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>...</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">min:</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">&lt;</span>definition of <span class="kw">min</span> goes here<span class="op">&gt;</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">ret</span>         <span class="co"># Return from function</span></span></code></pre></div>
+<h3 id="function-parameters-and-return-values">Function parameters and
+return values</h3>
+<p>In simpler cases, when there are at most eight parameters and each
+parameter fits into 4 bytes (one 32-bit register), the convention for
+passing arguments to a function is simple: The parameters are stored, in
+order, in the <code>a0</code>-<code>a7</code> registers (as many of them
+as needed) before calling the function. As long as the return value fits
+in a single 32-bit register, it is stored in <code>a0</code> before
+returning from the function.</p>
+<p>There are a few things to note about this:</p>
+<ul>
+<li>In C, the arguments to a function are often of datatypes that are
+smaller than 4 bytes (<code>char</code> or <code>short</code>). In
+assembly, such variables are, by convention, kept in one 32-bit register
+each even if several of them <em>could</em> be packed into a single
+register.</li>
+<li>When the parameters, or return value, are more advanced datatypes
+(structs in C, or classes in C++) the rules are more complex and they
+are sometimes sent in the <code>a</code> registers and sometimes pushed
+onto the stack instead. We will cover some of these cases later in this
+course.</li>
+</ul>
+<p>We are now ready to implement our <code>min</code> function and call
+it:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">li</span> <span class="kw">a0</span><span class="op">,</span> <span class="dv">20</span>     <span class="co"># Load the value 20 into register a0</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">li</span> <span class="kw">a1</span><span class="op">,</span> <span class="dv">10</span>     <span class="co"># Load the value 10 into register a1</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="cf">call</span> <span class="kw">min</span>      <span class="co"># Stores the return address in ra and jumps to min</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># a0 should now contain the smaller value of 10 and 20</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>...</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="fu">min:</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">blt</span> <span class="kw">a0</span><span class="op">,</span> <span class="kw">a1</span><span class="op">,</span> min_end     <span class="co"># If a0 is less than a1, we can return because the smallest value is already in a0</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">mv</span>  <span class="kw">a0</span><span class="op">,</span> <span class="kw">a1</span>              <span class="co"># Otherwise, copy the value of a1 into a0 (the return value)</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="fu">min_end:</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">ret</span>         <span class="co"># Return from function (the return value should now be in a0)</span></span></code></pre></div>
+<h3 id="register-saving">Register Saving</h3>
+<p>There is one more important thing to consider when writing, or
+calling, functions in assembly. We will illustrate this by an
+example.</p>
+<p>Let&#x2019;s say you have written the function
+<code>int max(int a, int b)</code> in C and that you are linking the
+compiled code with your assembly program <a href="#fn2"
+class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.
+You are now given the task to write an assembly program that finds the
+largest of the <em>three</em> values stored in registers
+<code>t0</code>, <code>t1</code>, and <code>t2</code>. I.e., we want to
+calculate <code>max(max(t0, t1), t2)</code></p>
+<p>You might write the following code:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">mv</span> <span class="kw">a0</span><span class="op">,</span> <span class="kw">t0</span>        <span class="co"># Use t0 as the first parameter</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">mv</span> <span class="kw">a1</span><span class="op">,</span> <span class="kw">t1</span>        <span class="co"># and t1 as the second parameter</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="cf">call</span> <span class="kw">max</span>         <span class="co"># After this line, the maximum of t0 and t1 is in a0</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                 <span class="co"># Since a0 is already max(t0, t1) we do not have to do anything for the first parameter</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="kw">mv</span> <span class="kw">a1</span><span class="op">,</span> <span class="kw">t2</span>        <span class="co"># Use t2 as the second parameter</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="cf">call</span> <span class="kw">max</span>         <span class="co"># After this line a0 should contain max(max(t0, t1), t2)...</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>                 <span class="co"># Or should it...</span></span></code></pre></div>
+<p>There is a potential bug in this program. Can you spot it? That&#x2019;s
+right: <em>We do not know what happens in <code>max</code>. It might
+have overwritten our <code>t2</code> register!</em> This is a general
+problem. When writing code, we can not feasibly read through every
+function we call, just to find out if it might overwrite any register we
+want to preserve.</p>
+<p>We <em>could</em> save <em>all</em> registers, before calling any
+function, but that would almost always be a waste. In the
+<code>min</code> function that we wrote earlier, we only overwrite
+<code>a0</code>, so saving every single register every time we need to
+call <code>min</code> would be very silly.</p>
+<p>An alternative would be to let the <em>callee</em> (the function
+being called) save the registers. When <em>writing</em> the
+<code>min</code> function, we know that we only need to overwrite the
+<code>a0</code> register, so we would only save that. But then, another
+function that uses many registers would have to save all of them,
+regardless of whether they are important to the calling function or
+not.</p>
+<p>The solution to this problem is a compromise. The ABI conventions say
+that the <em>calling</em> function (the <em>caller</em>) is responsible
+for saving <code>t0-t6</code>, <code>a0-a7</code>, and <code>ra</code>,
+if it needs them to be preserved. The <em>callee</em> is responsible for
+saving any other register, if it might modify them.</p>
+<p>Put differently, whenever calling a function, you have to think about
+which of <code>t0-t6</code> and <code>a0-a7</code> you might need later,
+and save them. Whenever you are writing a function, and use any of the
+<em>other</em> registers, you have to make sure that you save them
+first, and restore them before returning.</p>
+<p>&#x1F4A1; <strong>Note:</strong> <em>These rules might seem arbitrary, but
+have proven to work well for minimizing redundant register saving in
+most cases. When writing performance-critical code, an optimizer can
+often find remaining redundant register saving and remove it.</em></p>
+<p>So, for our example to be guaranteed to work, we need to save
+<code>t2</code> to the stack before calling <code>max</code> the first
+time. Note that <code>max</code> might also overwrite <code>a0</code>,
+<code>a1</code>, <code>a2</code>, <code>t1</code>, and <code>ra</code>
+but since we do not need those values any more we do not need to save
+them:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">mv</span> <span class="kw">a0</span><span class="op">,</span> <span class="kw">t0</span>        <span class="co"># Use t0 as the first parameter</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">mv</span> <span class="kw">a1</span><span class="op">,</span> <span class="kw">t1</span>        <span class="co"># and t1 as the second parameter</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="kw">addi</span> <span class="kw">sp</span><span class="op">,</span> <span class="op">-</span><span class="dv">4</span>      <span class="co"># Decrease the stack pointer</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="kw">sw</span>   <span class="kw">t2</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">sp</span><span class="op">)</span>   <span class="co"># Save t2 for later</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="cf">call</span> <span class="kw">max</span>         <span class="co"># After this line, the maximum of t0 and t1 is in a0</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>                 <span class="co"># Since a0 is already max(t0, t1) we do not have to do anything for the first parameter</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="kw">lw</span>   <span class="kw">t2</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">sp</span><span class="op">)</span>    <span class="co"># Restore t2 from the stack</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="kw">addi</span> <span class="kw">sp</span><span class="op">,</span> <span class="dv">4</span>        <span class="co"># And increase the stack pointer</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="kw">mv</span> <span class="kw">a1</span><span class="op">,</span> <span class="kw">t2</span>        <span class="co"># Use t2 as the second parameter</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="cf">call</span> <span class="kw">max</span>         <span class="co"># After this line a0 contains max(max(t0, t1), t2)...</span></span></code></pre></div>
+<h3 id="nested-function-calls">Nested Function Calls</h3>
+<p>In real programs, any code you write will usually be part of a
+function which means that you are always writing code for a
+<em>callee</em>, but sometimes that function calls another function,
+making it the <em>caller</em>.</p>
+<p>To keep things manageable, an assembly programmer will usually follow
+a simple procedure when writing a function <code>f</code>:</p>
+<ul>
+<li>Do most calculations in the <code>t</code> (temporary) registers.
+You can use them freely without pushing to the stack, as the function
+that called <code>f</code> will have saved them if it needed to.</li>
+<li>If you need any value to be preserved over a function call, use an
+<code>s</code> register instead. The function you call will make sure
+that it is not overwritten.</li>
+<li>If you use an <code>s</code> register, you have to make sure to save
+it the first thing you do in the function, and restore it before you
+return.</li>
+</ul>
+<p>Let us revisit the problem above. We now want to write a function
+<code>int max_of_three(int a, int b, int c)</code>, using the
+<code>int max(a, b)</code> function:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># int max_of_three(int a, int b, int c)</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># =================================================================================</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co"># a0: a</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># a1: b</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co"># a2: c</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="fu">max_of_three:</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># ===== PROLOGUE ================================================================</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Save any callee saved register that might be overwritten by this function</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">addi</span> <span class="kw">sp</span><span class="op">,</span> <span class="kw">sp</span><span class="op">,</span> <span class="op">-</span><span class="dv">8</span>                        <span class="co"># Allocate room for two words on stack</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">sw</span> <span class="kw">s0</span><span class="op">,</span> <span class="dv">4</span><span class="op">(</span><span class="kw">sp</span><span class="op">)</span>                           <span class="co"># Save s0 in one slot</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">sw</span> <span class="kw">ra</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">sp</span><span class="op">)</span>                           <span class="co"># Save ra, since it will be overwritten by</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>                                         <span class="co"># `call`</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># ===============================================================================</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  <span class="kw">mv</span> <span class="kw">s0</span><span class="op">,</span> <span class="kw">a2</span>           <span class="co"># s0 &lt;- c</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">call</span> <span class="kw">max</span>            <span class="co"># a0 &lt;- max(a, b)</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  <span class="kw">mv</span> <span class="kw">a1</span><span class="op">,</span> <span class="kw">s0</span>           <span class="co"># a1 &lt;- c</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  <span class="cf">call</span> <span class="kw">max</span>            <span class="co"># a0 &lt;- max(max(a,b),c)</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>  <span class="co"># ===== EPILOGUE ================================================================</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Restore all values we pushed in the beginning and return</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>  <span class="kw">lw</span> <span class="kw">s0</span><span class="op">,</span> <span class="dv">4</span><span class="op">(</span><span class="kw">sp</span><span class="op">)</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>  <span class="kw">lw</span> <span class="kw">ra</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">sp</span><span class="op">)</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>  <span class="kw">addi</span> <span class="kw">sp</span><span class="op">,</span> <span class="kw">sp</span><span class="op">,</span> <span class="dv">8</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>  <span class="co">#================================================================================</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>  <span class="cf">ret</span></span></code></pre></div>
+<p>In this version, we save the temporary register to one of the saved
+registers, instead of putting it directly on the stack. Since we use an
+<code>s</code> register, we have to save <em>that</em> on the stack,
+however, so we do not reduce the stack traffic. Both ways are allowed,
+but writing your code in this way makes it much easier to keep track of
+what is on the stack (it only changes as you enter a function), and
+makes the code easier to read.</p>
+<!---
+```
+factorial(1) = 1
+factorial(n) = n * factorial(n-1)
+```
+
+This can be implemented in assembly as:
+
+```
+# factorial(n)
+# ===========================================================
+# a0: The parameter n
+factorial:
+  addi sp, sp, -8             # Make room on the stack for everything we (might) want to push
+  sw   ra, 4(sp)              # Since this function will overwrite ra (if we get to the
+                              # call instruction below), we have to push ra onto the stack
+                              # (ra is "Callee saved")
+
+  li t0, 1                    # We can freely use t0 here, since the caller
+                              # will have saved it, if needed
+  beq a0, t0, factorial_one   # If n == 1, return 1
+
+  mv t0, a0                   # Otherwise, store n in a temporary register
+  addi a0, a0, -1             # a0 = n-1
+
+  sw t0, 0(sp)                # Since we are about to call another function, and we need
+                              # to remember t0 for later, we store it in the slot we reserved
+                              # earlier (t0 is "Caller saved").
+
+  call factorial              # a0 <- factorial(n-1)
+
+  lw t0, 0(sp)                # Restore t0 from stack
+
+  mul a0, a0, t0              # a0 <- factorial(n-1) * n
+
+factorial_end:
+  lw   ra, 4(sp)              # Restore ra for the calling function
+  addi sp, sp, 8
+  ret
+```
+--->
+<h2 id="arrays">Arrays</h2>
+<p>We have seen how we can have variables in memory and load them into
+registers already, but we often need a <em>list</em> of variables. A
+list of variables of the same type are often called <em>arrays</em>, as
+you have probably seen in previous programming courses. In C (and
+similarly in C++ and Java), some example code that uses an array could
+be:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="dt">char</span> numbers<span class="op">[</span><span class="dv">10</span><span class="op">];</span>          <span class="co">// Allocate memory space for 10 chars (bytes)</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>numbers<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">=</span> <span class="dv">10</span><span class="op">;</span>           <span class="co">// Write a value into the first element of the array</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>numbers<span class="op">[</span><span class="dv">1</span><span class="op">]</span> <span class="op">=</span> <span class="dv">20</span><span class="op">;</span>           <span class="co">//          ...           second         ....</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="op">...</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>numbers<span class="op">[</span><span class="dv">9</span><span class="op">]</span> <span class="op">=</span> <span class="dv">100</span><span class="op">;</span>          <span class="co">//          ...           last           ...</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="dt">char</span> v <span class="op">=</span> numbers<span class="op">[</span><span class="dv">9</span><span class="op">];</span>       <span class="co">// Read the last element of the array into another variable</span></span></code></pre></div>
+<p>We will return to arrays in C later in the course, but for now we
+shall see how arrays are implemented in assembly.</p>
+<h3 id="globally-allocated-arrays">Globally allocated arrays</h3>
+<p>If we want to allocate an array of chars <em>globally</em> (i.e.,
+that exists throughout the programs lifetime and is available to any
+function), this is very similar to allocating a single-byte
+variable:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">numbers:</span> <span class="kw">.byte</span> <span class="dv">10</span><span class="op">,</span> <span class="dv">20</span><span class="op">,</span> <span class="dv">30</span><span class="op">,</span> <span class="dv">40</span><span class="op">,</span> <span class="dv">50</span></span></code></pre></div>
+<p>This line will allocate space for 5 bytes (starting at the current
+address, which depends on preceding instructions in the code) and
+initialize them to the given values.</p>
+<p>If we want to allocate an empty (i.e., uninitialized) array, we can
+write:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">numbers:</span> <span class="kw">.space</span> <span class="dv">5</span>          <span class="co"># Allocate 5 bytes for the array</span></span></code></pre></div>
+<p>Loading or storing an element from/to the array is done in the same
+way that we accessed a single variable in the previous lecture. Let&#x2019;s
+say we want to copy the value of <code>numbers[4]</code> into
+<code>numbers[0]</code></p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">la</span> <span class="kw">t0</span><span class="op">,</span> numbers             <span class="co"># Load the address to where the array starts into t0</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="kw">lb</span> <span class="kw">t1</span><span class="op">,</span> <span class="dv">4</span><span class="op">(</span><span class="kw">t0</span><span class="op">)</span>               <span class="co"># Load numbers[4] (the fifth element) into t1</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="kw">sb</span> <span class="kw">t1</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">t0</span><span class="op">)</span>               <span class="co"># And store it into numbers[0]</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="fu">numbers:</span> <span class="kw">.space</span> <span class="dv">5</span>          <span class="co"># Allocate 5 bytes for the array</span></span></code></pre></div>
+<p>In other words, we put the <em>starting address</em> of the array
+into a register, and then access individual elements with an
+<em>offset</em> from that address. When our array consists of
+<code>char</code> (bytes) the offset is the same as the element. Let&#x2019;s
+do the same thing for an array of <code>short</code> (halfwords, 2
+bytes):</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">la</span> <span class="kw">t0</span><span class="op">,</span> numbers             <span class="co"># Load the address to where the array starts into t0</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="kw">lh</span> <span class="kw">t1</span><span class="op">,</span> <span class="dv">8</span><span class="op">(</span><span class="kw">t0</span><span class="op">)</span>               <span class="co"># Load numbers[4] (the fifth element) into t1</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="kw">sh</span> <span class="kw">t1</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">t0</span><span class="op">)</span>               <span class="co"># And store it into numbers[0]</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="kw">.align</span> <span class="dv">1</span>                    <span class="co"># Make sure address of numbers is divisible by 2 (since halfwords)</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="fu">numbers:</span> <span class="kw">.space</span> <span class="dv">10</span>          <span class="co"># Allocate 10 bytes for the array</span></span></code></pre></div>
+<!-- An image would be good here -->
+<p>Firstly, we have to allocate twice as much space (10 bytes for 5
+elements, since each <code>short</code> is two bytes). Secondly, we now
+use the offset 8 to access element number 4, again, this is because each
+element takes up 2 bytes, so the fifth element lies 2*4 bytes from the
+arrays starting address <a href="#fn3" class="footnote-ref" id="fnref3"
+role="doc-noteref"><sup>3</sup></a>.</p>
+<p>Also, remember that we now need to use <code>lh</code> (Load
+Halfword) instead of <code>lb</code> (Load Byte), and that we need to
+use <code>.align</code> to make sure that the array starts at an address
+that is divisible by 2 (see previous Lecture).</p>
+<h3 id="iterating-over-an-array">Iterating over an array</h3>
+<p>We have seen how to access individual elements in an array, but how
+do we loop over all (or some) elements? Usually, we will put the
+starting address to the array in one register and then <code>add</code>
+the offset to that. In the following example, we have a list of 10
+numbers and we want to calculate their sum:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> sum <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span><span class="op">(</span><span class="dt">int</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span> i<span class="op">&lt;</span><span class="dv">10</span><span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  sum <span class="op">=</span> sum <span class="op">+</span> numbers<span class="op">[</span>i<span class="op">];</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>In assembly, we could write this as:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a> <span class="fu">1:</span> <span class="kw">li</span> <span class="kw">t0</span><span class="op">,</span> <span class="dv">0</span>                                            <span class="co"># We use t0 for i</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">2:</span> <span class="kw">li</span> <span class="kw">t1</span><span class="op">,</span> <span class="dv">0</span>                                            <span class="co"># We use t1 for the sum</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a> <span class="fu">3:</span> <span class="kw">la</span> <span class="kw">t2</span><span class="op">,</span> numbers                                      <span class="co"># t2 &lt;- address of first element in array</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a> <span class="fu">4:</span> <span class="fu">loop:</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a> <span class="fu">5:</span>   <span class="kw">li</span> <span class="kw">t3</span><span class="op">,</span> <span class="dv">4</span>                                          <span class="co"># t3 &lt;- 4, the number of bytes per element</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a> <span class="fu">6:</span>   <span class="kw">mul</span> <span class="kw">t3</span><span class="op">,</span> <span class="kw">t0</span><span class="op">,</span> <span class="kw">t3</span>                                    <span class="co"># t3 &lt;- i * 4</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a> <span class="fu">7:</span>   <span class="kw">add</span> <span class="kw">t3</span><span class="op">,</span> <span class="kw">t2</span><span class="op">,</span> <span class="kw">t3</span>                                    <span class="co"># t3 &lt;- address of array + i * (4 bytes)</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a> <span class="fu">8:</span>   <span class="kw">lw</span> <span class="kw">t3</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">t3</span><span class="op">)</span>                                      <span class="co"># t3 &lt;- numbers[i]</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a> <span class="fu">9:</span>   <span class="kw">add</span> <span class="kw">t1</span><span class="op">,</span> <span class="kw">t1</span><span class="op">,</span> <span class="kw">t3</span>                                    <span class="co"># add element to sum</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="fu">10:</span>   <span class="kw">addi</span> <span class="kw">t0</span><span class="op">,</span> <span class="kw">t0</span><span class="op">,</span> <span class="dv">1</span>                                    <span class="co"># i++</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="fu">11:</span>   <span class="kw">li</span> <span class="kw">t3</span><span class="op">,</span> <span class="dv">10</span>                                         <span class="co"># t3 &lt;- 10</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a><span class="fu">12:</span>   <span class="cf">blt</span> <span class="kw">t0</span><span class="op">,</span> <span class="kw">t3</span><span class="op">,</span> <span class="kw">loop</span>                                  <span class="co"># iterate while i &lt; 10</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="fu">13:</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="fu">14:</span> <span class="fu">done:</span> <span class="co"># t1 now contains the sum</span></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a><span class="fu">15:</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="fu">16:</span> <span class="kw">.align</span> <span class="dv">2</span>                                            <span class="co"># Make sure our numbers are aligned to 4 bytes</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a><span class="fu">17:</span> <span class="fu">numbers:</span> <span class="kw">.word</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">6</span><span class="op">,</span> <span class="dv">8</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">5</span>         <span class="co"># Allocate 10*4 bytes for the array</span></span></code></pre></div>
+<p>Note that we have to manually multiply the offset by the size of the
+element type, to get the correct address. In the example above, we did
+this with the <code>mul</code> instruction (on lines 5-6), but we can do
+it slightly more efficiently with:</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a> <span class="fu">5:</span> <span class="kw">slli</span> <span class="kw">t3</span><span class="op">,</span> <span class="kw">t0</span><span class="op">,</span> <span class="dv">2</span>            <span class="co"># Shifting left by two steps is the same as multiplying by 4</span></span></code></pre></div>
+<h3 id="locally-allocated-arrays">Locally allocated arrays</h3>
+<p>Sometimes we need an array <em>locally</em> in a function. Perhaps
+the function should read 10 words from disk, calculate the sum, and
+return the sum. Since the memory for the array is only needed until the
+function returns, that array will be put on the <em>stack</em> instead.
+Consider the example in C:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> array<span class="op">[</span><span class="dv">10</span><span class="op">];</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">&lt;</span>read data into array<span class="op">&gt;</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">&lt;</span>calculate sum of array<span class="op">&gt;</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> sum<span class="op">;</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>In assembly, this could look like:</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">function:</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">addi</span> <span class="kw">sp</span><span class="op">,</span> <span class="kw">sp</span><span class="op">,</span> <span class="op">-</span><span class="dv">40</span>            <span class="co"># Make room on the stack for 10 integers</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">mv</span> <span class="kw">t0</span><span class="op">,</span> <span class="kw">sp</span>                   <span class="co"># t0 now holds the address to the start of the array</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">&lt;</span>read data <span class="kw">into</span> array<span class="op">&gt;</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">&lt;</span>calculate sum of array<span class="op">&gt;</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">addi</span> <span class="kw">sp</span><span class="op">,</span> <span class="kw">sp</span><span class="op">,</span> <span class="dv">40</span>             <span class="co"># restore the stack</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">ret</span></span></code></pre></div>
+<p>We will se later in the course how the stack is used for <em>all</em>
+local variables (unless they only exist in registers) when compiling C
+code.</p>
+<h3 id="arrays-as-function-parameters">Arrays as function
+parameters</h3>
+<p>It is very common that we want to send an array as a parameter to a
+function. We might, for instance, want to write a function that
+calculates the sum of an arbitrary array of integers. Since an array
+might consist of hundreds or thousands of elements, it does not make
+sense to try to pack them into the <code>a</code> registers. It usually
+also does not make sense to copy the array into the stack (we would have
+to copy thousands of bytes just to call a function). Instead, the usual
+approach to &#x201C;sending&#x201D; an array to a function is to simply send the
+starting address and the size of the array as parameters to the
+function:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">main:</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">la</span> <span class="kw">a0</span><span class="op">,</span> numbers        <span class="co"># Load address of array as first parameter</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">li</span> <span class="kw">a1</span><span class="op">,</span> <span class="dv">10</span>             <span class="co"># Size of array as second parameter</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">call</span> sum</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># a0 now contains sum of numbers</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="co"># int sum(int array[], int size)</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="co"># a0: starting address of array</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="co"># a1: size (number of elements) of array</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a><span class="fu">sum:</span></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">li</span> <span class="kw">t0</span><span class="op">,</span> <span class="dv">0</span>              <span class="co"># Calculating sum in t0</span></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a><span class="fu">sum_loop:</span></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>  <span class="kw">lw</span> <span class="kw">t1</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">a0</span><span class="op">)</span>          <span class="co"># Read element</span></span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>  <span class="kw">add</span> <span class="kw">t0</span><span class="op">,</span> <span class="kw">t0</span><span class="op">,</span> <span class="kw">t1</span>        <span class="co"># Add to sum</span></span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>  <span class="kw">addi</span> <span class="kw">a0</span><span class="op">,</span> <span class="kw">a0</span><span class="op">,</span> <span class="dv">4</span>        <span class="co"># Move a0 so it points at next element</span></span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>  <span class="kw">addi</span> <span class="kw">a1</span><span class="op">,</span> <span class="kw">a1</span><span class="op">,</span> <span class="op">-</span><span class="dv">1</span>       <span class="co"># Reduce size of (remaining) array</span></span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">bnez</span> <span class="kw">a1</span><span class="op">,</span> sum_loop     <span class="co"># If we have elements left, loop</span></span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>  <span class="kw">mv</span> <span class="kw">a0</span><span class="op">,</span> <span class="kw">t0</span>             <span class="co"># Return the sum</span></span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>  <span class="cf">ret</span></span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a><span class="kw">.align</span> <span class="dv">2</span>                                            <span class="co"># Make sure our numbers are aligned to 4 bytes</span></span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a><span class="fu">numbers:</span> <span class="kw">.word</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">6</span><span class="op">,</span> <span class="dv">8</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">5</span>         <span class="co"># Allocate 10*4 bytes for the array</span></span></code></pre></div>
+<h3 id="further-reading">Further reading</h3>
+<p>This lecture almost concludes our assembly adventures, as we will
+start looking into C programming in the next lecture. If you want more,
+or are looking for in-depth details, we can recommend the free online
+book: <a href="https://riscv-programming.org/book/riscv-book.html">An
+Introduction to Assembly Programming with RISC-V</a>.</p>
+<p><strong>Links:</strong> <a
+href="https://projectf.io/posts/riscv-cheat-sheet/">RISC-V Cheat
+Sheet</a> , <a
+href="https://d3s.mff.cuni.cz/files/teaching/nswi200/202324/doc/riscv-abi.pdf">RISC-V
+ABI</a></p>
+<p><strong>Text and excercises in the Workbook (Arbetsboken)</strong>
+Chapter 1, Pages 17-24 Chapter 1, Pages 34-56</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>If you are very awake, you might have noticed that a
+20-bit offset should only allow us to jump +/- 0.5MB. However, since all
+instructions are guaranteed to be 2-byte aligned, the offset in the
+machine instruction is multiplied by 2 before being added to
+<code>pc</code>.<a href="#fnref1" class="footnote-back"
+role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+<li id="fn2"><p>You don&#x2019;t know how to do that just yet, but you will in
+a few lessons time.<a href="#fnref2" class="footnote-back"
+role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+<li id="fn3"><p>If you are confused about <code>numbers[4]</code> being
+the fifth element, this is a good time to get used to it :). Since C
+uses <em>zero-based indexing</em>, <code>numbers[0]</code> is the first
+element, <code>numbers[1]</code> is the second, and so on.<a
+href="#fnref3" class="footnote-back" role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+</ol>
+</section>
+</body>
+</html>

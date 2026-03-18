@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>registers_csr</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+<table>
+<colgroup>
+<col style="width: 47%" />
+<col style="width: 52%" />
+</colgroup>
+<thead>
+<tr>
+<th>Register</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mstatus</code></td>
+<td>Machine status (global interrupt enables, privilege bits)</td>
+</tr>
+<tr>
+<td><code>mcause</code></td>
+<td>Cause of last exception (MSB is <code>1</code> if interrupt,
+<code>0</code> otherwise)</td>
+</tr>
+<tr>
+<td><code>mepc</code></td>
+<td>Exception program counter (return address)</td>
+</tr>
+<tr>
+<td><code>mtval</code></td>
+<td>Trap value (faulting address or instruction)</td>
+</tr>
+<tr>
+<td><code>mtvec</code></td>
+<td>Machine exception vector base address</td>
+</tr>
+<tr>
+<td><code>mie</code></td>
+<td>Machine interrupt enable</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

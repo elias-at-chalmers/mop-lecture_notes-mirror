@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>registers_gp</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+<table>
+<thead>
+<tr>
+<th>Register</th>
+<th>ABI Name</th>
+<th>Recommended Usage (ABI)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>x0</code></td>
+<td><code>zero</code></td>
+<td>Hard-wired to zero</td>
+</tr>
+<tr>
+<td><code>x1</code></td>
+<td><code>ra</code></td>
+<td>Return Address</td>
+</tr>
+<tr>
+<td><code>x2</code></td>
+<td><code>sp</code></td>
+<td>Stack pointer</td>
+</tr>
+<tr>
+<td><code>x3</code></td>
+<td><code>gp</code></td>
+<td>Global pointer</td>
+</tr>
+<tr>
+<td><code>x4</code></td>
+<td><code>tp</code></td>
+<td>Thread pointer</td>
+</tr>
+<tr>
+<td><code>x5</code>-<code>x7</code></td>
+<td><code>t0-t2</code></td>
+<td>Temporary.</td>
+</tr>
+<tr>
+<td><code>x8</code></td>
+<td><code>s0 / fp</code></td>
+<td>Frame pointer</td>
+</tr>
+<tr>
+<td><code>x9</code></td>
+<td><code>s1</code></td>
+<td>Saved register</td>
+</tr>
+<tr>
+<td><code>x10</code>-<code>x17</code></td>
+<td><code>a0-a7</code></td>
+<td>Function argument / Return value</td>
+</tr>
+<tr>
+<td><code>x18</code>-<code>x27</code></td>
+<td><code>s2-s11</code></td>
+<td>Saved Register</td>
+</tr>
+<tr>
+<td><code>x28</code>-<code>x31</code></td>
+<td><code>t3-t6</code></td>
+<td>Temporary</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

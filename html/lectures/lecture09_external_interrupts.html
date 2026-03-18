@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>lecture09_external_interrupts</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+<h1 id="external-interrupts">External Interrupts</h1>
+<p>So far we have seen how to interrupt the program when a single,
+<em>internal</em>, interrupt occurs (SysTick counted to zero). In this
+lecture we will dive deeper into interrupt handling, and show how we can
+handle several simultaneous interrupts from modules outside the Qingke
+processor and finally from interrupts originating from the GPIO
+pins.</p>
+<h2 id="configuring-multiple-interrupts">Configuring multiple
+interrupts</h2>
+<p>Recall from the previous lecture that every module that can cause an
+interrupt on the chip will have a hard-coded connection to the
+<em>Programmable Fast Interrupt Controller</em> (PFIC) module. When, for
+instance, the &#x201C;Ethernet Wakeup&#x201D; signal comes in from the ethernet cable,
+the ethernet module will signal the PFIC, and the PFIC will (if it has
+been configured to do so) interrupt the running code and make the
+processor run an interrupt handler.</p>
+<p>Every possible interrupt that can occur has an assigned <em>interrupt
+vector number</em> which you can find in the <a
+href="../quickguide/interrupt_vector_table.html">QuickGuide</a>.</p>
+<center>
+<img src= "../images/interrupts.png" width=100%>
+</center>
+<p>We will start with an example where we want three LEDs to blink at
+different frequencies, <code>f1</code>, <code>f2</code>, and
+<code>f3</code>.</p>
+<p>Couldn&#x2019;t we just use SysTick for this? If the frequencies are
+<code>f1 = 1Hz</code>, <code>f2 = 2 * f1</code>, and
+<code>f3 = 4 * f1</code>, we could create a SysTick interrupt that
+triggered at frequency <code>f3</code> and do:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">uint32_t</span> ctr <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> </span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> Interrupt_Handler<span class="op">()</span> <span class="co">// Runs at frequency f3</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    toggle_LED3<span class="op">();</span>   <span class="co">// Always toggle LED3 to get frequency f3</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span><span class="op">(</span>ctr <span class="op">%</span> <span class="dv">2</span> <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> toggle_LED2<span class="op">();</span> <span class="co">// Toggle every 2:nd time to get frequency f2</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span><span class="op">(</span>ctr <span class="op">%</span> <span class="dv">4</span> <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> toggle_LED1<span class="op">();</span> <span class="co">// Toggle every 4:th time to get frequency f1</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>This would work, but it is a special case. We want our leds to blink
+at <em>any</em> three frequencies. If the frequencies we wanted were
+<code>f1 = 1Hz</code>, <code>f2 = 3 * f1</code>, and
+<code>f3 = 5 * f1</code>, we would be in trouble because our interrupt
+would have to run at a frequency that is the <em>lowest common
+denominator</em>: <code>LCD(1,3,5) = 15Hz</code>. Therefore we would
+have to interrupt our processor very often, only to increase a counter.
+There are tricks for this, but it is much easier and more efficient to
+use one timer per LED.</p>
+<p>We can set up SysTick, TIMER6, and TIMER7 to generate interrupts at
+1Hz, 3Hz, and 5Hz, respectively, like<a href="#fn1" class="footnote-ref"
+id="fnref1" role="doc-noteref"><sup>1</sup></a> this:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Set up systick for 1 second delay (1Hz)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>systick <span class="op">=</span> <span class="op">(</span>SYSTICK_t<span class="op">){</span><span class="dv">0</span><span class="op">};</span> <span class="co">// Clear everything to 0</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    systick<span class="op">-&gt;</span>CMP <span class="op">=</span> <span class="dv">144000000</span><span class="op">;</span> <span class="co">// Set up to count to one second (assuming 144 MHz clock)</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    systick<span class="op">-&gt;</span>ctrl<span class="op">.</span>clksrc <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> <span class="co">// Use HCLK (update at full speed, not divided by 8)</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    systick<span class="op">-&gt;</span>ctrl<span class="op">.</span>reload <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> <span class="co">// Enable reload</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    systick<span class="op">-&gt;</span>ctrl<span class="op">.</span>intenable <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> <span class="co">// Enable interrupt</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    systick<span class="op">-&gt;</span>ctrl<span class="op">.</span>enable <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> <span class="co">// Start counting</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Set up timer 6 at 3Hz</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>timer6 <span class="op">=</span> <span class="op">(</span>TIMER_t<span class="op">){</span><span class="dv">0</span><span class="op">};</span>   <span class="co">// Clear everything to 0</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    timer6<span class="op">-&gt;</span>PSC <span class="op">=</span> <span class="dv">9600</span> <span class="op">-</span> <span class="dv">1</span><span class="op">;</span>   <span class="co">// Timer increases every 9600th clock -&gt; 144Mhz / 9600 = 15kHz</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    timer6<span class="op">-&gt;</span>ATRLR <span class="op">=</span> <span class="dv">5000</span> <span class="op">-</span> <span class="dv">1</span><span class="op">;</span> <span class="co">// Generate interrupt every 5000 ticks -&gt; 15kHz / 5000 = 3Hz</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    timer6<span class="op">-&gt;</span>ctrl1<span class="op">.</span>enable <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> <span class="co">// Enable timer</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    timer6<span class="op">-&gt;</span>DMAINTENR <span class="op">=</span> <span class="dv">1</span><span class="op">;</span>    <span class="co">// Enable update interrupt</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Set up timer 7 at 5Hz</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>timer7 <span class="op">=</span> <span class="op">(</span>TIMER_t<span class="op">){</span><span class="dv">0</span><span class="op">};</span>   <span class="co">// Clear everything to 0</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    timer7<span class="op">-&gt;</span>PSC <span class="op">=</span> <span class="dv">9600</span> <span class="op">-</span> <span class="dv">1</span><span class="op">;</span>   <span class="co">// Timer increases every 9600th clock -&gt; 144Mhz / 9600 = 15kHz</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    timer7<span class="op">-&gt;</span>ATRLR <span class="op">=</span> <span class="dv">3000</span> <span class="op">-</span> <span class="dv">1</span><span class="op">;</span> <span class="co">// Generate interrupt every 3000 ticks -&gt; 15kHz / 3000 = 5Hz</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    timer7<span class="op">-&gt;</span>ctrl1<span class="op">.</span>enable <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> <span class="co">// Enable timer</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    timer7<span class="op">-&gt;</span>DMAINTENR <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> <span class="co">// Enable update interrupt</span></span></code></pre></div>
+<div class="boxed">
+<p><strong>Prescaler</strong> - The two basic timers (TIMER6 and 7) only
+have a 16-bit counter, allowing us to count 65536 clocks (~0.5ms) at
+full resolution. To be able to count longer times, it also has a
+<em>prescaler</em> register (<code>PSC</code>, also 16 bits). The value
+in this register says how many clocks should pass between incrementing
+the count value. If we set the prescaler value to 100, the count value
+would increase every 100th clock cycle, so the timer can run for
+65536*100 clocks without overflow.</p>
+<p><strong>Note 1:</strong> - <em>I lied a little in that previous
+paragraph. Since the value <code>0</code> would have no real meaning in
+the <code>PSC</code> register, the number of clocks it will wait between
+increasing the counter is actually <code>PSC+1</code>. The same goes for
+the <code>ATRLR</code> (compare) value.</em></p>
+<p><strong>Note 2:</strong> - <em>The prescaler does not work properly
+in the simulator at the moment, so you will have to use the real
+hardware if you want to play around with this.</em></p>
+</div>
+<p>Next, we have to tell the PFIC to allow interrupts for all three
+timers. So, we have to use the interrupt vector number (which we find in
+the QuickGuide) to calculate which of the PFIC_IENRx registers it
+resides in, and then set the correct bit in that register. We can do
+this quite elegantly as:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#define PFIC_IENR     </span><span class="op">((</span><span class="dt">volatile</span><span class="pp"> </span><span class="dt">uint32_t</span><span class="pp"> </span><span class="op">*)(</span><span class="bn">0xE000E000</span><span class="pp"> </span><span class="op">+</span><span class="pp"> </span><span class="bn">0x100</span><span class="op">))</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="op">...</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    PFIC_IENR<span class="op">[</span>SYSTICK_IRQ_NUM <span class="op">/</span> <span class="dv">32</span><span class="op">]</span> <span class="op">|=</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="op">(</span>SYSTICK_IRQ_NUM <span class="op">%</span> <span class="dv">32</span><span class="op">));</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    PFIC_IENR<span class="op">[</span>TIMER6_IRQ_NUM <span class="op">/</span> <span class="dv">32</span><span class="op">]</span> <span class="op">|=</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="op">(</span>TIMER6_IRQ_NUM <span class="op">%</span> <span class="dv">32</span><span class="op">));</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    PFIC_IENR<span class="op">[</span>TIMER7_IRQ_NUM <span class="op">/</span> <span class="dv">32</span><span class="op">]</span> <span class="op">|=</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="op">(</span>TIMER7_IRQ_NUM <span class="op">%</span> <span class="dv">32</span><span class="op">));</span></span></code></pre></div>
+<p>Finally, we need to write an interrupt handler, and point
+<code>mtvec</code> to that interrupt handler (just as in the previous
+lecture):</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>__attribute__<span class="op">((</span>interrupt<span class="op">(</span><span class="st">&quot;machine&quot;</span><span class="op">)))</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> Interrupt_Handler<span class="op">(</span><span class="dt">void</span><span class="op">)</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Set mtvec to address of Interrupt_Handler</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    __asm <span class="dt">volatile</span> <span class="op">(</span><span class="st">&quot;csrw mtvec, %0&quot;</span> <span class="op">::</span> <span class="st">&quot;r&quot;</span><span class="op">(</span>Interrupt_Handler<span class="op">));</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span></span></code></pre></div>
+<p>But now what? With this code, all three timers will generate
+interrupts, and our interrupt handler will run whenever one of them
+fires, but how do we know <em>which</em> timer triggered the
+interrupt?</p>
+<p>When the processor interrupts the code to run an interrupt handler,
+it places the <em>source</em> of the interrupt (the interrupt vector
+number from the quickguide) in the CSR register <code>mcause</code>:</p>
+<center>
+<img src= "../images/mcause.png" width=100%>
+</center>
+<p>To handle the correct timer, we have to first make sure that it
+really was an interrupt that occurred (and not another exception, like
+an unaligned memory access), and then do the proper thing depending on
+which interrupt it was:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>__attribute__<span class="op">((</span>interrupt<span class="op">(</span><span class="st">&quot;machine&quot;</span><span class="op">)))</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> Interrupt_Handler<span class="op">(</span><span class="dt">void</span><span class="op">)</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">uint32_t</span> cause<span class="op">;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// The `mcause` register is not directly available to C, </span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// so we read it with inline assembly. </span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    __asm <span class="dt">volatile</span> <span class="op">(</span><span class="st">&quot;csrr %0, mcause&quot;</span> <span class="op">:</span> <span class="st">&quot;=r&quot;</span><span class="op">(</span>cause<span class="op">)</span> <span class="op">::</span> <span class="st">&quot;memory&quot;</span><span class="op">);</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span><span class="op">(</span>cause <span class="op">&amp;</span> <span class="bn">0x80000000</span><span class="op">){</span> <span class="co">// Check bit 31</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">// This is an interrupt</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        cause <span class="op">=</span> cause <span class="op">&amp;</span> <span class="bn">0x7FFFFFFF</span><span class="op">;</span> <span class="co">// Mask out the MSB</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span><span class="op">(</span>cause <span class="op">==</span> SYSTICK_IRQ_NUM<span class="op">){</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>            <span class="op">*</span>GPIOD_OUTDR <span class="op">^=</span> <span class="bn">0x1</span><span class="op">;</span>    <span class="co">// Toggle LED1</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>            systick<span class="op">-&gt;</span>SR <span class="op">=</span> <span class="dv">0</span><span class="op">;</span>        <span class="co">// Acknowledge the interrupt</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span> <span class="cf">if</span><span class="op">(</span>cause <span class="op">==</span> TIMER6_IRQ_NUM<span class="op">){</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>            <span class="op">*</span>GPIOD_OUTDR <span class="op">^=</span> <span class="bn">0x2</span><span class="op">;</span>    <span class="co">// Toggle LED2</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>            timer6<span class="op">-&gt;</span>INTFR <span class="op">=</span> <span class="dv">0</span><span class="op">;</span>      <span class="co">// Acknowledge the interrupt</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span> <span class="cf">if</span><span class="op">(</span>cause <span class="op">==</span> TIMER7_IRQ_NUM<span class="op">){</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>            <span class="op">*</span>GPIOD_OUTDR <span class="op">^=</span> <span class="bn">0x4</span><span class="op">;</span>    <span class="co">// Toggle LED3</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>            timer7<span class="op">-&gt;</span>INTFR <span class="op">=</span> <span class="dv">0</span><span class="op">;</span>      <span class="co">// Acknowledge the interrupt</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Exception. Freak out. </span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span><span class="op">(</span><span class="dv">1</span><span class="op">);</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Note that you <strong>must</strong> acknowledge the basic timer
+interrupts (just as you must acknowledge a SysTick interrupt) when you
+have handled it. Otherwise the processor will just run the interrupt
+handler again, as soon as it is finished.</p>
+<p>Another important thing to note here is that even this quite simple
+interrupt handler becomes quite a large number of instructions (35
+machine code instructions when I compiled it). Meanwhile, all we really
+need to do when we get, e.g., a SysTick interrupt is to flip one bit,
+acknowledge, and return (5 instructions). This can quickly become a
+bottleneck when we have to handle many interrupts and the interrupts
+need to be handled quickly.</p>
+<p>It would be much better if the CPU could immediately call a specific
+interrupt handler, based on the cause of the interrupt, and that is what
+we will cover next.</p>
+<h2 id="vectored-interrupt-handling">Vectored Interrupt Handling</h2>
+<p>So far, we have simply put the address to the interrupt handler into
+the <code>mtvec</code> CSR and when an interrupt occurs the processor
+has jumped to that address. This is only one of three <em>modes</em>
+that the CH32V307 can operate in. We choose the mode using the two least
+significant bits of the <code>mtvec</code> register (see image below).
+Since all instructions (and therefore, all functions) on our system must
+begin at a four-byte aligned address, any valid interrupt-handler
+address will have zeroes as its two least significant bits, so, without
+thinking about it, we have always chosen <strong>mode 0</strong> so
+far.</p>
+<p>The possible configurations of the two least significant bits
+are:</p>
+<ul>
+<li><strong>00 - mode 0</strong> - When an interrupt occurs, the
+processor jumps directly to the address stored in <code>mtvec</code>,
+i.e: <code>pc = mtvec</code>.</li>
+<li><strong>01 - mode 1</strong> - When an interrupt occurs, the
+processor will fetch the address from <code>mtvec</code> but will then
+<em>add 4 x</em> <code>cause</code> to the address (where cause is the
+value of the <code>mcause</code> CSR, with the MSB masked out). In other
+words: <code>pc = mtvec + 4 * (mcause &amp; 0x7FFFFFFF)</code>. This is
+called a <em>vectored</em> mode, and we would normally have a jump
+instruction at that address (see image below).</li>
+<li><strong>10 - reserved</strong></li>
+<li><strong>11 - mode 3</strong> - In this mode, the processor will
+fetch the new address from a list of <em>function pointers</em> starting
+at <code>mtvec</code> with an offset taken from <code>mcause</code>.
+<code>pc = M[mtvec + 4 * (mcause &amp; 0x7FFFFFFF)]</code>. This last
+mode is discussed further in your workbook, but as it is not a standard
+RISC-V mode, we will not explore it further in this course. <a
+href="#fn2" class="footnote-ref" id="fnref2"
+role="doc-noteref"><sup>2</sup></a></li>
+</ul>
+<div class="boxed">
+<blockquote>
+<p><strong>Quiz</strong> (advanced, answer in footnote<a href="#fn3"
+class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>) -
+Why was mode 1 chosen instead of mode 3 as the standard way for RISC-V
+to handle interrupts? Can you think of any case where it can be
+faster?</p>
+</blockquote>
+</div>
+<p>We will use <em>mode 1</em> to make our processor jump directly to
+the interrupt handler for the specific timer, by placing a list
+containing jump instructions somewhere in memory.</p>
+<center>
+<img src= "../images/interrupt_modes.png" width=100%>
+</center>
+<p>The remaining question is how to create that list of jump
+instructions, at some place in memory? The easiest, and most common, way
+to achieve this is to write the list in an assembly file, and compile it
+with the program:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">.section</span> <span class="kw">.text</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Make the (C code) interrupt handlers addresses available to our assembly code</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">.extern</span> SysTick_Handler  </span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="kw">.extern</span> Timer6_Handler </span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="kw">.extern</span> Timer7_Handler </span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="kw">.align</span> <span class="dv">2</span>        <span class="co"># Create a label that is the start of our list in memory</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="fu">vector_table:</span>   <span class="co"># and make sure it is at a 4-byte aligned address</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="kw">.org</span> vector_table <span class="op">+</span> <span class="dv">12</span> <span class="op">*</span> <span class="dv">4</span>   <span class="co"># &quot;Move&quot; to the place in memory where we want out SysTick handler</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="cf">j</span> SysTick_Handler            <span class="co">#  And place a jump instruction there</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="kw">.org</span> vector_table <span class="op">+</span> <span class="dv">70</span> <span class="op">*</span> <span class="dv">4</span>   <span class="co"># &quot;Move&quot; to the place in memory where we want out Timer6 handler</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="cf">j</span> Timer6_Handler             <span class="co">#  And place a jump instruction there</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="kw">.org</span> vector_table <span class="op">+</span> <span class="dv">71</span> <span class="op">*</span> <span class="dv">4</span>   <span class="co">#  etc... </span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="cf">j</span> Timer7_Handler             <span class="co">#  etc... </span></span></code></pre></div>
+<p>We do not really care where in memory our vector table is, so we just
+let the compiler decide on a place (the label
+<code>vector_table</code>), as we do for any variable. Since SysTick is
+interrupt number 12, we want the jump instruction that jumps to the
+SysTick handler top be at address <code>vector_table + 4 * 12</code>
+(because that is where the CPU will jump, when a SysTick interrupt is
+triggered). We could achieve this by just leaving
+<code>.space 4*12</code> after the <code>vector_table</code> label and
+before the <code>j SysTick_Handler</code> instruction, but it is easier
+to use the <code>.org &lt;address&gt;</code> directive. You can think of
+this as telling the assembler to &#x201C;move the cursor&#x201D; to somewhere in
+memory, and that is where the next instruction will be placed.</p>
+<p>Finally, we need to put the address of our vector table into
+<code>mtvec</code> and set the least significant bit so the processor
+knows that it should use mode 1. Since we already have an assembly file,
+this is easiest to do with a little assembly function:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">init_interrupts:</span> </span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">la</span> <span class="kw">t0</span><span class="op">,</span> vector_table     <span class="co"># Address of vector table to t0</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ori</span> <span class="kw">t0</span><span class="op">,</span> <span class="kw">t0</span><span class="op">,</span> <span class="dv">1</span>           <span class="co"># Choose `mode 1` by setting the LSB</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">csrw</span> mtvec<span class="op">,</span> <span class="kw">t0</span>          <span class="co"># Write t0 into `mtvec`</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">ret</span></span></code></pre></div>
+<p>We can now rewrite our c program so that it has three separate
+interrupt handlers:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>__attribute__<span class="op">((</span>interrupt<span class="op">(</span><span class="st">&quot;machine&quot;</span><span class="op">)))</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> SysTick_Handler<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>__attribute__<span class="op">((</span>interrupt<span class="op">(</span><span class="st">&quot;machine&quot;</span><span class="op">)))</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> Timer6_Handler<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>__attribute__<span class="op">((</span>interrupt<span class="op">(</span><span class="st">&quot;machine&quot;</span><span class="op">)))</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> Timer7_Handler<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Configure timers (as before)</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Enable interrupts in PFIC (as before)</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Set up processor to use vector table: </span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    init_interrupts<span class="op">();</span> </span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">// LEDs will blink frome here on</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="nested-interrupts">Nested Interrupts</h3>
+<p>It would be reasonable at this point to ask ourselves: &#x201C;What happens
+if an interrupt occurs while an interrupt hadler is running?&#x201D;. The
+answer is that &#x201C;it depends&#x201D; on a lot of things. A RISC-V processor has
+the capability for <em>nested</em> exceptions, i.e., one exception
+interrupts another exception handler.</p>
+<p><strong>Can an interrupt from one source (e.g.&#xA0;SysTick) interrupt
+itself?</strong> - No.&#xA0;When the processor starts handling a specific
+interrupt, it sets the corresponding <em>active</em> bit in the
+<em>Interrupt Active</em> register (<code>PFIC_IACTR</code>) register.
+If the same interrupt should fire again, the processor will detect that
+it is active and will not start the handler again immediately. Instead,
+it will set the corresponding bit in the <em>Interrupt Pending</em>
+register (<code>PFIC_IPR</code>).</p>
+<p>When the interrupt handler returns, the active bit will be cleared.
+If the processor finds that a new interrupt is pending, it will handle
+that interrupt before returning to the program code.</p>
+<p>Thus, there is no risk of an interrupt interrupting itself: The
+interrupt handler will always complete before another interrupt of the
+same type is handled. What <em>can</em> happen, if you, e.g., set the
+SysTick frequency too fast, is that the systick interrupt handler is
+always pending, and the processor never returns to the program code. We
+say that the program is <em>starved</em>.</p>
+<p><strong>Can a fault (e.g.&#xA0;unaligned memory access) interrupt a
+running interrupt handler?</strong> - Yes. An exception caused by the
+currently running instruction (called a <em>synchronous</em> exception)
+<em>will</em> interrupt the interrupt handler. This gives the processor
+a chance to transfer control to an exception handler, if an interrupt
+handler behaves badly.</p>
+<p><strong>Can another interrupt (e.g.&#xA0;Timer6) interrupt a running
+interrupt handler (e.g.&#xA0;SysTick)?</strong> - The RISC-V ISA does
+<em>not</em> require this to be possible, so on many architectures the
+new interrupt will be &#x201C;pending&#x201D; and its handler will run directly after
+the current handler returns.</p>
+<p>On the CH32V307, different interrupt sources can have different
+<em>priorities</em> (set in the <code>IPRIO</code> registers). If an
+interrupt with a higher priority occurs while a lower-priority interrupt
+handler is running, the new interrupt handler will run immediately,
+pre-empting the current one. The pre-empted handler will then continue
+and complete once the higher-priority handler returns.</p>
+<p><strong>What if a fault occurs while a fault-handler is
+running?</strong> - Infinite exception loop. Crash and Burn. Don&#x2019;t do
+this.</p>
+<p>We will not delve much deeper into nested interrupts in this course,
+but it is worthwhile understanding that nested interrupts and priorities
+can be quite important. Let&#x2019;s say we have a program where SysTick is
+used to output signal (perhaps a clock signal, or a note to a speaker)
+with a specific frequency. Meanwhile, Timer6 is used to turn on the
+night-light every evening. If the interrupt handler for Timer6 run a few
+milliseconds later than intended, that is usually acceptable. But if the
+SysTick interrupt handler is delayed by even a few nanoseconds, that
+might mean that the clock signal falls out-of-sync with other parts of
+the system or, even worse, the played note becomes slightly flat!</p>
+<p>The mechanism for nested interrupts does not have to be very
+complicated at all, on RISC-V. Since an interrupt handler is already
+handled differently than normal functions, and always saves all
+registers it might modify on the stack, interrupts can in principle
+interrupt each other arbitrarily, as long as there is sufficient stack
+space available.</p>
+<p>On the CH32V307, there is a special <em>hardware stack</em>, that
+allows up to three nested interrupt handlers without using the in-memory
+stack at all. This significantly reduces interrupt latency and enables
+extremely fast interrupt response times.</p>
+<h2 id="interrupts-from-gpio-pins">Interrupts from GPIO pins</h2>
+<p>Finally, we will see how we can configure an interrupt for a GPIO
+pin. We will extend our program so that (in addition to the timed LEDs)
+another LED will turn on when we flick a switch connected to a GPIO pin,
+and of when we flick it back. We will use interrupts for this as well,
+so the processor is free to run any application we might want.</p>
+<p>On the CH32V307, any GPIO pin can cause an interrupt, but we are not
+free to use the pins entirely arbitrarily. The image below illustrates
+the path from a physical GPIO pin to the interrupt signal sent to the
+PFIC (and on to the processor):</p>
+<center>
+<img src= "../images/afio_exti.png" width=100%>
+</center>
+<p>As an example, we will connect a switch to GPIO Port E, pin 1. It
+would of course be possible for a microcontroller to connect every
+single GPIO pin on every port to a specific interrupt line, but this
+would be very resource intensive and costly. On the CH32V307, pin 1 on
+<em>all</em> ports (A-F) is connected to a MUX that will only let one of
+the signals through. This means that we <em>cannot</em> trigger an
+interrupt from pin 1 on Port D <em>and</em> pin 1 on Port E; we have to
+choose.</p>
+<h3 id="routing">Routing</h3>
+<p>To decide which port gets to forward the signal from a specific pin,
+we use the <em>Alternative Function I/O</em> (AFIO) module, and
+specifically the <code>AFIO_EXTICR1</code> - <code>AFIO_EXTICR4</code>
+registers (see QuickGuide). These are 16 bit registers and every
+register contains four groups of four bits, where each group decides
+which port should forward a specific pin.</p>
+<div class="boxed">
+<p>
+External interrupt configuration register 1
+          (AFIO_EXTICR1)<br>
+</p>
+<small>Access: read-write  Reset Value: 0x00000000  </small>
+<table style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'>
+<tr><colgroup><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'></colgroup><tr><th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>31</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>30</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>29</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>28</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>27</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>26</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>25</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>24</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>23</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>22</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>21</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>20</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>19</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>18</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>17</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>16</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>15</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>14</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>13</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>12</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>11</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>10</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>9</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>8</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>7</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>6</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>5</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>4</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>3</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>2</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>1</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0</th>
+</tr><td colspan=16 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+</td><td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>EXTI3</small></td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>EXTI2</small></td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>EXTI1</small></td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>EXTI0</small></td>
+</tr></table><b>EXTI</b>n (n = 0..3): Port selection for pin n. 0: Port A, 1: Port B, ... , 4: Port E<br>
+
+
+</div>
+<p>Since we want an interrupt to fire for pin 1 in GPIO port E, we will
+set the four bits corresponding to <code>EXTI1</code>, in
+<code>AFIO_EXTICR1</code>, to <code>4</code>:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#define AFIO_EXTICR1 </span><span class="op">((</span><span class="dt">volatile</span><span class="pp"> </span><span class="dt">uint16_t</span><span class="pp"> </span><span class="op">*)</span><span class="bn">0x40010008</span><span class="op">)</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Configure AFIO to allow pin1 interrupts for port E</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>AFIO_EXTICR1 <span class="op">&amp;=</span> <span class="bn">0xFF0F</span><span class="op">;</span> <span class="co">// Zero the corresponding bits</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>AFIO_EXTICR1 <span class="op">|=</span> <span class="bn">0x0040</span><span class="op">;</span> <span class="co">// Set EXTI1 to 4 (Port E)</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="configuring-interrupt-triggers-exti">Configuring interrupt
+triggers (EXTI)</h3>
+<p>If the value from our pin is chosen as an interrupt source in the
+<code>AFIO</code> module, it will be sent on to the <code>EXTI</code>
+module. This is where we can decide if and when a change in signal value
+should cause an interrupt. The behaviour of this module is illustrated
+in the image and QuickGuide snippet below:</p>
+<center>
+<img src= "../images/exti.png" width=100%>
+</center>
+<table class="fold-table" style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'>
+<colgroup><col style = 'width: 5%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 5%;'></colgroup><tr><th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>offset</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>31</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>30</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>29</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>28</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>27</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>26</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>25</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>24</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>23</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>22</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>21</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>20</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>19</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>18</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>17</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>16</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>15</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>14</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>13</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>12</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>11</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>10</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>9</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>8</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>7</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>6</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>5</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>4</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>3</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>2</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>1</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>Register</th>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x00</td>
+<td colspan=12 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>INTENR</td>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x04</td>
+<td colspan=12 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>EVENR</td>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x08</td>
+<td colspan=12 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>RTENR</td>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0xC</td>
+<td colspan=12 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>FTENR</td>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x10</td>
+<td colspan=12 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>SWIEVR</td>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x14</td>
+<td colspan=12 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>INTFR</td>
+</tr>
+</table>
+
+<p>The first thing to notice is that the incoming signal is connected to
+an <em>edge detection curcuit</em>. This circuit will output a short
+<em>pulse</em> of <code>1</code> when it detects that the incoming
+signal changes between 0 and 1, or from 1 to 0. As long as the input
+signal is a steady 0 or 1, the circuit outputs 0. We can configure the
+edge-detection circuit to react on <em>rising edges</em> (the value goes
+from 0 to 1) or <em>falling edges</em> (the value going from 1 to 0), or
+both, by writing the <code>EXTI_RTENR</code> and <code>EXTI_FENR</code>
+resgisters.</p>
+<p>In all the EXTI registers, each bit affects a single input line (the
+signals coming from pins 0-15). We want our interrupt to fire whenever
+we flick the switch connected to pin 1, so we will configure the
+edge-detection circuit to react on <em>both</em> rising and falling
+triggers:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>EXTI_RTENR <span class="op">|=</span> <span class="bn">0b10</span><span class="op">;</span> <span class="co">// Generate a pulse when pin1 goes from 0 to 1</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>EXTI_FTENR  <span class="op">|=</span> <span class="bn">0b10</span><span class="op">;</span> <span class="co">// Generate a pulse when pin1 goes from 1 to 0</span></span></code></pre></div>
+<blockquote>
+<p><strong>Note:</strong> You may have noticed that there are 20 bits in
+each of the EXTI registers, but only 16 GPIO pins (per port). This is
+because there are other external signals, like USB Wakeup and Power
+Voltage Detector signals, that can trigger interrupts in the same way.
+We will not talk more about these in the course.</p>
+</blockquote>
+<p>Next, we see that the pulse is ORed with the corresponding bit in the
+<em>Software Interrupt Event Register</em> (SWIER). This register is
+normally all zeroes, but by writing a one to either of the bits we can
+<em>force</em> an interrupt for that pin, regardless of the actual value
+on the pin.</p>
+<p>Then, the pulse is ANDed with the corresponding bit in the
+<code>EXTI_INTENR</code> register. This allows us to turn interrupts off
+for a specific pin, by setting the corresponding bit to zero. Since we
+only want to allow interrupts from pin 1, we configure this in our
+code:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>EXTI_INTENR <span class="op">=</span> <span class="bn">0b10</span><span class="op">;</span> <span class="co">// Enable interrupts only for pin 1</span></span></code></pre></div>
+<p>If the input pin has changed its value, and triggered a pulse in the
+edge-detection circuit that has made it past this AND gate, an interrupt
+request should be sent to the PFIC. If <em>another</em> pulse appears,
+before this interrupt has been handled, we do <em>not</em> want to send
+another interrupt request to the PFIC. Therefore, the pulse is finally
+<em>latched</em> into the <code>EXTI_INTFR</code> register. That is, a
+single pulse will set the corresponding bit in <code>EXTI_INTFR</code>
+to 1, but that bit will <em>stay</em> set until our interrupt handler
+explicitly zeroes it in the interrupt handler. This way we ensure that
+multiple edges occurring before the handler runs collapse into a single
+pending interrupt, guaranteeing reliable event detection without
+overwhelming the interrupt controller.</p>
+<p>Finally, we should note that only pins 0 to 4 have their own
+connections to the PFIC. If an interrupt is triggered on <em>either</em>
+of pins 5-9, the <em>same</em> interrupt line in the PFIC will be
+triggered. In these cases, our interrupt handler code must read the
+<code>EXTI_INTFR</code> register to see which pin actually triggered the
+interrupt.</p>
+<h2 id="completing-the-program">Completing the program</h2>
+<p>That is all that is really new about GPIO interrupts, but for
+completeness, let&#x2019;s go through the final things your program needs to
+respond to a GPIO interrupt.</p>
+<h3 id="configuring-gpio-pins">Configuring GPIO pins</h3>
+<p>For any signal to make it through to the EXTI module, and then PFIC,
+we have to configure the pin as an <em>input</em> pin. If we use our
+DIP-switch as the input device, we need to configure it as
+pull-down:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>GPIOE_CFGLR <span class="op">=</span> <span class="bn">0x00000080</span><span class="op">;</span> <span class="co">// Configure pin 1 as input and pull down</span></span></code></pre></div>
+<h3 id="configure-pfic">Configure PFIC</h3>
+<p>Just as when we set up interrupt handlers for our timers, we need to
+enable the interrupt in the PFIC. We can see in the vector table in the
+QuickGuide that <code>EXTI1</code> has interrupt vetor number 22, so we
+write:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#define EXTI1_IRQ_NUM </span><span class="dv">23</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="op">...</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>PFIC_IENR<span class="op">[</span>EXTI1_IRQ_NUM <span class="op">/</span> <span class="dv">32</span><span class="op">]</span> <span class="op">|=</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="op">(</span>EXTI1_IRQ_NUM <span class="op">%</span> <span class="dv">32</span><span class="op">));</span></span></code></pre></div>
+<h3 id="write-the-interrupt-handler">Write the interrupt handler</h3>
+<p>Then we need an interrupt handler that takes care of our new
+interrupt.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>__attribute__<span class="op">((</span>interrupt<span class="op">(</span><span class="st">&quot;machine&quot;</span><span class="op">)))</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> EXTI1_Handler<span class="op">(</span><span class="dt">void</span><span class="op">)</span> </span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    uitn32_t current_value <span class="op">=</span> <span class="op">*</span>GPIOE_INDR <span class="op">&amp;</span> <span class="bn">0b10</span><span class="op">;</span> <span class="co">// Read the current value of the switch</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>GPIOD_OUTDR <span class="op">&amp;=</span> <span class="op">~</span><span class="bn">0x8</span><span class="op">;</span>           <span class="co">// Zero the fourth LED</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>GPIOD_OUTDR <span class="op">|=</span> current_value<span class="op">;</span>  <span class="co">// Set it to 1 if the switch is on, 0 otherwise</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>EXTI_INTFR   <span class="op">|=</span> <span class="bn">0b10</span><span class="op">;</span>  <span class="co">// Acknowledge the interrupt (zeroes the corresponding bit in EXTI_INTFR)</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>One thing that may surprise you is that the interrupt is acknowledged
+by writing <code>1</code> to the corresponding bit, even though the
+actual result is that the bit is zeroed <a href="#fn4"
+class="footnote-ref" id="fnref4"
+role="doc-noteref"><sup>4</sup></a>.</p>
+<h3 id="put-the-interrupt-handler-address-into-the-vector-table">Put the
+interrupt handler address into the vector table</h3>
+<p>Finally, we add a single jump instruction at the right place in our
+vector table:</p>
+<pre><code>.align 2
+vector_table: 
+.org vector_table + 12 * 4
+j SysTick_Handler  # IRQ 12:  SysTick Handler
+
+.org vector_table + 22 * 4
+j EXTI1_Handler  # IRQ 22:  EXTI1 handler
+
+.org vector_table + 70 * 4
+j Timer6_Handler  # IRQ 70: Timer 6 Handler
+.org vector_table + 71 * 4
+j Timer7_Handler  # IRQ 71: Timer 7 Handler </code></pre>
+<p>And that&#x2019;s it! When running the program we will now see three LEDs
+blinking at different frequencies and a fourth LED can be turned on and
+off by a switch, all handled by interrupt routines, so the CPU is free
+to run whatever other code it wants to.</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>We covered the basic timers and prescalers in a previous
+lecture, so go there and do the exercises if this looks confusing to
+you.<a href="#fnref1" class="footnote-back"
+role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+<li id="fn2"><p>This is how vectored interrupts are handled on ARM
+processors, and it is implemented in this microcontroller by WCH to ease
+the transition for ARM developers.<a href="#fnref2"
+class="footnote-back" role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+<li id="fn3"><p>If you need an interrupt to be handled extremely
+quickly, you can place its instructions <em>directly</em> into the
+vector table. This only works if the instructions do not overwrite
+another entry that you need. Useful for very fast (MHz range) signals.<a
+href="#fnref3" class="footnote-back" role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+<li id="fn4"><p>Interrupt flags are cleared by writing 1 so that
+software can acknowledge an event atomically, without risking the loss
+of new events occurring at the same time.<a href="#fnref4"
+class="footnote-back" role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+</ol>
+</section>
+</body>
+</html>

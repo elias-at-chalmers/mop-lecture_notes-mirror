@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>lecture10_serial_communication</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+<h1 id="serial-communication">Serial Communication</h1>
+<p>This lecture is about transfer of data between components. Such
+communication occurs across a wide range of scales in machine-oriented
+programming. A microprocessor may transmit a byte to a
+digital-to-analogue converter (DAC) located on the same printed circuit
+board (PCB) via copper traces on the board. A byte may be conveyed
+through general-purpose input/output (GPIO) pins to a bargraph or
+hexadecimal display. A longer cable may connect a GPIO port to a
+terminal situated in another room. At a broader scale, the
+microcontroller (MCU) may be connected to the Internet.</p>
+<center>
+<img src="../images/communication.png" width="100%">
+</center>
+<p>The protocols and transmission media employed in these scenarios can
+differ substantially: ranging from a single conductor connecting a GPIO
+pin to a light-emitting diode (LED), to multiple parallel conductors
+with a simple protocol for communicating with an ASCII display, to
+retrieving a web page, which requires several layers of protocols and
+heterogeneous transmission media.</p>
+<p>At the lowest level of abstraction, however, the fundamental problem
+remains the same: a sequence of bytes must be transferred over a
+physical medium from one device to another.</p>
+<h2 id="parallel-communication">Parallel Communication</h2>
+<p>So far in this course, only examples of <em>parallel</em>
+communication have been considered. When transmitting data to the
+bargraph or the ASCII display, the entire byte is presented
+simultaneously, with one signal line per bit. This is arguably the
+simplest conceptual approach; however, it entails several practical
+limitations:</p>
+<ul>
+<li>Adjacent parallel lines may interfere with one another, producing
+signal degradation through <em>crosstalk</em>.</li>
+<li>Over longer distances, providing a large number of parallel
+conductors becomes costly.</li>
+<li>On a printed circuit board (PCB) or within a cable assembly,
+additional conductors require more routing space or result in thicker,
+bulkier cables.</li>
+<li>The microprocessor has a finite number of general-purpose
+input/output (GPIO) pins.</li>
+<li>At very high data rates, even small differences in conductor length
+or load cause timing misalignment (skew) between parallel lines</li>
+</ul>
+<p>During the 1980s and 1990s, consumer electronics frequently employed
+parallel interfaces<a href="#fn1" class="footnote-ref" id="fnref1"
+role="doc-noteref"><sup>1</sup></a>. For the reasons outlined above,
+however, and for additional considerations related to scalability and
+signal integrity, most communication at nearly all scales is now
+implemented using <em>serial</em> protocols. In serial communication,
+data is transmitted sequentially over a single channel, one bit at a
+time. Although this approach demands more sophisticated timing control
+and higher signalling rates at both ends of the link, it is generally
+more economical, more scalable, and more robust in practice.</p>
+<p>Parallel interfaces remain relevant in applications requiring
+extremely high data throughput over very short distances, such as modern
+synchronous dynamic random-access memory (e.g.&#xA0;DDR5).</p>
+<h1 id="sending-a-byte-of-data">Sending a byte of data</h1>
+<p>Let us use the gorgeous old text terminal in the image above as an
+example. These devices were common in earlier computing systems. Their
+only job was to receive bytes encoding ASCII characters for display on
+the screen, and to capture the keys pressed by the user, transmitting
+the corresponding ASCII codes back to the host computer.</p>
+<p>Because terminals could be located in separate rooms or even in
+different buildings, using a parallel interface like the one we connect
+the ASCII display with was not a realistic option. Instead,
+communication was implemented using serial transmission. Data in each
+direction were conveyed over a single signal conductor, so the cable
+required two signal lines: one for transmission and one for reception<a
+href="#fn2" class="footnote-ref" id="fnref2"
+role="doc-noteref"><sup>2</sup></a>. This configuration is called
+<em>full duplex</em> communication, since both ends can transmit
+simultaneously on separate lines.</p>
+<p>If one wanted really cheap cables, one could instead use
+<em>half-duplex</em> communication, where the two devices take turns
+transmitting and share the same signal line. In that case, only one side
+may drive the line at any given time.</p>
+<center>
+<img src="../images/shift_register.png" width="80%">
+</center>
+<p>To transmit data, the transmitter places the bits on the wire
+sequentially at an agreed signalling rate. The receiver samples the wire
+at the same rate. In practice, this is often implemented using a
+<em>shift register</em>. On the transmitter side, the register is loaded
+with a byte and, at each clock pulse, the register shifts the next bit
+onto the line. At the receiving end, a corresponding register shifts the
+incoming bits into storage. If both devices share the same clock signal,
+this arrangement functions correctly.</p>
+<p>Herein lies a difficulty, however. It is not realistic to assume that
+two independent devices will have exactly identical clock frequency and
+phase. Even if both are configured to operate at 1 MHz, small tolerances
+ensure that one clock will be slightly faster or slower than the other.
+Over time, this frequency mismatch accumulates as phase error, and the
+shift registers will gradually drift out of synchronisation.</p>
+<p>A straightforward solution is to transmit the clock signal over an
+additional wire. This is known as <em>synchronous</em> transmission and
+is widely used. SPI and I<sup>2</sup>C are examples of synchronous
+protocols that will be discussed later in the lecture. However, adding a
+clock line does not eliminate the earlier concerns regarding cost and
+interference. Furthermore, at very high signalling rates, <em>skew</em>
+becomes significant. At GHz frequencies, even if clock and data are
+launched simultaneously from the CPU, differences in propagation delay
+can prevent them from arriving in perfect alignment at the receiver.</p>
+<h2 id="asynchronous-transmission">Asynchronous transmission</h2>
+<p>We would like to transmit data over a single wire without a shared
+clock signal. However, if two devices run on independent clocks, they
+will inevitably drift out of synchronisation.</p>
+<p>Consider the diagram below. The blue and green traces represent two
+clocks that are <em>almost</em> the same frequency, but the green clock
+runs slightly faster. The transmitting device places a new bit on the
+wire at each clock pulse. Initially, the receiving device samples the
+line just before the next bit transition, and everything works
+correctly. After some time (see the arrows), the accumulated drift
+causes the sampling instant to move into the neighbouring bit period &#x2014;
+and the receiver misinterprets a bit.</p>
+<center>
+<img src="../images/clocks.png" width="80%">
+</center>
+<p>If we knew the <em>exact</em> clock frequencies of the two devices
+(we never do, but let us pretend), we could calculate how many bits can
+be transmitted before an error occurs. For example, if one device runs
+at exactly 1 MHz and the other at exactly 1.001 MHz (a 0.1% mismatch),
+sampling will drift by half a bit period after approximately 500 bits.
+Thus, with a 0.1% frequency difference and perfect initial alignment,
+roughly 500 bits can be transmitted before failure.</p>
+<p>To ensure correct initial alignment, the transmitter sends a
+<em>start bit</em>. The receiver detects the high-to-low transition
+(idle is logic 1) and uses that edge to align its internal timing, for
+example by resetting a counter or starting a timer interrupt (which you
+already know how to implement). From that point, it samples subsequent
+bits at regular intervals. After a fixed number of bits, it waits for
+the next start bit and re-synchronises.</p>
+<p>This is the fundamental principle behind the <em>Universal
+Asynchronous Receiver/Transmitter</em> (UART). A UART is a standard
+hardware block found in most microcontrollers that implements this
+start&#x2013;stop asynchronous protocol.</p>
+<center>
+<img src="../images/frame.png" width="80%">
+</center>
+<p>The UART transmits data bytes encapsulated in a <em>frame</em>, as
+shown above. A frame begins with a start bit (logic 0). The receiver
+detects this transition and begins sampling the incoming bits. It then
+receives eight data bits &#x2014; the byte to be transmitted.</p>
+<p>Optionally, a <em>parity bit</em> may follow. For even parity, the
+transmitter computes the XOR of all data bits
+(<code>bit0 XOR bit1 XOR ... XOR bit7</code>) and transmits the result.
+The receiver performs the same calculation and compares it with the
+received parity bit. If the values differ, a transmission error is
+detected. Parity cannot guarantee correctness, but it reliably detects
+any single-bit error.</p>
+<p>Finally, the transmitter sends one stop bit (logic 1), returning the
+line to its idle state. The receiver then waits for the next start bit.
+(Some configurations use two stop bits, but 8N1 uses one.)</p>
+<p>Thus, to transmit 8 data bits with parity and one stop bit, the UART
+places 11 symbols on the line. The number of symbols per second is the
+<em>baud rate</em>. In a UART, one symbol corresponds to one bit on the
+wire, so the baud rate equals the raw line bit rate. The useful payload
+rate is lower because of start, parity, and stop bits.</p>
+<p>A common UART setting is 115200 baud. With 8 data bits, even parity,
+and one stop bit (8E1), the effective data rate is:</p>
+<p>115200 &#xD7; 8 / 11 &#x2248; 83,782 bit/s.</p>
+<p>You might wonder why frames are typically only 8 bits long. Longer
+frames would reduce overhead from start, parity, and stop bits. However,
+the longer the frame, the more clock drift accumulates before
+re-synchronisation. An 8-bit frame gives a combined clock mismatch
+tolerance of roughly 5&#x2013;6% (about &#xB1;2&#x2013;3% per device), which aligns well
+with what inexpensive oscillators in typical UART systems can
+achieve.</p>
+<p>Although UART-style asynchronous serial communication is one of the
+earliest techniques for transmitting data without a separate clock line,
+it remains entirely appropriate when very high data rates are not
+required. Its simplicity and modest hardware demands make it well suited
+to embedded systems, and it is still widely used in GPS receivers, debug
+consoles, Bluetooth modules, and (most importantly to some of us) in the
+MIDI interface between keyboards and synthesisers.</p>
+<h2 id="embedded-clock-signal">Embedded clock signal</h2>
+<p>In contrast, USB (and other modern high-speed serial links) uses
+<em>embedded</em> clocking: the receiver continuously adjusts its
+sampling phase by observing transitions in the data stream. Instead of
+sampling at fixed time intervals after a single initial synchronisation
+event (as in UART), it continually corrects its timing so that each bit
+is sampled near its centre, keeping its clock aligned with the
+transmitter throughout the transmission.</p>
+<p>The advantage of embedded clocking is that it allows far higher data
+rates because the receiver continually corrects its timing instead of
+relying on a fixed sampling schedule. The trade-off is increased circuit
+complexity, since the receiver must include a clock-recovery loop rather
+than a simple baud-rate timer.</p>
+<p>We will not dive deeper into embedded clock signals in this
+course.</p>
+<h1 id="programming-the-uart">Programming the UART</h1>
+<p>Now that you understand asynchronous transmission and framing, you
+might be tempted to implement this manually using GPIO, interrupts, and
+SysTick timing. That is entirely possible with your current knowledge &#x2014;
+but fortunately unnecessary. Since the 1970s, microcontrollers have
+included dedicated UART peripherals that handle framing, timing, and
+buffering in hardware, allowing the processor to perform other
+tasks.</p>
+<p>The CH32V307 contains three USART controllers, each capable of
+transmitting asynchronous data in several different modes. The register
+block for each USART appears as follows in the quick guide:</p>
+<table class="fold-table" style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'>
+<colgroup><col style = 'width: 5%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 5%;'></colgroup><tr><th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>offset</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>31</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>30</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>29</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>28</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>27</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>26</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>25</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>24</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>23</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>22</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>21</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>20</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>19</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>18</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>17</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>16</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>15</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>14</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>13</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>12</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>11</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>10</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>9</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>8</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>7</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>6</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>5</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>4</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>3</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>2</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>1</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>Register</th>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x0</td>
+<td colspan=22 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>STATR</td>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x4</td>
+<td colspan=23 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=9 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>DATAR</td>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x8</td>
+<td colspan=16 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=12 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>BRR</td>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0xC</td>
+<td colspan=18 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>CTLR1</td>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x10</td>
+<td colspan=17 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>CTLR2</td>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x14</td>
+<td colspan=21 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>CTLR3</td>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x18</td>
+<td colspan=16 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=8 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=8 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>GPR</td>
+</tr>
+</table>
+
+<p>The USART supports multiple operating modes, and not all registers
+are relevant for our purposes.</p>
+<h2 id="sending-a-byte-of-data-1">Sending a byte of data</h2>
+<p>Before transmitting, the USART must be configured with the desired
+frame format and baud rate.</p>
+<p>We begin by setting the <code>UE</code>, <code>PCE</code>,
+<code>M</code>, and <code>TE</code> bits in the <code>CTLR1</code>
+register. <code>UE</code> enables the USART, <code>PCE</code> enables
+parity control, <code>M</code> selects the word length (8 or 9 bits),
+<code>TE</code> enables the transmitter part of the USART.</p>
+<div class="boxed">
+<p>
+Control register 1<br>
+</p>
+<small>Access: read-write  Reset Value: 0x00000000  </small>
+<table style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'>
+<tr><colgroup><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'></colgroup><tr><th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>31</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>30</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>29</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>28</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>27</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>26</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>25</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>24</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>23</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>22</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>21</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>20</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>19</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>18</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>17</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>16</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>15</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>14</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>13</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>12</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>11</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>10</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>9</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>8</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>7</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>6</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>5</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>4</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>3</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>2</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>1</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0</th>
+</tr><td colspan=18 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+</td><td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>UE</small></td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>M</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>WAKE</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>PCE</small></td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>PS</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>PEIE</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>TXEIE</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>TCIE</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>RXNEIE</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>IDLEIE</small></td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>TE</small></td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>RE</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>RWU</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>SBK</small></td>
+</tr></table><b>UE</b>: USART enable<br>
+<b>M</b>: Word length<br>
+<b>WAKE</b>: Wakeup method<br>
+<b>PCE</b>: Parity control enable<br>
+<b>PS</b>: Parity selection<br>
+<b>PEIE</b>: PE interrupt enable<br>
+<b>TXEIE</b>: TXE interrupt enable<br>
+<b>TCIE</b>: Transmission complete interrupt enable<br>
+<b>RXNEIE</b>: RXNE interrupt enable<br>
+<b>IDLEIE</b>: IDLE interrupt enable<br>
+<b>TE</b>: Transmitter enable<br>
+<b>RE</b>: Receiver enable<br>
+<b>RWU</b>: Receiver wakeup<br>
+<b>SBK</b>: Send break<br>
+
+
+</div>
+<p>Next, we configure the baud rate. The USART divides the peripheral
+clock frequency (<code>f_PCLK</code>) to generate the desired symbol
+rate. The required divisor is:</p>
+<p>USARTDIV = f<sub>PCLK</sub> / (16 &#xD7; baudrate)</p>
+<p>For example, with a baud rate of 115200 bit/s and a peripheral clock
+of 144 MHz:</p>
+<p>USARTDIV = 144,000,000 / (16 &#xD7; 115200) = 78.125</p>
+<p>This value is written into the Baud Rate Register (<code>BRR</code>),
+which contains separate fields for the mantissa and fractional part:</p>
+<div class="boxed">
+<p>
+Baud rate register<br>
+</p>
+<small>Access: read-write  Reset Value: 0x00000000  </small>
+<table style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'>
+<tr><colgroup><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'></colgroup><tr><th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>31</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>30</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>29</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>28</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>27</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>26</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>25</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>24</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>23</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>22</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>21</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>20</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>19</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>18</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>17</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>16</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>15</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>14</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>13</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>12</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>11</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>10</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>9</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>8</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>7</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>6</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>5</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>4</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>3</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>2</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>1</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0</th>
+</tr><td colspan=16 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+</td><td colspan=12 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>DIV_Mantissa</small></td>
+<td colspan=4 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>DIV_Fraction</small></td>
+</tr></table><b>DIV_Mantissa</b>: mantissa of USARTDIV<br>
+<b>DIV_Fraction</b>: fraction of USARTDIV<br>
+
+
+</div>
+<p>To transmit a byte, we simply write it to the Data Register
+(<code>DATAR</code>). The USART immediately begins shifting the bits out
+sequentially on pin PA9 (the default USART1 TX pin).</p>
+<p>The program should then wait until the <code>TXE</code> bit in the
+Status Register (<code>STATR</code>) is set. <code>TXE</code> indicates
+that the data register is empty and ready to accept a new byte. (If one
+needs to know when transmission has fully completed on the wire, the
+<code>TC</code> flag must be checked instead.)</p>
+<div class="boxed">
+<p>
+Status register<br>
+</p>
+<small>Reset Value: 0x000000C0  </small>
+<table style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'>
+<tr><colgroup><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'></colgroup><tr><th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>31</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>30</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>29</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>28</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>27</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>26</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>25</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>24</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>23</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>22</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>21</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>20</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>19</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>18</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>17</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>16</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>15</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>14</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>13</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>12</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>11</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>10</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>9</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>8</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>7</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>6</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>5</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>4</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>3</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>2</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>1</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0</th>
+</tr><td colspan=22 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+</td><td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CTS</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>LBD</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>TXE</small></td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>TC</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>RXNE</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>IDLE</small></td>
+<td colspan=1 style = 'writing-mode: vertical-rl; transform: rotate(180deg);border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>ORE</small></td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>NE</small></td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>FE</small></td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>PE</small></td>
+</tr></table><b>CTS</b>: CTS flag<br>
+<b>LBD</b>: LIN break detection flag<br>
+<b>TXE</b>: Transmit data register empty<br>
+<b>TC</b>: Transmission complete<br>
+<b>RXNE</b>: Read data register not empty<br>
+<b>IDLE</b>: IDLE line detected<br>
+<b>ORE</b>: Overrun error<br>
+<b>NE</b>: Noise error flag<br>
+<b>FE</b>: Framing error<br>
+<b>PE</b>: Parity error<br>
+
+
+</div>
+<h2 id="receiving-a-byte-of-data">Receiving a byte of data</h2>
+<p>On the receiving side, configuration is similar, except that the
+receiver is enabled instead of (or in addition to) the transmitter by
+setting the <code>RE</code> bit in <code>CTLR1</code>.</p>
+<p>When a byte arrives on PA10 (USART1 RX), the USART hardware
+automatically shifts the bits into the data register. When a full frame
+has been received, the <code>RXNE</code> (Receive Not Empty) flag is
+set. The program can then read the <code>DATAR</code> register to obtain
+the received byte.</p>
+<p>To send multiple bytes from one CH32V307 to another, the transmitting
+device could remain in a loop, writing a new byte each time
+<code>TXE</code> is set. Similarly, the receiving device could poll the
+<code>RXNE</code> flag and read incoming bytes as they arrive.</p>
+<p>However, constant polling would occupy the processor entirely. In
+practice, transmission and reception are usually interrupt-driven. By
+enabling the transmit interrupt (<code>TXEIE</code>) in
+<code>CTLR1</code>, the USART generates an interrupt whenever it is
+ready to accept another byte. The transmitter interrupt handler then
+feeds the next byte from a software buffer.</p>
+<p>Likewise, by enabling the receive interrupt (<code>RXNEIE</code>),
+the processor is interrupted whenever a new byte arrives. The interrupt
+handler reads the data register and stores the byte in a buffer,
+allowing the main program to continue executing independently of the
+serial communication.</p>
+<h1 id="other-transmission-protocols-on-the-md307">Other transmission
+protocols on the MD307</h1>
+<p>In addition to the USART peripherals, the MD307 also supports several
+other widely used communication protocols.</p>
+<p><strong>SPI (Serial Peripheral Interface)</strong> is a synchronous,
+full-duplex protocol typically used for short-distance communication
+between a microcontroller and peripheral devices such as displays, ADCs,
+DACs, and external memory. It uses separate lines for clock (SCK),
+master-out&#x2013;slave-in (MOSI), master-in&#x2013;slave-out (MISO), and a
+chip-select (CS) signal for each slave device. Because data are shifted
+in and out simultaneously under control of a shared clock, SPI can
+achieve very high data rates over short distances. The protocol itself
+is simple and has minimal overhead, but it does not provide built-in
+addressing or error detection; these must be implemented at a higher
+level if required.</p>
+<p>The TFT screen that you will use in Lab 4 (if you choose to do that)
+is controlled via SPI. The SPI communication is handled by another
+hardware block, similar to the USART, but you will not need to program
+that directly for the lab.</p>
+<p><strong>I<sup>2</sup>C (Inter-Integrated Circuit)</strong> is a
+synchronous, half-duplex bus designed for communication between
+integrated circuits on the same board. It uses only two wires: a serial
+clock (SCL) and a bidirectional data line (SDA), both operating with
+open-drain signalling and pull-up resistors. Devices share the same bus
+and are selected through unique addresses, allowing many peripherals to
+coexist on just two lines. I<sup>2</sup>C is slower than SPI but reduces
+pin usage and wiring complexity. It includes acknowledgement bits and
+defined bus arbitration mechanisms, which improve reliability in
+multi-device systems.</p>
+<p><strong>I<sup>2</sup>S (Inter-IC Sound)</strong> is a synchronous
+serial protocol designed specifically for digital audio transmission
+between integrated circuits. Unlike SPI or UART, which are
+general-purpose data links, I<sup>2</sup>S is optimised for continuous
+streaming of audio samples.</p>
+<p>An I<sup>2</sup>S connection typically uses three signals: a serial
+clock (SCK), a word-select or left/right clock (WS or LRCK), and a
+serial data line (SD). The clock defines the bit rate, while the
+word-select signal indicates whether the transmitted sample belongs to
+the left or right audio channel. Data are shifted synchronously with the
+clock, most significant bit first. Because audio data must be delivered
+at a constant rate, I<sup>2</sup>S operates as a continuous stream
+rather than as discrete frames with start and stop bits.</p>
+<p>On the MD307, I<sup>2</sup>S functionality is implemented as a
+special operating mode of certain SPI peripherals. It is commonly used
+to interface with audio DACs, ADCs, codecs, and digital microphones in
+applications requiring high-quality digital sound reproduction.</p>
+<p><strong>CAN (Controller Area Network)</strong> is a robust,
+message-based protocol originally developed for automotive systems. It
+uses differential signalling over a two-wire bus and is designed for
+high noise immunity and fault tolerance. Unlike UART, SPI, or
+I<sup>2</sup>C, CAN is multi-master and uses identifier-based
+arbitration to determine message priority. It includes strong error
+detection, automatic retransmission, and fault confinement mechanisms.
+Although more complex than the other protocols discussed, CAN is well
+suited for distributed embedded systems where reliability and resilience
+are critical.</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Legacy parallel printer cables typically contained on
+the order of 25&#x2013;36 conductors, depending on implementation. By contrast,
+a standard USB 2.0 cable requires only four signal conductors.<a
+href="#fnref1" class="footnote-back" role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+<li id="fn2"><p>In practice, a third conductor was typically included to
+provide a common ground reference between the devices.<a href="#fnref2"
+class="footnote-back" role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+</ol>
+</section>
+</body>
+</html>

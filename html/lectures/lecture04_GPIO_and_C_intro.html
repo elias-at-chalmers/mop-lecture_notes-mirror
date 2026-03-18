@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>lecture04_GPIO_and_C_intro</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+<h1 id="introduction-to-gpio-and-c">Introduction to GPIO and C</h1>
+<hr>
+<p>So far, we have focused on the <em>core</em> of our processor, the
+<em>Qingke V4F</em>, and how to move data between memory and registers.
+This would be quite pointless unless the processor was connected to the
+outside world somehow. Today we will start introducing how to
+communicate with off-chip devices using the GPIO ports.</p>
+<p>We will also start looking at the programming language C, which we
+will start using to program our machine. You know the basics of the
+RISC-V assembly language now, and you have probably noticed that it
+quickly becomes impractical for larger programs. Throughout the rest of
+the course, we will switch over to the (relatively) high-level language
+C, but we will keep showing you how C is <em>compiled</em> into assembly
+language. Understanding how a high-level language gets translated to
+assembly, and then machine code, is very important for writing
+performant and secure code, on any machine.</p>
+<h2 id="gpio-general-purpose-inputoutput">GPIO (General Purpose
+Input/Output)</h2>
+<p>A processor chip talks to the outside world through its tiny metal
+legs, called <em>pins</em>. In desktop and laptop computers, most of
+these pins are already spoken for - they connect directly to memory (so
+you can plug in RAM) or to standard buses like PCI Express (so you can
+add devices like graphics cards). Microcontrollers, however, are much
+simpler. They often don&#x2019;t have separate memory chips or standard
+expansion slots, so most of their pins can be used more flexibly as
+General Purpose Input/Output (GPIO) <a href="#fn1" class="footnote-ref"
+id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+<p>By allowing the processor to directly read or control the logical
+status of these pins, they can be connected to almost anything, as long
+as the software drives them with the right values at the right time. In
+this course, you will go from connecting a single pin to an LED to make
+it turn on and off, to communicating with an ASCII display via a number
+of pins. In theory, there is nothing stopping you from connecting some
+of the pins to an HDMI cable, to drive a monitor, or to a bunch of
+motors, to drive a radio-controlled car.</p>
+<p><img src="../images/md307_ch32v307_zoom.png" /></p>
+<p>The picture above illustrates how the processor chip is connected to
+the GPIO pins on the MD307. If you look close enough (and turn the board
+over at times) you can follow a very thin wire from most of the
+CH32V307&#x2019;s tiny pins to one of the more accessible pins on the top of
+the board. On this microcontroller, the pins are divided into 16-bit
+<em>ports</em>, labeled A-E. On the bottom of the board, you can see
+that the pins that make up the ports labeled E and D are also available
+in a nice little connector layout, that allows us to connect peripheral
+devices with a standard ribbon cable. The pins on the top of the board,
+in the image, provide access to the remaining GPIO ports (A-C).</p>
+<p>To read or set a pin&#x2019;s value, we read or write to a specific memory
+location (the GPIO Port&#x2019;s <em>In or Out Data Register</em>, which we
+will discuss soon). When the memory subsystem sees that the address we
+are trying to write to from the CPU is, e.g., <code>0x4001140C</code> it
+knows (this is implemented at the hardware level) that the write
+operation should be sent on to the <em>GPIO Module</em>. The GPIO
+Module, in turn, knows that this address means &#x201C;the Out Data Register
+for Port D&#x201D;. If the value we write is <code>0b00001111</code> it will
+set the first four GPIOD pins (some of the little spider legs in the
+image of the chip, above) to 1 (3.3V) and the others to 0 (0V). These
+pins are connected with wires to the pins in the connector.</p>
+<h3 id="blink">Blink</h3>
+<p>When learning programming in almost any language, the starting
+example is &#x201C;Hello World.&#x201D;. Similarly, when starting MCU programming, the
+first thing to try is &#x201C;Blink&#x201D;, so let&#x2019;s start there. We want to plug in
+an LED to our MCU and make it blink. This will serve as a first
+introduction to GPIO programming, and then we will continue with more
+challenging tasks in the next lecture.</p>
+<p align="center">
+<img src="../images/IDC_layout.png" alt="My image" width="80%"/>
+</p>
+<p>The image above illustrates the physical connector corresponding to
+the lower byte (pin 0-7) of Port D. Eight of the pins (labeled bit0-bit7
+in the image) carry a voltage (0 or 3.3V) depending on whether the
+corresponding bit in the data register is high or low. There are two
+additional pins: one is always 0V (GND) and one is always 3.3V.</p>
+<p>If we want to connect an LED we can do that as in the figure above.
+We connect the cathode of the LED (through a resistor) to the GND pin,
+and the anode to one of the data-carrying pins (the one corresponding to
+bit 6, in this case). The resistor is required to stay within the
+maximum current allowed by the LED.</p>
+<p>Now, if we <em>set</em> bit 6 in Port D, the pin will be at 3.3V, and
+current will run through the LED, making it glow. If we <em>clear</em>
+bit 6, the pin will be at 0V (same as the GND pin) and there will be no
+current, and no light.</p>
+<h3 id="configuring-a-pin-for-output">Configuring a pin for output</h3>
+<p>Each pin in the port can <em>either</em> be an input pin <em>or</em>
+an output pin, at any given time. If the pin is configured as an input
+pin, we can read the corresponding bit to find out if the pin is at 3.3V
+(bit is 1) or 0V (bit is 0). Right now, we want pin 6 to act as an
+output bit, so we have to configure Port D accordingly.</p>
+<p>As previously mentioned, any communication between the processor core
+and the outside is achieved by reading from or writing to the memory
+subsystem. We have, for instance, seen that we can access the SRAM
+module by writing to the <code>0x20000000</code> -
+<code>0x2000FFFF</code> region. In the same way, to communicate with the
+GPIO module, we read and write to the
+<code>0x40010800</code>-<code>0x40011BFF</code> region. In that region,
+there are a number of registers for each GPIO Port. To find out which
+registers there are, and how to configure our GPIO Module, we would
+normally refer to the microcontroller&#x2019;s reference manual, but in this
+course we have prepared an easier-to-read <a
+href="https://www.cse.chalmers.se/edu/resources/mop/lecture_notes/quickguide.html">QuickGuide</a>.
+The section about the GPIO Module begins:</p>
+<!--
+<p align="center">
+  <img src="images/Quickguide_GPIO.png" alt="My image" width="95%" style="border: 2px solid black; border-radius: 8px;"/>
+</p>
+--->
+<div class="boxed">
+<p><b> Base addresses: </b></p>
+GPIOA: <code>0x40010800</code><br>
+GPIOB: <code>0x40010C00</code><br>
+GPIOC: <code>0x40011000</code><br>
+GPIOD: <code>0x40011400</code><br>
+GPIOE: <code>0x40011800</code><br>
+
+
+<p><b> Register Block Overview </b></p>
+<table class="fold-table" style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'>
+<colgroup><col style = 'width: 5%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 5%;'></colgroup><tr><th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>offset</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>31</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>30</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>29</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>28</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>27</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>26</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>25</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>24</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>23</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>22</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>21</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>20</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>19</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>18</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>17</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>16</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>15</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>14</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>13</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>12</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>11</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>10</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>9</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>8</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>7</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>6</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>5</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>4</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>3</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>2</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>1</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>Register</th>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x0</td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>CFGLR</td>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x4</td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>CFGHR</td>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x8</td>
+<td colspan=16 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>INDR</td>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0xC</td>
+<td colspan=16 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>OUTDR</td>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x10</td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>BSHR</td>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x14</td>
+<td colspan=16 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>BCR</td>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x18</td>
+<td colspan=15 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=1 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>LCKR</td>
+</tr>
+</table>
+
+<p><b> Register Details: </b></p>
+<details open>
+<summary>
+CFGLR</summary>
+<b>Configuration of GPIO port, for lower 8 pins.</b>
+
+Configuration of the port is done using the CFGLR and CFGHR for the lower eight and upper eight pins, respectively. For each pin, there are two bits to set the MODE (Input or Output, and speed of output pins), and two bits to set the CoNFiguration (the meaning of these pins depend on whether the pin is an input pin or an output pin):
+
+<table style="width:100%; table-layout:auto">
+  <tr>
+    <th colspan="2">CNF</th>
+    <th colspan="2">MODE</th>
+  </tr>
+
+  <!-- Input mode rows -->
+  <tr>
+    <td>00</td><td>Analog</td>
+    <td rowspan="4">00</td><td rowspan="4">Input Mode</td>
+  </tr>
+  <tr>
+    <td>01</td><td>Floating</td>
+  </tr>
+  <tr>
+    <td>10</td><td>Pull-up/Pull-down</td>
+  </tr>
+  <tr>
+    <td>11</td><td>Reserved</td>
+  </tr>
+
+  <!-- Output mode rows -->
+  <tr>
+    <td>00</td><td>Push Pull</td>
+    <td rowspan="4" colspan="1">
+      01<br>
+      10<br>
+      11
+    </td>
+    <td rowspan="4" colspan="1">
+      Output Mode 10Mhz<br>
+      Output Mode 2Mhz<br>
+      Output Mode 50Mhz
+    </td>
+  </tr>
+  <tr><td>01</td><td>Open Drain</td></tr>
+  <tr><td>10</td><td>Alternate Function, Push Pull</td></tr>
+  <tr><td>11</td><td>Alternate Function, Open Drain</td></tr>
+</table>
+<br>
+<small>Access: read-write  Reset Value: 0x44444444  </small>
+<table style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'>
+<tr><colgroup><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'></colgroup><tr><th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>31</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>30</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>29</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>28</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>27</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>26</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>25</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>24</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>23</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>22</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>21</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>20</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>19</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>18</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>17</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>16</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>15</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>14</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>13</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>12</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>11</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>10</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>9</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>8</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>7</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>6</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>5</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>4</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>3</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>2</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>1</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0</th>
+</tr><td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF7</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE7</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF6</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE6</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF5</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE5</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF4</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE4</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF3</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE3</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF2</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE2</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF1</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE1</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF0</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE0</small></td>
+</tr></table><b>CNF</b>n (n = 0..7): Set CONF for pin n<br>
+<b>MODE</b>n (n = 0..7): Set MODE for pin n<br>
+</details>
+<details open>
+<summary>
+CFGHR</summary>
+<p>
+Configure port for the upper 8 pins. (See CFGLR for details)<br>
+</p>
+<small>Access: read-write  Reset Value: 0x44444444  </small>
+<table style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'>
+<tr><colgroup><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'></colgroup><tr><th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>31</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>30</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>29</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>28</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>27</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>26</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>25</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>24</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>23</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>22</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>21</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>20</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>19</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>18</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>17</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>16</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>15</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>14</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>13</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>12</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>11</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>10</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>9</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>8</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>7</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>6</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>5</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>4</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>3</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>2</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>1</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0</th>
+</tr><td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF15</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE15</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF14</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE14</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF13</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE13</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF12</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE12</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF11</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE11</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF10</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE10</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF9</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE9</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>CNF8</small></td>
+<td colspan=2 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'><small>MODE8</small></td>
+</tr></table><b>CNF</b>n (n = 8..15): Set CONF for pin n<br>
+<b>MODE</b>n (n = 8..15): Set MODE for pin n<br>
+</details>
+
+
+</div>
+<p>This text is pretty dense, but in a few weeks&#x2019; time you will find it
+an invaluable resource when programming.</p>
+<blockquote>
+<p>&#x1F4A1; <strong>Tip:</strong> <em>The QuickGuide is the only help you are
+allowed to bring to the exam, so learn to find your way around it as
+soon as possible!</em></p>
+</blockquote>
+<p>Let&#x2019;s parse this text to find out what we need to do to get pin
+number 6, on Port D, to 3.3V so that our LED lights up:</p>
+<p>For each GPIO port, the configuration information for its pins is
+stored in two registers:</p>
+<ul>
+<li>CFGLR (Configuration Low Register) &#x2192; holds settings for pins
+0&#x2013;7.</li>
+<li>CFGHR (Configuration High Register) &#x2192; holds settings for pins
+8&#x2013;15.</li>
+</ul>
+<p>Inside these registers, each pin is assigned 4 bits:</p>
+<ul>
+<li>2 bits define the MODE (input/output modes).</li>
+<li>2 bits define the CNF (the pin&#x2019;s specific configuration, what the
+bits mean depend on whether the pin is in <em>input</em> or one of the
+<em>output</em> modes).</li>
+</ul>
+<p>To find the address to a specific register, you must pay attention to
+the base addresses of each port, and the offset of each of its
+registers. Example: to determine the address of Port D&#x2019;s CFGHR, we
+calculate <code>base address</code> + <code>offset</code>
+(<code>0x40011400</code> + <code>0x4</code> =
+<code>0x40011404</code>.)</p>
+<p>We want to set pin 6 as an <em>output</em> pin. From the table we can
+see that we then want to set <code>MODE</code> to be <code>01</code>,
+<code>10</code>, or <code>11</code> depending on what <em>maximum
+frequency</em> we need. If the frequency is set to 10 MHz, that means
+that we can flip the value of the pin 10 million times per second, and
+get a reliable output. If we were going to use the pin to send out some
+digital signal that changed quickly, we might need to worry about that,
+but since we are just going to turn a light on and off, 2 MHz is more
+than enough (and this consumes the least energy). So we want to set
+<code>MODE</code> to <code>10</code>.</p>
+<p>Since <code>MODE</code> is an <em>output</em> mode, the
+<code>CNF</code> value lets us choose between <code>Push-Pull</code>,
+<code>Open Drain</code>, <code>Alternative Function Push-Pull</code>,
+and <code>Alternative Function Open Drain</code>. We will go through the
+meaning of this in the next lecture. For now, we set it to
+<code>Push-Pull</code> (<code>00</code>), which means that it will
+output 0V if the corresponding bit in <code>OUTDR</code> is set to 0 and
+3.3V if set to 1.</p>
+<p>So, we want to set <code>MODE</code> for pin 6 (bits 25:24 in
+<code>CFGLR</code>) to <code>10</code>, and <code>CNF</code> for pin 6
+(bits 27:26 in <code>CFGLR</code>) to <code>00</code>. We do not care
+about the other pins, and will just set them to <code>0</code>, so we
+should write the binary value <code>0000 <b>0010</b> 0000 0000 0000 0000
+0000 0000</code>, or, in hexadecimal <code>0x02000000</code> to
+<code>CFGLR</code> to configure our pin.</p>
+<p>In assembly, that looks like:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">la</span> <span class="kw">t0</span><span class="op">,</span> <span class="bn">0x40011400</span>    <span class="co"># Address of CFGLR to t0</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">li</span> <span class="kw">t1</span><span class="op">,</span> <span class="bn">0x02000000</span>    <span class="co"># Configuration value to t1</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">sw</span> <span class="kw">t1</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">t0</span><span class="op">)</span>         <span class="co"># Write the configuration to CFGLR                    </span></span></code></pre></div>
+<h3 id="turning-on-the-led">Turning on the LED</h3>
+<p>Now that the configuration is done, all we have to do is set bit 6 in
+the <em>out data</em> register for GPIO Port D. We look at the <a
+href="https://www.cse.chalmers.se/edu/resources/mop/lecture_notes/quickguide.html">QuickGuide</a>
+again (or the snippet above) to see that the <em>base address</em> for
+GPIO Port D is still <code>0x40011400</code>, and that the
+<em>offset</em> for the out data register, <code>OUTDR</code>, is
+<code>0xC</code>. So the address to <code>GPIOD_OUTDR</code> is
+<code>0x40011400 + 0xC</code> = <code>0x4001140C</code>.</p>
+<p>We want to set bit 6 to make pin 6 go to 3.3V and turn on the
+LED:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">la</span> <span class="kw">t0</span><span class="op">,</span> <span class="bn">0x4001140C</span>  <span class="co"># Address to GPIOD_OUTDR to t0</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">li</span> <span class="kw">t1</span><span class="op">,</span> <span class="bn">0b1000000</span>   <span class="co"># Set bit number 6 in t1 (equivalent to 0x40)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">sh</span> <span class="kw">t1</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">t0</span><span class="op">)</span>       <span class="co"># Set pin 6 to 3.3V (and all others to 0V)</span></span></code></pre></div>
+<p>Nothing new here, the only thing you should note is that when we
+write to <code>OUTDR</code> we only write a halfword, because we can see
+in the quickguide that the register is only 16 bits.</p>
+<p>Let&#x2019;s put all of this together into a little Blink program:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">la</span> <span class="kw">t0</span><span class="op">,</span> <span class="bn">0x40011400</span>    <span class="co"># Address of CFGLR to t0</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">li</span> <span class="kw">t1</span><span class="op">,</span> <span class="bn">0x02000000</span>    <span class="co"># Configuration value to t1</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">sw</span> <span class="kw">t1</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">t0</span><span class="op">)</span>         <span class="co"># Write the configuration to CFGLR                    </span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">loop:</span> </span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="kw">la</span> <span class="kw">t0</span><span class="op">,</span> <span class="bn">0x4001140C</span>  <span class="co"># Address to GPIOD_OUTDR to t0</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="kw">li</span> <span class="kw">t1</span><span class="op">,</span> <span class="bn">0b1000000</span>   <span class="co"># Set bit number 6 in t1</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="kw">sh</span> <span class="kw">t1</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">t0</span><span class="op">)</span>       <span class="co"># Set pin 6 to 3.3V (and all others to 0V)</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="kw">la</span> <span class="kw">t0</span><span class="op">,</span> <span class="bn">0x4001140C</span>  <span class="co"># Address to GPIOD_OUTDR to t0</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="kw">li</span> <span class="kw">t1</span><span class="op">,</span> <span class="bn">0b0000000</span>   <span class="co"># Clear all bits in t1</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="kw">sh</span> <span class="kw">t1</span><span class="op">,</span> <span class="dv">0</span><span class="op">(</span><span class="kw">t0</span><span class="op">)</span>       <span class="co"># Set all pins to 0V</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="cf">j</span> <span class="kw">loop</span>             <span class="co"># Loop forever</span></span></code></pre></div>
+<p>If we connect an LED as described above and run this program&#x2026; nothing
+seems to happen.</p>
+<p>But that is not very strange, since we will be turning the light on
+and off every 20 nanoseconds, or so. If we step through the program
+instead, we can see that the light turns on and off every time we write
+to <code>OUTDR</code>. Hurrah!</p>
+<h2 id="introduction-to-the-c-programming-language">Introduction to the
+C programming language</h2>
+<p>We will now step away from our microcontroller for a minute, and take
+a first look at the C programming language instead. We will start by
+looking at a very small example program from a very high-level view.
+Later on in the course, we will dive into some of the details, so do not
+worry if there are things you don&#x2019;t fully understand yet.</p>
+<h3 id="a-simple-c-program">A simple C program</h3>
+<p>C is a <em>procedural programming language</em> which means that the
+program&#x2019;s state can be changed by executing some <em>procedure</em>. A
+procedure, in this context, is simply a <em>subroutine</em> or, as they
+are called in C, a <em>function</em>. Specifically, every C program must
+contain exactly one function called <code>main</code>, where the program
+starts.</p>
+<p>To introduce the structure of a C program, we will start by looking
+at a very small example:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">// A function that calculates the square of the input</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> square<span class="op">(</span><span class="dt">int</span> x<span class="op">)</span> </span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x <span class="op">*</span> x<span class="op">;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> number <span class="op">=</span> <span class="dv">5</span><span class="op">;</span> </span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> main<span class="op">()</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> square_of_number <span class="op">=</span> square<span class="op">(</span>number<span class="op">);</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;The square of </span><span class="sc">%i</span><span class="st"> is </span><span class="sc">%i</span><span class="st">.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">,</span> number<span class="op">,</span> square_of_number<span class="op">);</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Starting from line one, we see that the program begins with an
+<code>#include</code> statement:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span></code></pre></div>
+<p>This line says that the contents of the file <code>stdio.h</code>
+will be included at the top of this c file before compilation. This file
+is part of the C Standard Library (which we will talk more about later)
+and contains <em>declarations</em> of a number of useful functions that
+deal with user input and output. This is similar to the way the
+<code>import</code> statements work in Java or Python but the
+<code>#include</code> statement is much more rudimentary.</p>
+<p>The next line:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// A function that calculates the square of the input</span></span></code></pre></div>
+<p>is just a comment. Comments can either begin with <code>//</code> and
+end at the end of the line, or be enclosed between a <code>/*</code> and
+<code>*/</code>. Comments are completely ignored by the compiler and are
+only used to make the code easier to understand.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> square<span class="op">(</span><span class="dt">int</span> x<span class="op">)</span> </span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x <span class="op">*</span> x<span class="op">;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Next, we define a <em>function</em>. The function is called
+<code>square</code> and has one integer parameter (named
+<code>x</code>). It calculates <code>x * x</code> and returns the result
+as an integer. This is a function <em>definition</em>, meaning that we
+provide the code that will be run when the function is called. In many
+cases (as in the <code>stdio.h</code> file included earlier), we only
+provide a function <em>declaration</em> which tells the compiler the
+name, return type and parameters of a function that is defined elsewhere
+(later on in the file, or in a different file).</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> number <span class="op">=</span> <span class="dv">5</span><span class="op">;</span> </span></code></pre></div>
+<p>Here, we declare a <em>global variable</em> of type <code>int</code>
+(a four-byte integer), and assign the value 5 to it. It is
+<em>global</em> because it is declared outside of any function, and will
+be visible to all subsequent code. This variable will have its position
+in memory allocated during compilation and will exist throughout the
+whole program.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> main<span class="op">()</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> square_of_number <span class="op">=</span> square<span class="op">(</span>number<span class="op">);</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;The square of </span><span class="sc">%i</span><span class="st"> is </span><span class="sc">%i</span><span class="st">.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">,</span> number<span class="op">,</span> square_of_number<span class="op">);</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>We now provide the function definition of the <code>main</code>
+function. This is where program execution will start. This function
+returns <code>void</code><a href="#fn2" class="footnote-ref" id="fnref2"
+role="doc-noteref"><sup>2</sup></a>, which is how we write in C that it
+does not return anything.</p>
+<p>Next, we define a new integer variable,
+<code>square_of_number</code>, also of type <code>int</code>. Because it
+is defined inside a function, this is a <em>temporary</em> variable
+which only exists (on the stack, or in registers) while we are executing
+this function. We call the function <code>square</code> with the global
+variable <code>number</code> as an argument, and store the returned
+value in <code>square_of_number</code>.</p>
+<p>Finally, we print the result to the console. This is achieved by
+calling the function <code>printf</code> which has been declared in the
+<code>stdio.h</code> file. The <code>printf</code> function takes as its
+first argument a string <a href="#fn3" class="footnote-ref" id="fnref3"
+role="doc-noteref"><sup>3</sup></a>. Within this string we have inserted
+<em>tags</em>, on the form <code>%i</code>. The first such tag means
+that <code>printf</code> should substitute the tag with the value of the
+second parameter and that the parameter is of type <code>int</code>. The
+next tag will be substituted for the third parameter, and so on<a
+href="#fn4" class="footnote-ref" id="fnref4"
+role="doc-noteref"><sup>4</sup></a>. The final two characters in the
+string, <code>\n</code>, denote a <code>newline</code> character and
+mean that the next text sent to the console will appear at the beginning
+of the next line.</p>
+<p>As you can see, the general structure and syntax of a C program is
+very similar to other imperative languages (Java, C++, C#, Javascript,
+Go, Rust, Swift, &#x2026;).</p>
+<p>In the next lecture, we will start using C to program our
+microcontroller, and learn more details about the language, but the
+course will not teach you everything. If you would like to dive deeper,
+there are several books and online sources that delve much deeper, and
+provide online learning examples <a href="#fn5" class="footnote-ref"
+id="fnref5" role="doc-noteref"><sup>5</sup></a>.</p>
+<h3 id="compiling-a-c-program-to-machine-code">Compiling a C program to
+machine code</h3>
+<p>We will now briefly explain how the C code is turned into a binary
+file that can be executed on your computer or microcontroller. To
+describe the process of compiling a whole C program, we will use a small
+example, consisting of a few files:</p>
+<p><img src="../images/c_figure_3_1.png" /></p>
+<p>The program consists of three C files: <code>main.c</code>,
+<code>functions.c</code>, and <code>math.c</code>. With each C file
+(except <code>main.c</code>) there is an accompanying <code>.h</code>
+file that <em>declares</em> the functions that we want to be visible to
+other <code>.c</code> files.</p>
+<p>Normally, when compiling a program from inside an <em>Integrated
+Development Environment</em> (IDE), like CodeLite or Visual Studio Code,
+we simply press the &#x201C;build&#x201D; button and do not have to care much about
+what actually happens. In this section, however, we will go through the
+actual compilation steps, since it can be very useful to know how this
+works when things go wrong.</p>
+<blockquote>
+<p><strong>Note:</strong> The following assumes a system where gcc is
+installed and on the path, which is not the case on your machines. You
+do not have to run these commands, they are just here to show how it
+would work.</p>
+</blockquote>
+<h4 id="preprocessor">Preprocessor</h4>
+<p>The first step in compiling a program is to run the
+<em>preprocessor</em> on all <code>.c</code> files. We can invoke the
+preprocessor alone on the command-line like this:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gcc</span> <span class="at">-E</span> <span class="at">-P</span> main.c <span class="at">-o</span> main.i</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">gcc</span> <span class="at">-E</span> <span class="at">-P</span> functions.c <span class="at">-o</span> functions.i</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">gcc</span> <span class="at">-E</span> <span class="at">-P</span> math.c <span class="at">-o</span> math.i</span></code></pre></div>
+<p>Doing that will generate these three files:</p>
+<p><img src="../images/c_figure_3_2.png" /></p>
+<h5 id="the-include-statement">The #include statement</h5>
+<p>As you can see, the job of the preprocessor is mostly quite simple.
+When it comes across an <code>#include "filename"</code> statement, it
+will simply cut and paste the contents of the provided file into the
+<code>.c</code> file being preprocessed. For example, in
+<code>main.i</code> it has removed the include statement and inserted
+the function declaration from <code>functions.h</code>.</p>
+<p>It is important to realize that the preprocessor is not smarter than
+this. Whatever text is in the included file will be inserted, in its
+entirety, into the preprocessed file.</p>
+<h5 id="the-define-statement">The #define statement</h5>
+<p>The file <code>math.c</code> begins with the statement
+<code>#define PI 3.14</code>. This tells the preprocessor that whenever
+it comes across the word &#x201C;PI&#x201D;, in the subsequent code, it will replace
+it with the text &#x201C;3.14&#x201D;. Note that this is very different from declaring
+a <em>variable</em> called PI and assigning a value to it. The
+preprocessor does not understand the code at all, it simply replaces
+text, exactly as it has been told.</p>
+<p>The define statement can also be used to construct slightly more
+complex <em>macros</em>, but we will not come across them in this
+course.</p>
+<h4 id="compiler">Compiler</h4>
+<p>The next step is to take the preprocessed <code>.i</code> files and
+generate assembly code <a href="#fn6" class="footnote-ref" id="fnref6"
+role="doc-noteref"><sup>6</sup></a>. This is the job of the
+<em>Compiler</em>. We can run the compiler to produce assembly files
+with:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gcc</span> <span class="at">-S</span> main.i</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">gcc</span> <span class="at">-S</span> functions.i</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">gcc</span> <span class="at">-S</span> math.i</span></code></pre></div>
+<p>The resulting assembly files are:</p>
+<p><img src="../images/c_figure_3_3_riscv.png" /></p>
+<p>You are not expected to understand this assembly code, but we will
+note a few important things about them. First, we can compile, for
+instance, the <code>main.i</code> file into assembly code
+<em>independently</em> of the other files. To create the assembly code
+for <code>main.i</code>, the compiler needs to know that <em>there
+exists</em> a function called <code>function</code>, that it returns a
+<code>float</code>, and that it takes a <code>float</code> as parameter,
+but it does not need to know what that function <em>does</em>.</p>
+<p>Secondly, this assembler code can be created without any knowledge of
+where this code will reside in memory. Connecting the symbols (function
+and variable names) between the assembly files and placing them at
+specific places in memory is the job of the <em>Linker</em>, which we
+will discuss soon.</p>
+<p>In larger projects, it is very important that we can recompile a
+single <code>.c</code> file and that we do not have to recompile
+<em>all</em> files, whenever one of them changes.</p>
+<h4 id="assembler">Assembler</h4>
+<p>The next step is to assemble all of the <code>.s</code> files into
+<em>object</em> files. This can be done on the command line with:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">as</span> <span class="at">-c</span> main.s</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">as</span> <span class="at">-c</span> functions.s</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">as</span> <span class="at">-c</span> math.s</span></code></pre></div>
+<p>An object file is a binary file<a href="#fn7" class="footnote-ref"
+id="fnref7" role="doc-noteref"><sup>7</sup></a>, containing the machine
+code that will eventually run on the processor. Note, however, that this
+file is not an executable program. We still don&#x2019;t know the final
+addresses of variables and functions. The <code>call function</code>
+command in <code>main.s</code>, for instance, has been assembled into
+the appropriate machine code for the <code>call</code> instruction, but
+the <em>address</em> it should jump to is not yet available.</p>
+<h4 id="linker">Linker</h4>
+<p>The final step in producing our executable program is called
+<em>linking</em> the program. The linker takes as input all of the
+object files, and produces an executable:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ld</span> main.o functions.o math.o <span class="at">-o</span> program</span></code></pre></div>
+<p>The linker&#x2019;s main job is to arrange the code in memory, and turn all
+<em>symbols</em> (such as the call to a function called
+<code>function</code>) into actual memory addresses.</p>
+<p>If you had run all of these commands on your host computer, with the
+appropriate gcc toolchain, the output would be an executable file that
+would run on your operating system (although it won&#x2019;t actually
+<em>do</em> anything visible).</p>
+<p>If you are cross-compiling for another machine (like the MD307) and
+have used the appropriate gcc toolchain, this last linking stage will
+not quite work. You will also have to supply some flags to inform the
+compiler that it should not expect to find a <em>runtime</em> library
+(which we will talk about later), and you would need to supply a
+<em>linker script</em> that tells the linker in what part of memory to
+place the functions and variables and where to start running the
+code.</p>
+<p><strong>Links:</strong> <a
+href="https://www.wch-ic.com/downloads/CH32FV2x_V3xRM_PDF.html">CH32V307
+Reference Manual</a></p>
+<p><strong>Text and exercises in the Workbook (Arbetsboken)</strong>:
+76-78</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>As you will see later, the pins are actually multiplexed
+and can also be used for standardized protocols, like USART, SPI, etc.<a
+href="#fnref1" class="footnote-back" role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+<li id="fn2"><p>Actually, main <em>should</em> return <code>int</code>,
+and the returned value should indicate if the program succeeded, but a
+<code>void</code> return value is allowed by most compilers.<a
+href="#fnref2" class="footnote-back" role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+<li id="fn3"><p>To be precise, it takes a pointer to a string of
+characters (bytes) in memory.<a href="#fnref3" class="footnote-back"
+role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+<li id="fn4"><p>More detailed descriptions of <code>printf</code> are
+widely available on the <a
+href="https://cplusplus.com/reference/cstdio/printf/">internet</a><a
+href="#fnref4" class="footnote-back" role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+<li id="fn5"><p>Some good places to start are:
+https://www.w3schools.com/c/index.php,
+https://www.programiz.com/c-programming, and
+https://www.tutorialspoint.com/cprogramming/index.htm<a href="#fnref5"
+class="footnote-back" role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+<li id="fn6"><p>In practice, the compiler might skip creating the actual
+assembly code and merge the compilation step with the assembler step
+that produces machine code, but sometimes it is very handy to see the
+human readable assembly code.<a href="#fnref6" class="footnote-back"
+role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+<li id="fn7"><p>The actual format of this file depends on the compiler.
+<code>gcc</code> will produce files on the ELF format.<a href="#fnref7"
+class="footnote-back" role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+</ol>
+</section>
+</body>
+</html>

@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>lecture08_internal_interrupts</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+<h1 id="exceptions-and-internal-interrupts">Exceptions and Internal
+Interrupts</h1>
+<p>In this lecture, we will start looking into <em>exceptions</em>,
+<em>faults</em>, <em>traps</em>, and <em>interrupts</em>. These are all
+names for situations where the currently running program is
+<em>interrupted</em> by some event, either from outside or inside the
+processor.</p>
+<p>A simple real-world analogy would be the ring signal on your phone.
+You probably do not look at your phone every few seconds to see if
+someone is calling you. Instead, you go about your life, and sometimes
+the phone rings and you drop everything for a short while to handle that
+phone call, and then go on with your life as if nothing had
+happened.</p>
+<p>In the same way, a microcontroller in your fridge might run along
+happily regulating the temperature. When the fridge door opens, it has
+to turn on the lights. If the door stays open for too long it has to
+start an annoying beep that reminds you to close the door.</p>
+<p>We <em>could</em> try to check if the door is open, every few
+instructions, in our code, but that would be very difficult and lead to
+horribly complicated code. Instead, all modern microprocessors have an
+exception mechanism that allows the processor to:</p>
+<ol type="1">
+<li>Store the current state of the machine (the register values) to
+memory.</li>
+<li>Jump to an <em>exception handler</em> - another piece of code that
+handles the event that just occurred.</li>
+<li>Restore the machine state and resume your program as if nothing had
+happened.</li>
+</ol>
+<h2 id="different-types-of-exceptions">Different types of
+exceptions</h2>
+<p>Exceptions are categorized in a number of different ways, and you
+will see that essentially the same functionality has different names
+depending on where and how it happens:</p>
+<ul>
+<li><strong>RESET</strong> - A very special type of exception occurs
+when someone presses the <em>reset</em> button (or the processor was
+told to reset by the debug module). The running program is then
+interrupted, and the processor starts a RESET sequence (the program is
+never resumed).</li>
+<li><strong>FAULT</strong> - The running code might do something that is
+not allowed. For example, it might do an unaligned memory access (as we
+have discussed before), it might try to write to a protected part of the
+memory area, or it might simply try to divide a value by zero. All of
+these errors are likely to cause the machine to crash if not handled
+appropriately. Instead, the program can be immediately interrupted and
+some system code can run that handles the error in an appropriate way
+and then might allow the program to resume.</li>
+<li><strong>INTERRUPT</strong> - In this course we will divide
+interrupts into two different types:
+<ul>
+<li><strong>External Interrupts</strong> - This is when an interrupt
+originates from <em>outside</em> the microcontroller. The fridge door,
+for example, might be connected to one of the GPIO pins, and when the
+door opens the programmer wants the change in the GPIO pin&#x2019;s value to
+immediately interrupt the running program.</li>
+<li><strong>Internal Interrupts</strong> - This is when the signal to
+interrupt originates from within the microcontroller. When the fridge
+door opens, the programmer might start a SysTick timer, and configure it
+to interrupt the running code after 30 seconds.</li>
+</ul></li>
+<li><strong>TRAP</strong> - Sometimes, the code itself might ask to be
+interrupted. This might sound strange, but in reality there are many
+cases where this is useful - for example when invoking system services
+or entering a debugger. We will return to this later.</li>
+</ul>
+<blockquote>
+<p><strong>Note:</strong> This is the terminology we will use in this
+course, and what is used in many textbooks. Some textbooks and articles
+(and even the RISC-V specification) use slightly different, and
+sometimes contradictory, definitions of these terms.</p>
+</blockquote>
+<h2 id="a-quick-aside-control-and-status-registers">A quick aside:
+Control and Status Registers</h2>
+<p>In the beginning of this course, we stated that a processor
+implementing RV32I only needs 33 registers (<code>x0&#x2013;x31</code> plus the
+<code>pc</code>). That is still true - but such a processor would not
+support interrupts.</p>
+<p>Our microprocessor (CH32V307) implements RV32I together with the
+Privileged ISA and the <code>Zicsr</code> extension, which add support
+for interrupts and system control. As a result, the processor contains a
+number of additional registers called <em>Control and Status
+Registers</em> (CSRs). We will encounter a few of these later in the
+lecture. For now, all you need to know is that:</p>
+<ol type="1">
+<li>CSRs are real hardware registers like the GPRs, but they are not
+accessible with normal instructions.<br />
+</li>
+<li>They can only be read or modified using a small set of special CSR
+instructions.</li>
+</ol>
+<div class="boxed">
+<p><small> <strong>Enrichment:</strong> The following is interesting and
+will help your understanding, but is not essential for the course.
+</small></p>
+<h1 id="machine-privilege-modes">Machine Privilege modes</h1>
+<p>A RISC-V processor (that implements the &#x201C;Privileged Specification&#x201D;)
+can run in different <em>privilege modes</em>. At lower privilege
+levels, some instructions are not allowed. It is easy to see why this is
+necessary on a desktop computer: if any program could execute any
+instruction and freely access the memory of other programs, it could
+cause serious <strong>security problems</strong> (reading or modifying
+private data) or <strong>stability problems</strong> (crashing the
+entire system). For this reason, the operating system runs with full
+system access, while user applications run with very limited
+privileges.</p>
+<p>We will not explore this topic in depth in this course, but even on
+the small microcontrollers we use, privilege modes can be very useful.
+Consider a smart fridge as an example. Some parts of the system are
+<strong>safety-critical</strong>, such as temperature regulation, and
+are developed very carefully to run reliably for many years without
+change. Other parts, such as the touchscreen user interface, are updated
+frequently as features and visual designs evolve. If a bug is introduced
+while adding a new font to the clock app, it is crucial that this
+mistake cannot affect the safety-critical code and spoil the food.</p>
+<p>For this reason, the less critical code can run in a lower privilege
+mode, where it does not have the ability to interfere with or crash the
+core control software that keeps the fridge operating safely.</p>
+<p>Even code that runs in a lower privilege mode (such as the
+user-interface tasks) will still need to interact with hardware. For
+example, the UI must update the display, read button presses, or query
+the current temperature. However, direct access to most peripherals and
+critical registers is restricted to privileged code.</p>
+<p>To handle this safely, user-mode programs do not access hardware
+directly. Instead, they <strong>request services from privileged
+code</strong>, which performs the sensitive operations on their behalf.
+This is done by temporarily transitioning from user mode to machine mode
+using a <em>trap</em> (often called a <em>system call</em>).</p>
+<p>When the UI wants to update the screen or read a sensor, it triggers
+a special instruction that raises a trap. The processor immediately
+switches into machine mode and begins executing a trusted service
+routine. This routine checks the request, performs the necessary
+hardware access in a controlled way, and then returns the result to the
+user-mode program before switching back to user mode.</p>
+<blockquote>
+<p>Quiz: If all interrupt handlers run in privileged mode, why couldn&#x2019;t
+a malicious programmer simply write an interrupt handler that does the
+malicious stuff?</p>
+</blockquote>
+</div>
+<h2 id="the-programmable-fast-interrupt-controller-pfic">The
+Programmable Fast Interrupt Controller (PFIC)</h2>
+<p>The module in the processor core on our microcontroller that collects
+all exceptions is called the <em>Programmable Fast Interrupt
+Controller</em> (PFIC). We will discuss this in more detail in the next
+lecture bit will quickly introduce it here. Anything that <em>can</em>
+interrupt the processor is connected to this module, and all the
+possible interrupt sources are ordered and listed in the <em>Vector
+Table</em> in the <a
+href="https://www.cse.chalmers.se/edu/resources/mop/lecture_notes/quickguide.html">QuickGuide</a>.</p>
+<p>Whenever something wants to interrupt the processor, it will tell the
+PFIC and the PFIC will check if that interrupt is enabled, if there is
+another interrupt running at the moment and whether that interrupt
+should be interrupted or if the current interrupt should be queued.</p>
+<center>
+<img src= "../images/pfic.png" width=70%>
+</center>
+<p>For this lecture, all we need to do to the PFIC is to <em>enable</em>
+interrupts from the SysTick timer, so let us look at a single set of
+registers:</p>
+<table class="fold-table" style = 'border-collapse: collapse; table-layout: fixed; width: 100%;'>
+<colgroup><col style = 'width: 5%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 1%;'><col style = 'width: 5%;'></colgroup><tr><th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>offset</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>31</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>30</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>29</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>28</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>27</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>26</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>25</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>24</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>23</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>22</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>21</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>20</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>19</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>18</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>17</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>16</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>15</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>14</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>13</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>12</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>11</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>10</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>9</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>8</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>7</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>6</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>5</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>4</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>3</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>2</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>1</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0</th>
+<th style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>Register</th>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x100</td>
+<td colspan=20 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=12 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>IENR1</td>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x104</td>
+<td colspan=32 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>IENR2</td>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x108</td>
+<td colspan=32 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>IENR3</td>
+</tr>
+<tr>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>0x10C</td>
+<td colspan=24 style = 'background-color: lightgray; border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td colspan=8 style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'> </td>
+<td style = 'border: 1px solid black;  padding: 1px;  text-align: center;  white-space: nowrap; font-family: "Arial Narrow", sans-serif;'>IENR4</td>
+</tr>
+</table>
+
+<p>These are the <em>Interupt Enable</em> registers and they contain one
+bit for each possible interrupt source (104 bits all together). The
+first register, <code>IENR1</code>, contains the bits corresponding to
+the first 32 interrupts in the <a href="vector_table.html">vector
+table</a>, the next register, <code>IENR2</code>, correspond to
+interrupts [32-63], and so on.</p>
+<p>Since we want to enable SyTick interrupts (interrupt number 12 in the
+vector table), we need to set the 12:th bit in <code>IENR1</code>.</p>
+<h1 id="how-to-write-a-program-with-interrupts">How to write a program
+with interrupts</h1>
+<p>We will explore why and how we program with interrupts using a simple
+example. Let&#x2019;s say we are employed by a Fridge company, and they want a
+prototype program from us. When the fridge door has been left open for
+too long they want a microcontroller to play a loud and annoying note,
+while at the same time displaying the current temperature on a 7-segment
+display.</p>
+<p>Luckily, our PTB-110 IO board has both a little speaker (called
+&#x201C;buzzer&#x201D; in the image below), and a 7 segment display, so all we have to
+do is plug in our MD307 and write the code.</p>
+<p><img src="../images/sound_and_graphics.png" /></p>
+<p>Let&#x2019;s start with playing a note. A sound signal sent to a speaker is
+usually an analog signal with varying voltage, and all we know (yet) is
+how to output 0 or 3.3V from our GPIO ports. For us humans to perceive a
+signal as a note, however, all we need is a signal with a frequency in
+the 20Hz-20kHz range. So in fact, just flipping a GPIO pin between 0 and
+1 (0 and 3.3V) every ~2 ms and connecting that signal to a speaker will
+produce a 261Hz signal that sounds like a middle C on a piano (well, it
+has the same pitch, anyways).</p>
+<p>We have already practiced sending signals to GPIO pins <em>and</em>
+precise timing (with SysTick), so we can immediately write the code for
+this.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>GPIOD_CFGLR <span class="op">=</span> <span class="bn">0x00000002</span><span class="op">;</span>  <span class="co">// Configure pin 0 as Output, Push-Pull, 2MHz</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>SYSTICK_CMPH <span class="op">=</span> <span class="bn">0x0</span><span class="op">;</span>        <span class="co">// Set systick compare value to 2ms </span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>SYSTICK_CMPL <span class="op">=</span> <span class="dv">147000</span> <span class="op">*</span> <span class="dv">2</span><span class="op">;</span> <span class="co">//</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>SYSTICK_CTLR <span class="op">=</span> <span class="bn">0b101101</span><span class="op">;</span>   <span class="co">// Start systick timer, count down, enable restart</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span><span class="op">(</span><span class="dv">1</span><span class="op">)</span> </span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span><span class="op">((*</span>SYSTICK_SR <span class="op">&amp;</span> <span class="bn">0x1</span><span class="op">)</span> <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{}</span>  <span class="co">// Wait until systick has counted to zero (2ms)</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">*</span>SYSTICK_SR <span class="op">=</span> <span class="dv">0</span><span class="op">;</span>                    <span class="co">// Reset status flag</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">*</span>GPIOD_ODATA <span class="op">^=</span> <span class="bn">0x1</span><span class="op">;</span>                <span class="co">// Flip pin 0</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>If we connect GPIO pin <code>D0</code> to the buzzer, we will hear a
+tone playing.</p>
+<p>For the second task &#x2013; showing the temperature on the 7-segment
+display &#x2013; we will pretend that we are given two helper functions in a
+library:</p>
+<ul>
+<li><code>int GetTemperature()</code> - Blocks until a new temperature
+value is available (max 100 ms), then returns the temperature (always
+between 0 and 9 degrees)</li>
+<li><code>uint8_t Get7SegCode(int x)</code> - Returns the bitmask (the
+lit segments) corresponding to the number <code>x</code>.</li>
+</ul>
+<p>If we connect GPIO port E(7:0) to our 7-segment display, we could now
+run the following program:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>GPIOE_CFGLR <span class="op">=</span> <span class="bn">0x22222222</span><span class="op">;</span>  <span class="co">// Configure all pins as Output, Push-Pull, 20MHz</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span><span class="op">(</span><span class="dv">1</span><span class="op">)</span> </span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> t <span class="op">=</span> GetTemperature<span class="op">();</span> </span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">*</span>GPIOE_ODATA <span class="op">=</span> Get7SegCode<span class="op">(</span>t<span class="op">);</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>But how can we combine these two programs? Since the
+<code>GetTemperature</code> function can take anywhere between 0 and
+100ms it seems impossible to keep flipping pin <code>D0</code> every
+2ms. The answer (as you have probably guessed) is to let SysTick
+interrupt our code every time it has counted down to zero, flip
+<code>D0</code> in the interrupt handler, and return to the the main
+program. But before we can write that code, we need to know a bit more
+about interrupt handlers.</p>
+<h2 id="what-happens-when-an-interrupt-occurs">What happens when an
+interrupt occurs?</h2>
+<p>In an early lecture, we gave a brief introduction to the
+<em>instruction cycle</em> - the state machine the processor goes
+through for each instruction. Let&#x2019;s revisit that, and add a few steps to
+take care of interrupts <a href="#fn1" class="footnote-ref" id="fnref1"
+role="doc-noteref"><sup>1</sup></a>:</p>
+<ol type="1">
+<li><em>Fetch Instruction</em> - Fetch the next instruction from memory
+(at the address stored in <code>PC</code>)</li>
+<li><em>Decode Instruction</em> - Find which instruction it is, and
+prepare inputs to ALU, etc.</li>
+<li><em>Execute Instruction</em> - Execute the instruction (usually an
+ALU operation)</li>
+<li><em>Store/Writeback</em> - Write results to memory or destination
+registers</li>
+<li><strong>Check Exceptions</strong> - Check if any exception has
+occurred and if it is enabled and, <em>if so</em>:
+<ol type="1">
+<li>Save current <code>PC</code> in CSR register <code>mepc</code></li>
+<li>Save the cause of the exception in CSR register
+<code>mcause</code></li>
+<li>Disable interrupts by writing a bit in CSR register
+<code>mstatus</code></li>
+<li><code>PC</code> &lt;- Get address to interrupt handler from
+<code>mtvec</code> CSR.</li>
+</ol></li>
+</ol>
+<p>In other words, if an interrupt occurs, the current instruction will
+continue until done. Then machine state will be saved away and
+<code>PC</code> will change to an address specific to this exception. We
+will discuss some of these steps in detail below.</p>
+<h3 id="interrupt-handler-address">Interrupt handler address</h3>
+<p>So how does the processor know where to jump (i.e., where in memory
+the interrupt handler is), when an interrupt occurs? There are actually
+several different ways that the CH32V307 can handle this, and they will
+be discussed in the next lecture. For this lecture, we will use the
+simplest possible way: Put the <em>address</em> of the interrupt handler
+function into the CSR <code>mtvec</code>.</p>
+<p>Since the C language is platform independent, there is no special C
+code that can write to the CSR registers. Instead, we either have to
+implement this in an assembly file:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">.extern</span> Interrupt_Handler  <span class="co"># Assuming there is a C function with this name</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">.global</span> write_mtvec        <span class="co"># Make this function available to C code</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">write_mtvec:</span>               <span class="co"># void write_mtvec()</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">la</span> <span class="kw">t0</span><span class="op">,</span> Interrupt_Handler   <span class="co"># Load the address of that function to t0</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">csrw</span> mtvec<span class="op">,</span> <span class="kw">t0</span>             <span class="co"># And write it into mtvec</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="cf">ret</span></span></code></pre></div>
+<p>, or we can use <em>inline assembly</em> in our C code to achieve the
+same thing:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Set mtvec to address of Interrupt_Handler</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>__asm__ <span class="dt">volatile</span> <span class="op">(</span><span class="st">&quot;csrw mtvec, %0&quot;</span> <span class="op">::</span> <span class="st">&quot;r&quot;</span><span class="op">(</span>Interrupt_Handler<span class="op">));</span></span></code></pre></div>
+<p>Either way, when an interrupt is enabled and triggers, the processor
+will now expect a handler routine at the address stored in the
+<code>mtvec</code> register, and jump to that address.</p>
+<h3 id="interrupt-handlers">Interrupt handlers</h3>
+<p>In most respects, an interrupt handler is just a &#x201C;function&#x201D; and we
+will implement it as a function in C, but there are two important
+caveats.</p>
+<ul>
+<li><p><strong>Returning from an interrupt handler</strong> When the
+interrupt handler is done, it cannot use the <code>ret</code> assembler
+instruction to return. If you recall, or look in the QuickGuide, the
+<code>ret</code> pseudo instruction is implemented as
+<code>jalr x0, 0(ra)</code>. That is, it will jump to whatever address
+is in the <code>ra</code> register but that will <em>not</em> be the
+address to the instruction that was interrupted!</p>
+<p>Instead, an interrupt handler must use the <code>mret</code>
+instruction. This is a special instruction, only used by interrupt
+handlers, that copies the previously stored CSR <code>mepc</code> to
+<code>pc</code>, restores privilege levels and enables interrupts again
+(if they were enabled when the exception occured).</p></li>
+<li><p><strong>Register saving in an interrupt handler</strong> In
+normal C functions, the compiler will follow the conventions, set up by
+the ABI, for which registers shall be saved on the stack. Importantly,
+that means that the <em>caller</em> is expected to save the
+<code>t</code> registers (if it has further use for them) before calling
+a function, so the <em>callee</em> does not have to do that.</p>
+<p>Since an interrupt handler is not &#x201C;called&#x201D; in the conventional sense,
+the <em>caller</em> has no opportunity to save the <code>t</code>
+registers, and the interrupt handler has to assume that <em>all</em>
+registers it uses need to be saved on the stack.</p></li>
+</ul>
+<p>Luckily, in practice, we rarely have to think about this distinction
+when programming in C. We simply tell the compiler that this specific
+function is an interrupt handler and the compiler will produce the
+correct code.</p>
+<h2 id="implementing-our-smart-fridge-prototype">Implementing our
+smart-fridge prototype</h2>
+<p>To complete our prototype that can play a tone on the buzzer and show
+the temperature on the display at the same time, we will rewrite the
+tone generation so that it is triggered by a systick interrupt
+instead.</p>
+<h3 id="enabling-interrupts-from-systick-in-the-pfic">Enabling
+interrupts from SysTick in the PFIC</h3>
+<p>Since SysTick is interrupt number 12, we enable SysTick interrupts by
+setting bit number 12 in the PFIC_IENR1 register:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#define PFIC_BASE       </span><span class="bn">0xE000E000</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#define PFIC_IENR1     </span><span class="op">((</span><span class="dt">volatile</span><span class="pp"> </span><span class="dt">uint32_t</span><span class="pp"> </span><span class="op">*)(</span><span class="pp">PFIC_BASE </span><span class="op">+</span><span class="pp"> </span><span class="bn">0x100</span><span class="op">))</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Enable Systick Interrupt in PFIC</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>PFIC_IENR1 <span class="op">|=</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">12</span><span class="op">);</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="writing-a-systick-interrupt-handler">Writing a SysTick interrupt
+handler</h3>
+<p>Next, we will write an interrupt handler that will be called every
+time the SysTick counter reaches 0. The actual handler code can look
+like this:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>__attribute__<span class="op">((</span>interrupt<span class="op">(</span><span class="st">&quot;machine&quot;</span><span class="op">)))</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> SysTick_Handler<span class="op">(</span><span class="dt">void</span><span class="op">)</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>SYSTICK_SR <span class="op">=</span> <span class="dv">0</span><span class="op">;</span>        <span class="co">// Reset the status, so we will get a new interrupt in 2ms</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>GPIOD_ODATA <span class="op">^=</span> <span class="bn">0x1</span><span class="op">;</span>    <span class="co">// Flip GPIO D0 pin</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The first line tells the compiler that this is an interrupt handler
+and code must be generated accordingly. Note that the systick module
+will not generate a new interrupt until the last one has been taken care
+of. You inform the module that this has been done by setting the status
+register back to 0.</p>
+<p>We also have to inform the processor that this is the function that
+we want to be called when an interrupt occurs. As discussed earlier, we
+do this by putting the address to it into the <code>mtvec</code> CSR
+register:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    asm <span class="dt">volatile</span> <span class="op">(</span><span class="st">&quot;csrw mtvec, %0&quot;</span> <span class="op">::</span> <span class="st">&quot;r&quot;</span><span class="op">(</span>SysTick_Handler<span class="op">));</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="configuring-systick-to-generate-interrupts">Configuring SysTick
+to generate Interrupts</h3>
+<p>To make sure that this handler actually gets called, we can start by
+flipping a single bit in our previous systick-initialization code:</p>
+<pre><code>    *SYSTICK_CMPH = 0x0;        // Set systick compare value to 2ms 
+    *SYSTICK_CMPL = 147000 * 2; //
+    *SYSTICK_CTLR = 0b101111;   // Start systick timer, count down, enable restart,
+                                // and ENABLE INTERRUPTS</code></pre>
+<p>But now our code is in a dangerous state! After this line has been
+executed, systick will start counting and after 2ms, an interrupt will
+be triggered. The processor will then use the <code>mtvec</code> CSR to
+decide where to jump, but we have not put anything useful into that
+register.</p>
+<p>And that is all there is to it! We can now write a single main C
+file, that plays a tone using an interrupt, and <em>in parallel</em>
+reads and updates the thermometer value.</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>This description is still simplified, and interrupt
+handling is described as it works when the processor is configured for
+&#x201C;vectored interrupts&#x201D;, which is all we cover in this course.<a
+href="#fnref1" class="footnote-back" role="doc-backlink">&#x21A9;&#xFE0E;</a></p></li>
+</ol>
+</section>
+</body>
+</html>

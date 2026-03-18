@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>interrupt_vector_table</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+<h1 id="ch32v307-interrupt-vector-table-complete">CH32V307 Interrupt
+Vector Table (Complete)</h1>
+<h2 id="section"></h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 13%" />
+<col style="width: 26%" />
+<col style="width: 34%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: right;">No.</th>
+<th style="text-align: right;">Priority</th>
+<th>Name</th>
+<th>Description</th>
+<th>Address</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">-</td>
+<td>-</td>
+<td>Reserved</td>
+<td>0x00000000</td>
+</tr>
+<tr>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">-</td>
+<td>-</td>
+<td>Reserved</td>
+<td>0x00000004</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">-5 (fixed)</td>
+<td>NMI</td>
+<td>Non-maskable interrupt</td>
+<td>0x00000008</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">-4 (fixed)</td>
+<td>HardFault</td>
+<td>Hard fault exception</td>
+<td>0x0000000C</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">-</td>
+<td>-</td>
+<td>Reserved</td>
+<td>0x00000010</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">-3 (fixed)</td>
+<td>ECALL-M</td>
+<td>Machine-mode ECALL</td>
+<td>0x00000014</td>
+</tr>
+<tr>
+<td style="text-align: right;">6&#x2013;7</td>
+<td style="text-align: right;">-</td>
+<td>-</td>
+<td>Reserved</td>
+<td>0x00000018&#x2013;1C</td>
+</tr>
+<tr>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">-2 (fixed)</td>
+<td>ECALL-U</td>
+<td>User-mode ECALL</td>
+<td>0x00000020</td>
+</tr>
+<tr>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">-1 (fixed)</td>
+<td>BreakPoint</td>
+<td>Breakpoint exception</td>
+<td>0x00000024</td>
+</tr>
+<tr>
+<td style="text-align: right;">10&#x2013;11</td>
+<td style="text-align: right;">-</td>
+<td>-</td>
+<td>Reserved</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0</td>
+<td>SysTick</td>
+<td>System timer interrupt</td>
+<td>0x00000030</td>
+</tr>
+<tr>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">-</td>
+<td>-</td>
+<td>Reserved</td>
+<td>0x00000034</td>
+</tr>
+<tr>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">1</td>
+<td>SW</td>
+<td>Software interrupt</td>
+<td>0x00000038</td>
+</tr>
+<tr>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">-</td>
+<td>-</td>
+<td>Reserved</td>
+<td>0x0000003C</td>
+</tr>
+</tbody>
+</table>
+<h1 id="peripheral-interrupts-programmable-16104">Peripheral Interrupts
+(Programmable: 16&#x2013;104)</h1>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 21%" />
+<col style="width: 56%" />
+<col style="width: 15%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: right;">No.</th>
+<th>Name</th>
+<th>Description</th>
+<th>Address</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">16</td>
+<td>WWDG</td>
+<td>Window watchdog</td>
+<td>0x00000040</td>
+</tr>
+<tr>
+<td style="text-align: right;">17</td>
+<td>PVD</td>
+<td>PVD via EXTI</td>
+<td>0x00000044</td>
+</tr>
+<tr>
+<td style="text-align: right;">18</td>
+<td>TAMPER</td>
+<td>Tamper interrupt</td>
+<td>0x00000048</td>
+</tr>
+<tr>
+<td style="text-align: right;">19</td>
+<td>RTC</td>
+<td>RTC global interrupt</td>
+<td>0x0000004C</td>
+</tr>
+<tr>
+<td style="text-align: right;">20</td>
+<td>FLASH</td>
+<td>Flash global interrupt</td>
+<td>0x00000050</td>
+</tr>
+<tr>
+<td style="text-align: right;">21</td>
+<td>RCC</td>
+<td>RCC global interrupt</td>
+<td>0x00000054</td>
+</tr>
+<tr>
+<td style="text-align: right;">22</td>
+<td>EXTI0</td>
+<td>EXTI line0 interrupt</td>
+<td>0x00000058</td>
+</tr>
+<tr>
+<td style="text-align: right;">23</td>
+<td>EXTI1</td>
+<td>EXTI line1 interrupt</td>
+<td>0x0000005C</td>
+</tr>
+<tr>
+<td style="text-align: right;">24</td>
+<td>EXTI2</td>
+<td>EXTI line2 interrupt</td>
+<td>0x00000060</td>
+</tr>
+<tr>
+<td style="text-align: right;">25</td>
+<td>EXTI3</td>
+<td>EXTI line3 interrupt</td>
+<td>0x00000064</td>
+</tr>
+<tr>
+<td style="text-align: right;">26</td>
+<td>EXTI4</td>
+<td>EXTI line4 interrupt</td>
+<td>0x00000068</td>
+</tr>
+<tr>
+<td style="text-align: right;">27</td>
+<td>DMA1_CH1</td>
+<td>DMA1 Channel 1</td>
+<td>0x0000006C</td>
+</tr>
+<tr>
+<td style="text-align: right;">28</td>
+<td>DMA1_CH2</td>
+<td>DMA1 Channel 2</td>
+<td>0x00000070</td>
+</tr>
+<tr>
+<td style="text-align: right;">29</td>
+<td>DMA1_CH3</td>
+<td>DMA1 Channel 3</td>
+<td>0x00000074</td>
+</tr>
+<tr>
+<td style="text-align: right;">30</td>
+<td>DMA1_CH4</td>
+<td>DMA1 Channel 4</td>
+<td>0x00000078</td>
+</tr>
+<tr>
+<td style="text-align: right;">31</td>
+<td>DMA1_CH5</td>
+<td>DMA1 Channel 5</td>
+<td>0x0000007C</td>
+</tr>
+<tr>
+<td style="text-align: right;">32</td>
+<td>DMA1_CH6</td>
+<td>DMA1 Channel 6</td>
+<td>0x00000080</td>
+</tr>
+<tr>
+<td style="text-align: right;">33</td>
+<td>DMA1_CH7</td>
+<td>DMA1 Channel 7</td>
+<td>0x00000084</td>
+</tr>
+<tr>
+<td style="text-align: right;">34</td>
+<td>ADC1_2</td>
+<td>ADC1/ADC2 global</td>
+<td>0x00000088</td>
+</tr>
+<tr>
+<td style="text-align: right;">35</td>
+<td>USB_HP/CAN1_TX</td>
+<td>USB FS HP or CAN1 TX</td>
+<td>0x0000008C</td>
+</tr>
+<tr>
+<td style="text-align: right;">36</td>
+<td>USB_LP/CAN1_RX0</td>
+<td>USB FS LP or CAN1 RX0</td>
+<td>0x00000090</td>
+</tr>
+<tr>
+<td style="text-align: right;">37</td>
+<td>CAN1_RX1</td>
+<td>CAN1 RX1</td>
+<td>0x00000094</td>
+</tr>
+<tr>
+<td style="text-align: right;">38</td>
+<td>CAN1_SCE</td>
+<td>CAN1 status/error</td>
+<td>0x00000098</td>
+</tr>
+<tr>
+<td style="text-align: right;">39</td>
+<td>EXTI9_5</td>
+<td>EXTI lines 5&#x2013;9</td>
+<td>0x0000009C</td>
+</tr>
+<tr>
+<td style="text-align: right;">40</td>
+<td>TIM1_BRK</td>
+<td>TIM1 break</td>
+<td>0x000000A0</td>
+</tr>
+<tr>
+<td style="text-align: right;">41</td>
+<td>TIM1_UP</td>
+<td>TIM1 update</td>
+<td>0x000000A4</td>
+</tr>
+<tr>
+<td style="text-align: right;">42</td>
+<td>TIM1_TRG_COM</td>
+<td>TIM1 trigger/comm</td>
+<td>0x000000A8</td>
+</tr>
+<tr>
+<td style="text-align: right;">43</td>
+<td>TIM1_CC</td>
+<td>TIM1 capture/compare</td>
+<td>0x000000AC</td>
+</tr>
+<tr>
+<td style="text-align: right;">44</td>
+<td>TIM2</td>
+<td>TIM2 global</td>
+<td>0x000000B0</td>
+</tr>
+<tr>
+<td style="text-align: right;">45</td>
+<td>TIM3</td>
+<td>TIM3 global</td>
+<td>0x000000B4</td>
+</tr>
+<tr>
+<td style="text-align: right;">46</td>
+<td>TIM4</td>
+<td>TIM4 global</td>
+<td>0x000000B8</td>
+</tr>
+<tr>
+<td style="text-align: right;">47</td>
+<td>I2C1_EV</td>
+<td>I2C1 event</td>
+<td>0x000000BC</td>
+</tr>
+<tr>
+<td style="text-align: right;">48</td>
+<td>I2C1_ER</td>
+<td>I2C1 error</td>
+<td>0x000000C0</td>
+</tr>
+<tr>
+<td style="text-align: right;">49</td>
+<td>I2C2_EV</td>
+<td>I2C2 event</td>
+<td>0x000000C4</td>
+</tr>
+<tr>
+<td style="text-align: right;">50</td>
+<td>I2C2_ER</td>
+<td>I2C2 error</td>
+<td>0x000000C8</td>
+</tr>
+<tr>
+<td style="text-align: right;">51</td>
+<td>SPI1</td>
+<td>SPI1 global</td>
+<td>0x000000CC</td>
+</tr>
+<tr>
+<td style="text-align: right;">52</td>
+<td>SPI2</td>
+<td>SPI2 global</td>
+<td>0x000000D0</td>
+</tr>
+<tr>
+<td style="text-align: right;">53</td>
+<td>USART1</td>
+<td>USART1 global</td>
+<td>0x000000D4</td>
+</tr>
+<tr>
+<td style="text-align: right;">54</td>
+<td>USART2</td>
+<td>USART2 global</td>
+<td>0x000000D8</td>
+</tr>
+<tr>
+<td style="text-align: right;">55</td>
+<td>USART3</td>
+<td>USART3 global</td>
+<td>0x000000DC</td>
+</tr>
+<tr>
+<td style="text-align: right;">56</td>
+<td>EXTI15_10</td>
+<td>EXTI lines 10&#x2013;15</td>
+<td>0x000000E0</td>
+</tr>
+<tr>
+<td style="text-align: right;">57</td>
+<td>RTCAlarm</td>
+<td>RTC alarm via EXTI</td>
+<td>0x000000E4</td>
+</tr>
+<tr>
+<td style="text-align: right;">58</td>
+<td>USBWakeUp</td>
+<td>USB wakeup via EXTI</td>
+<td>0x000000E8</td>
+</tr>
+<tr>
+<td style="text-align: right;">59</td>
+<td>TIM8_BRK</td>
+<td>TIM8 break</td>
+<td>0x000000EC</td>
+</tr>
+<tr>
+<td style="text-align: right;">60</td>
+<td>TIM8_UP</td>
+<td>TIM8 update</td>
+<td>0x000000F0</td>
+</tr>
+<tr>
+<td style="text-align: right;">61</td>
+<td>TIM8_TRG_COM</td>
+<td>TIM8 trigger/comm</td>
+<td>0x000000F4</td>
+</tr>
+<tr>
+<td style="text-align: right;">62</td>
+<td>TIM8_CC</td>
+<td>TIM8 capture/compare</td>
+<td>0x000000F8</td>
+</tr>
+<tr>
+<td style="text-align: right;">63</td>
+<td>RNG</td>
+<td>Random number generator</td>
+<td>0x000000FC</td>
+</tr>
+<tr>
+<td style="text-align: right;">64</td>
+<td>Reserved</td>
+<td>&#x2014;</td>
+<td>0x00000100</td>
+</tr>
+<tr>
+<td style="text-align: right;">65</td>
+<td>SDIO</td>
+<td>SDIO global</td>
+<td>0x00000104</td>
+</tr>
+<tr>
+<td style="text-align: right;">66</td>
+<td>TIM5</td>
+<td>TIM5 global</td>
+<td>0x00000108</td>
+</tr>
+<tr>
+<td style="text-align: right;">67</td>
+<td>SPI3</td>
+<td>SPI3 global</td>
+<td>0x0000010C</td>
+</tr>
+<tr>
+<td style="text-align: right;">68</td>
+<td>USART4</td>
+<td>USART4 global</td>
+<td>0x00000110</td>
+</tr>
+<tr>
+<td style="text-align: right;">69</td>
+<td>USART5</td>
+<td>USART5 global</td>
+<td>0x00000114</td>
+</tr>
+<tr>
+<td style="text-align: right;">70</td>
+<td>TIM6</td>
+<td>TIM6 global</td>
+<td>0x00000118</td>
+</tr>
+<tr>
+<td style="text-align: right;">71</td>
+<td>TIM7</td>
+<td>TIM7 global</td>
+<td>0x0000011C</td>
+</tr>
+<tr>
+<td style="text-align: right;">72</td>
+<td>DMA2_CH1</td>
+<td>DMA2 Channel 1</td>
+<td>0x00000120</td>
+</tr>
+<tr>
+<td style="text-align: right;">73</td>
+<td>DMA2_CH2</td>
+<td>DMA2 Channel 2</td>
+<td>0x00000124</td>
+</tr>
+<tr>
+<td style="text-align: right;">74</td>
+<td>DMA2_CH3</td>
+<td>DMA2 Channel 3</td>
+<td>0x00000128</td>
+</tr>
+<tr>
+<td style="text-align: right;">75</td>
+<td>DMA2_CH4</td>
+<td>DMA2 Channel 4</td>
+<td>0x0000012C</td>
+</tr>
+<tr>
+<td style="text-align: right;">76</td>
+<td>DMA2_CH5</td>
+<td>DMA2 Channel 5</td>
+<td>0x00000130</td>
+</tr>
+<tr>
+<td style="text-align: right;">77</td>
+<td>ETH</td>
+<td>Ethernet global interrupt</td>
+<td>0x00000134</td>
+</tr>
+<tr>
+<td style="text-align: right;">78</td>
+<td>ETH_WKUP</td>
+<td>Ethernet wakeup interrupt</td>
+<td>0x00000138</td>
+</tr>
+<tr>
+<td style="text-align: right;">79</td>
+<td>CAN2_TX</td>
+<td>CAN2 TX</td>
+<td>0x0000013C</td>
+</tr>
+<tr>
+<td style="text-align: right;">80</td>
+<td>CAN2_RX0</td>
+<td>CAN2 RX FIFO 0</td>
+<td>0x00000140</td>
+</tr>
+<tr>
+<td style="text-align: right;">81</td>
+<td>CAN2_RX1</td>
+<td>CAN2 RX FIFO 1</td>
+<td>0x00000144</td>
+</tr>
+<tr>
+<td style="text-align: right;">82</td>
+<td>CAN2_SCE</td>
+<td>CAN2 status/error</td>
+<td>0x00000148</td>
+</tr>
+<tr>
+<td style="text-align: right;">83</td>
+<td>OTG_FS</td>
+<td>USB FS OTG interrupt</td>
+<td>0x0000014C</td>
+</tr>
+<tr>
+<td style="text-align: right;">84</td>
+<td>USBHSWakeUp</td>
+<td>USBHS wakeup</td>
+<td>0x00000150</td>
+</tr>
+<tr>
+<td style="text-align: right;">85</td>
+<td>USBHS</td>
+<td>USBHS global</td>
+<td>0x00000154</td>
+</tr>
+<tr>
+<td style="text-align: right;">86</td>
+<td>DVP</td>
+<td>Digital video port</td>
+<td>0x00000158</td>
+</tr>
+<tr>
+<td style="text-align: right;">87</td>
+<td>USART6</td>
+<td>USART6 global</td>
+<td>0x0000015C</td>
+</tr>
+<tr>
+<td style="text-align: right;">88</td>
+<td>USART7</td>
+<td>USART7 global</td>
+<td>0x00000160</td>
+</tr>
+<tr>
+<td style="text-align: right;">89</td>
+<td>USART8</td>
+<td>USART8 global</td>
+<td>0x00000164</td>
+</tr>
+<tr>
+<td style="text-align: right;">90</td>
+<td>TIM9_BRK</td>
+<td>TIM9 break</td>
+<td>0x00000168</td>
+</tr>
+<tr>
+<td style="text-align: right;">91</td>
+<td>TIM9_UP</td>
+<td>TIM9 update</td>
+<td>0x0000016C</td>
+</tr>
+<tr>
+<td style="text-align: right;">92</td>
+<td>TIM9_TRG_COM</td>
+<td>TIM9 trigger/comm</td>
+<td>0x00000170</td>
+</tr>
+<tr>
+<td style="text-align: right;">93</td>
+<td>TIM9_CC</td>
+<td>TIM9 capture/compare</td>
+<td>0x00000174</td>
+</tr>
+<tr>
+<td style="text-align: right;">94</td>
+<td>TIM10_BRK</td>
+<td>TIM10 break</td>
+<td>0x00000178</td>
+</tr>
+<tr>
+<td style="text-align: right;">95</td>
+<td>TIM10_UP</td>
+<td>TIM10 update</td>
+<td>0x0000017C</td>
+</tr>
+<tr>
+<td style="text-align: right;">96</td>
+<td>TIM10_TRG_COM</td>
+<td>TIM10 trigger/comm</td>
+<td>0x00000180</td>
+</tr>
+<tr>
+<td style="text-align: right;">97</td>
+<td>TIM10_CC</td>
+<td>TIM10 capture/compare</td>
+<td>0x00000184</td>
+</tr>
+<tr>
+<td style="text-align: right;">98</td>
+<td>DMA2_CH6</td>
+<td>DMA2 Channel 6</td>
+<td>0x00000188</td>
+</tr>
+<tr>
+<td style="text-align: right;">99</td>
+<td>DMA2_CH7</td>
+<td>DMA2 Channel 7</td>
+<td>0x0000018C</td>
+</tr>
+<tr>
+<td style="text-align: right;">100</td>
+<td>DMA2_CH8</td>
+<td>DMA2 Channel 8</td>
+<td>0x00000190</td>
+</tr>
+<tr>
+<td style="text-align: right;">101</td>
+<td>DMA2_CH9</td>
+<td>DMA2 Channel 9</td>
+<td>0x00000194</td>
+</tr>
+<tr>
+<td style="text-align: right;">102</td>
+<td>DMA2_CH10</td>
+<td>DMA2 Channel 10</td>
+<td>0x00000198</td>
+</tr>
+<tr>
+<td style="text-align: right;">103</td>
+<td>DMA2_CH11</td>
+<td>DMA2 Channel 11</td>
+<td>0x0000019C</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>tenta_2024_03_11</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+<style>
+body {
+    max-width: none !important;
+}
+h1 {
+    background-color: #2c2c2c;
+    color: #ffffff;
+    padding: 0.4em 0.7em;
+    border-radius: 4px;
+}
+td pre {
+    padding: 0;
+    margin: 0;
+}
+td pre code {
+    padding: 0.3em 0.5em;
+    white-space: pre;
+}
+td:has(pre) {
+    padding: 0.2rem 0.3rem;
+}
+</style>
+<h1 id="uppgift-1a-26-p">Uppgift 1a (&#x2212;2&#x2026;6 p)</h1>
+<p>F&#xF6;ljande deklarationer &#xE4;r givna p&#xE5; &#x201C;toppniv&#xE5;&#x201D;.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">static</span> <span class="dt">unsigned</span> <span class="dt">short</span> a<span class="op">,</span> b<span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="dt">static</span> <span class="dt">int</span> index<span class="op">;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="dt">static</span> <span class="dt">int</span> vi<span class="op">[</span><span class="dv">100</span><span class="op">];</span></span></code></pre></div>
+<p>Vi har nu tilldelningen:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>vi<span class="op">[</span> a<span class="op">++</span> <span class="op">]</span> <span class="op">=</span> index<span class="op">;</span></span></code></pre></div>
+<p>Vilken av f&#xF6;ljande implementeringar i RISC-V-kod &#xE4;r korrekt?</p>
+<h2 id="svarsalternativ">Svarsalternativ</h2>
+<table>
+<tr>
+<td>
+A
+</td>
+<td>
+B
+</td>
+<td>
+C
+</td>
+<td>
+D
+</td>
+</tr>
+<tr>
+<td>
+<pre><code>  la    t0, index
+  lw    t0, 0(t0)
+  la    t1, a
+  lw    t2, 0(t1)
+  addi  t3, t2, 1
+  sh    t3, 0(t1)
+  slli  t2, t2, 4
+  la    t3, vi
+  add   t3, t3, t2
+  sw    t0, 0(t3)</code></pre>
+</td>
+<td>
+<pre><code>  la    t0, index
+  lw    t0, 0(t0)
+  la    t1, a
+  lw    t2, 0(t1)
+  addi  t3, t2, 1
+  sw    t3, 0(t1)
+  slli  t2, t2, 2
+  la    t3, vi
+  add   t3, t3, t2
+  sw    t0, 0(t3)</code></pre>
+</td>
+<td>
+<pre><code>  la    t0, index
+  lw    t0, 0(t0)
+  la    t1, a
+  lhu   t2, 0(t1)
+  addi  t3, t2, 1
+  sh    t3, 0(t1)
+  slli  t2, t2, 2
+  la    t3, vi
+  add   t3, t3, t2
+  sw    t0, 0(t3)</code></pre>
+</td>
+<td>
+<pre><code>  la    t0, index
+  lw    t0, 0(t0)
+  la    t1, a
+  lhu   t2, 0(t1)
+  addi  t3, t2, 1
+  sh    t3, 0(t1)
+  slli  t2, t2, 4
+  la    t3, vi
+  add   t3, t3, t2
+  sw    t0, 0(t3)</code></pre>
+</td>
+</tr>
+<tr>
+<td>
+E
+</td>
+<td>
+F
+</td>
+</tr>
+<tr>
+<td>
+<pre><code>  la    t0, index
+  lw    t0, 0(t0)
+  la    t1, a
+  lhu   t2, 0(t1)
+  addi  t3, t2, 1
+  sh    t3, 0(t1)
+  slli  t2, t2, 4
+  la    t3, vi
+  sw    t0, t2(t3)</code></pre>
+</td>
+<td>
+<pre><code>  la    t0, index
+  lw    t0, 0(t0)
+  la    t1, a
+  lw    t2, 0(t1)
+  addi  t3, t2, 1
+  sh    t3, 0(t1)
+  slli  t2, t2, 4
+  la    t3, vi
+  sw    t0, t2(t3)</code></pre>
+</td>
+</tr>
+</table>
+<details>
+<summary>
+Svar
+</summary>
+<p>Svarsalternativ <strong>C</strong></p>
+<pre><code>  la    t0, index
+  lw    t0, 0(t0)
+  la    t1, a
+  lhu   t2, 0(t1)
+  addi  t3, t2, 1
+  sh    t3, 0(t1)
+  slli  t2, t2, 2
+  la    t3, vi
+  add   t3, t3, t2
+  sw    t0, 0(t3)</code></pre>
+</details>
+<hr />
+<h1 id="uppgift-1b-22-p">Uppgift 1b (&#x2212;2&#x2026;2 p)</h1>
+<p>F&#xF6;ljande deklarationer &#xE4;r givna p&#xE5; &#x201C;toppniv&#xE5;&#x201D;.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="dt">static</span> <span class="dt">short</span> a<span class="op">,</span> b<span class="op">,</span> c<span class="op">;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="dt">static</span> <span class="dt">int</span> index<span class="op">;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="dt">static</span> <span class="dt">int</span> vi<span class="op">[</span><span class="dv">100</span><span class="op">];</span></span></code></pre></div>
+<p>Vilken av f&#xF6;ljande implementeringar i RISC-V-kod &#xE4;r korrekt?</p>
+<h2 id="svarsalternativ-1">Svarsalternativ</h2>
+<table>
+<tr>
+<td>
+A
+</td>
+<td>
+B
+</td>
+<td>
+C
+</td>
+<td>
+D
+</td>
+</tr>
+<tr>
+<td>
+<pre><code>.align 2
+a:  .byte 2
+.align 2
+b:  .byte 2
+.align 2
+c:  .byte 2
+.align 4
+index:  .byte 4
+.align 100
+vi:  .byte 100</code></pre>
+</td>
+<td>
+<pre><code>.align 2
+a:  .short 1
+.align 2
+b:  .short 1
+.align 2
+c:  .space 2
+.align 4
+index:  .word 1
+.align 100
+vi:  .word 100</code></pre>
+</td>
+<td>
+<pre><code>.align 2
+a:  .word 2
+.align 1
+b:  .word 2
+.align 1
+c:  .word 2
+.align 2
+index:  .space 4
+vi:  .space 400</code></pre>
+</td>
+<td>
+<pre><code>.align 1
+a:  .space 2
+b:  .space 2
+c:  .space 2
+.align 2
+index:  .space 4
+vi:  .byte 400</code></pre>
+</td>
+</tr>
+<tr>
+<td>
+E
+</td>
+<td>
+F
+</td>
+</tr>
+<tr>
+<td>
+<pre><code>.align 1
+a:  .space 2
+b:  .space 2
+c:  .space 2
+.align 2
+index:  .space 4
+vi:  .space 400</code></pre>
+</td>
+<td>
+<pre><code>.align 1
+a:  .space 2
+b:  .space 2
+c:  .space 2
+.align 2
+index:  .space 4
+vi:  .space 100</code></pre>
+</td>
+</tr>
+</table>
+<details>
+<summary>
+Svar
+</summary>
+<p>Svarsalternativ <strong>E</strong></p>
+<pre><code>.align 1
+a:  .space 2
+b:  .space 2
+c:  .space 2
+.align 2
+index:  .space 4
+vi:  .space 400</code></pre>
+</details>
+<hr />
+<h1 id="uppgift-2-26-p">Uppgift 2 (&#x2212;2&#x2026;6 p)</h1>
+<p>F&#xF6;ljande C-funktion <code>pack</code> packar f&#xF6;delsedata (&#xE5;r, m&#xE5;nad
+dag) i en unsigned int, enligt:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> pack<span class="op">(</span><span class="dt">unsigned</span> <span class="dt">short</span> year<span class="op">,</span> <span class="dt">unsigned</span> <span class="dt">short</span> month<span class="op">,</span> <span class="dt">unsigned</span> <span class="dt">short</span> day<span class="op">)</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">unsigned</span> <span class="dt">int</span> rval <span class="op">=</span> year <span class="op">&lt;&lt;</span> <span class="dv">9</span><span class="op">;</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  rval <span class="op">|=</span> month <span class="op">&lt;&lt;</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  rval <span class="op">|=</span> day<span class="op">;</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> rval<span class="op">;</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<table style="text-align: center; border-collapse: collapse; font-size: 0.85em; width: 100%;" border="1">
+<tr>
+<th style="padding: 1px 2px;">
+31
+</th>
+<th style="padding: 1px 2px;">
+30
+</th>
+<th style="padding: 1px 2px;">
+29
+</th>
+<th style="padding: 1px 2px;">
+28
+</th>
+<th style="padding: 1px 2px;">
+27
+</th>
+<th style="padding: 1px 2px;">
+26
+</th>
+<th style="padding: 1px 2px;">
+25
+</th>
+<th style="padding: 1px 2px;">
+24
+</th>
+<th style="padding: 1px 2px;">
+23
+</th>
+<th style="padding: 1px 2px;">
+22
+</th>
+<th style="padding: 1px 2px;">
+21
+</th>
+<th style="padding: 1px 2px;">
+20
+</th>
+<th style="padding: 1px 2px;">
+19
+</th>
+<th style="padding: 1px 2px;">
+18
+</th>
+<th style="padding: 1px 2px;">
+17
+</th>
+<th style="padding: 1px 2px;">
+16
+</th>
+<th style="padding: 1px 2px;">
+15
+</th>
+<th style="padding: 1px 2px;">
+14
+</th>
+<th style="padding: 1px 2px;">
+13
+</th>
+<th style="padding: 1px 2px;">
+12
+</th>
+<th style="padding: 1px 2px;">
+11
+</th>
+<th style="padding: 1px 2px;">
+10
+</th>
+<th style="padding: 1px 2px;">
+9
+</th>
+<th style="padding: 1px 2px;">
+8
+</th>
+<th style="padding: 1px 2px;">
+7
+</th>
+<th style="padding: 1px 2px;">
+6
+</th>
+<th style="padding: 1px 2px;">
+5
+</th>
+<th style="padding: 1px 2px;">
+4
+</th>
+<th style="padding: 1px 2px;">
+3
+</th>
+<th style="padding: 1px 2px;">
+2
+</th>
+<th style="padding: 1px 2px;">
+1
+</th>
+<th style="padding: 1px 2px;">
+0
+</th>
+</tr>
+<tr>
+<td style="padding: 1px 2px;">
+0
+</td>
+<td style="padding: 1px 2px;">
+0
+</td>
+<td style="padding: 1px 2px;">
+0
+</td>
+<td style="padding: 1px 2px;">
+0
+</td>
+<td style="padding: 1px 2px;">
+0
+</td>
+<td style="padding: 1px 2px;">
+0
+</td>
+<td style="padding: 1px 2px;">
+0
+</td>
+<td style="padding: 1px 2px;">
+0
+</td>
+<td style="padding: 1px 2px;">
+0
+</td>
+<td style="padding: 1px 2px;">
+0
+</td>
+<td colspan="13" style="padding: 1px 2px;">
+year
+</td>
+<td colspan="4" style="padding: 1px 2px;">
+month
+</td>
+<td colspan="5" style="padding: 1px 2px;">
+day
+</td>
+</tr>
+</table>
+<p>Ange det alternativ (A&#x2013;G) som visar en korrekt implementering (hur
+funktionen kodas) i RISC-V assemblerspr&#xE5;k.</p>
+<h2 id="svarsalternativ-2">Svarsalternativ</h2>
+<table>
+<tr>
+<td>
+A
+</td>
+<td>
+B
+</td>
+<td>
+C
+</td>
+<td>
+D
+</td>
+</tr>
+<tr>
+<td>
+<pre><code>pack:
+  shl   a0, a0, 9
+  shl   a1, a1, 5
+  or    a0, a0, a2
+  or    a0, a0, a1
+  ret</code></pre>
+</td>
+<td>
+<pre><code>pack:
+  slli  a0, a0, 9
+  slli  a1, a1, 5
+  or    a0, a0, a1
+  or    a0, a0, a2
+  ret</code></pre>
+</td>
+<td>
+<pre><code>pack:
+  srli  a0, a0, 9
+  srli  a1, a1, 5
+  or    a0, a0, a1
+  or    a0, a0, a2
+  ret</code></pre>
+</td>
+<td>
+<pre><code>pack:
+  slli  a0, a0, 9
+  slli  a1, a1, 5
+  ori   a0, a0, a1
+  ori   a0, a0, a2
+  ret</code></pre>
+</td>
+</tr>
+<tr>
+<td>
+E
+</td>
+<td>
+F
+</td>
+<td>
+G
+</td>
+</tr>
+<tr>
+<td>
+<pre><code>pack:
+  shl   a2, a2, 9
+  shl   a1, a1, 5
+  or    a2, a2, a1
+  or    a0, a0, a2
+  ret</code></pre>
+</td>
+<td>
+<pre><code>pack:
+  slli  a2, a2, 9
+  slli  a1, a1, 5
+  or    a2, a2, a1
+  or    a0, a0, a2
+  ret</code></pre>
+</td>
+<td>
+<pre><code>pack:
+  srli  a2, a2, 9
+  srli  a1, a1, 5
+  or    a2, a2, a1
+  or    a0, a0, a2
+  ret</code></pre>
+</td>
+</tr>
+</table>
+<details>
+<summary>
+Svar
+</summary>
+<p>Svarsalternativ <strong>B</strong></p>
+<pre><code>pack:
+  slli  a0, a0, 9
+  slli  a1, a1, 5
+  or    a0, a0, a1
+  or    a0, a0, a2
+  ret</code></pre>
+</details>
+<hr />
+<h1 id="uppgift-3-26-p">Uppgift 3 (&#x2212;2&#x2026;6 p)</h1>
+<p>En lista av objekt med typen unsigned int skall konverteras till
+unsigned short. Om talet &#xE4;r f&#xF6;r stort f&#xF6;r att f&#xE5; plats i en unsigned
+short skall det inte vara med i den nya listan. Funktionen
+<code>ConvertList</code> skall returnera pekaren till det f&#xF6;rsta
+elementet i den nya listan, och parametern <code>num_elems</code> skall
+uppdateras med den nya storleken. Huvudprogrammet nedan skall exempelvis
+ge utskriften: <code>345 2333 123</code>.</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">unsigned</span> <span class="dt">short</span> <span class="op">*</span>a<span class="op">;</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">unsigned</span> <span class="dt">int</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  v<span class="op">[]</span> <span class="op">=</span> <span class="op">{</span><span class="dv">65536</span><span class="op">,</span> <span class="dv">345</span><span class="op">,</span> <span class="dv">2333</span><span class="op">,</span> <span class="bn">0xFFFFFFFE</span><span class="op">,</span> <span class="dv">123</span><span class="op">};</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> num_elems <span class="op">=</span> <span class="kw">sizeof</span><span class="op">(</span>v<span class="op">)</span> <span class="op">/</span> <span class="kw">sizeof</span><span class="op">(</span>v<span class="op">[</span><span class="dv">0</span><span class="op">]);</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  a <span class="op">=</span> ConvertList<span class="op">(</span>v<span class="op">,</span> <span class="op">&amp;</span>num_elems<span class="op">);</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> num_elems<span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;</span><span class="sc">%i</span><span class="st"> &quot;</span><span class="op">,</span> a<span class="op">[</span>i<span class="op">]);</span></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Sex olika programmerare f&#xE5;r i uppgift att implementera funktionen
+<code>ConvertList(unsigned int *, int *)</code>, resultaten blir
+likartade men bara en programmerare presterar ett helt korrekt resultat.
+De olika alternativen finns nedan, ange alternativet med den korrekta
+l&#xF6;sningen.</p>
+<h2 id="svarsalternativ-3">Svarsalternativ</h2>
+<table>
+<tr>
+<td>
+A
+</td>
+<td>
+B
+</td>
+<td>
+C
+</td>
+<td>
+D
+</td>
+</tr>
+<tr>
+<td>
+<div class="sourceCode" id="cb28"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>ConvertList<span class="op">(</span><span class="dt">unsigned</span> <span class="dt">int</span><span class="op">*</span> a<span class="op">,</span> <span class="dt">int</span><span class="op">*</span> num_elems<span class="op">)</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*</span> b <span class="op">=</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*)&amp;</span>a<span class="op">[</span><span class="dv">0</span><span class="op">];</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> c <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="op">(*</span>num_elems<span class="op">);</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>a<span class="op">[</span>i<span class="op">]</span> <span class="op">&gt;=</span> <span class="bn">0xFFFF</span><span class="op">)</span> <span class="op">{</span> c<span class="op">++;</span> <span class="op">}</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>      b <span class="op">=</span> a<span class="op">[</span>i<span class="op">];</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>      <span class="op">*</span>b <span class="op">+=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>num_elems <span class="op">-=</span> c<span class="op">;</span></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> b<span class="op">;</span></span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</td>
+<td>
+<div class="sourceCode" id="cb29"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>ConvertList<span class="op">(</span><span class="dt">unsigned</span> <span class="dt">int</span><span class="op">*</span> a<span class="op">,</span> <span class="dt">int</span><span class="op">*</span> num_elems<span class="op">)</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*</span> b <span class="op">=</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*)</span>a<span class="op">;</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> c <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="op">(*</span>num_elems<span class="op">);</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>a<span class="op">[</span>i<span class="op">]</span> <span class="op">&gt;=</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">16</span><span class="op">))</span> <span class="op">{</span> c<span class="op">++;</span> <span class="op">}</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>      <span class="op">*</span>b <span class="op">=</span> a<span class="op">[</span>i<span class="op">];</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>      b <span class="op">+=</span> <span class="dv">2</span><span class="op">;</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>num_elems <span class="op">-=</span> c<span class="op">;</span></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*)</span>a<span class="op">;</span></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</td>
+<td>
+<div class="sourceCode" id="cb30"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>ConvertList<span class="op">(</span><span class="dt">unsigned</span> <span class="dt">int</span><span class="op">*</span> a<span class="op">,</span> <span class="dt">int</span><span class="op">*</span> num_elems<span class="op">)</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*</span> b <span class="op">=</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*)&amp;</span>a<span class="op">[</span><span class="dv">0</span><span class="op">];</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="op">(*</span>num_elems<span class="op">);</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>a<span class="op">[</span>i<span class="op">]</span> <span class="op">&gt;=</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">16</span><span class="op">))</span> <span class="op">{</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>      <span class="op">*</span>num_elems <span class="op">-=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>      <span class="op">*</span>b <span class="op">=</span> a<span class="op">[</span>i<span class="op">];</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>      b <span class="op">+=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*)</span>a<span class="op">;</span></span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</td>
+<td>
+<div class="sourceCode" id="cb31"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>ConvertList<span class="op">(</span><span class="dt">unsigned</span> <span class="dt">int</span><span class="op">*</span> a<span class="op">,</span> <span class="dt">int</span><span class="op">*</span> num_elems<span class="op">)</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*</span> b <span class="op">=</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*)&amp;</span>a<span class="op">[</span><span class="dv">0</span><span class="op">];</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> c <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="op">(*</span>num_elems<span class="op">);</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>a<span class="op">[</span>i<span class="op">]</span> <span class="op">&gt;=</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">16</span><span class="op">))</span> <span class="op">{</span> c<span class="op">++;</span> <span class="op">}</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>      <span class="op">*</span>b <span class="op">=</span> a<span class="op">[</span>i<span class="op">];</span></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>      b <span class="op">+=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>num_elems <span class="op">-=</span> c<span class="op">;</span></span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*)</span>a<span class="op">;</span></span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</td>
+</tr>
+<tr>
+<td>
+E
+</td>
+<td>
+F
+</td>
+</tr>
+<tr>
+<td>
+<div class="sourceCode" id="cb32"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>ConvertList<span class="op">(</span><span class="dt">unsigned</span> <span class="dt">int</span><span class="op">*</span> a<span class="op">,</span> <span class="dt">int</span><span class="op">*</span> num_elems<span class="op">)</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*</span> b <span class="op">=</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*)</span>a<span class="op">;</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> c <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> num_elems<span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>a<span class="op">[</span>i<span class="op">]</span> <span class="op">&gt;=</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">16</span><span class="op">))</span> <span class="op">{</span> c<span class="op">++;</span> <span class="op">}</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>      <span class="op">*</span>b <span class="op">=</span> a<span class="op">[</span>i<span class="op">];</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>      b <span class="op">+=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>  num_elems <span class="op">-=</span> c<span class="op">;</span></span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*)</span>a<span class="op">;</span></span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</td>
+<td>
+<div class="sourceCode" id="cb33"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>ConvertList<span class="op">(</span><span class="dt">unsigned</span> <span class="dt">int</span><span class="op">*</span> a<span class="op">,</span> <span class="dt">int</span><span class="op">*</span> num_elems<span class="op">)</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*</span> b <span class="op">=</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*)&amp;</span>a<span class="op">[</span><span class="dv">0</span><span class="op">];</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> c <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="op">(*</span>num_elems<span class="op">);</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>a<span class="op">[</span>i<span class="op">]</span> <span class="op">&gt;=</span> <span class="bn">0xFFFF</span><span class="op">)</span> <span class="op">{</span> c<span class="op">++;</span> <span class="op">}</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="op">{</span> <span class="op">*</span>b<span class="op">++</span> <span class="op">=</span> <span class="op">*</span>a<span class="op">++;</span> <span class="op">}</span></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>num_elems <span class="op">-=</span> c<span class="op">;</span></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*)</span>a<span class="op">;</span></span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</td>
+</tr>
+</table>
+<details>
+<summary>
+Svar
+</summary>
+<p>Svarsalternativ <strong>D</strong></p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>ConvertList<span class="op">(</span><span class="dt">unsigned</span> <span class="dt">int</span><span class="op">*</span> a<span class="op">,</span> <span class="dt">int</span><span class="op">*</span> num_elems<span class="op">)</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*</span> b <span class="op">=</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*)&amp;</span>a<span class="op">[</span><span class="dv">0</span><span class="op">];</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> c <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="op">(*</span>num_elems<span class="op">);</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>a<span class="op">[</span>i<span class="op">]</span> <span class="op">&gt;=</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">16</span><span class="op">))</span> <span class="op">{</span> c<span class="op">++;</span> <span class="op">}</span></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>      <span class="op">*</span>b <span class="op">=</span> a<span class="op">[</span>i<span class="op">];</span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>      b <span class="op">+=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>num_elems <span class="op">-=</span> c<span class="op">;</span></span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">short</span><span class="op">*)</span>a<span class="op">;</span></span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</details>
+<hr />
+<h1 id="uppgift-4-10-p">Uppgift 4 (10 p)</h1>
+<p>En fyrkantsv&#xE5;g med frekvensen 1kHz skall l&#xE4;ggas ut p&#xE5; GPIO port B,
+pinne 8.</p>
+<p><img src="../images/square_wave.png" /></p>
+<ol type="a">
+<li>Visa de makrodefinitioner som beh&#xF6;vs f&#xF6;r att beskriva SysTick
+porten. Visa &#xE4;ven makrodefinitionen f&#xF6;r registret OUTDR_B_HIGH som
+motsvarar b8&#x2013;b15 i GPIO port B. (2p)</li>
+</ol>
+<p>b1) Nedanst&#xE5;ende assemblyfil &#xE4;r given. Visa hur avbrottsvektorn f&#xF6;r
+<code>systick_handler()</code> initieras i vektortabellen, och hur mtvec
+st&#xE4;lls in, under antagandet att systemet anv&#xE4;nder vektorat l&#xE4;ge (mode
+01). (1p)</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="kw">.extern</span> at_irq</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="kw">.section</span> <span class="kw">.data</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="fu">vector_table:</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># fyll i h&#xE4;r</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a><span class="kw">.section</span> <span class="kw">.text</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a><span class="fu">init_interrupts:</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># fyll i h&#xE4;r</span></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">ret</span></span></code></pre></div>
+<p>b2) Skriv funktionen <code>void start_wave()</code> som initierar
+SysTick och startar fyrkantsv&#xE5;gen genom att, med avbrott, utf&#xF6;ra
+avbrottshanteraren <code>void systick_handler()</code> var 500:de
+millisekund. Skriv &#xE4;ven koden f&#xF6;r avbrottshanteraren. (3p)</p>
+<ol start="3" type="a">
+<li><p>&#xC4;ndra avbrottshanteraren s&#xE5; att den &#xE4;ven l&#xE4;gger ut en fyrkantsv&#xE5;g
+med frekvensen 500Hz p&#xE5; port B, pinne 9. (2p)</p></li>
+<li><p>Tv&#xE5; CH32V307-kort, A och B, &#xE4;r ihopkopplade f&#xF6;r att &#xF6;verf&#xF6;ra data
+fr&#xE5;n A till B. Varje g&#xE5;ng en bit skall skickas l&#xE4;gger A ut en etta eller
+nolla p&#xE5; Port D, pinne 0. Sedan flippar den Port D, pinne 1. N&#xE4;r B
+m&#xE4;rker att pinne 1 byter v&#xE4;rde startas en avbrottshanterare som
+omedelbart l&#xE4;ser av v&#xE4;rdet som ligger p&#xE5; pinne 0.</p></li>
+</ol>
+<p>F&#xF6;r att spara pengar har man best&#xE4;mt att &#xF6;verf&#xF6;ringen skall ske med
+bara en sladd fr&#xE5;n pinne 0 p&#xE5; A till pinne 0 p&#xE5; B. B&#xE5;da maskinernas
+systemklocka &#xE4;r ungef&#xE4;r, men inte exakt, 144MHz. Beskriv (i text, ingen
+kod) hur man tillf&#xF6;rlitligt kan &#xF6;verf&#xF6;ra datan med bara en sladd.
+(2p)</p>
+<details>
+<summary>
+Svar
+</summary>
+<h4 id="a">a)</h4>
+<div class="sourceCode" id="cb36"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#define STK_CTLR          </span><span class="op">((</span><span class="dt">volatile</span><span class="pp"> </span><span class="dt">unsigned</span><span class="pp"> </span><span class="dt">int</span><span class="pp"> </span><span class="op">*)</span><span class="bn">0xE000F000</span><span class="op">)</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#define STK_SR            </span><span class="op">((</span><span class="dt">volatile</span><span class="pp"> </span><span class="dt">unsigned</span><span class="pp"> </span><span class="dt">int</span><span class="pp"> </span><span class="op">*)</span><span class="bn">0xE000F004</span><span class="op">)</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="pp">#define STK_CNTL          </span><span class="op">((</span><span class="dt">volatile</span><span class="pp"> </span><span class="dt">unsigned</span><span class="pp"> </span><span class="dt">int</span><span class="pp"> </span><span class="op">*)</span><span class="bn">0xE000F008</span><span class="op">)</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="pp">#define STK_CMPLR         </span><span class="op">((</span><span class="dt">volatile</span><span class="pp"> </span><span class="dt">unsigned</span><span class="pp"> </span><span class="dt">int</span><span class="pp"> </span><span class="op">*)</span><span class="bn">0xE000F010</span><span class="op">)</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="pp">#define GPIO_B_OUTDR_HIGH </span><span class="op">((</span><span class="dt">volatile</span><span class="pp"> </span><span class="dt">unsigned</span><span class="pp"> </span><span class="dt">char</span><span class="pp"> </span><span class="op">*)</span><span class="bn">0x40010C0D</span><span class="op">)</span></span></code></pre></div>
+<h4 id="b1">b1)</h4>
+<p>I vektorat l&#xE4;ge (mode 01) hoppar processorn till mtvec_BASE + 4 &#xD7;
+cause vid ett avbrott. SysTick har IRQ-nummer 12, s&#xE5; hopp-instruktionen
+placeras p&#xE5; offset 12 &#xD7; 4 = 0x30 fr&#xE5;n vector_table.</p>
+<p>mtvec st&#xE4;lls in p&#xE5; adressen till vector_table med de tv&#xE5; l&#xE4;gsta
+bitarna satta till 01.</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="kw">.extern</span> systick_handler</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="kw">.section</span> <span class="kw">.data</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="fu">vector_table:</span></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">.org</span> vector_table <span class="op">+</span> <span class="dv">12</span> <span class="op">*</span> <span class="dv">4</span>   <span class="co">/* IRQ 12 = SysTick, offset 0x30 */</span></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">j</span>    systick_handler</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a><span class="kw">.section</span> <span class="kw">.text</span></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a><span class="fu">init_interrupts:</span></span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">la</span>   <span class="kw">t0</span><span class="op">,</span> vector_table</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">ori</span>  <span class="kw">t0</span><span class="op">,</span> <span class="kw">t0</span><span class="op">,</span> <span class="dv">1</span>               <span class="co">/* S&#xE4;tt mode = 01 (vektorat l&#xE4;ge) */</span></span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">csrw</span> mtvec<span class="op">,</span> <span class="kw">t0</span></span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">ret</span></span></code></pre></div>
+<h4 id="b2">b2)</h4>
+<div class="sourceCode" id="cb38"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> systick_handler<span class="op">(</span><span class="dt">void</span><span class="op">)</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>GPIO_B_OUTDR_HIGH <span class="op">^=</span> <span class="bn">0x1</span><span class="op">;</span>    <span class="co">/* Toggla PB8 &#x2192; 1 kHz fyrkantsv&#xE5;g */</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>STK_SR <span class="op">=</span> <span class="dv">0</span><span class="op">;</span>                  <span class="co">/* Kvittera avbrottet */</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> start_wave<span class="op">(</span><span class="dt">void</span><span class="op">)</span></span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>STK_CTLR <span class="op">=</span> <span class="dv">0</span><span class="op">;</span>                            <span class="co">/* St&#xE4;ng av SysTick under konfiguration */</span></span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>STK_CMPLR <span class="op">=</span> <span class="dv">144000000</span> <span class="op">/</span> <span class="op">(</span><span class="dv">2</span> <span class="op">*</span> <span class="dv">1000</span><span class="op">)</span> <span class="op">-</span> <span class="dv">1</span><span class="op">;</span> <span class="co">/* 500 &#xB5;s @ 144 MHz = 71999 */</span></span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>PFIC_IENR1 <span class="op">|=</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">12</span><span class="op">);</span>                 <span class="co">/* Aktivera SysTick-avbrott i PFIC (IRQ 12) */</span></span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>STK_CTLR <span class="op">=</span> <span class="bn">0xF</span><span class="op">;</span>                          <span class="co">/* STE|STIE|STCLK|STRE &#x2013; starta SysTick */</span></span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="c">c)</h4>
+<div class="sourceCode" id="cb39"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> systick_handler<span class="op">(</span><span class="dt">void</span><span class="op">)</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>GPIO_B_OUTDR_HIGH <span class="op">^=</span> <span class="bn">0x1</span><span class="op">;</span>         <span class="co">/* Toggla PB8 &#x2192; 1 kHz */</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(*</span>GPIO_B_OUTDR_HIGH <span class="op">&amp;</span> <span class="bn">0x1</span><span class="op">)</span>      <span class="co">/* Var annanhanstig (500 Hz) */</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>GPIO_B_OUTDR_HIGH <span class="op">^=</span> <span class="bn">0x2</span><span class="op">;</span>       <span class="co">/* Toggla PB9 &#x2192; 500 Hz */</span></span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>STK_SR <span class="op">=</span> <span class="dv">0</span><span class="op">;</span>                       <span class="co">/* Kvittera avbrottet (alltid) */</span></span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="d">d)</h4>
+<p>(kort beskrivning av Manchester Kodning, eller ett ram-protokoll som
+RS232, se l&#xE4;robok) 1&#x2013;2p</p>
+</details>
+<hr />
+<h1 id="uppgift-5-10-p">Uppgift 5 (10 p)</h1>
+<p>I den h&#xE4;r uppgiften ska du implementera en enkel display f&#xF6;r att visa
+ljudvolym. Vi kommer att anv&#xE4;nda ett numeriskt tangentbord med &#x2018;+&#x2019; och
+&#x2018;-&#x2019; tangenter (se Figur 2) och en 8-segment bargraph (Figur 3) kopplade
+till CH32V307-systemet.</p>
+<p><img src="../images/volume_control.png" /></p>
+<p>Se Figur 1 som exempel, genom att trycka p&#xE5; &#x2018;+&#x2019;-tangenten &#xF6;kar vi
+volymen och d&#xE5; skall fler segment lysa. Genom att trycka p&#xE5;
+&#x2018;-&#x2019;-tangenten minskar vi volymen och d&#xE5; skall f&#xE4;rre segment lysa p&#xE5;
+bargraphen.</p>
+<p>Tangentbordet &#xE4;r anordnat i tre rader och 4 kolumner, som visas i
+Figur 2, och ansluts till systemet via GPIO-port C. Signaler i stiften
+som motsvarar bitarna b0&#x2013;b2 anv&#xE4;nds f&#xF6;r att aktivera raderna medan
+signalen i stiften som motsvarar bitarna b3&#x2013;b6 anv&#xE4;nds f&#xF6;r att
+identifiera vilken tangent som tryckts ned. Bit b7 anv&#xE4;nds inte. Endast
+nedtryckning av tangenterna &#x2018;+&#x2019; och &#x2018;-&#x2019; ska resultera i n&#xE5;gon &#xE5;tg&#xE4;rd i
+programmet medan nedtryckning av &#xF6;vriga tangenter ignoreras av
+programmet.</p>
+<p>Bargraphen, som ses i Figur 3, ansluts till systemet via GPIO-port D
+bitar b0&#x2013;b7. Alla ing&#xE5;ngsstift ska konfigureras som pull-up och alla
+utg&#xE5;ngsstift ska konfigureras som open-drain.</p>
+<p>Implementera ditt program i C och f&#xF6;lj stegen nedan:</p>
+<ol type="a">
+<li>Definera en struct som representerar en GPIO port. Visa sedan hur
+man refererar CFGLR-registret i Port D med anv&#xE4;ndning av denna struct.
+(2p)</li>
+</ol>
+<p>Om du v&#xE4;ljer att inte g&#xF6;ra uppgift a) m&#xE5;ste du visa korrekta
+macrodefinitioner f&#xF6;r de register du anv&#xE4;nder i f&#xF6;ljande uppgifter.</p>
+<ol start="2" type="a">
+<li><p>Skriv en funktion <code>void ports_init(void)</code> d&#xE4;r du g&#xF6;r
+de initieringar som beh&#xF6;vs f&#xF6;r att port C och D skall fungera enligt
+beskrivningen ovan. (2p)</p></li>
+<li><p>Skriv en funktion <code>int read_key(void)</code> d&#xE4;r du l&#xE4;ser av
+tangentbordet och returnerar ett v&#xE4;rde som motsvarar tangenten som har
+tryckts in. Returv&#xE4;rdena ska vara 0 till 9 som representerar motsvarande
+numeriska tangenter, 10 f&#xF6;r tangenten &#x2018;+&#x2019;, och 11 f&#xF6;r tangenten &#x2018;-&#x2019;.
+(3p)</p></li>
+<li><p>Skriv en funktion
+<code>int update_volume(int incdec, int vol)</code> som tar som
+inparameter det f&#xF6;reg&#xE5;ende v&#xE4;rdet f&#xF6;r volymen (<code>int vol</code>) och
+en flagga som har v&#xE4;rdet 1 eller -1 (<code>int incdec</code>) beroende
+p&#xE5; om volymen skall &#xF6;kas eller minskas med en enhet, och returnerar de
+nya v&#xE4;rdena f&#xF6;r volym. Volymv&#xE4;rdena kan vara 0 t.o.m 8. F&#xF6;rs&#xF6;k att &#xF6;ka
+volymen &#xF6;ver 8, eller att minska volymen under 0 ska ignoreras.
+(1p)</p></li>
+<li><p>G&#xF6;r en huvudfunktion som anropar alla funktionerna ovan f&#xF6;r att
+f&#xF6;rst initiera portarna och sedan i en o&#xE4;ndlig slinga l&#xE4;sa av
+tangentbordet. Om &#x2018;+&#x2019; eller &#x2018;-&#x2019; trycks ned uppdateras volymen och
+motsvarande antal segment skall lysa p&#xE5; bargraphen. (2p)</p></li>
+</ol>
+<details>
+<summary>
+Svar
+</summary>
+<h4 id="a-2p">(a) (2p)</h4>
+<p><strong>Alternativ 1:</strong></p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="kw">typedef</span> <span class="dt">volatile</span> <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>   <span class="dt">unsigned</span> <span class="dt">int</span> cfglr<span class="op">;</span>    <span class="co">// +0x0</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>   <span class="dt">unsigned</span> <span class="dt">int</span> cfghr<span class="op">;</span>    <span class="co">// +0x4</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>   <span class="dt">unsigned</span> <span class="dt">int</span> indr<span class="op">;</span>     <span class="co">// +0x8</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>   <span class="dt">unsigned</span> <span class="dt">int</span> outdr<span class="op">;</span>    <span class="co">// +0xC</span></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>   <span class="dt">unsigned</span> <span class="dt">int</span> bshr<span class="op">;</span>     <span class="co">// +0x10</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>   <span class="dt">unsigned</span> <span class="dt">int</span> bcr<span class="op">;</span>      <span class="co">// +0x14</span></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>   <span class="dt">unsigned</span> <span class="dt">int</span> lckr<span class="op">;</span>     <span class="co">// +0x18</span></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> GPIO<span class="op">,</span> <span class="op">*</span>PGPIO<span class="op">;</span></span></code></pre></div>
+<p>Anm: Fler alternativ &#xE4;r m&#xF6;jliga h&#xE4;r</p>
+<p>Alt a:</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#define GPIO_C </span><span class="op">(*((</span><span class="dt">volatile</span><span class="pp"> PGPIO</span><span class="op">)</span><span class="pp"> </span><span class="bn">0x40011000</span><span class="op">))</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#define GPIO_D </span><span class="op">(*((</span><span class="dt">volatile</span><span class="pp"> PGPIO</span><span class="op">)</span><span class="pp"> </span><span class="bn">0x40011400</span><span class="op">))</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>GPIO_D<span class="op">.</span>cfglr</span></code></pre></div>
+<p>Alt b:</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#define GPIO_C </span><span class="op">((</span><span class="dt">volatile</span><span class="pp"> PGPIO</span><span class="op">)</span><span class="pp"> </span><span class="bn">0x40011000</span><span class="op">)</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#define GPIO_D </span><span class="op">((</span><span class="dt">volatile</span><span class="pp"> PGPIO</span><span class="op">)</span><span class="pp"> </span><span class="bn">0x40011400</span><span class="op">)</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>GPIO_D<span class="op">-&gt;</span>cfglr</span></code></pre></div>
+<p><strong>Alternativ 2:</strong></p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="kw">typedef</span> <span class="dt">volatile</span> <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>   <span class="dt">unsigned</span> <span class="dt">int</span> cfglr<span class="op">;</span>       <span class="co">// +0x0</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>   <span class="dt">unsigned</span> <span class="dt">int</span> cfghr<span class="op">;</span>       <span class="co">// +0x4</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>   <span class="dt">unsigned</span> <span class="dt">short</span> indr<span class="op">;</span>      <span class="co">// +0x8</span></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>   <span class="dt">unsigned</span> <span class="dt">short</span> unused_0<span class="op">;</span></span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>   <span class="dt">unsigned</span> <span class="dt">short</span> outdr<span class="op">;</span>     <span class="co">// +0xC</span></span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>   <span class="dt">unsigned</span> <span class="dt">short</span> unused_1<span class="op">;</span></span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>   <span class="dt">unsigned</span> <span class="dt">int</span> bshr<span class="op">;</span>        <span class="co">// +0x10</span></span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>   <span class="dt">unsigned</span> <span class="dt">short</span> bcr<span class="op">;</span>       <span class="co">// +0x14</span></span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>   <span class="dt">unsigned</span> <span class="dt">short</span> unused_2<span class="op">;</span></span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>   <span class="dt">unsigned</span> <span class="dt">int</span> lckr<span class="op">;</span>        <span class="co">// +0x18</span></span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> GPIO<span class="op">;</span></span></code></pre></div>
+<p>Anm: Fler alternativ &#xE4;r m&#xF6;jliga h&#xE4;r</p>
+<p>Alt a:</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#define GPIO_C </span><span class="op">(*((</span><span class="dt">volatile</span><span class="pp"> GPIO </span><span class="op">*)</span><span class="pp"> </span><span class="bn">0x40011000</span><span class="op">))</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#define GPIO_D </span><span class="op">(*((</span><span class="dt">volatile</span><span class="pp"> GPIO </span><span class="op">*)</span><span class="pp"> </span><span class="bn">0x40011400</span><span class="op">))</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>GPIO_D<span class="op">.</span>cfglr  <span class="co">// Referens</span></span></code></pre></div>
+<p>Alt b:</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#define GPIO_C </span><span class="op">((</span><span class="dt">volatile</span><span class="pp"> GPIO </span><span class="op">*)</span><span class="pp"> </span><span class="bn">0x40011000</span><span class="op">)</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#define GPIO_D </span><span class="op">((</span><span class="dt">volatile</span><span class="pp"> GPIO </span><span class="op">*)</span><span class="pp"> </span><span class="bn">0x40011400</span><span class="op">)</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>GPIO_D<span class="op">-&gt;</span>cfglr  <span class="co">// Referens</span></span></code></pre></div>
+<h4 id="b-2p">(b) (2p)</h4>
+<div class="sourceCode" id="cb46"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> ports_init<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>   <span class="co">/* Port C: b0-b2 open-drain output (CNF=01,MODE=01 = 0x5), b3-b6 input pull-up (CNF=10,MODE=00 = 0x8) */</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>   GPIO_C<span class="op">.</span>cfglr <span class="op">=</span> <span class="bn">0x08888555</span><span class="op">;</span></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>   GPIO_C<span class="op">.</span>outdr <span class="op">|=</span> <span class="bn">0x78</span><span class="op">;</span>       <span class="co">/* b3-b6 pull-up (set ODR bits) */</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>   <span class="co">/* Port D: b0-b7 open-drain output (CNF=01,MODE=01 = 0x5) */</span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>   GPIO_D<span class="op">.</span>cfglr <span class="op">=</span> <span class="bn">0x55555555</span><span class="op">;</span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="c-3p">(c) (3p)</h4>
+<div class="sourceCode" id="cb47"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> read_key<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>   <span class="dt">int</span> row<span class="op">,</span> value<span class="op">;</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>   <span class="co">/* blocking read */</span></span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>   <span class="cf">while</span> <span class="op">(</span><span class="dv">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>      <span class="co">/* activate rows */</span></span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> <span class="op">(</span>row <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> row <span class="op">&lt;</span> <span class="dv">3</span><span class="op">;</span> row<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>         GPIO_C<span class="op">.</span>outdr <span class="op">|=</span> <span class="bn">0b111</span><span class="op">;</span> <span class="co">/* deactivate all rows */</span></span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>         GPIO_C<span class="op">.</span>outdr <span class="op">&amp;=</span> <span class="op">~(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> row<span class="op">);</span>  <span class="co">/* activate one row at a time b0, b1, b2 */</span></span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>         <span class="cf">for</span><span class="op">(</span><span class="dt">volatile</span> <span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">100</span><span class="op">;</span> i<span class="op">++);</span>  <span class="co">/* delay to update pin values */</span></span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>         value <span class="op">=</span> GPIO_C<span class="op">.</span>indr <span class="op">&gt;&gt;</span> <span class="dv">3</span><span class="op">;</span> <span class="co">/* read b3-b6 and shift to 0 position */</span></span>
+<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>         value <span class="op">=</span> <span class="op">~</span>value<span class="op">;</span> <span class="co">/* as input is pins are in pull-up mode, revert the logic so that 1 == pressed key */</span> </span>
+<span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a>         value <span class="op">&amp;=</span> <span class="bn">0b1111</span><span class="op">;</span> <span class="co">/* clear all but first 4 bits (input pins) */</span></span>
+<span id="cb47-14"><a href="#cb47-14" aria-hidden="true" tabindex="-1"></a>         <span class="dt">int</span> col <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb47-15"><a href="#cb47-15" aria-hidden="true" tabindex="-1"></a>         <span class="cf">while</span> <span class="op">(</span>value<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb47-16"><a href="#cb47-16" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(</span>value <span class="op">&amp;</span> <span class="bn">0x1</span><span class="op">)</span></span>
+<span id="cb47-17"><a href="#cb47-17" aria-hidden="true" tabindex="-1"></a>               <span class="cf">return</span> <span class="op">(</span>row <span class="op">*</span> <span class="dv">4</span> <span class="op">+</span> col<span class="op">);</span> <span class="co">/* convert read value into key value */</span></span>
+<span id="cb47-18"><a href="#cb47-18" aria-hidden="true" tabindex="-1"></a>            col<span class="op">++;</span></span>
+<span id="cb47-19"><a href="#cb47-19" aria-hidden="true" tabindex="-1"></a>            value <span class="op">=</span> value <span class="op">&gt;&gt;</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb47-20"><a href="#cb47-20" aria-hidden="true" tabindex="-1"></a>         <span class="op">}</span></span>
+<span id="cb47-21"><a href="#cb47-21" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
+<span id="cb47-22"><a href="#cb47-22" aria-hidden="true" tabindex="-1"></a>   <span class="op">}</span></span>
+<span id="cb47-23"><a href="#cb47-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="d-1p">(d) (1p)</h4>
+<div class="sourceCode" id="cb48"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> update_volume<span class="op">(</span><span class="dt">int</span> incdec<span class="op">,</span> <span class="dt">int</span> vol<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>   <span class="cf">if</span> <span class="op">((</span>incdec <span class="op">==</span> <span class="dv">1</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="op">(</span>vol <span class="op">&lt;</span> <span class="dv">8</span><span class="op">))</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>      vol<span class="op">++;</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>   <span class="cf">else</span> <span class="cf">if</span> <span class="op">((</span>incdec <span class="op">==</span> <span class="op">-</span><span class="dv">1</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="op">(</span>vol <span class="op">&gt;</span> <span class="dv">0</span><span class="op">))</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>      vol<span class="op">--;</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>   <span class="cf">return</span> vol<span class="op">;</span></span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="e-2p">(e) (2p)</h4>
+<div class="sourceCode" id="cb49"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>   <span class="dt">int</span> key<span class="op">;</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>   <span class="dt">int</span> volume <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>   <span class="dt">int</span> bars<span class="op">;</span></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>   ports_init<span class="op">();</span></span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>   <span class="cf">while</span> <span class="op">(</span><span class="dv">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>      key <span class="op">=</span> read_key<span class="op">();</span></span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> <span class="op">(</span>key <span class="op">==</span> <span class="dv">10</span><span class="op">)</span>        <span class="co">/* key &#39;+&#39; */</span></span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>         volume <span class="op">=</span> update_volume<span class="op">(</span><span class="dv">1</span><span class="op">,</span> volume<span class="op">);</span></span>
+<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">else</span> <span class="cf">if</span> <span class="op">(</span>key <span class="op">==</span> <span class="dv">11</span><span class="op">)</span>   <span class="co">/* key &#39;-&#39; */</span></span>
+<span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a>         volume <span class="op">=</span> update_volume<span class="op">(-</span><span class="dv">1</span><span class="op">,</span> volume<span class="op">);</span></span>
+<span id="cb49-13"><a href="#cb49-13" aria-hidden="true" tabindex="-1"></a>      bars <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb49-14"><a href="#cb49-14" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> volume<span class="op">;</span> i<span class="op">++){</span></span>
+<span id="cb49-15"><a href="#cb49-15" aria-hidden="true" tabindex="-1"></a>        bars <span class="op">|=</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> i<span class="op">);</span></span>
+<span id="cb49-16"><a href="#cb49-16" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
+<span id="cb49-17"><a href="#cb49-17" aria-hidden="true" tabindex="-1"></a>      GPIO_D<span class="op">.</span>outdr <span class="op">=</span> bars<span class="op">;</span></span>
+<span id="cb49-18"><a href="#cb49-18" aria-hidden="true" tabindex="-1"></a>   <span class="op">}</span></span>
+<span id="cb49-19"><a href="#cb49-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</details>
+<h1 id="uppgift-6-10-p">Uppgift 6 (10 p)</h1>
+<p>Betrakta nedanst&#xE5;ende koppling, d&#xE4;r ett CH32V307-kort har kopplats
+till ett transportband. Transportbandet kan startas och stoppas fr&#xE5;n
+programvara som k&#xF6;rs p&#xE5; CH32V307-kortet med hj&#xE4;lp av funktionerna
+<code>start_machine()</code> och <code>stop_machine()</code>. Du kan
+anta att dessa funktioner &#xE4;r implementerade.</p>
+<p><img src="../images/transportband.png" /></p>
+<p>Tv&#xE5; &#xE5;terfj&#xE4;drande knappar START och STOP &#xE4;r kopplade till pin PE0
+respektive PE1 p&#xE5; CH32V307-kortet. N&#xE4;r respektive knapp trycks ned s&#xE4;tts
+den tillkopplade pinnen till &#x2018;1&#x2019;. N&#xE4;r respektive knapp inte &#xE4;r nedtryckt
+s&#xE4;tts pinnen till &#x2018;0&#x2019;.</p>
+<p>M&#xE5;let med denna uppgift &#xE4;r att konfigurera avbrott f&#xF6;r pinnarna PE0
+respektive PE1, s&#xE5; att avbrott genereras n&#xE4;r knapparna trycks ner.
+Avbrottshanteraren ska anropa funktionen <code>start_machine()</code>
+eller <code>stop_machine()</code> beroende p&#xE5; vilken knapp som trycks
+ned.</p>
+<p>Observera, i denna uppgift kan du f&#xF6;ruts&#xE4;tta att korrekt
+typkonverterade macrodefinitioner f&#xF6;r pekare till alla register redan
+finns.</p>
+<ol type="a">
+<li><p>Pinnarna PE0 och PE1 ska st&#xE4;llas in som ing&#xE5;ngar med
+pull-down-motst&#xE5;nd. Visa hur detta kan &#xE5;stadkommas utan att
+inst&#xE4;llningarna f&#xF6;r &#xF6;vriga pinnar p&#xE5;verkas. (1p)</p></li>
+<li><p>Visa hur AFIO konfigureras s&#xE5; att PE0 och PE1 kopplas till
+EXTI-modulen i CH32V307. T&#xE4;nk p&#xE5; att bara PE0 och PE1 ska konfigureras
+och att &#xF6;vriga EXTI-linor inte f&#xE5;r p&#xE5;verkas. (2p)</p></li>
+<li><p>Visa hur EXTI och PFIC konfigureras s&#xE5; att avbrott genereras p&#xE5;
+positiv flank f&#xF6;r de tv&#xE5; pinnarna. (3p)</p></li>
+</ol>
+<p>d1) Visa en avbrottshanterare <code>void at_irq(void)</code> som
+startar transportbandet genom att anropa <code>start_machine()</code>
+vid positiv flank p&#xE5; PE0 och som stoppar transportbandet genom att
+anropa <code>stop_machine()</code> vid positiv flank p&#xE5; PE1.</p>
+<p>d2) Nedan visas assemblerkod f&#xF6;r systemets vektortabell. Komplettera
+koden s&#xE5; att hopp till funktionen <code>at_irq</code> sker vid avbrott
+p&#xE5; b&#xE5;de EXTI line 0 och EXTI line 1. Du f&#xE5;r anta att registret
+<code>mtvec</code> &#xE4;r korrekt konfigurerat. (4p)</p>
+<div class="sourceCode" id="cb50"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="kw">.extern</span> at_irq</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="kw">.section</span> <span class="kw">.data</span></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a><span class="fu">vector_table:</span></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Fyll i h&#xE4;r</span></span></code></pre></div>
+<details>
+<summary>
+Svar
+</summary>
+<h4 id="a-1p">(a) (1p)</h4>
+<div class="sourceCode" id="cb51"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co">/* Pin 0, pin 1: input with pull-up/pull-down (CNF=10, MODE=00) = 0x8 per pin */</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="op">*</span>GPIO_E_CFGLR <span class="op">&amp;=</span> <span class="bn">0xFFFFFF00</span><span class="op">;</span>         <span class="co">/* clear config for pin0 and pin1 */</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="op">*</span>GPIO_E_CFGLR <span class="op">|=</span> <span class="bn">0x00000088</span><span class="op">;</span>         <span class="co">/* input with pull-up/pull-down */</span></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a><span class="op">*</span>GPIO_E_OUTDR <span class="op">&amp;=</span> <span class="op">~</span><span class="bn">0x03</span><span class="op">;</span>              <span class="co">/* pin0 and pin1 pull-down (ODR=0) */</span></span></code></pre></div>
+<h4 id="b-2p-1">(b) (2p)</h4>
+<div class="sourceCode" id="cb52"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Port E&#39;s identifier is 0x4 and we need to write this identifier</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="co">// in AFIO_EXTICR1 register&#39;s first 4 bits for pin 0 and next 4 bits</span></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a><span class="co">// for pin 1</span></span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> InitAFIO<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>AFIO_EXTICR1 <span class="op">&amp;=</span> <span class="bn">0xFFFFFF00</span><span class="op">;</span></span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>AFIO_EXTICR1 <span class="op">|=</span> <span class="bn">0x00000044</span><span class="op">;</span></span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="c-3p-1">(c) (3p)</h4>
+<div class="sourceCode" id="cb53"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> InitEXTI<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Enable line 0 and line 1 in the EXTI module&#39;s interrupt enable register.</span></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Rising edge will generate interrupts from pins PE0 and PE1.</span></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Falling edge will NOT generate interrupts from pins PE0 and PE1.</span></span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>EXTI_INTENR <span class="op">|=</span> <span class="bn">0x0003</span><span class="op">;</span></span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>EXTI_RTENR <span class="op">|=</span> <span class="bn">0x0003</span><span class="op">;</span></span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>EXTI_FTENR <span class="op">&amp;=</span> <span class="bn">0xFFFC</span><span class="op">;</span></span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Enable interrupt sources in PFIC</span></span>
+<span id="cb53-12"><a href="#cb53-12" aria-hidden="true" tabindex="-1"></a>  <span class="co">// EXTI0 = IRQ 22, EXTI1 = IRQ 23</span></span>
+<span id="cb53-13"><a href="#cb53-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>PFIC_IENR1 <span class="op">|=</span> <span class="op">((</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">22</span><span class="op">)</span> <span class="op">|</span> <span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">23</span><span class="op">));</span></span>
+<span id="cb53-14"><a href="#cb53-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="d1-3p">(d1) (3p)</h4>
+<div class="sourceCode" id="cb54"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> at_irq<span class="op">(</span><span class="dt">void</span><span class="op">)</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">// If an interrupt is generated at the rising edge of PE0, i.e., the</span></span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">// first bit of port E&#39;s INDR register becomes 1, then START the machine</span></span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(*</span>GPIO_E_INDR <span class="op">&amp;</span> <span class="bn">0x1</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>    start_machine<span class="op">();</span></span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">// If an interrupt is generated at the rising edge of PE1, i.e., the second</span></span>
+<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a>  <span class="co">// bit of port E&#39;s INDR register becomes 1, then STOP the machine</span></span>
+<span id="cb54-12"><a href="#cb54-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-13"><a href="#cb54-13" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(*</span>GPIO_E_INDR <span class="op">&amp;</span> <span class="bn">0x2</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb54-14"><a href="#cb54-14" aria-hidden="true" tabindex="-1"></a>    stop_machine<span class="op">();</span></span>
+<span id="cb54-15"><a href="#cb54-15" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb54-16"><a href="#cb54-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-17"><a href="#cb54-17" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>EXTI_INTFR <span class="op">|=</span> <span class="bn">0x3</span><span class="op">;</span>               <span class="co">/* Acknowledge both interrupts */</span></span>
+<span id="cb54-18"><a href="#cb54-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="d2-1p">(d2) (1p)</h4>
+<div class="sourceCode" id="cb55"><pre class="sourceCode s"><code class="sourceCode gnuassembler"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="kw">.extern</span> at_irq</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a><span class="kw">.section</span> <span class="kw">.data</span></span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a><span class="fu">vector_table:</span></span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">.org</span> vector_table <span class="op">+</span> <span class="dv">22</span> <span class="op">*</span> <span class="dv">4</span></span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">j</span> at_irq</span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">j</span> at_irq</span></code></pre></div>
+</details>
+<hr />
+</body>
+</html>

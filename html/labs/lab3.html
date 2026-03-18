@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>lab3</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+<h1 id="laboration-3">Laboration 3</h1>
+<p>In this lab assignment, you will use a library to create a
+synthesizer, which includes handling internal and external
+interrupts!</p>
+<h2 id="preparations">Preparations</h2>
+<p>You <em>must</em> have done and submitted the preparatory assignment
+for this lab. If you have not, you will probably not be able to finish
+this lab assignment on time, so consult a TA and book a time slot in a
+later lab session.</p>
+<h2 id="lab-environment">Lab environment</h2>
+<p>The lab environment is the same as in lab 1 (MD307 + VSCode), with
+the addition of a peripheral device you have used before:</p>
+<ul>
+<li>PTB-110, featuring a bargraph, a keypad, and a buzzer</li>
+</ul>
+<p>You will use the keypad to make the buzzer produce different tones,
+and the bargraph as an indicator of which key is being pressed.</p>
+<h2 id="task-0-getting-started">Task 0: Getting Started</h2>
+<p>Create a new project folder and initialize a project with the
+<strong>Lab3</strong> template (<em>Ctrl+Shift+P -&gt; MDx07: Initialize
+project -&gt; Lab Assignments -&gt; Lab3</em>).</p>
+<p>Connect the keypad to <strong>Port D [0:7]</strong>. Connect the
+bargraph to <strong>Port D [8:15]</strong>. Connect the buzzer to
+<strong>Port E [0]</strong>. Finally, connect the MD307 to your computer
+via USB.</p>
+<p>To clarify the buzzer connection: Use a jumper cable directly from
+the MD307 to the buzzer. The ports and pin numbers are shown in the
+diagram below, where <code>+</code> means <strong>VDD</strong> and
+<code>g</code> means <strong>GND</strong>. The pin in square brackets
+<code>[.]</code> is where one end of the jumper cable should go.</p>
+<pre><code>     PE15..8          PE7..0         PD15..8          PD7..0
+
+    0 2 4 6 +       0 2 4 6 +       0 2 4 6 +       0 2 4 6 +
+  |-----------|   |-----------|   |-----------|   |-----------|
+  | . . . . . |   |[.]. . . . |   | . . . . . |   | . . . . . |
+  | . . . . . |   | . . . . . |   | . . . . . |   | . . . . . |
+  |----   ----|   |----   ----|   |----   ----|   |----   ----|
+    g 1 3 5 7       g 1 3 5 7       g 1 3 5 7       g 1 3 5 7
+
+      UNUSED          BUZZER        BARGRAPH          KEYPAD</code></pre>
+<p>The template includes a library with various definitions and
+functions that you will use to implement a synthesizer. All the
+initialization needed for this lab assignment is already done (correctly
+this time - <em>no bug fixing!</em>).</p>
+<p>The only thing missing is the logic inside the interrupt handlers
+<code>systick_handler()</code> and <code>exti_handler()</code> in
+<code>src/main.c</code>.</p>
+<p>Let&#x2019;s start by making some noise.</p>
+<h2 id="task-1-sound-check">Task 1: Sound Check</h2>
+<p>The SysTick interrupt handler <code>systick_handler()</code> in
+<code>src/main.c</code> is where we need to put the logic for creating a
+square wave, by writing alternating high/low
+(<code>1</code>/<code>0</code>) signals to the output pin connected to
+the buzzer (<strong>GPIOE [0]</strong>).</p>
+<p>Within <code>systick_handler()</code>, write some code that inverts
+the value of the buzzer output pin. This only requires <em>one</em> line
+of code if you choose the right bitwise operation! Use the GPIO
+interface in <code>inc/gpio.h</code> - you may use pointer macros or
+struct pointers, whichever you prefer.</p>
+<p>Also, the interrupt needs to be acknowledged to let the system know
+that the handler can be called again. Acknowledge the SysTick interrupt
+at the end of the handler (see <em>QuickGuide -&gt; SysTick -&gt; STK_SR
+-&gt; CNTIF</em>).</p>
+<p>The library includes functions for starting and stopping periodic
+SysTick interrupts. Test your SysTick interrupt handler by adding a line
+of code in <code>main()</code>, after the initialization calls
+(<em>not</em> within the infinite loop), that starts SysTick interrupts
+with a period of 500 &#xB5;s (see the SysTick interface in
+<code>inc/systick.h</code>).</p>
+<p>If it works, you should hear a 1 KHz tone. If not, call a TA to get
+some guidance.</p>
+<p>Before moving on, remove the 1 KHz tone from the program! Next, we
+will use the keypad to control the tone generation.</p>
+<h2 id="task-2-external-control">Task 2: External Control</h2>
+<p>The external interrupts have been configured such that any key on the
+keypad will invoke the interrupt handler <code>exti_handler()</code> in
+<code>src/main.c</code>. The interrupts are triggered on falling
+<em>and</em> rising edges, i.e.&#xA0;when a key is pressed <em>and</em> when
+a key is released.</p>
+<h3 id="task-2.1-reading-the-keypad">Task 2.1: Reading the Keypad</h3>
+<p>Within <code>exti_handler()</code>, start small by adding some code
+that simply reads the keypad (see the keypad interface in
+<code>inc/keypad.h</code>). Acknowledge the interrupt at the end of the
+handler (see <em>QuickGuide -&gt; EXTI -&gt; INTFR</em>). Use the
+debugger to make sure you can read all the keys properly and know what
+values they return. Ensure the interrupt handler is called when a key is
+pressed as well as released.</p>
+<p>Time to turn the keypad into a synthesizer!</p>
+<h3 id="task-2.2-making-noise">Task 2.2: Making Noise</h3>
+<p>Now, everything is in place. You can control the tone
+(<code>inc/systick.h</code>) and read the keypad
+(<code>inc/keypad.h</code>). Use this to generate a tone when a key is
+pressed according to the keypad diagram below, where the numbers
+represent SysTick periods in microseconds.</p>
+<pre><code>|------|------|------|------|
+| 1516 | 1431 | 1351 | 1275 |
+|------|------|------|------|
+| 1203 | 1136 | 1072 | 1012 |
+|------|------|------|------|
+|  955 |  901 |  851 |  803 |
+|------|------|------|------|
+|  758 |  715 |  675 |  637 |
+|------|------|------|------|</code></pre>
+<p>A tone should only be generated while a key is pressed. Make the tone
+stop when a key is released.</p>
+<p>Now you have a working synthesizer - take the time to pat yourself on
+the back and play some notes for fun before moving on!</p>
+<p>It would be nice with some visual feedback as well though, don&#x2019;t you
+think?</p>
+<h2 id="task-3-lights-please">Task 3: Lights, Please!</h2>
+<p>Recall that the bargraph is connected to <strong>GPIOD
+[8:15]</strong>. Make the bargraph indicate which key is being pressed.
+Each key should show a unique light pattern. Feel free to come up with
+something yourself, but if you&#x2019;re not in a creative mood, you could
+simply use the numbers 1 to 16 from top-left to bottom-right button
+(interpreting the lights as a natural binary number).</p>
+<p>Like the tone, the lights should only be on while while a key is
+pressed. Turn off the lights when a key is released.</p>
+<h2 id="task-4-melody-player">Task 4: Melody Player</h2>
+<p>Playing a melody on the keypad is fun, but it&#x2019;s difficult to get the
+timing right and (with the current implementation) we only have access
+to a very limited set of notes.</p>
+<p>Let&#x2019;s make the program play a melody automatically.</p>
+<p>The library includes definitions for playing a particular melody.
+Have a look at the interface in <code>inc/music.h</code>, particularly
+the <code>Note</code> struct. Add the code below to
+<code>src/main.c</code> in global scope above
+<code>systick_handler()</code>.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>Note notes<span class="op">[]</span> <span class="op">=</span> NOTES<span class="op">;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="dt">const</span> <span class="dt">int</span> notes_length <span class="op">=</span> <span class="kw">sizeof</span><span class="op">(</span>notes<span class="op">)</span> <span class="op">/</span> <span class="kw">sizeof</span><span class="op">(</span>Note<span class="op">);</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> remaining_duration<span class="op">;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> current_period<span class="op">;</span></span></code></pre></div>
+<p>Within <code>main()</code>, after the initialization calls
+(<em>not</em> within the infinite loop), add a loop that iterates
+through the array of notes. For each note, set the values of the global
+variables <code>remaining_duration</code> and
+<code>current_period</code> according to the fields of the note struct
+(see Lecture 7 on how to access struct fields). Generate a tone with a
+period of <code>current_period</code> and then wait (do nothing) until
+the note is finished.</p>
+<p><em>How can the note finish while we&#x2019;re doing nothing?</em></p>
+<p>I&#x2019;m glad you asked. Interrupts, of course! You&#x2019;ve set up SysTick to
+trigger an interrupt with a certain periodicity. Use this within
+<code>systick_handler()</code> to keep track of time!</p>
+<p>Do you recognize the melody?</p>
+<h2 id="task-5-getting-approved">Task 5: Getting Approved</h2>
+<p>Demonstrate your solution to a TA. Show them that the program works,
+and explain how you implemented it. Answer any questions they might
+have.</p>
+<p><strong><em>When you have been approved by a TA, it is YOUR
+responsibility to verify that it has been documented in Canvas under
+&#x2018;Grades&#x2019;. Do so before leaving!</em></strong></p>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>intro1_assembly</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+<h1
+id="inledande-&#xF6;vning-1---utvecklingsmilj&#xF6;n-och-inledande-assemblerprogrammering">Inledande
+&#xD6;vning 1 - Utvecklingsmilj&#xF6;n och Inledande Assemblerprogrammering</h1>
+<p>I den h&#xE4;r &#xF6;vningen introduceras utvecklingsmilj&#xF6;n vi anv&#xE4;nder i
+kursen. Vi g&#xE5;r igenom hur ni skriver och k&#xF6;r assemblerkod p&#xE5; MD307 (i
+simulatorn). Ni skall bekanta er med Visual Studio Code (h&#xE4;danefter
+VSCode), som vi senare ocks&#xE5; kommer anv&#xE4;nda f&#xF6;r utveckling i C.</p>
+<h2 id="skapa-ett-assemblerprojekt">Skapa ett assemblerprojekt</h2>
+<p>Innan ni drar ig&#xE5;ng med den h&#xE4;r &#xF6;vningen f&#xF6;rv&#xE4;ntas ni ha g&#xE5;tt igenom
+F&#xF6;rel&#xE4;sning 1, och sedan installerat simulatorn och VSCode enligt
+anvisningarna <a
+href="https://www.cse.chalmers.se/edu/resources/mop/lecture_notes/introductory_exercises/Getting_Started_with_Visual_Studio_Code.html">h&#xE4;r</a>.
+Om ni inte startat om VSCode sedan installationen, g&#xF6;r detta nu (annars
+hittar inte VSCode&#x2019;s terminal GDB!) Starta sedan VSCode i ett nytt, tomt
+directory. Skapa ett tomt assemblerprojekt:</p>
+<ul>
+<li>Tryck Ctrl+Shift+P (Cmd+Shift+P p&#xE5; mac) f&#xF6;r att &#xF6;ppna
+kommandopaletten</li>
+<li>Skriv sedan &#x201C;MDx07: Initialize Project&#x201D; i textrutan</li>
+</ul>
+<p align="center">
+<img src="../images/Picture1.png" alt="My image" width="80%"/>
+</p>
+<p>S&#xE5; fort ni b&#xF6;rjat skriva kommer alternativet att dyka upp.
+Kommandopaletten anv&#xE4;nds till det mesta i VSCode, och vi kommer st&#xF6;ta p&#xE5;
+den igen senare i &#xF6;vningen. Tryck p&#xE5; <code>&lt;enter&gt;</code> f&#xF6;r att
+v&#xE4;lja kommandot och v&#xE4;lj sedan foldern &#x201C;Basic templates&#x201D; och i denna
+&#x201C;MD307 empty assembly project&#x201D; f&#xF6;r att initiera ett assemblerprojekt. Ni
+skall nu se n&#xE5;got i den h&#xE4;r stilen p&#xE5; sk&#xE4;rmen (om ni inte g&#xF6;r det s&#xE5;
+klicka p&#xE5; den inringade ikonen som &#xF6;ppnar &#x201C;explorer&#x201D; vyn):</p>
+<p align="center">
+<img src="../images/Picture2.png" alt="My image" width="80%"/>
+</p>
+<p>I listan till v&#xE4;nster ser ni alla filer som ligger i mappen d&#xE4;r ni
+startade VSCode. F&#xF6;ljande filer har skapats av initieringskommandot:</p>
+<ul>
+<li>Underkatalogen <code>.vscode</code>: Denna inneh&#xE5;ller inst&#xE4;llningar
+f&#xF6;r VSCode, och kan oftast ignoreras.</li>
+<li>Underkatalogen <code>device</code>: Inneh&#xE5;ller konfigurationsfiler
+f&#xF6;r v&#xE5;r utvecklingsmilj&#xF6;.</li>
+<li>Underkatalogen <code>src</code>: H&#xE4;r ligger assemblerkodfilerna som
+skall bli till ett program.
+<ul>
+<li><code>main.s</code>: Det h&#xE4;r &#xE4;r filen d&#xE4;r ni skall skriva er kod.
+Fr&#xE5;n b&#xF6;rjan inneh&#xE5;ller den bara ett program som inte g&#xF6;r n&#xE5;gonting.</li>
+<li><code>startup.s</code>: Den h&#xE4;r filen inneh&#xE5;ller lite
+initialiseringskod som k&#xF6;rs innan varje program. Ni beh&#xF6;ver inte bry er
+om den f&#xF6;rr&#xE4;n i slutet av kursen.</li>
+</ul></li>
+<li><code>Makefile</code>: Detta &#xE4;r en textfil som beskriver hur
+programmet skall kompileras. Ni kommer l&#xE4;ra er lite mer om kompilatorn
+senare i kursen. F&#xF6;r tillf&#xE4;llet kan ni l&#xE5;ta den vara.</li>
+<li><code>md307-runtime.a</code>: Det h&#xE4;r &#xE4;r ett &#x201C;runtime bibliotek&#x201D;,
+grundl&#xE4;ggande funktioner som beh&#xF6;vs f&#xF6;r att C skall fungera. Vi pratar
+mer om det senare i kursen.</li>
+</ul>
+<h2 id="st&#xE4;ng-av-din-ai-kompis">St&#xE4;ng av din AI &#x201C;kompis&#x201D;</h2>
+<p><em>Om</em> du har GitHub copilot installerat s&#xE5; kommer den
+omedelbart b&#xF6;rja f&#xF6;resl&#xE5; vilka instruktioner du skall skriva. Det h&#xE4;r
+kan vara extremt anv&#xE4;ndbart senare, n&#xE4;r du kan assemblerprogrammering,
+men &#xE4;r katastrofalt d&#xE5;ligt n&#xE4;r man skall l&#xE4;ra sig. S&#xE5;, f&#xF6;r din egen
+skull, st&#xE4;ng av AI hj&#xE4;lpen genom att avchecka boxarna i bilden:</p>
+<p align="center">
+<img src="../images/turn_off_ai.png" alt="My image" width="50%"/>
+</p>
+<h2 id="starta-simulatorn">Starta simulatorn</h2>
+<p>Eftersom ni inte har en MD307 till hands kommer ni att k&#xF6;ra er kod p&#xE5;
+en simulator. Vi kompilerar och k&#xF6;r v&#xE5;ra program precis p&#xE5; samma s&#xE4;tt
+som om koden k&#xF6;rde p&#xE5; riktig h&#xE5;rdvara. Senare i kursen (Laboration 1)
+kommer ni l&#xE4;ra er lite mer om hur detta fungerar och kommer f&#xE5; testa att
+k&#xF6;ra er kod p&#xE5; riktig h&#xE5;rdvara. Allt ni beh&#xF6;ver g&#xF6;ra &#xE4;n s&#xE5; l&#xE4;nge &#xE4;r
+att:</p>
+<ul>
+<li>Starta simulatorn genom att trycka
+<code>Ctrl</code>+<code>Shift</code>+<code>P</code> -&gt; &#x201C;Launch
+Simserver&#x2026;&#x201D;</li>
+</ul>
+<p>som genast l&#xE4;gger sig och v&#xE4;ntar p&#xE5; att VSCode skall ladda upp ett
+program.</p>
+<h2 id="skriv-och-starta-ett-assemblerprogram">Skriv och starta ett
+assemblerprogram</h2>
+<p>&#xC4;ndra nu koden i <code>main.s</code> s&#xE5; att den ser ut s&#xE5; h&#xE4;r:</p>
+<p align="center">
+<img src="../images/Picture3.png" alt="My image" width="80%"/>
+</p>
+<p>Vi har p&#xE5; mening skrivit en felaktig instruktion (&#x201C;lii&#x201D; &#xE4;r inte en
+RISC-V assembler instruktion) f&#xF6;r att ni skall se hur VSCode hj&#xE4;lper er
+att uppt&#xE4;cka enkla misstag. L&#xE5;t misstaget vara kvar och f&#xF6;rs&#xF6;k nu
+kompilera och k&#xF6;ra programmet:</p>
+<p align="center">
+<img src="../images/Picture4.png" alt="My image" width="80%"/>
+</p>
+<ul>
+<li>V&#xE4;lj f&#xF6;rst &#x201C;Build and Debug&#x201D; vyn (ikonen &#xE4;r inringad i r&#xF6;tt i
+bilden)</li>
+<li>Och tryck sedan p&#xE5; &#x201C;Build and debug&#x201D; knappen (ikonen &#xE4;r inrutad i
+gr&#xF6;nt i bilden). Alternativt kan du bara trycka p&#xE5; &#x201C;F5&#x201D;.</li>
+</ul>
+<p>Kompilatorn kommer nu skriva ut en massa information i &#x201C;terminal&#x201D;
+f&#xF6;nstret, och kommer sedan poppa upp ett f&#xF6;nster:</p>
+<p align="center">
+<img src="../images/Picture5.png" alt="My image" width="80%"/>
+</p>
+<p>som ber&#xE4;ttar f&#xF6;r dig att kompileringen misslyckades. Tryck p&#xE5;
+&#x201C;abort&#x201D;.</p>
+<p>Titta p&#xE5; koden igen s&#xE5; ser du att VSCode har varit v&#xE4;nligt nog att
+visa f&#xF6;r dig vad som gick snett:</p>
+<p align="center">
+<img src="../images/Picture6.png" alt="My image" width="80%"/>
+</p>
+<p>Oftast r&#xE4;cker den h&#xE4;r informationen f&#xF6;r att man skall se vad som g&#xE5;tt
+snett, men ibland blir man tvungen att l&#xE4;sa igenom hela texten som
+kompilatorn spottade ur sig i &#x201C;terminal&#x201D; f&#xF6;nstret.</p>
+<p>I det h&#xE4;r fallet visste vi ju redan vad som var fel, s&#xE5; fixa koden
+och tryck sedan p&#xE5; F5 f&#xF6;r att bygga och k&#xF6;ra programmet igen.</p>
+<p>Efter en liten stund kommer eran sk&#xE4;rm se ut s&#xE5; h&#xE4;r:</p>
+<p align="center">
+<img src="../images/Picture7.png" alt="My image" width="80%"/>
+</p>
+<p>VSCode har nu kompilerat assemblerkoden till maskinkod och laddat upp
+den till simulatorn. Sedan instruerades simulatorn att starta
+programmet, men att avbryta (&#x201C;break&#x201D;) s&#xE5; fort den kommit fram till
+funktionen &#x201C;main&#x201D;. Den gulmarkerade raden visar n&#xE4;sta instruktion som
+kommer att k&#xF6;ras. Vi skall nu stega igenom v&#xE5;rat lilla program och se
+vad som h&#xE4;nder.</p>
+<p>S&#xE4;g &#xE5;t debuggern att exekvera den gulmarkerade instruktionen genom
+att trycka p&#xE5; &#x201C;step into&#x201D; knappen (eller trycka p&#xE5; F11):</p>
+<p align="center">
+<img src="../images/Picture8.png" alt="My image" width="50%"/>
+</p>
+<p>Instruktionen <code>li t0, 10</code> borde ha lagt v&#xE4;rdet 10 i
+register <code>t0</code>. F&#xF6;r att se om det verkligen h&#xE4;nt &#xF6;ppnar ni
+&#x201C;Registers&#x201D; fliken i &#x201C;Build and Debug&#x201D; vyn till v&#xE4;nster:</p>
+<p align="center">
+<img src="../images/Picture9.png" alt="My image" width="30%"/>
+</p>
+<p>H&#xE4;r kan ni se v&#xE4;rdet p&#xE5; alla processorns register, och i
+<code>t0</code> ligger mycket riktigt 0xa som &#xE4;r hexadecimalt f&#xF6;r 10.
+Stega nu &#xF6;ver n&#xE4;sta rad och kontrollera att register <code>t1</code> f&#xE5;r
+v&#xE4;rdet 0x14 (hexadecimalt f&#xF6;r 20). Om ni stegar &#xF6;ver n&#xE4;sta instruktion
+igen s&#xE5; kommer ni till <code>j main</code> instruktionen och nu kan ni
+se att <code>t0</code> f&#xE5;tt v&#xE4;rdet 0x1e d.v.s. 30 decimalt. Om inte
+<code>j main</code> instruktionen funnits hade all information om
+register och den gula raden f&#xF6;rsvunnit eftersom VSCode f&#xF6;rs&#xF6;ker visa
+n&#xE4;sta instruktion, men det d&#xE5; inte funnits n&#xE5;gon n&#xE4;sta instruktion att
+visa.</p>
+<p>N&#xE4;r du vill avsluta programmet och &#xE5;terg&#xE5; till att koda trycker du p&#xE5;
+&#x201C;disconnect&#x201D; knappen (eller Shift+F5):</p>
+<p align="center">
+<img src="../images/Picture10.png" alt="My image" width="50%"/>
+</p>
+<h2 id="unders&#xF6;k-minnet">Unders&#xF6;k minnet</h2>
+<p>F&#xF6;rutom att se registrenas v&#xE4;rden n&#xE4;r man debuggar kan det vara
+viktigt att se vad som ligger p&#xE5; en speciell plats i minnet. L&#xE4;gg till
+n&#xE5;gra instruktioner som kopierar resultatet av v&#xE5;r addition till
+addressen 0x20001000 och kompilera och k&#xF6;r ditt program:</p>
+<p align="center">
+<img src="../images/Picture11.png" alt="My image" width="80%"/>
+</p>
+<p>Programmet har stannat p&#xE5; f&#xF6;rsta instruktionen som vanligt. Vi vill
+nu k&#xF6;ra programmet till dess att <code>sb</code> instruktionen har
+exekverats. Vi kan f&#xF6;rst&#xE5;s stega instruktion f&#xF6;r instruktion, men det
+blir l&#xE4;tt tjatigt, om programmet &#xE4;r l&#xE5;ngt. Ist&#xE4;llet flyttar ni mark&#xF6;ren
+ner till <code>j main</code> instruktionen, och trycker p&#xE5;
+<code>F9</code> f&#xF6;r att l&#xE4;gga till en brytpunkt (breakpoint). Vi kan nu
+l&#xE5;ta programmet k&#xF6;ra fritt (genom att trycka p&#xE5; &#x201C;Continue&#x201D; knappen eller
+<code>F5</code>), s&#xE5; kommer det att avbrytas igen n&#xE4;r det n&#xE5;r v&#xE5;r
+brytpunkt. Testa det:</p>
+<p align="center">
+<img src="../images/Picture12.png" alt="My image" width="80%"/>
+</p>
+<p>Processorn borde nu ha lagt ihop talen 10 och 20 och lagt resultatet
+p&#xE5; minnesaddressen 0x20001000. Unders&#xF6;k detta genom att &#xF6;ppna &#x201C;memory&#x201D;
+fliken i f&#xF6;nstret under koden (inrutat i gr&#xF6;nt i bilden nedan):</p>
+<p align="center">
+<img src="../images/Picture13.png" alt="My image" width="80%"/>
+</p>
+<p>Vi vill unders&#xF6;ka minnet med b&#xF6;rjan p&#xE5; address 0x20001000, s&#xE5; tryck
+p&#xE5; &#x201C;Add new memory view&#x201D; (inrutat i r&#xF6;tt i bilden ovan) och skriv in
+0x20001000 i f&#xF6;nstret som poppar upp.</p>
+<p align="center">
+<img src="../images/Picture14.png" alt="My image" width="80%"/>
+</p>
+<p>Minnet listas h&#xE4;r med 16 bytes per rad, och vi kan se att p&#xE5; address
+0x20001000 ligger mycket riktigt byten 0x1e, som &#xE4;r hexadecimalt f&#xF6;r 30
+(summan av v&#xE5;r addition).</p>
+</body>
+</html>

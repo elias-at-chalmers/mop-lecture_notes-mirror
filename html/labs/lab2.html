@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>lab2</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+<h1 id="laboration-2">Laboration 2</h1>
+<p>In this lab assignment, you will get to run and debug a C program on
+real hardware.</p>
+<h2 id="preparations">Preparations</h2>
+<p>You <em>must</em> have done and submitted the preparatory assignment
+for this lab. If you have not, you will probably not be able to finish
+this lab assignment on time, so consult a TA and book a time slot in a
+later lab session.</p>
+<h2 id="lab-environment">Lab environment</h2>
+<p>The lab environment is the same as in the previous lab (MD307 +
+VSCode), with the addition of some peripheral devices:</p>
+<ul>
+<li>PTB-110, featuring a keypad, a DIL switch, a bargraph, and a
+7-segment display</li>
+<li>PTB-111, featuring an ASCII display, and a graphical display</li>
+</ul>
+<p>This lab assignment will primarily deal with the keypad and the ASCII
+display. The DIL switch will be used for debugging purposes.</p>
+<h2 id="task-0-getting-started">Task 0: Getting Started</h2>
+<p>Create a new project folder and initialize a project with the
+<em>Lab2</em> template (<em>Ctrl+Shift+P -&gt; MDx07: Initialize project
+-&gt; Lab Assignments -&gt; Lab2</em>).</p>
+<p>Connect the <em>keypad</em> to <em>Port D 15..8</em>. Connect the
+<em>PTB-111</em> to the <em>MD307</em> via the PTB-1000 bus. Connect the
+<em>ASCII display</em> to <em>Port E</em> (<em>Data</em> to
+<em>15..8</em>, <em>Control</em> to <em>7..0</em>).</p>
+<p>Finally, connect the <em>MD307</em> to your computer via USB. In the
+end it should look something like this:</p>
+<p><img src="../images/lab2-hardware-setup.jpg" /></p>
+<p>The expected behaviour of the program is for it to print characters
+from left to right on the top row of the ASCII display when you press
+keys on the keypad. When the end of the row is reached, it should start
+over from the beginning of the row and overwrite existing characters.
+The grid below shows the characters to be printed when pressing the
+corresponding keys on the keypad (e.g.&#xA0;top-left key should print
+<code>1</code>, bottom-right key should print <code>D</code>).</p>
+<pre><code>|---|---|---|---|
+| 1 | 2 | 3 | A |
+|---|---|---|---|
+| 4 | 5 | 6 | B |
+|---|---|---|---|
+| 7 | 8 | 9 | C |
+|---|---|---|---|
+| E | 0 | F | D |
+|---|---|---|---|</code></pre>
+<p>Time to run the program. Go to the <em>Run and Debug</em> view
+(Ctrl+Shift+D), select <em>Build and debug (hardware)</em> in the
+drop-down list, and press <em>Start Debugging</em> (F5).</p>
+<p>When the debugger has automatically stopped in the beginning of
+<code>main</code>, press <em>Continue</em> (F5) and test if the program
+behaves as expected.</p>
+<p><em>Rats! It doesn&#x2019;t work!</em></p>
+<p>Luckily, you <em>love</em> fixing broken software.</p>
+<p><strong>In this lab, like the previous, you will first debug an
+existing program, and then try your own if you have time left. Only the
+first part is necessary to pass the lab.</strong></p>
+<h2 id="task-1-fixing-the-program">Task 1: Fixing the Program</h2>
+<p>The program is riddled with bugs. Given your familiarity with similar
+code from the preparatory assignment, it <em>might</em> be possible to
+simply read the code from beginning to end and fix all the bugs without
+ever running it, but don&#x2019;t do that. The point is for you to learn how to
+debug a program in a <em>structured</em> way. As you may have already
+noticed, debugging (fixing bugs) is usually a much more time-consuming
+part of software development than actually writing the code. This
+problem should <em>not</em> be approached by trying to learn how to
+write perfect code from the outset - that is unattainable. Instead, one
+should learn how to find bugs efficiently - once the bug is pinpointed,
+the solution is usually obvious.</p>
+<p><strong>Warning</strong>: <em>When debugging code (especially code
+written by someone other than yourself), correcting inconsequential
+things (like the way the code is formatted) can be tempting, but</em>
+<strong><em>refrain</em></strong> <em>from doing so! When debugging, it
+is useful to check</em> <strong><em>exactly</em></strong> <em>what
+changes have been made to the source code (the TAs may want to do so if
+you run into problems), and having a bunch of irrelevant changes makes
+it more difficult.</em></p>
+<p>Let&#x2019;s look at the program from a top-down perspective starting from
+<code>main</code>, just one level deep into the calling hierarchy:</p>
+<p><img src="../images/lab2-main.svg" /></p>
+<p>We start off with initializations. If the GPIO ports are configured
+incorrectly, testing the program is going to be difficult. So let&#x2019;s
+start there.</p>
+<h3 id="task-1.1-checking-the-gpio-ports">Task 1.1: Checking the GPIO
+Ports</h3>
+<p><strong>NB</strong>: <em>You may assume the definitions in the GPIO
+header file <code>gpio.h</code>, which includes the port macros, are
+correct. You do not need to check those.</em></p>
+<p>Starting with the keypad (connected to <em>Port D 15..8</em>), recall
+that the upper four pins (<em>15..12</em>) should be configured as
+<em>digital output (open drain, 2 MHz)</em>, and the lower four pins
+(<em>11..8</em>) as <em>digital input (pull up).</em></p>
+<p>Consult the QuickGuide and carefully derive what values should be
+written to what registers for this configuration to work.</p>
+<p>Look at the code in <code>init_keypad</code> and see if you can spot
+the bugs. If so, modify the code and make a note of your corrections. If
+not, consult a TA.</p>
+<p><strong>Before moving on:</strong> You need to be <em>really</em>
+confident in your ocular inspection. The upcoming tasks rely on
+correctly configured GPIO pins - if you&#x2019;ve made a mistake, you might end
+up wasting precious time. You may ask a TA to verify that your new
+configuration is correct, if you wish.</p>
+<p>To save time, you needn&#x2019;t bother checking <code>init_ascii</code> -
+it is correctly implemented.</p>
+<p>Now that you&#x2019;ve modified the code you should recompile the project,
+run the program and check whether it works as intended.</p>
+<p><em>What&#x2019;s that? The program still doesn&#x2019;t work? How
+unfortunate!</em></p>
+<p>The delay functions are used in most parts of the program, so let&#x2019;s
+check those next.</p>
+<h3 id="task-1.2-checking-the-delay-functions">Task 1.2: Checking the
+Delay Functions</h3>
+<p>Have a look in the file <code>systick.c</code>. It appears
+<code>delay_milli</code>, <code>delay_micro</code> and
+<code>delay_nano</code> are all essentially carbon copies of one
+another, where the only difference is the initial calculation of the
+<code>count</code> variable.</p>
+<p>If the delay functions were defined in terms of one another in some
+reasonable way, testing one of them would have been enough to verify the
+correctness of all of them. However, that is not the case, so we are
+forced to test all of them separately. Let&#x2019;s not bother with the
+mathematics of the initial calculation; instead, we&#x2019;ll just devise a
+simple test (we would have to do that anyway) and deal with the headache
+if the test fails.</p>
+<p>We can use the debugger to step over a delay function and measure the
+time it takes to complete. Add the code below to the beginning of
+<code>main</code>.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#define MS </span><span class="dv">0</span><span class="pp"> </span><span class="co">// Change the number to something reasonable!</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  delay_milli<span class="op">(</span>MS<span class="op">);</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  delay_micro<span class="op">(</span><span class="dv">1000</span> <span class="op">*</span> MS<span class="op">);</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  delay_nano<span class="op">(</span><span class="dv">1000</span> <span class="op">*</span> <span class="dv">1000</span> <span class="op">*</span> MS<span class="op">);</span></span></code></pre></div>
+<p>Try to think of a reasonable target for the test, and change the
+definition of <code>MS</code> accordingly. Keep in mind you will have to
+measure it manually, using a stopwatch on your phone or something
+similar. If the target is too short, your reaction time (noticing the
+debugger stopped and actually stopping the stopwatch) will be too
+significant and render the test useless. If the target is too long, you
+might get too bored to actually finish the test.</p>
+<p>For each of the delay functions, use the debugger to <em>Step
+Over</em> (F10) and record the time it takes to complete the step.</p>
+<p>Were the delays reasonably accurate? If any of the delays deviated
+too much, fix the calculation and test it again to verify
+correctness.</p>
+<p>Make a note of your corrections, if any. Remove the test code and
+check if the program works now.</p>
+<p><em>Gah! Still broken.</em></p>
+<p>The code of the <em>ASCII display</em> is fairly complex, and depends
+on the input from the <em>keypad</em>. If we&#x2019;re lucky, we only need to
+fix the <em>keypad</em> code. Onward!</p>
+<h3 id="task-1.3-checking-the-keypad">Task 1.3: Checking the Keypad</h3>
+<p>Looking again at the calling hierarchy from before, we notice that
+the only <em>keypad</em>-related call made in <code>main</code> is to
+<code>keyb</code>.</p>
+<p>Put a breakpoint at the call to <code>keyb</code>, start the program
+and <em>Continue</em> (F5) to get to the breakpoint. Press and hold one
+of the buttons on the <em>keypad</em>, and <em>Continue</em> (F5). Check
+the return value. Is it what you expected? Keep trying different inputs
+until you have found an input that yields an incorrect return value.</p>
+<p>To get a better picture of the situation, let&#x2019;s look at the calling
+hierarchy below, starting from <code>keyb</code>.</p>
+<p><img src="../images/lab2-keyb.svg" /></p>
+<p>Luckily it&#x2019;s not very complex. You can ignore the call to
+<code>delay_nano</code> - it needs to be there to give enough time for
+the row activation to take effect. That leaves us with
+<code>kbd_activate</code> and <code>kbd_getcol</code>.</p>
+<p>Use the debugger to <em>Step Into</em> (F11) <code>keyb</code>. Put
+breakpoints on the return statements. Press and hold a button that
+earlier yielded an incorrect return value, and <em>Continue</em> (F5).
+Do the values of the <em>row</em> and <em>col</em> variables meet your
+expectations? The answer should give you a clue whether the bug lies
+within <code>kbd_activate</code> or <code>kbd_getcol</code>.</p>
+<p>Dig deeper into the calling hierarchy based on your findings.
+Carefully step through the function and correct any bugs you come
+across. If you get stuck, ask a TA for help.</p>
+<p>After any corrections, go back to testing <code>keyb</code> and
+verify that it returns the values you expect.</p>
+<p>Make a note of your corrections, cross your fingers, and check if the
+program works.</p>
+<p><em>No&#x2026; no, no, no!</em></p>
+<p>Yes. You know what that means. We finally get the pleasure of
+debugging the <em>ASCII display</em> code.</p>
+<h3 id="task-1.4-checking-the-ascii-display">Task 1.4: Checking the
+ASCII Display</h3>
+<p>Yet again looking at the calling hierarchy from <code>main</code>, we
+see two calls related to the <em>ASCII display</em>, namely
+<code>ascii_gotoxy</code> and <code>ascii_write_char</code>. Let&#x2019;s have
+a look at their calling hierarchies (excluding delay functions, since
+you&#x2019;ve already fixed those) below.</p>
+<p><img src="../images/lab2-ascii.svg" /></p>
+<p>This one is a bit more complex, but still manageable. There are many
+incoming arrows in the bottom layer, i.e.&#xA0;many calls made to
+<code>ascii_ctrl_bit_set</code> and <code>ascii_ctrl_bit_clear</code>.
+If they don&#x2019;t work, nor will the ones that depend on them.</p>
+<p>So let&#x2019;s work our way up from the bottom, checking the layers one by
+one and testing the program after each bug fix, until the program
+works.</p>
+<p>Since the functions of the bottom layer (defined as macros in
+<code>ascii.h</code>) should have opposite effects, we can easily test
+them with the code below.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>GPIO_OUTDR<span class="op">(</span>GPIO_E<span class="op">)</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  ascii_ctrl_bit_set<span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">7</span><span class="op">);</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">unsigned</span> <span class="dt">char</span> ctrl <span class="op">=</span> <span class="op">*</span>GPIO_OUTDR<span class="op">(</span>GPIO_E<span class="op">);</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Check here that bit 7 of ctrl is set</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  ascii_ctrl_bit_clear<span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">7</span><span class="op">);</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  ctrl <span class="op">=</span> <span class="op">*</span>GPIO_OUTDR<span class="op">(</span>GPIO_E<span class="op">);</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Check here that bit 7 of ctrl is cleared</span></span></code></pre></div>
+<p>Step through the code with the debugger, check for unexpected
+behaviour, and fix and document any bugs you come across.</p>
+<p>Moving forward, you are on your own. Use what you&#x2019;ve learned so far
+to systematically debug the next layer.</p>
+<p><em>Hint: There is one bug per layer on the bottom two layers. Apart
+from these two bugs, there are no more bugs to be found.</em></p>
+<h3 id="task-2-try-your-own-program">Task 2: Try your own program</h3>
+<p>If you have time left, try your own program from the lab preparation.
+You might find that the hardware is less forgiving than the simulator,
+and you might have to do some more debugging to get it to work, but you
+are good at that now.</p>
+<h3 id="task-3-getting-approved">Task 3: Getting Approved</h3>
+<p>Show the TA the bugs you found, and demonstrate that the corrected
+program works as intended. If you got your own code to work as well,
+show that to the TA too.</p>
+<p><strong><em>When you have been approved by the TA, it is YOUR
+responsibility to verify that it has been documented in Canvas under
+&#x2018;Grades&#x2019;. Do so before leaving!</em></strong></p>
+</body>
+</html>

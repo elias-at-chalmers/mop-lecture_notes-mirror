@@ -127,9 +127,7 @@ loop:
 ```
 
 ### Task 4: RGB Lights!
-If you have made it this far, great work! If you have time to complete this task as well, **wow!** Go find the TA and ask for an RGB LED, if you don't have one already. Then connect it and make it pulsate with all the colors of the rainbow. Then record it and show your lecturer for a gold star sticker[^1].
-
-[^1]: The gold star has no monetary value and does not affect your grade. It might also be a virtual gold star sticker if I cannot find a real one. 
+If you have made it this far, great work! If you have time to complete this task as well, **wow!** Go find the TA and ask for an RGB LED, if you don't have one already. Then connect it and make it pulsate with all the colors of the rainbow. Then record it and show your lecturer for a gold star sticker.
 
 ### Task 5: Getting Approved
 

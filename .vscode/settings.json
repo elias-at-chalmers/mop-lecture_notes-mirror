@@ -1,0 +1,13 @@
+{
+      "livePreview.autoRefreshPreview": "On Changes to Saved Files",
+      "cSpell.words": [
+            "bitmask",
+            "microcontroller",
+            "microcontrollers",
+            "Writeback"
+      ],
+      "cSpell.enabledFileTypes": {
+            "python": false
+      },
+      "livePreview.defaultPreviewPath": "/quickguide.html"
+}      

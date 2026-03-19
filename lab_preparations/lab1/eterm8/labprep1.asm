@@ -2,7 +2,7 @@
 # Lab 1 - Preparation Task
 #
 #         Your task is to write an assembler function which will be tested 
-#by external C code. 
+#         by a program featured at the bottom of this file. 
 #         The test harness will output results on the USART, so, if you are
 #         running on Simserver, you need to attach a Console to USART1:
 #         Serial communication interface 1 -> 06 Console

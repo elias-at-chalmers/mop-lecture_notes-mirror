@@ -39,12 +39,13 @@ VSCode), som vi senare ocks&#xE5; kommer anv&#xE4;nda f&#xF6;r utveckling i C.</
 <p>Innan ni drar ig&#xE5;ng med den h&#xE4;r &#xF6;vningen f&#xF6;rv&#xE4;ntas ni ha g&#xE5;tt igenom
 F&#xF6;rel&#xE4;sning 1, och sedan installerat simulatorn och VSCode enligt
 anvisningarna <a
-href="https://www.cse.chalmers.se/edu/resources/mop/lecture_notes/introductory_exercises/Getting_Started_with_Visual_Studio_Code.html">h&#xE4;r</a>.
-Om ni inte startat om VSCode sedan installationen, g&#xF6;r detta nu (annars
-hittar inte VSCode&#x2019;s terminal GDB!) Starta sedan VSCode i ett nytt, tomt
+href="./Getting_Started_with_Visual_Studio_Code.html">h&#xE4;r</a>. Om ni
+inte startat om VSCode sedan installationen, g&#xF6;r detta nu (annars hittar
+inte VSCode&#x2019;s terminal GDB!) Starta sedan VSCode i ett nytt, tomt
 directory. Skapa ett tomt assemblerprojekt:</p>
 <ul>
-<li>Tryck Ctrl+Shift+P (Cmd+Shift+P p&#xE5; mac) f&#xF6;r att &#xF6;ppna
+<li>Tryck <kbd>Ctrl</kbd>+<kbd>&#x21E7;</kbd>+<kbd>P</kbd> (mac:
+<kbd>&#x2318;</kbd>+<kbd>&#x21E7;</kbd>+<kbd>P</kbd>) f&#xF6;r att &#xF6;ppna
 kommandopaletten</li>
 <li>Skriv sedan &#x201C;MDx07: Initialize Project&#x201D; i textrutan</li>
 </ul>
@@ -53,11 +54,11 @@ kommandopaletten</li>
 </p>
 <p>S&#xE5; fort ni b&#xF6;rjat skriva kommer alternativet att dyka upp.
 Kommandopaletten anv&#xE4;nds till det mesta i VSCode, och vi kommer st&#xF6;ta p&#xE5;
-den igen senare i &#xF6;vningen. Tryck p&#xE5; <code>&lt;enter&gt;</code> f&#xF6;r att
-v&#xE4;lja kommandot och v&#xE4;lj sedan foldern &#x201C;Basic templates&#x201D; och i denna
-&#x201C;MD307 empty assembly project&#x201D; f&#xF6;r att initiera ett assemblerprojekt. Ni
-skall nu se n&#xE5;got i den h&#xE4;r stilen p&#xE5; sk&#xE4;rmen (om ni inte g&#xF6;r det s&#xE5;
-klicka p&#xE5; den inringade ikonen som &#xF6;ppnar &#x201C;explorer&#x201D; vyn):</p>
+den igen senare i &#xF6;vningen. Tryck p&#xE5; <kbd>enter&#x21B5;</kbd> f&#xF6;r att v&#xE4;lja
+kommandot och v&#xE4;lj sedan foldern &#x201C;Basic templates&#x201D; och i denna &#x201C;MD307
+empty assembly project&#x201D; f&#xF6;r att initiera ett assemblerprojekt. Ni skall
+nu se n&#xE5;got i den h&#xE4;r stilen p&#xE5; sk&#xE4;rmen (om ni inte g&#xF6;r det s&#xE5; klicka p&#xE5;
+den inringade ikonen som &#xF6;ppnar &#x201C;explorer&#x201D; vyn):</p>
 <p align="center">
 <img src="../images/Picture2.png" alt="My image" width="80%"/>
 </p>
@@ -102,8 +103,8 @@ k&#xF6;ra er kod p&#xE5; riktig h&#xE5;rdvara. Allt ni beh&#xF6;ver g&#xF6;ra &#
 att:</p>
 <ul>
 <li>Starta simulatorn genom att trycka
-<code>Ctrl</code>+<code>Shift</code>+<code>P</code> -&gt; &#x201C;Launch
-Simserver&#x2026;&#x201D;</li>
+<kbd>Ctrl</kbd>+<kbd>&#x21E7;</kbd>+<kbd>P</kbd> (mac:
+<kbd>&#x2318;</kbd>+<kbd>&#x21E7;</kbd>+<kbd>P</kbd>) &#x2192; &#x201C;Launch Simserver&#x2026;&#x201D;</li>
 </ul>
 <p>som genast l&#xE4;gger sig och v&#xE4;ntar p&#xE5; att VSCode skall ladda upp ett
 program.</p>
@@ -124,7 +125,7 @@ kompilera och k&#xF6;ra programmet:</p>
 <li>V&#xE4;lj f&#xF6;rst &#x201C;Build and Debug&#x201D; vyn (ikonen &#xE4;r inringad i r&#xF6;tt i
 bilden)</li>
 <li>Och tryck sedan p&#xE5; &#x201C;Build and debug&#x201D; knappen (ikonen &#xE4;r inrutad i
-gr&#xF6;nt i bilden). Alternativt kan du bara trycka p&#xE5; &#x201C;F5&#x201D;.</li>
+gr&#xF6;nt i bilden). Alternativt kan du bara trycka p&#xE5; <kbd>F5</kbd>.</li>
 </ul>
 <p>Kompilatorn kommer nu skriva ut en massa information i &#x201C;terminal&#x201D;
 f&#xF6;nstret, och kommer sedan poppa upp ett f&#xF6;nster:</p>
@@ -142,7 +143,8 @@ visa f&#xF6;r dig vad som gick snett:</p>
 snett, men ibland blir man tvungen att l&#xE4;sa igenom hela texten som
 kompilatorn spottade ur sig i &#x201C;terminal&#x201D; f&#xF6;nstret.</p>
 <p>I det h&#xE4;r fallet visste vi ju redan vad som var fel, s&#xE5; fixa koden
-och tryck sedan p&#xE5; F5 f&#xF6;r att bygga och k&#xF6;ra programmet igen.</p>
+och tryck sedan p&#xE5; <kbd>F5</kbd> f&#xF6;r att bygga och k&#xF6;ra programmet
+igen.</p>
 <p>Efter en liten stund kommer eran sk&#xE4;rm se ut s&#xE5; h&#xE4;r:</p>
 <p align="center">
 <img src="../images/Picture7.png" alt="My image" width="80%"/>
@@ -154,7 +156,7 @@ funktionen &#x201C;main&#x201D;. Den gulmarkerade raden visar n&#xE4;sta instruk
 kommer att k&#xF6;ras. Vi skall nu stega igenom v&#xE5;rat lilla program och se
 vad som h&#xE4;nder.</p>
 <p>S&#xE4;g &#xE5;t debuggern att exekvera den gulmarkerade instruktionen genom
-att trycka p&#xE5; &#x201C;step into&#x201D; knappen (eller trycka p&#xE5; F11):</p>
+att trycka p&#xE5; &#x201C;step into&#x201D; knappen (eller trycka p&#xE5; <kbd>F11</kbd>):</p>
 <p align="center">
 <img src="../images/Picture8.png" alt="My image" width="50%"/>
 </p>
@@ -175,7 +177,7 @@ register och den gula raden f&#xF6;rsvunnit eftersom VSCode f&#xF6;rs&#xF6;ker v
 n&#xE4;sta instruktion, men det d&#xE5; inte funnits n&#xE5;gon n&#xE4;sta instruktion att
 visa.</p>
 <p>N&#xE4;r du vill avsluta programmet och &#xE5;terg&#xE5; till att koda trycker du p&#xE5;
-&#x201C;disconnect&#x201D; knappen (eller Shift+F5):</p>
+&#x201C;disconnect&#x201D; knappen (eller <kbd>&#x21E7;</kbd>+<kbd>F5</kbd>):</p>
 <p align="center">
 <img src="../images/Picture10.png" alt="My image" width="50%"/>
 </p>
@@ -191,11 +193,11 @@ addressen 0x20001000 och kompilera och k&#xF6;r ditt program:</p>
 nu k&#xF6;ra programmet till dess att <code>sb</code> instruktionen har
 exekverats. Vi kan f&#xF6;rst&#xE5;s stega instruktion f&#xF6;r instruktion, men det
 blir l&#xE4;tt tjatigt, om programmet &#xE4;r l&#xE5;ngt. Ist&#xE4;llet flyttar ni mark&#xF6;ren
-ner till <code>j main</code> instruktionen, och trycker p&#xE5;
-<code>F9</code> f&#xF6;r att l&#xE4;gga till en brytpunkt (breakpoint). Vi kan nu
-l&#xE5;ta programmet k&#xF6;ra fritt (genom att trycka p&#xE5; &#x201C;Continue&#x201D; knappen eller
-<code>F5</code>), s&#xE5; kommer det att avbrytas igen n&#xE4;r det n&#xE5;r v&#xE5;r
-brytpunkt. Testa det:</p>
+ner till <code>j main</code> instruktionen, och trycker p&#xE5; <kbd>F9</kbd>
+f&#xF6;r att l&#xE4;gga till en brytpunkt (breakpoint). Vi kan nu l&#xE5;ta programmet
+k&#xF6;ra fritt (genom att trycka p&#xE5; &#x201C;Continue&#x201D; knappen eller <kbd>F5</kbd>),
+s&#xE5; kommer det att avbrytas igen n&#xE4;r det n&#xE5;r v&#xE5;r brytpunkt. Testa
+det:</p>
 <p align="center">
 <img src="../images/Picture12.png" alt="My image" width="80%"/>
 </p>

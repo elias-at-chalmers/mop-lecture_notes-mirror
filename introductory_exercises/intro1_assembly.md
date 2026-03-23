@@ -2,7 +2,7 @@
 I den här övningen introduceras utvecklingsmiljön vi använder i kursen. Vi går igenom hur ni skriver och kör assemblerkod på MD307 (i simulatorn). Ni skall bekanta er med Visual Studio Code (hädanefter VSCode), som vi senare också kommer använda för utveckling i C.
 
 ## Skapa ett assemblerprojekt
-Innan ni drar igång med den här övningen förväntas ni ha gått igenom Föreläsning 1, och sedan installerat simulatorn och VSCode enligt anvisningarna [här](https://www.cse.chalmers.se/edu/resources/mop/lecture_notes/introductory_exercises/Getting_Started_with_Visual_Studio_Code.html). Om ni inte startat om VSCode sedan installationen, gör detta nu (annars hittar inte VSCode's terminal GDB!) Starta sedan VSCode i ett nytt, tomt directory. Skapa ett tomt assemblerprojekt: 
+Innan ni drar igång med den här övningen förväntas ni ha gått igenom Föreläsning 1, och sedan installerat simulatorn och VSCode enligt anvisningarna [här](./Getting_Started_with_Visual_Studio_Code.html). Om ni inte startat om VSCode sedan installationen, gör detta nu (annars hittar inte VSCode's terminal GDB!) Starta sedan VSCode i ett nytt, tomt directory. Skapa ett tomt assemblerprojekt: 
 
 * Tryck <kbd>Ctrl</kbd>+<kbd>⇧</kbd>+<kbd>P</kbd> (mac: <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>P</kbd>) för att öppna kommandopaletten
 * Skriv sedan "MDx07: Initialize Project" i textrutan

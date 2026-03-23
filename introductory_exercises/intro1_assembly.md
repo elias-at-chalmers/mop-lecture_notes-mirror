@@ -4,14 +4,14 @@ I den här övningen introduceras utvecklingsmiljön vi använder i kursen. Vi g
 ## Skapa ett assemblerprojekt
 Innan ni drar igång med den här övningen förväntas ni ha gått igenom Föreläsning 1, och sedan installerat simulatorn och VSCode enligt anvisningarna [här](https://www.cse.chalmers.se/edu/resources/mop/lecture_notes/introductory_exercises/Getting_Started_with_Visual_Studio_Code.html). Om ni inte startat om VSCode sedan installationen, gör detta nu (annars hittar inte VSCode's terminal GDB!) Starta sedan VSCode i ett nytt, tomt directory. Skapa ett tomt assemblerprojekt: 
 
-* Tryck Ctrl+Shift+P (Cmd+Shift+P på mac) för att öppna kommandopaletten
+* Tryck <kbd>Ctrl</kbd>+<kbd>⇧</kbd>+<kbd>P</kbd> (mac: <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>P</kbd>) för att öppna kommandopaletten
 * Skriv sedan "MDx07: Initialize Project" i textrutan
 
 <p align="center">
   <img src="../images/Picture1.png" alt="My image" width="80%"/>
 </p>
 
-Så fort ni börjat skriva kommer alternativet att dyka upp. Kommandopaletten används till det mesta i VSCode, och vi kommer stöta på den igen senare i övningen. Tryck på `<enter>` för att välja kommandot och välj sedan foldern "Basic templates" och i denna “MD307 empty assembly project” för att initiera ett assemblerprojekt.
+Så fort ni börjat skriva kommer alternativet att dyka upp. Kommandopaletten används till det mesta i VSCode, och vi kommer stöta på den igen senare i övningen. Tryck på <kbd>enter↵</kbd> för att välja kommandot och välj sedan foldern "Basic templates" och i denna “MD307 empty assembly project” för att initiera ett assemblerprojekt.
 Ni skall nu se något i den här stilen på skärmen (om ni inte gör det så klicka på den inringade ikonen som öppnar "explorer" vyn): 
 
 <p align="center">
@@ -39,7 +39,7 @@ I listan till vänster ser ni alla filer som ligger i mappen där ni startade VS
 Eftersom ni inte har en MD307 till hands kommer ni att köra er kod på en simulator. Vi kompilerar och kör våra program precis på samma sätt som om koden körde på riktig hårdvara. Senare i kursen (Laboration 1) kommer ni lära er lite mer om hur detta fungerar och kommer få testa att köra er kod på riktig hårdvara. 
 Allt ni behöver göra än så länge är att: 
 
-* Starta simulatorn genom att trycka `Ctrl`+`Shift`+`P` -> "Launch Simserver..."
+* Starta simulatorn genom att trycka <kbd>Ctrl</kbd>+<kbd>⇧</kbd>+<kbd>P</kbd> (mac: <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>P</kbd>) → "Launch Simserver..."
 
 som genast lägger sig och väntar på att VSCode skall ladda upp ett program.
 
@@ -58,7 +58,7 @@ Vi har på mening skrivit en felaktig instruktion ("lii" är inte en RISC-V asse
 </p>
 
 * Välj först "Build and Debug" vyn (ikonen är inringad i rött i bilden)
-* Och tryck sedan på "Build and debug" knappen (ikonen är inrutad i grönt i bilden). Alternativt kan du bara trycka på "F5".
+* Och tryck sedan på "Build and debug" knappen (ikonen är inrutad i grönt i bilden). Alternativt kan du bara trycka på <kbd>F5</kbd>.
 
 Kompilatorn kommer nu skriva ut en massa information i "terminal" fönstret, och kommer sedan poppa upp ett fönster: 
 
@@ -76,7 +76,7 @@ Titta på koden igen så ser du att VSCode har varit vänligt nog att visa för 
 
 Oftast räcker den här informationen för att man skall se vad som gått snett, men ibland blir man tvungen att läsa igenom hela texten som kompilatorn spottade ur sig i "terminal" fönstret. 
 
-I det här fallet visste vi ju redan vad som var fel, så fixa koden och tryck sedan på F5 för att bygga och köra programmet igen. 
+I det här fallet visste vi ju redan vad som var fel, så fixa koden och tryck sedan på <kbd>F5</kbd> för att bygga och köra programmet igen. 
 
 Efter en liten stund kommer eran skärm se ut så här: 
 
@@ -87,7 +87,7 @@ Efter en liten stund kommer eran skärm se ut så här:
 
 VSCode har nu kompilerat assemblerkoden till maskinkod och laddat upp den till simulatorn. Sedan instruerades simulatorn att starta programmet, men att avbryta ("break") så fort den kommit fram till funktionen "main". Den gulmarkerade raden visar nästa instruktion som kommer att köras. Vi skall nu stega igenom vårat lilla program och se vad som händer. 
 
-Säg åt debuggern att exekvera den gulmarkerade instruktionen genom att trycka på "step into" knappen (eller trycka på F11): 
+Säg åt debuggern att exekvera den gulmarkerade instruktionen genom att trycka på "step into" knappen (eller trycka på <kbd>F11</kbd>): 
 
 <p align="center">
   <img src="../images/Picture8.png" alt="My image" width="50%"/>
@@ -101,7 +101,7 @@ Instruktionen `li t0, 10` borde ha lagt värdet 10 i register `t0`. För att se 
 
 Här kan ni se värdet på alla processorns register, och i `t0` ligger mycket riktigt 0xa som är hexadecimalt för 10. Stega nu över nästa rad och kontrollera att register `t1` får värdet 0x14 (hexadecimalt för 20). Om ni stegar över nästa instruktion igen så kommer ni till `j main` instruktionen och nu kan ni se att `t0` fått värdet 0x1e d.v.s. 30 decimalt. Om inte `j main` instruktionen funnits hade all information om register och den gula raden försvunnit eftersom VSCode försöker visa nästa instruktion, men det då inte funnits någon nästa instruktion att visa.
 
-När du vill avsluta programmet och återgå till att koda trycker du på "disconnect" knappen (eller Shift+F5):
+När du vill avsluta programmet och återgå till att koda trycker du på "disconnect" knappen (eller <kbd>⇧</kbd>+<kbd>F5</kbd>):
 
 <p align="center">
   <img src="../images/Picture10.png" alt="My image" width="50%"/>
@@ -114,7 +114,7 @@ Förutom att se registrenas värden när man debuggar kan det vara viktigt att s
   <img src="../images/Picture11.png" alt="My image" width="80%"/>
 </p>
 
-Programmet har stannat på första instruktionen som vanligt. Vi vill nu köra programmet till dess att `sb` instruktionen har exekverats. Vi kan förstås stega instruktion för instruktion, men det blir lätt tjatigt, om programmet är långt. Istället flyttar ni markören ner till `j main` instruktionen, och trycker på `F9` för att lägga till en brytpunkt (breakpoint). Vi kan nu låta programmet köra fritt (genom att trycka på "Continue" knappen eller `F5`), så kommer det att avbrytas igen när det når vår brytpunkt. Testa det:
+Programmet har stannat på första instruktionen som vanligt. Vi vill nu köra programmet till dess att `sb` instruktionen har exekverats. Vi kan förstås stega instruktion för instruktion, men det blir lätt tjatigt, om programmet är långt. Istället flyttar ni markören ner till `j main` instruktionen, och trycker på <kbd>F9</kbd> för att lägga till en brytpunkt (breakpoint). Vi kan nu låta programmet köra fritt (genom att trycka på "Continue" knappen eller <kbd>F5</kbd>), så kommer det att avbrytas igen när det når vår brytpunkt. Testa det:
 
 <p align="center">
   <img src="../images/Picture12.png" alt="My image" width="80%"/>

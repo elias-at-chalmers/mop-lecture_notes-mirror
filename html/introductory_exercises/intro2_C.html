@@ -41,28 +41,32 @@ Lektion 4 - <em>Portar och Introduktion till C</em>. Ni skall ha gjort
 Inledande &#xD6;vning 1 - <em>Utvecklingsmilj&#xF6;n och Inledande
 Assemblerprogrammering</em> - s&#xE5; att ni har VSCode, kompilatorer, och
 simulator fungerande p&#xE5; er maskin.</p>
-<p>Starta VSCode och &#xF6;ppna en ny, tom katalog.</p>
 <h2 id="skapa-ett-c-projekt">Skapa ett C projekt</h2>
 <p>Vi skapar ett C projekt p&#xE5; samma s&#xE4;tt som vi tidigare skapat ett
-assemblerprojekt. &#xD6;ppna VSCode i en tom katalog och:</p>
+assemblerprojekt. &#xD6;ppna VSCode i en tom mapp (<em>File &#x2192; Open
+folder&#x2026;</em>) och:</p>
 <ul>
-<li>Tryck Ctrl+Shift+P (Command+Shift+P p&#xE5; Mac) och skriv sedan
+<li>Tryck <kbd>Ctrl</kbd>+<kbd>&#x21E7;</kbd>+<kbd>P</kbd>
+(<kbd>&#x2318;</kbd>+<kbd>&#x21E7;</kbd>+<kbd>P</kbd> p&#xE5; Mac) och skriv sedan
 <code>MDx07: Initialize Project</code> i textrutan. Tryck return.</li>
-<li>V&#xE4;lj sedan MD307 C Project som template och tryck return.</li>
+<li>V&#xE4;lj sedan <code>MD307 C Project</code> som template och tryck
+<kbd>enter&#x21B5;</kbd>.</li>
 </ul>
 <p>Precis som n&#xE4;r vi startade ett assemblerprojekt s&#xE5; skapas nu ett g&#xE4;ng
-filer i katalogen:</p>
+filer i mappen:</p>
 <p><img src="../images/intro2/Picture1.png" /></p>
 <p>Filerna &#xE4;r desamma som f&#xF6;rra g&#xE5;ngen, men ist&#xE4;llet f&#xF6;r
 <code>main.s</code> finns nu en <code>main.c</code> fil.</p>
 <h2 id="skriv-ett-f&#xF6;rsta-c-program">Skriv ett f&#xF6;rsta C program</h2>
-<p><strong>Starta simulatorn</strong>, precis som n&#xE4;r du tidigare
-arbetat med assembler. Knacka sedan in den h&#xE4;r koden i main.c: <img
+<p><strong>Starta simulatorn</strong>
+(<code>MDx07: Launch simserver</code> i kommandopaletten), precis som
+n&#xE4;r du tidigare arbetat med assembler.</p>
+<p>Knacka sedan in den h&#xE4;r koden i main.c: <img
 src="../images/intro2/Picture2.png" /></p>
 <p>Titta p&#xE5; ditt program och se till att du f&#xF6;rst&#xE5;r vad det borde g&#xF6;ra
 (&#xE5;terv&#xE4;nd annars till lektionsanteckningarna). S&#xE4;tt sedan en brytpunkt
-(<code>F9</code>) p&#xE5; rad 7 och tryck p&#xE5; <code>F5</code> f&#xF6;r att
-kompilera och k&#xF6;ra programmet.</p>
+(<kbd>F9</kbd>) p&#xE5; rad 7 och tryck p&#xE5; <kbd>F5</kbd> f&#xF6;r att kompilera
+och k&#xF6;ra programmet.</p>
 <p>Nu skall en bunt saker ha h&#xE4;nt. F&#xF6;rst kompilerades programmet, och du
 kan se kompilatorns output i Terminal f&#xF6;nstret:</p>
 <p><img src="../images/intro2/Picture3.png" /></p>
@@ -73,33 +77,34 @@ fliken:</p>
 error och varningar direkt vid k&#xE4;llkoden:</p>
 <p><img src="../images/intro2/Picture5.png" /></p>
 <p>I det h&#xE4;r fallet kompilerade programmet, men kompilatorn
-<em>varnar</em> om att variabeln &#x2018;b&#x2019; aldrig anv&#xE4;nds till n&#xE5;got. Normalt
-sett skulle det vara ett tecken p&#xE5; att vi gjort ett misstag, men i det
-h&#xE4;r fallet &#xE4;r det okay.</p>
+<em>varnar</em> om att variabeln <code>b</code> aldrig anv&#xE4;nds till
+n&#xE5;got. Normalt sett skulle det vara ett tecken p&#xE5; att vi gjort ett
+misstag, men i det h&#xE4;r fallet &#xE4;r det okay.</p>
 <p>Vi ser ocks&#xE5; att programmet har startat, och sedan avbrutits p&#xE5; rad
 7, precis som vi ville.</p>
-<p>Vi kan nu exekvera koden p&#xE5; rad 7 genom att trycka p&#xE5; F10 (eller den
-inringade ikonen i bilden nedan):</p>
+<p>Vi kan nu exekvera koden p&#xE5; rad 7 genom att trycka p&#xE5; <kbd>F10</kbd>
+(eller den inringade knappen i bilden nedan):</p>
 <p><img src="../images/intro2/Picture6b.png" /></p>
 <p>Vi ser nu att raden exekverats (n&#xE4;sta rad &#xE4;r gulmarkerad) och i
 listan till v&#xE4;nster kan vi se att variabeln a har f&#xE5;tt v&#xE4;rdet 4
 (kvadraten av 2, som v&#xE4;ntat).</p>
 <p>Vi skall nu testa att f&#xF6;lja med debuggern <em>in</em> i funktionen
-Square. Detta g&#xF6;r vi genom att trycka p&#xE5; F11, eller p&#xE5; den inringade
-ikonen i bilden nedan:</p>
+Square. Detta g&#xF6;r vi genom att trycka p&#xE5; <kbd>F11</kbd>, eller p&#xE5; den
+inringade ikonen i bilden nedan:</p>
 <p><img src="../images/intro2/Picture7b.png" /></p>
 <p>Om vi vill k&#xF6;ra vidare tills funktionen returnerat och vi &#xE4;r tillbaks
-i den kallande funktionen kan vi forts&#xE4;tta stega rad f&#xF6;r rad med F10,
-eller s&#xE5; trycker vi direkt p&#xE5; Shift+F11, eller p&#xE5; den inringade ikonen i
-bilden nedan:</p>
+i den kallande funktionen kan vi forts&#xE4;tta stega rad f&#xF6;r rad med
+<kbd>F10</kbd>, eller s&#xE5; trycker vi direkt p&#xE5;
+<kbd>&#x21E7;</kbd>+<kbd>F11</kbd>, eller p&#xE5; den inringade ikonen i bilden
+nedan:</p>
 <p><img src="../images/intro2/Picture8b.png" /></p>
 <p>Debugkommandona sammanfattas i bilden nedan:</p>
 <p><img src="../images/intro2/Picture9.png" /></p>
 <h2 id="kombinera-c-och-assembler">Kombinera C och assembler</h2>
 <p>Vi skall nu utforska hur vi kan skriva en funktion i assembler och
 kalla den fr&#xE5;n ett C program. Vi b&#xF6;rjar med att skapa en ny
-assemblerfil. H&#xF6;gerklicka p&#xE5; &#x201C;src&#x201D; katalogen i Explorerviewn till
-v&#xE4;nster och v&#xE4;lj &#x201C;New File&#x2026;&#x201D;. Ge den nya filen namnet assembly.s:</p>
+assemblerfil. H&#xF6;gerklicka p&#xE5; &#x201C;src&#x201D; mappen i Explorerviewn till v&#xE4;nster
+och v&#xE4;lj &#x201C;New File&#x2026;&#x201D;. Ge den nya filen namnet assembly.s:</p>
 <p><img src="../images/intro2/Picture10.png" /></p>
 <p>Filen kan egentligen heta vad som helst, s&#xE5; l&#xE4;nge den har &#x201C;.s&#x201D; som
 extension. Makefilen kommer d&#xE5; att anta att detta &#xE4;r en assemblerfil,
@@ -110,9 +115,9 @@ argument och returnerar argumentet i kvadrat:</p>
 <p>&#xC4;ndra nu koden i main.c s&#xE5; att den bara deklarerar en funktion som
 heter Square (definitionen av funktionen &#xE4;r nu i eran assemblerfil):</p>
 <p><img src="../images/intro2/Picture12.png" /></p>
-<p>Ni kan nu starta programmet igen (<code>F5</code>) och stega er
-igenom det f&#xF6;r att se att det fungerar. Om ni v&#xE4;ljer &#x201C;Step Into&#x201D; n&#xE4;r
-programmet &#xE4;r p&#xE5; rad 6 eller 7 kommer debuggern att l&#xE5;ta er stega igenom
+<p>Ni kan nu starta programmet igen (<kbd>F5</kbd>) och stega er igenom
+det f&#xF6;r att se att det fungerar. Om ni v&#xE4;ljer &#x201C;Step Into&#x201D; n&#xE4;r programmet
+&#xE4;r p&#xE5; rad 6 eller 7 kommer debuggern att l&#xE5;ta er stega igenom
 assemblerkoden.</p>
 <p>Hittills har vi debuggat v&#xE5;rat program p&#xE5; k&#xE4;llkodsniv&#xE5;. Det &#xE4;r oftast
 vad man vill, men ibland kan det vara viktigt att se den faktiska
@@ -135,9 +140,7 @@ port D, pinnarna 0-7. Tryck p&#xE5; &#x201C;Connect&#x201D; och sedan p&#xE5; &#
 <p><img src="../images/intro2/Picture15.png" /></p>
 <p>Nu skall ett litet f&#xF6;nster ha dykt upp d&#xE4;r bargraphen simuleras.
 Skriv nu en liten assembler funktion (i assembly.s) som tar ett nummer
-som argument och t&#xE4;nder motsvarande lampa p&#xE5; bargraphen. Vi har precis
-g&#xE5;tt igenom det h&#xE4;r i Lektion 4, s&#xE5; g&#xE5; tillbaks till den
-lektionsanteckningen.</p>
+som argument och t&#xE4;nder motsvarande lampa p&#xE5; bargraphen.</p>
 <p><img src="../images/intro2/Picture16.png" /></p>
 <p>Sedan skriver vi kod i mainfunktionen som kallar den h&#xE4;r funktionen
 en g&#xE5;ng f&#xF6;r varje lysdiod:</p>

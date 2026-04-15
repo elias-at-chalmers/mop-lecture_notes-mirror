@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>lab2_sv_codelite</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+<h1 id="laboration-2">Laboration 2</h1>
+<p>I denna laboration f&#xE5;r du k&#xF6;ra och fels&#xF6;ka ett C-program p&#xE5; riktig
+h&#xE5;rdvara.</p>
+<h2 id="f&#xF6;rberedelser">F&#xF6;rberedelser</h2>
+<p>Du <em>m&#xE5;ste</em> ha gjort de f&#xF6;rberedande uppgifterna (&#x201C;Laboration 2
+&#x2013; f&#xF6;rberedelse&#x201D; p&#xE5; Canvas) f&#xF6;r denna laboration. Om du inte har gjort
+det kommer du troligtvis inte att hinna slutf&#xF6;ra laborationsuppgiften i
+tid.</p>
+<h2 id="laborationsmilj&#xF6;">Laborationsmilj&#xF6;</h2>
+<p>Vi forts&#xE4;tter jobba med laborationsdatorn MD307, nu med till&#xE4;gg av
+lite kringutrustning:</p>
+<ul>
+<li>PTB-110, med en keypad, en DIL-switch, ett bargraph och ett
+7-segmentsdisplay</li>
+<li>PTB-111, med en ASCII-display och en grafisk display</li>
+</ul>
+<p>Denna laborationsuppgift kommer huvudsakligen att behandla keypaden
+och ASCII-displayen. DIL-switchen kommer att anv&#xE4;ndas f&#xF6;r
+fels&#xF6;knings&#xE4;ndam&#xE5;l.</p>
+<h2 id="uppgift-0-komma-ig&#xE5;ng">Uppgift 0: Komma ig&#xE5;ng</h2>
+<ul>
+<li><p>Starta ett nytt workspace (eller &#xF6;ppna ett befintligt) i
+Codelite</p></li>
+<li><p>Skapa ett nytt projekt (<em>Workspace -&gt; New Project</em>.)
+V&#xE4;lj templaten <code>md307-startup</code>.</p></li>
+<li><p>&#xD6;ppna den skapade mappen <code>src</code> och ta bort filen
+<code>startup.c</code></p></li>
+<li><p>Ladda ner och extrahera denna zip-fil med k&#xE4;llkodsfiler</p></li>
+<li><p>Importera samtliga extraherade filerna genom att h&#xF6;gerklicka p&#xE5;
+<code>src</code>-mappen och v&#xE4;lj <em>Add an existing file&#x2026;</em></p></li>
+<li><p>Anslut <em>keypaden</em> till <em>Port D 15..8</em>.</p></li>
+<li><p>Anslut <em>PTB-111</em> till <em>MD307</em> via
+PTB-1000-bussen.</p></li>
+<li><p>Anslut <em>ASCII-displayen</em> till <em>Port E</em>
+(<em>Data</em> till <em>15..8</em>, <em>Control</em> till
+<em>7..0</em>).</p></li>
+<li><p>Anslut slutligen <em>MD307</em> till din dator via USB. Till slut
+b&#xF6;r det se ut ungef&#xE4;r s&#xE5; h&#xE4;r:</p></li>
+</ul>
+<p><img src="../images/lab2-hardware-setup.jpg" /></p>
+<p>Det f&#xF6;rv&#xE4;ntade beteendet &#xE4;r att programmet ska skriva ut tecken fr&#xE5;n
+v&#xE4;nster till h&#xF6;ger p&#xE5; den &#xF6;versta raden p&#xE5; ASCII-displayen n&#xE4;r du
+trycker p&#xE5; tangenter p&#xE5; keypaden. N&#xE4;r slutet av raden n&#xE5;s ska det b&#xF6;rja
+om fr&#xE5;n b&#xF6;rjan av raden och skriva &#xF6;ver befintliga tecken. Tabellen
+nedan visar vilka tecken som ska skrivas ut n&#xE4;r man trycker p&#xE5;
+motsvarande tangent p&#xE5; keypaden (t.ex. ska tangenten l&#xE4;ngst upp till
+v&#xE4;nster skriva ut <code>1</code>, och tangenten l&#xE4;ngst ned till h&#xF6;ger
+ska skriva ut <code>D</code>).</p>
+<pre><code>|---|---|---|---|
+| 1 | 2 | 3 | A |
+|---|---|---|---|
+| 4 | 5 | 6 | B |
+|---|---|---|---|
+| 7 | 8 | 9 | C |
+|---|---|---|---|
+| E | 0 | F | D |
+|---|---|---|---|</code></pre>
+<p>Dags att k&#xF6;ra programmet. Kompilera projektet med <em>Build &#x2192; Build
+Project</em> (<kbd>F7</kbd>). Starta sedan debuggern med <em>Debugger &#x2192;
+Start/Continue Debugger</em> (<kbd>F5</kbd>).</p>
+<p>N&#xE4;r debuggern automatiskt har stannat i b&#xF6;rjan av <code>main</code>,
+tryck p&#xE5; <em>Continue</em> (<kbd>F5</kbd>) och testa om programmet beter
+sig som f&#xF6;rv&#xE4;ntat.</p>
+<p><em>&#xC5;h nej! Det funkar inte!</em></p>
+<p>Som tur &#xE4;r <em>&#xE4;lskar</em> du att fixa trasig programvara.</p>
+<p><strong>I denna laboration, precis som i den f&#xF6;reg&#xE5;ende, kommer du
+f&#xF6;rst att fels&#xF6;ka ett befintligt program och sedan prova ditt eget om du
+har tid kvar. Endast den f&#xF6;rsta delen &#xE4;r n&#xF6;dv&#xE4;ndig f&#xF6;r att bli godk&#xE4;nd
+p&#xE5; laborationen.</strong></p>
+<h2 id="uppgift-1-fixa-programmet">Uppgift 1: Fixa programmet</h2>
+<p>Programmet &#xE4;r fullt av buggar. Med tanke p&#xE5; din bekantskap med
+liknande kod fr&#xE5;n den f&#xF6;rberedande uppgiften <em>kan</em> det vara
+m&#xF6;jligt att helt enkelt l&#xE4;sa koden fr&#xE5;n b&#xF6;rjan till slut och &#xE5;tg&#xE4;rda
+alla buggar utan att k&#xF6;ra den, men g&#xF6;r inte det! Po&#xE4;ngen &#xE4;r att du ska
+l&#xE4;ra dig att fels&#xF6;ka ett program p&#xE5; ett <em>strukturerat</em> s&#xE4;tt. Som
+du kanske redan har m&#xE4;rkt &#xE4;r fels&#xF6;kning (att fixa buggar) vanligtvis en
+mycket mer tidskr&#xE4;vande del av mjukvaruutveckling &#xE4;n att faktiskt skriva
+koden. Problemet b&#xF6;r <em>inte</em> angripas genom att f&#xF6;rs&#xF6;ka l&#xE4;ra sig
+att skriva felfri kod fr&#xE5;n start &#x2013; det &#xE4;r ouppn&#xE5;eligt. Ist&#xE4;llet b&#xF6;r man
+l&#xE4;ra sig att hitta buggar effektivt &#x2013; n&#xE4;r buggen v&#xE4;l &#xE4;r lokaliserad &#xE4;r
+l&#xF6;sningen vanligtvis uppenbar.</p>
+<p><em>OBS</em>: <em>N&#xE4;r man fels&#xF6;ker kod (s&#xE4;rskilt kod skriven av n&#xE5;gon
+annan) kan det vara frestande att korrigera mindre viktiga saker (som
+hur koden &#xE4;r formaterad), men</em> <strong><em>avst&#xE5;</em></strong>
+<em>fr&#xE5;n att g&#xF6;ra det! Vid fels&#xF6;kning &#xE4;r det anv&#xE4;ndbart att
+kontrollera</em> <strong><em>exakt</em></strong> <em>vilka &#xE4;ndringar som
+har gjorts i k&#xE4;llkoden (handledarna kan vilja g&#xF6;ra detta om du st&#xF6;ter p&#xE5;
+problem), och en massa irrelevanta &#xE4;ndringar g&#xF6;r det sv&#xE5;rare.</em></p>
+<p>Nu ska vi titta p&#xE5; programmet uppifr&#xE5;n och ned med start fr&#xE5;n
+<code>main</code>, bara ett steg ned i anropshierarkin:</p>
+<p><img src="../images/lab2-main.svg" /></p>
+<p>Vi b&#xF6;rjar med initieringen. Om GPIO-portarna &#xE4;r felaktigt
+konfigurerade kommer det att vara sv&#xE5;rt att testa programmet. S&#xE5; l&#xE5;t oss
+b&#xF6;rja d&#xE4;r.</p>
+<h3 id="uppgift-1.1-kontrollera-gpio-portarna">Uppgift 1.1: Kontrollera
+GPIO-portarna</h3>
+<p><strong>OBS</strong>: <em>Du kan anta att definitionerna i
+header-filen <code>gpio.h</code>, som inkluderar port-makrona, &#xE4;r
+korrekta. Du beh&#xF6;ver inte kontrollera dessa.</em></p>
+<p>B&#xF6;rja med keypaden (ansluten till <em>Port D 15..8</em>); kom ih&#xE5;g
+att de &#xF6;vre fyra pinnarna (<em>15..12</em>) ska konfigureras som
+<em>digital output (open drain, 2 MHz)</em> och de fyra nedre pinnarna
+(<em>11..8</em>) som <em>digital input (pull up)</em>.</p>
+<p>Konsultera QuickGuide och h&#xE4;rled noggrant vilka v&#xE4;rden som ska
+skrivas till vilka register f&#xF6;r att denna konfiguration ska fungera.</p>
+<p>Titta p&#xE5; koden i <code>init_keypad</code> och se om du kan hitta
+buggarna. Om du hittar dem, modifiera koden och notera dina
+korrigeringar. Om inte, konsultera en handledare.</p>
+<p><strong>Innan du g&#xE5;r vidare:</strong> Du m&#xE5;ste vara <em>v&#xE4;ldigt</em>
+s&#xE4;ker p&#xE5; den visuella inspektion du gjort ovan. De kommande uppgifterna
+f&#xF6;rlitar sig p&#xE5; korrekt konfigurerade GPIO-pinnar &#x2013; om du har gjort ett
+misstag kan du komma att sl&#xF6;sa v&#xE4;rdefull tid. Du kan be en handledare
+att verifiera att din nya konfiguration &#xE4;r korrekt, om du vill.</p>
+<p>F&#xF6;r att spara tid beh&#xF6;ver du inte bry dig om att kontrollera
+<code>init_ascii</code> &#x2013; den &#xE4;r korrekt implementerad.</p>
+<p>Nu n&#xE4;r du har modifierat koden b&#xF6;r du kompilera om projektet med
+<kbd>F7</kbd>, k&#xF6;ra programmet och kontrollera om det fungerar som
+avsett.</p>
+<p><em>Huh, programmet fungerar fortfarande inte!</em></p>
+<p>F&#xF6;rdr&#xF6;jningsfunktionerna anv&#xE4;nds i de flesta delar av programmet, s&#xE5;
+l&#xE5;t oss kontrollera dem h&#xE4;rn&#xE4;st.</p>
+<h3 id="uppgift-1.2-kontrollera-f&#xF6;rdr&#xF6;jningsfunktionerna">Uppgift 1.2:
+Kontrollera f&#xF6;rdr&#xF6;jningsfunktionerna</h3>
+<p>Ta en titt i filen <code>systick.c</code>. Det verkar som att
+<code>delay_milli</code>, <code>delay_micro</code> och
+<code>delay_nano</code> alla i grunden &#xE4;r kopior av varandra, d&#xE4;r den
+enda skillnaden &#xE4;r den initiala ber&#xE4;kningen av variabeln
+<code>count</code>.</p>
+<p>Om f&#xF6;rdr&#xF6;jningsfunktionerna hade definierats i termer av varandra p&#xE5;
+n&#xE5;got rimligt s&#xE4;tt hade det r&#xE4;ckt med att testa en av dem f&#xF6;r att
+verifiera korrektheten hos alla. Det &#xE4;r dock inte fallet, s&#xE5; vi &#xE4;r
+tvungna att testa var och en separat. L&#xE5;t oss inte bry oss om
+matematiken i den initiala ber&#xE4;kningen; ist&#xE4;llet utformar vi ett enkelt
+test (det hade vi &#xE4;nd&#xE5; beh&#xF6;vt g&#xF6;ra) och hanterar problemet om testet
+misslyckas.</p>
+<p>Vi kan anv&#xE4;nda debuggern f&#xF6;r att stega &#xF6;ver en f&#xF6;rdr&#xF6;jningsfunktion
+och m&#xE4;ta hur l&#xE5;ng tid den tar att slutf&#xF6;ra. L&#xE4;gg till koden nedan i
+b&#xF6;rjan av <code>main</code>.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#define MS </span><span class="dv">0</span><span class="pp"> </span><span class="co">// Change the number to something reasonable!</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  delay_milli<span class="op">(</span>MS<span class="op">);</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  delay_micro<span class="op">(</span><span class="dv">1000</span> <span class="op">*</span> MS<span class="op">);</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  delay_nano<span class="op">(</span><span class="dv">1000</span> <span class="op">*</span> <span class="dv">1000</span> <span class="op">*</span> MS<span class="op">);</span></span></code></pre></div>
+<p>F&#xF6;rs&#xF6;k att t&#xE4;nka p&#xE5; ett rimligt m&#xE5;lv&#xE4;rde f&#xF6;r testet och &#xE4;ndra
+definitionen av <code>MS</code> i enlighet med det. T&#xE4;nk p&#xE5; att du m&#xE5;ste
+m&#xE4;ta det manuellt med ett stoppur p&#xE5; din telefon eller liknande. Om
+m&#xE5;let &#xE4;r f&#xF6;r kort kommer din reaktionstid (att m&#xE4;rka att debuggern
+stannade och faktiskt stoppa tidtagningen) att vara f&#xF6;r stor och g&#xF6;ra
+testet oanv&#xE4;ndbart. Om m&#xE5;let &#xE4;r f&#xF6;r l&#xE5;ngt kan du bli alltf&#xF6;r uttr&#xE5;kad
+f&#xF6;r att faktiskt slutf&#xF6;ra testet.</p>
+<p>F&#xF6;r var och en av f&#xF6;rdr&#xF6;jningsfunktionerna, anv&#xE4;nd debuggern f&#xF6;r att
+<em>Step Over</em> (<kbd>F10</kbd>) och registrera hur l&#xE5;ng tid det tar
+att slutf&#xF6;ra steget.</p>
+<p>Var f&#xF6;rdr&#xF6;jningarna rimligt noggranna? Om n&#xE5;gon av f&#xF6;rdr&#xF6;jningarna
+avvek f&#xF6;r mycket, r&#xE4;tta till ber&#xE4;kningen och testa den igen f&#xF6;r att
+verifiera korrektheten.</p>
+<p>Notera dina korrigeringar, om s&#xE5;dana finns. Ta bort testkoden och
+kontrollera om programmet fungerar nu.</p>
+<p><em>Ugh! Fortfarande trasigt.</em></p>
+<p>Koden f&#xF6;r <em>ASCII-displayen</em> &#xE4;r ganska komplex och beror p&#xE5;
+indata fr&#xE5;n <em>keypaden</em>. Om vi har tur beh&#xF6;ver vi bara &#xE5;tg&#xE4;rda
+koden f&#xF6;r <em>keypaden!</em></p>
+<h3 id="uppgift-1.3-kontrollera-keypaden">Uppgift 1.3: Kontrollera
+keypaden</h3>
+<p>Om vi &#xE5;terigen tittar p&#xE5; anropshierarkin fr&#xE5;n tidigare m&#xE4;rker vi att
+det enda <em>keypad</em>-relaterade anropet i <code>main</code> &#xE4;r till
+<code>keyb</code>.</p>
+<p>S&#xE4;tt en brytpunkt vid anropet till <code>keyb</code> genom att klicka
+i marginalen till v&#xE4;nster om raden i editorn (en r&#xF6;d punkt visas).
+Starta debuggern med <kbd>F5</kbd> och tryck p&#xE5; <em>Continue</em>
+(<kbd>F5</kbd>) f&#xF6;r att komma till brytpunkten. H&#xE5;ll ned en av knapparna
+p&#xE5; <em>keypaden</em> och tryck <em>Continue</em> (<kbd>F5</kbd>).
+Kontrollera returv&#xE4;rdet i panelen <em>Locals/Watches</em> l&#xE4;ngst ned. &#xC4;r
+det vad du f&#xF6;rv&#xE4;ntade dig? Forts&#xE4;tt prova olika indata tills du har
+hittat ett indata som ger ett felaktigt returv&#xE4;rde.</p>
+<p>F&#xF6;r att f&#xE5; en b&#xE4;ttre bild av situationen, l&#xE5;t oss titta p&#xE5;
+anropshierarkin nedan med start fr&#xE5;n <code>keyb</code>.</p>
+<p><img src="../images/lab2-keyb.svg" /></p>
+<p>Som tur &#xE4;r inte den s&#xE4;rskilt komplex. Du kan ignorera anropet till
+<code>delay_nano</code> &#x2013; det beh&#xF6;ver vara d&#xE4;r f&#xF6;r att ge tillr&#xE4;ckligt
+med tid f&#xF6;r radaktiveringen att f&#xE5; effekt. Det l&#xE4;mnar oss med
+<code>kbd_activate</code> och <code>kbd_getcol</code>.</p>
+<p>Anv&#xE4;nd debuggern f&#xF6;r att <em>Step Into</em> (<kbd>F11</kbd>)
+<code>keyb</code>. S&#xE4;tt brytpunkter p&#xE5; return-satserna. H&#xE5;ll ned en
+knapp som tidigare gav ett felaktigt returv&#xE4;rde och tryck
+<em>Continue</em> (<kbd>F5</kbd>). Uppfyller v&#xE4;rdena f&#xF6;r variablerna
+<code>row</code> och <code>col</code> i <em>Locals</em>-panelen dina
+f&#xF6;rv&#xE4;ntningar? Svaret b&#xF6;r ge dig en ledtr&#xE5;d om buggen ligger i
+<code>kbd_activate</code> eller <code>kbd_getcol</code>.</p>
+<p>G&#xE5; djupare in i anropshierarkin baserat p&#xE5; dina fynd. Stega noggrant
+igenom funktionen och korrigera eventuella buggar du st&#xF6;ter p&#xE5;. Om du
+fastnar, be en handledare om hj&#xE4;lp.</p>
+<p>Efter eventuella korrigeringar, g&#xE5; tillbaka och testa
+<code>keyb</code> igen och verifiera att den returnerar de v&#xE4;rden du
+f&#xF6;rv&#xE4;ntar dig.</p>
+<p>Notera dina korrigeringar, h&#xE5;ll tummarna och kontrollera om
+programmet fungerar.</p>
+<p><em>Nej&#x2026; nej, nej, nej!</em></p>
+<p>Du vet vad det inneb&#xE4;r. Vi f&#xE5;r &#xE4;ntligen n&#xF6;jet att fels&#xF6;ka
+<em>ASCII-display</em>-koden.</p>
+<h3 id="uppgift-1.4-kontrollera-ascii-displayen">Uppgift 1.4:
+Kontrollera ASCII-displayen</h3>
+<p>Om vi &#xE5;terigen tittar p&#xE5; anropshierarkin fr&#xE5;n <code>main</code> ser
+vi tv&#xE5; anrop relaterade till <em>ASCII-displayen</em>, n&#xE4;mligen
+<code>ascii_gotoxy</code> och <code>ascii_write_char</code>. L&#xE5;t oss
+titta p&#xE5; deras anropshierarkier (exklusive f&#xF6;rdr&#xF6;jningsfunktioner,
+eftersom du redan har &#xE5;tg&#xE4;rdat dessa) nedan.</p>
+<p><img src="../images/lab2-ascii.svg" /></p>
+<p>Den h&#xE4;r &#xE4;r lite mer komplex men fortfarande hanterbar. Det finns
+m&#xE5;nga inkommande pilar i det nedersta lagret, d.v.s. m&#xE5;nga anrop g&#xF6;rs
+till <code>ascii_ctrl_bit_set</code> och
+<code>ascii_ctrl_bit_clear</code>. Om de inte fungerar kommer inte
+heller de som beror p&#xE5; dem att fungera.</p>
+<p>L&#xE5;t oss d&#xE4;rf&#xF6;r arbeta oss upp nerifr&#xE5;n, kontrollera lagren ett i
+taget och testa programmet efter varje buggfix tills programmet
+fungerar.</p>
+<p>Eftersom funktionerna i det nedersta lagret (definierade som makron i
+<code>ascii.h</code>) b&#xF6;r ha motsatta effekter kan vi enkelt testa dem
+med koden nedan.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>GPIO_OUTDR<span class="op">(</span>GPIO_E<span class="op">)</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  ascii_ctrl_bit_set<span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">7</span><span class="op">);</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">unsigned</span> <span class="dt">char</span> ctrl <span class="op">=</span> <span class="op">*</span>GPIO_OUTDR<span class="op">(</span>GPIO_E<span class="op">);</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Check here that bit 7 of ctrl is set</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  ascii_ctrl_bit_clear<span class="op">(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">7</span><span class="op">);</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  ctrl <span class="op">=</span> <span class="op">*</span>GPIO_OUTDR<span class="op">(</span>GPIO_E<span class="op">);</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Check here that bit 7 of ctrl is cleared</span></span></code></pre></div>
+<p>Stega igenom koden med debuggern, kontrollera om det uppst&#xE5;r ov&#xE4;ntat
+beteende och &#xE5;tg&#xE4;rda och dokumentera eventuella buggar du st&#xF6;ter p&#xE5;. Du
+kan inspektera v&#xE4;rdet p&#xE5; <code>ctrl</code> i
+<em>Locals</em>-panelen.</p>
+<p>Fr&#xE5;n och med nu f&#xE5;r ni jobba p&#xE5; egen hand! Anv&#xE4;nd det ni har l&#xE4;rt er
+f&#xF6;r att systematiskt fels&#xF6;ka n&#xE4;sta lager.</p>
+<p><em>Ledtr&#xE5;d: Det finns en bugg per lager i de tv&#xE5; nedersta lagren.
+F&#xF6;rutom dessa tv&#xE5; buggar finns det inga fler buggar att hitta.</em></p>
+<h3 id="uppgift-2-prova-ditt-eget-program">Uppgift 2: Prova ditt eget
+program</h3>
+<p>Om du har tid kvar, prova ditt eget program fr&#xE5;n
+laborationsf&#xF6;rberedelsen. Det kan h&#xE4;nda att h&#xE5;rdvaran &#xE4;r mindre
+f&#xF6;rl&#xE5;tande &#xE4;n simulatorn och att du beh&#xF6;ver g&#xF6;ra en del ytterligare
+fels&#xF6;kning f&#xF6;r att f&#xE5; det att fungera, men nu &#xE4;r du bra p&#xE5; det!</p>
+<h3 id="uppgift-3-bli-godk&#xE4;nd">Uppgift 3: Bli godk&#xE4;nd</h3>
+<p>Visa handledaren de buggar du hittade och demonstrera att det
+korrigerade programmet fungerar som avsett. Om du &#xE4;ven fick din egen kod
+att fungera, visa det f&#xF6;r handledaren ocks&#xE5;.</p>
+<p><em>N&#xE4;r du har blivit godk&#xE4;nd av handledaren &#xE4;r det DITT ansvar att
+verifiera att det faktiskt har lagts in i Canvas under &#x201C;Omd&#xF6;men&#x201D; /
+&#x201C;Grades&#x201D;. G&#xF6;r det innan du l&#xE4;mnar salen!</em></p>
+</body>
+</html>

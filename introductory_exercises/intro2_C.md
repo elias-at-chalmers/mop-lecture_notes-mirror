@@ -58,7 +58,7 @@ Debugkommandona sammanfattas i bilden nedan:
 ![](../images/intro2/Picture9.png)
 
 ## Kombinera C och assembler
-Vi skall nu utforska hur vi kan skriva en funktion i assembler och kalla den från ett C program. Vi börjar med att skapa en ny assemblerfil. Högerklicka på "src" mappen i Explorerviewn till vänster och välj "New File...". Ge den nya filen namnet assembly.s: 
+Vi skall nu utforska hur vi kan skriva en funktion i assembler och kalla den från ett C program. Vi börjar med att skapa en ny assemblerfil. Högerklicka på "src" mappen i Explorer-vyn till vänster och välj "New File...". Ge den nya filen namnet assembly.s: 
 
 ![](../images/intro2/Picture10.png)
 
@@ -100,7 +100,7 @@ Sedan skriver vi kod i mainfunktionen som kallar den här funktionen en gång f�
 Starta nu programmet och stega er igenom koden och kolla så att lamporna lyser upp, en i taget.
 
 ## Hello World!
-Slutligen skall vi testa att skriva ut lite text. Först måste vi koppla in en textkonsoll till simulatorn. Öppna fönstret för SimServer och välj Server->IO Setup i menyn. Välj sedan "Serial Communication Interface 1" som IO port och "06 Console" i listan till höger.
+Slutligen skall vi testa att skriva ut lite text. Först måste vi koppla in en textkonsoll till simulatorn. Öppna fönstret för SimServer och välj "Server"→"IO Setup" i menyn. Välj sedan "Serial Communication Interface 1" som IO port och "06 Console" i listan till höger.
 
 ![](../images/intro2/Picture18.png)
 

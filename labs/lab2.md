@@ -23,7 +23,7 @@ The DIL switch will be used for debugging purposes.
 ## Task 0: Getting Started
 
 Create a new project folder and initialize a project with the *Lab2* template
-(*Ctrl+Shift+P -> MDx07: Initialize project -> Lab Assignments -> Lab2*).
+(*Ctrl+Shift+P → MDx07: Initialize project → Lab Assignments → Lab2*).
 
 Connect the *keypad* to *Port D 15..8*. Connect the *PTB-111* to the *MD307* via
 the PTB-1000 bus. Connect the *ASCII display* to *Port E* (*Data* to *15..8*,
@@ -55,10 +55,10 @@ key should print `1`, bottom-right key should print `D`).
 
 Time to run the program. Go to the *Run and Debug* view (Ctrl+Shift+D), select
 *Build and debug (hardware)* in the drop-down list, and press *Start Debugging*
-(F5).
+(<kbd>F5</kbd>).
 
 When the debugger has automatically stopped in the beginning of `main`, press
-*Continue* (F5) and test if the program behaves as expected.
+*Continue* (<kbd>F5</kbd>) and test if the program behaves as expected.
 
 *Rats! It doesn't work!*
 
@@ -174,9 +174,9 @@ the *keypad*. If we're lucky, we only need to fix the *keypad* code. Onward!
 Looking again at the calling hierarchy from before, we notice that the only
 *keypad*-related call made in `main` is to `keyb`.
 
-Put a breakpoint at the call to `keyb`, start the program and *Continue* (F5) to
+Put a breakpoint at the call to `keyb`, start the program and *Continue* (<kbd>F5</kbd>) to
 get to the breakpoint. Press and hold one of the buttons on the *keypad*, and
-*Continue* (F5). Check the return value. Is it what you expected? Keep trying
+*Continue* (<kbd>F5</kbd>). Check the return value. Is it what you expected? Keep trying
 different inputs until you have found an input that yields an incorrect return
 value.
 
@@ -189,9 +189,9 @@ Luckily it's not very complex. You can ignore the call to `delay_nano` - it
 needs to be there to give enough time for the row activation to take effect.
 That leaves us with `kbd_activate` and `kbd_getcol`.
 
-Use the debugger to *Step Into* (F11) `keyb`. Put breakpoints on the return
+Use the debugger to *Step Into* (<kbd>F11</kbd>) `keyb`. Put breakpoints on the return
 statements. Press and hold a button that earlier yielded an incorrect return
-value, and *Continue* (F5). Do the values of the *row* and *col* variables meet
+value, and *Continue* (<kbd>F5</kbd>). Do the values of the *row* and *col* variables meet
 your expectations? The answer should give you a clue whether the bug lies within
 `kbd_activate` or `kbd_getcol`.
 

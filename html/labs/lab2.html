@@ -113,8 +113,8 @@ VSCode), with the addition of some peripheral devices:</p>
 display. The DIL switch will be used for debugging purposes.</p>
 <h2 id="task-0-getting-started">Task 0: Getting Started</h2>
 <p>Create a new project folder and initialize a project with the
-<em>Lab2</em> template (<em>Ctrl+Shift+P -&gt; MDx07: Initialize project
--&gt; Lab Assignments -&gt; Lab2</em>).</p>
+<em>Lab2</em> template (<em>Ctrl+Shift+P &#x2192; MDx07: Initialize project &#x2192;
+Lab Assignments &#x2192; Lab2</em>).</p>
 <p>Connect the <em>keypad</em> to <em>Port D 15..8</em>. Connect the
 <em>PTB-111</em> to the <em>MD307</em> via the PTB-1000 bus. Connect the
 <em>ASCII display</em> to <em>Port E</em> (<em>Data</em> to
@@ -140,10 +140,10 @@ corresponding keys on the keypad (e.g.&#xA0;top-left key should print
 |---|---|---|---|</code></pre>
 <p>Time to run the program. Go to the <em>Run and Debug</em> view
 (Ctrl+Shift+D), select <em>Build and debug (hardware)</em> in the
-drop-down list, and press <em>Start Debugging</em> (F5).</p>
+drop-down list, and press <em>Start Debugging</em> (<kbd>F5</kbd>).</p>
 <p>When the debugger has automatically stopped in the beginning of
-<code>main</code>, press <em>Continue</em> (F5) and test if the program
-behaves as expected.</p>
+<code>main</code>, press <em>Continue</em> (<kbd>F5</kbd>) and test if
+the program behaves as expected.</p>
 <p><em>Rats! It doesn&#x2019;t work!</em></p>
 <p>Luckily, you <em>love</em> fixing broken software.</p>
 <p><strong>In this lab, like the previous, you will first debug an
@@ -246,10 +246,11 @@ fix the <em>keypad</em> code. Onward!</p>
 the only <em>keypad</em>-related call made in <code>main</code> is to
 <code>keyb</code>.</p>
 <p>Put a breakpoint at the call to <code>keyb</code>, start the program
-and <em>Continue</em> (F5) to get to the breakpoint. Press and hold one
-of the buttons on the <em>keypad</em>, and <em>Continue</em> (F5). Check
-the return value. Is it what you expected? Keep trying different inputs
-until you have found an input that yields an incorrect return value.</p>
+and <em>Continue</em> (<kbd>F5</kbd>) to get to the breakpoint. Press
+and hold one of the buttons on the <em>keypad</em>, and
+<em>Continue</em> (<kbd>F5</kbd>). Check the return value. Is it what
+you expected? Keep trying different inputs until you have found an input
+that yields an incorrect return value.</p>
 <p>To get a better picture of the situation, let&#x2019;s look at the calling
 hierarchy below, starting from <code>keyb</code>.</p>
 <p><img src="../images/lab2-keyb.svg" /></p>
@@ -257,12 +258,13 @@ hierarchy below, starting from <code>keyb</code>.</p>
 <code>delay_nano</code> - it needs to be there to give enough time for
 the row activation to take effect. That leaves us with
 <code>kbd_activate</code> and <code>kbd_getcol</code>.</p>
-<p>Use the debugger to <em>Step Into</em> (F11) <code>keyb</code>. Put
-breakpoints on the return statements. Press and hold a button that
-earlier yielded an incorrect return value, and <em>Continue</em> (F5).
-Do the values of the <em>row</em> and <em>col</em> variables meet your
-expectations? The answer should give you a clue whether the bug lies
-within <code>kbd_activate</code> or <code>kbd_getcol</code>.</p>
+<p>Use the debugger to <em>Step Into</em> (<kbd>F11</kbd>)
+<code>keyb</code>. Put breakpoints on the return statements. Press and
+hold a button that earlier yielded an incorrect return value, and
+<em>Continue</em> (<kbd>F5</kbd>). Do the values of the <em>row</em> and
+<em>col</em> variables meet your expectations? The answer should give
+you a clue whether the bug lies within <code>kbd_activate</code> or
+<code>kbd_getcol</code>.</p>
 <p>Dig deeper into the calling hierarchy based on your findings.
 Carefully step through the function and correct any bugs you come
 across. If you get stuck, ask a TA for help.</p>
